@@ -4,11 +4,11 @@ const { getDefaultConfig } = require("expo/metro-config");
 const { FileStore } = require("metro-cache");
 const { withNativewind } = require("nativewind/metro");
 
-const config = getDefaultConfig(__dirname);
+const config = getDefaultConfig(import.meta.dirname);
 
 config.cacheStores = [
   new FileStore({
-    root: path.join(__dirname, "node_modules", ".cache", "metro"),
+    root: path.join(import.meta.dirname, "node_modules", ".cache", "metro"),
   }),
 ];
 

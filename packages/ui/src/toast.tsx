@@ -10,7 +10,6 @@ export const Toaster = ({ ...props }: ToasterProps) => {
 
   return (
     <Sonner
-      theme={themeMode === "auto" ? "system" : themeMode}
       className="toaster group"
       style={
         {
@@ -19,6 +18,7 @@ export const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-border": "var(--border)",
         } as React.CSSProperties
       }
+      theme={themeMode === "auto" ? "system" : themeMode}
       {...props}
     />
   );

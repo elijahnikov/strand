@@ -6,7 +6,8 @@
     "moduleSuffixes": [".ios", ".android", ".native", ""],
     "paths": {
       "~/*": ["./src/*"]
-    }
+    },
+    "strictNullChecks": true
   },
   "include": [
     "src",

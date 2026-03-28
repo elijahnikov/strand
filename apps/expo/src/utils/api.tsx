@@ -8,42 +8,42 @@ import { authClient } from "./auth";
 import { getBaseUrl } from "./base-url";
 
 export const queryClient = new QueryClient({
-	defaultOptions: {
-		queries: {
-			// ...
-		},
-	},
+  defaultOptions: {
+    queries: {
+      // ...
+    },
+  },
 });
 
 /**
  * A set of typesafe hooks for consuming your API.
  */
 export const trpc = createTRPCOptionsProxy<AppRouter>({
-	client: createTRPCClient({
-		links: [
-			loggerLink({
-				enabled: (opts) =>
-					process.env.NODE_ENV === "development" ||
-					(opts.direction === "down" && opts.result instanceof Error),
-				colorMode: "ansi",
-			}),
-			httpBatchLink({
-				transformer: superjson,
-				url: `${getBaseUrl()}/api/trpc`,
-				headers() {
-					const headers = new Map<string, string>();
-					headers.set("x-trpc-source", "expo-react");
+  client: createTRPCClient({
+    links: [
+      loggerLink({
+        enabled: (opts) =>
+          process.env.NODE_ENV === "development" ||
+          (opts.direction === "down" && opts.result instanceof Error),
+        colorMode: "ansi",
+      }),
+      httpBatchLink({
+        transformer: superjson,
+        url: `${getBaseUrl()}/api/trpc`,
+        headers() {
+          const headers = new Map<string, string>();
+          headers.set("x-trpc-source", "expo-react");
 
-					const cookies = authClient.getCookie();
-					if (cookies) {
-						headers.set("Cookie", cookies);
-					}
-					return headers;
-				},
-			}),
-		],
-	}),
-	queryClient,
+          const cookies = authClient.getCookie();
+          if (cookies) {
+            headers.set("Cookie", cookies);
+          }
+          return headers;
+        },
+      }),
+    ],
+  }),
+  queryClient,
 });
 
 export type { RouterInputs, RouterOutputs } from "@strand/api";

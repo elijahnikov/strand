@@ -5,7 +5,8 @@
     "jsx": "preserve",
     "paths": {
       "~/*": ["./src/*"]
-    }
+    },
+    "strictNullChecks": true
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
