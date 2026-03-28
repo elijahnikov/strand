@@ -1,5 +1,5 @@
 {
-  "name": "@acme/auth",
+  "name": "@strand/auth",
   "private": true,
   "type": "module",
   "exports": {
@@ -17,20 +17,20 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@acme/db": "*",
+    "@strand/db": "*",
     "@better-auth/expo": "catalog:",
     "@t3-oss/env-core": "^0.13.8",
     "better-auth": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@acme/eslint-config": "*",
-    "@acme/prettier-config": "*",
-    "@acme/tsconfig": "*",
+    "@strand/eslint-config": "*",
+    "@strand/prettier-config": "*",
+    "@strand/tsconfig": "*",
     "@better-auth/cli": "catalog:",
     "eslint": "catalog:",
     "prettier": "catalog:",
     "typescript": "catalog:"
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@strand/prettier-config"
 }

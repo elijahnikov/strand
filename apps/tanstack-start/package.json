@@ -1,5 +1,5 @@
 {
-  "name": "@acme/tanstack-start",
+  "name": "@strand/tanstack-start",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -13,10 +13,10 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@acme/api": "*",
-    "@acme/auth": "*",
-    "@acme/db": "*",
-    "@acme/ui": "*",
+    "@strand/api": "*",
+    "@strand/auth": "*",
+    "@strand/db": "*",
+    "@strand/ui": "*",
     "@fontsource-variable/geist": "^5.2.8",
     "@fontsource-variable/geist-mono": "^5.2.7",
     "@t3-oss/env-core": "^0.13.8",
@@ -37,10 +37,10 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@acme/eslint-config": "*",
-    "@acme/prettier-config": "*",
-    "@acme/tailwind-config": "*",
-    "@acme/tsconfig": "*",
+    "@strand/eslint-config": "*",
+    "@strand/prettier-config": "*",
+    "@strand/tailwind-config": "*",
+    "@strand/tsconfig": "*",
     "@tailwindcss/vite": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:react19",
@@ -53,5 +53,5 @@
     "vite": "catalog:",
     "vite-tsconfig-paths": "^5.1.4"
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@strand/prettier-config"
 }

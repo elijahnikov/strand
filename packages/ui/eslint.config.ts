@@ -1,12 +1,11 @@
+import { baseConfig } from "@strand/eslint-config/base";
+import { reactConfig } from "@strand/eslint-config/react";
 import { defineConfig } from "eslint/config";
 
-import { baseConfig } from "@acme/eslint-config/base";
-import { reactConfig } from "@acme/eslint-config/react";
-
 export default defineConfig(
-  {
-    ignores: ["dist/**"],
-  },
-  baseConfig,
-  reactConfig,
+	{
+		ignores: ["dist/**"],
+	},
+	baseConfig,
+	reactConfig,
 );

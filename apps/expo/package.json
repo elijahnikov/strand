@@ -1,5 +1,5 @@
 {
-  "name": "@acme/expo",
+  "name": "@strand/expo",
   "private": true,
   "main": "index.ts",
   "scripts": {
@@ -44,16 +44,16 @@
     "superjson": "2.2.3"
   },
   "devDependencies": {
-    "@acme/api": "*",
-    "@acme/eslint-config": "*",
-    "@acme/prettier-config": "*",
-    "@acme/tailwind-config": "*",
-    "@acme/tsconfig": "*",
+    "@strand/api": "*",
+    "@strand/eslint-config": "*",
+    "@strand/prettier-config": "*",
+    "@strand/tailwind-config": "*",
+    "@strand/tsconfig": "*",
     "@types/react": "catalog:react19",
     "eslint": "catalog:",
     "prettier": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:"
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@strand/prettier-config"
 }

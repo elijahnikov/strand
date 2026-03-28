@@ -1,5 +1,5 @@
 {
-  "name": "@acme/eslint-config",
+  "name": "@strand/eslint-config",
   "private": true,
   "type": "module",
   "exports": {
@@ -24,12 +24,12 @@
     "typescript-eslint": "^8.46.2"
   },
   "devDependencies": {
-    "@acme/prettier-config": "*",
-    "@acme/tsconfig": "*",
+    "@strand/prettier-config": "*",
+    "@strand/tsconfig": "*",
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "prettier": "catalog:",
     "typescript": "catalog:"
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@strand/prettier-config"
 }

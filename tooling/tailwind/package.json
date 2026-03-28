@@ -1,5 +1,5 @@
 {
-  "name": "@acme/tailwind-config",
+  "name": "@strand/tailwind-config",
   "private": true,
   "type": "module",
   "exports": {
@@ -19,13 +19,13 @@
     "tailwindcss": "catalog:"
   },
   "devDependencies": {
-    "@acme/eslint-config": "*",
-    "@acme/prettier-config": "*",
-    "@acme/tsconfig": "*",
+    "@strand/eslint-config": "*",
+    "@strand/prettier-config": "*",
+    "@strand/tsconfig": "*",
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "prettier": "catalog:",
     "typescript": "catalog:"
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@strand/prettier-config"
 }
