@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
-import { ThemeProvider, ThemeToggle } from "@strand/ui/theme";
-import { Toaster } from "@strand/ui/toast";
+import { ThemeProvider } from "@strand/ui/theme";
+import { AnchoredToastProvider, ToastProvider } from "@strand/ui/toast";
 import type { QueryClient } from "@tanstack/react-query";
 import {
   createRootRouteWithContext,
@@ -26,28 +26,28 @@ export const Route = createRootRouteWithContext<{
 function RootComponent() {
   return (
     <RootDocument>
-      <Outlet />
+      <ThemeProvider>
+        <ToastProvider>
+          <AnchoredToastProvider>
+            <Outlet />
+          </AnchoredToastProvider>
+        </ToastProvider>
+      </ThemeProvider>
     </RootDocument>
   );
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider>
-      <html lang="en" suppressHydrationWarning>
-        <head>
-          <HeadContent />
-        </head>
-        <body className="min-h-screen bg-background font-sans text-foreground antialiased">
-          {children}
-          <div className="absolute right-4 bottom-12">
-            <ThemeToggle />
-          </div>
-          <Toaster />
-          <TanStackRouterDevtools position="bottom-right" />
-          <Scripts />
-        </body>
-      </html>
-    </ThemeProvider>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <HeadContent />
+      </head>
+      <body className="isolate min-h-screen bg-ui-bg-base font-sans text-ui-fg-base antialiased">
+        {children}
+        <TanStackRouterDevtools position="bottom-right" />
+        <Scripts />
+      </body>
+    </html>
   );
 }

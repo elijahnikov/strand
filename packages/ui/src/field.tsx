@@ -1,248 +1,78 @@
-"use client";
+import { Field as FieldPrimitive } from "@base-ui/react/field";
 
 import { cn } from "@strand/ui";
-import { Label } from "@strand/ui/label";
-import { Separator } from "@strand/ui/separator";
-import type { VariantProps } from "class-variance-authority";
-import { cva } from "class-variance-authority";
-import { useMemo } from "react";
 
-export function FieldSet({
-  className,
-  ...props
-}: React.ComponentProps<"fieldset">) {
+function Field({ className, ...props }: FieldPrimitive.Root.Props) {
   return (
-    <fieldset
-      className={cn(
-        "flex flex-col gap-6",
-        "has-[>[data-slot=checkbox-group]]:gap-3 has-[>[data-slot=radio-group]]:gap-3",
-        className
-      )}
-      data-slot="field-set"
-      {...props}
-    />
-  );
-}
-
-export function FieldLegend({
-  className,
-  variant = "legend",
-  ...props
-}: React.ComponentProps<"legend"> & { variant?: "legend" | "label" }) {
-  return (
-    <legend
-      className={cn(
-        "mb-3 font-medium",
-        "data-[variant=legend]:text-base",
-        "data-[variant=label]:text-sm",
-        className
-      )}
-      data-slot="field-legend"
-      data-variant={variant}
-      {...props}
-    />
-  );
-}
-
-export function FieldGroup({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
-  return (
-    <div
-      className={cn(
-        "group/field-group @container/field-group flex w-full flex-col gap-7 data-[slot=checkbox-group]:gap-3 [&>[data-slot=field-group]]:gap-4",
-        className
-      )}
-      data-slot="field-group"
-      {...props}
-    />
-  );
-}
-
-const fieldVariants = cva(
-  "group/field flex w-full gap-3 data-[invalid=true]:text-destructive",
-  {
-    variants: {
-      orientation: {
-        vertical: ["flex-col [&>*]:w-full [&>.sr-only]:w-auto"],
-        horizontal: [
-          "flex-row items-center",
-          "[&>[data-slot=field-label]]:flex-auto",
-          "has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
-        ],
-        responsive: [
-          "@md/field-group:flex-row flex-col @md/field-group:items-center @md/field-group:[&>*]:w-auto [&>*]:w-full [&>.sr-only]:w-auto",
-          "@md/field-group:[&>[data-slot=field-label]]:flex-auto",
-          "@md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
-        ],
-      },
-    },
-    defaultVariants: {
-      orientation: "vertical",
-    },
-  }
-);
-
-export function Field({
-  className,
-  orientation = "vertical",
-  ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof fieldVariants>) {
-  return (
-    <div
-      className={cn(fieldVariants({ orientation }), className)}
-      data-orientation={orientation}
+    <FieldPrimitive.Root
+      className={cn("flex flex-col items-start gap-2", className)}
       data-slot="field"
-      role="group"
       {...props}
     />
   );
 }
 
-export function FieldContent({
+function FieldLabel({
   className,
   ...props
-}: React.ComponentProps<"div">) {
+}: FieldPrimitive.Label.Props & { required?: boolean }) {
   return (
-    <div
+    <FieldPrimitive.Label
       className={cn(
-        "group/field-content flex flex-1 flex-col gap-1.5 leading-snug",
-        className
-      )}
-      data-slot="field-content"
-      {...props}
-    />
-  );
-}
-
-export function FieldLabel({
-  className,
-  ...props
-}: React.ComponentProps<typeof Label>) {
-  return (
-    <Label
-      className={cn(
-        "group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50",
-        "has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-4",
-        "has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5 dark:has-data-[state=checked]:bg-primary/10",
+        "inline-flex items-center gap-x-0.5 font-medium text-xs",
         className
       )}
       data-slot="field-label"
       {...props}
-    />
+    >
+      {props.children}
+      {props.required && <span className="text-ui-fg-error">*</span>}
+    </FieldPrimitive.Label>
   );
 }
 
-export function FieldTitle({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function FieldItem({ className, ...props }: FieldPrimitive.Item.Props) {
   return (
-    <div
-      className={cn(
-        "flex w-fit items-center gap-2 font-medium text-sm leading-snug group-data-[disabled=true]/field:opacity-50",
-        className
-      )}
-      data-slot="field-label"
+    <FieldPrimitive.Item
+      className={cn("flex", className)}
+      data-slot="field-item"
       {...props}
     />
   );
 }
 
-export function FieldDescription({
+function FieldDescription({
   className,
   ...props
-}: React.ComponentProps<"p">) {
+}: FieldPrimitive.Description.Props) {
   return (
-    <p
-      className={cn(
-        "font-normal text-muted-foreground text-sm leading-normal group-has-[[data-orientation=horizontal]]/field:text-balance",
-        "nth-last-2:-mt-1 last:mt-0 [[data-variant=legend]+&]:-mt-1.5",
-        "[&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4",
-        className
-      )}
+    <FieldPrimitive.Description
+      className={cn("text-muted-foreground text-xs", className)}
       data-slot="field-description"
       {...props}
     />
   );
 }
 
-export function FieldSeparator({
-  children,
-  className,
-  ...props
-}: React.ComponentProps<"div"> & {
-  children?: React.ReactNode;
-}) {
+function FieldError({ className, ...props }: FieldPrimitive.Error.Props) {
   return (
-    <div
-      className={cn(
-        "relative -my-2 h-5 text-sm group-data-[variant=outline]/field-group:-mb-2",
-        className
-      )}
-      data-content={!!children}
-      data-slot="field-separator"
-      {...props}
-    >
-      <Separator className="absolute inset-0 top-1/2" />
-      {children && (
-        <span
-          className="relative mx-auto block w-fit bg-background px-2 text-muted-foreground"
-          data-slot="field-separator-content"
-        >
-          {children}
-        </span>
-      )}
-    </div>
-  );
-}
-
-export function FieldError({
-  className,
-  children,
-  errors: maybeErrors,
-  ...props
-}: React.ComponentProps<"div"> & {
-  errors?: ({ message?: string } | undefined)[];
-}) {
-  const content = useMemo(() => {
-    if (children) {
-      return children;
-    }
-
-    const errors = (maybeErrors ?? []).filter((error) => error !== undefined);
-
-    if (errors.length === 0) {
-      return null;
-    }
-
-    if (errors.length === 1 && errors[0]?.message) {
-      return errors[0].message;
-    }
-
-    return (
-      <ul className="ml-4 flex list-disc flex-col gap-1">
-        {errors.map(
-          (error, index) =>
-            error.message && <li key={index}>{error.message}</li>
-        )}
-      </ul>
-    );
-  }, [children, maybeErrors]);
-
-  if (!content) {
-    return null;
-  }
-
-  return (
-    <div
-      className={cn("font-normal text-destructive text-sm", className)}
+    <FieldPrimitive.Error
+      className={cn("text-destructive-foreground text-xs", className)}
       data-slot="field-error"
-      role="alert"
       {...props}
-    >
-      {content}
-    </div>
+    />
   );
 }
+
+const FieldControl = FieldPrimitive.Control;
+const FieldValidity = FieldPrimitive.Validity;
+
+export {
+  Field,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+  FieldItem,
+  FieldLabel,
+  FieldValidity,
+};

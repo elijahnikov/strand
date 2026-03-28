@@ -1,56 +1,101 @@
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
 import { cn } from "@strand/ui";
-import type { VariantProps } from "class-variance-authority";
-import { cva } from "class-variance-authority";
-import { Slot as SlotPrimitive } from "radix-ui";
+import { cva, type VariantProps } from "class-variance-authority";
+import type * as React from "react";
 
-export const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium text-sm outline-none transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+const buttonVariants = cva(
+  [
+    "relative inline-flex w-fit items-center justify-center rounded-sm outline-none",
+    "disabled:border-ui-border-base disabled:opacity-50 disabled:after:hidden",
+    "disabled:pointer-events-none",
+    'after:absolute after:inset-0 after:content-[""]',
+  ],
   {
     variants: {
       variant: {
-        default:
-          "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
-        outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
-        secondary:
-          "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
-        ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
+        default: cn(
+          "after:button-inverted-gradient bg-ui-button-inverted text-ui-fg-base shadow-buttons-neutral",
+          "hover:bg-ui-button-inverted-hover",
+          "active:bg-ui-button-inverted-pressed",
+          "focus-visible:shadow-buttons-inverted-focus!"
+        ),
+        strand: cn(
+          "bg-linear-to-t from-blue-500 to-blue-400 text-white shadow-buttons-recall after:hidden",
+          "hover:from-blue-600 hover:to-blue-500",
+          "active:from-blue-700 active:to-blue-600",
+          "focus-visible:shadow-buttons-recall-focus disabled:shadow-none"
+        ),
+        success: cn(
+          "bg-linear-to-t from-green-500 to-green-400 text-white shadow-buttons-recall after:hidden",
+          "hover:from-green-600 hover:to-green-500",
+          "active:from-green-700 active:to-green-600",
+          "focus-visible:shadow-buttons-recall-focus disabled:shadow-none",
+          "disabled:text-green-200"
+        ),
+        outline: cn(
+          "after:button-neutral-gradient bg-ui-button-neutral text-ui-fg-base shadow-buttons-neutral",
+          "hover:after:button-neutral-hover-gradient hover:bg-ui-button-neutral-hover",
+          "active:after:button-neutral-pressed-gradient active:bg-ui-button-neutral-pressed",
+          "focus-visible:shadow-buttons-neutral-focus"
+        ),
+        secondary: cn(
+          "bg-[rgba(0,0,0,0.05)] text-ui-fg-base dark:bg-[rgba(255,255,255,0.05)]",
+          "hover:bg-[rgba(0,0,0,0.1)] dark:hover:bg-[rgba(255,255,255,0.1)]",
+          "active:bg-[rgba(0,0,0,0.15)] dark:active:bg-[rgba(255,255,255,0.15)]",
+          "focus-visible:bg-ui-bg-base focus-visible:shadow-buttons-neutral-focus",
+          "disabled:bg-transparent! disabled:shadow-none!"
+        ),
+        ghost: cn(
+          "after:hidden",
+          "bg-ui-button-transparent text-ui-fg-base",
+          "hover:bg-ui-button-transparent-hover",
+          "active:bg-ui-button-transparent-pressed",
+          "focus-visible:bg-ui-bg-base focus-visible:shadow-buttons-neutral-focus",
+          "disabled:bg-transparent! disabled:shadow-none!"
+        ),
+        destructive: cn(
+          "after:button-danger-gradient bg-ui-button-danger text-ui-fg-on-color shadow-buttons-colored shadow-buttons-danger",
+          "hover:after:button-danger-hover-gradient hover:bg-ui-button-danger-hover",
+          "active:after:button-danger-pressed-gradient active:bg-ui-button-danger-pressed",
+          "focus-visible:shadow-buttons-danger-focus"
+        ),
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-9",
+        xsmall: "txt-compact-xsmall-plus gap-x-0.5 px-1.5 py-0.5",
+        small: "txt-compact-small-plus gap-x-1.5 px-2 py-1",
+        base: "txt-compact-small-plus gap-x-1.5 px-3 py-1.5",
+        large: "txt-compact-medium-plus gap-x-1.5 px-4 py-2.5",
+        xlarge: "txt-compact-large-plus gap-x-1.5 px-5 py-3.5",
       },
     },
     defaultVariants: {
+      size: "base",
       variant: "default",
-      size: "default",
     },
   }
 );
 
-export function Button({
-  className,
-  variant,
-  size,
-  asChild = false,
-  ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  }) {
-  const Comp = asChild ? SlotPrimitive.Slot : "button";
-
-  return (
-    <Comp
-      className={cn(buttonVariants({ variant, size, className }))}
-      data-slot="button"
-      {...props}
-    />
-  );
+export interface ButtonProps extends useRender.ComponentProps<"button"> {
+  size?: VariantProps<typeof buttonVariants>["size"];
+  variant?: VariantProps<typeof buttonVariants>["variant"];
 }
+
+function Button({ className, variant, size, render, ...props }: ButtonProps) {
+  const typeValue: React.ButtonHTMLAttributes<HTMLButtonElement>["type"] =
+    render ? undefined : "button";
+
+  const defaultProps = {
+    className: cn(buttonVariants({ className, size, variant })),
+    "data-slot": "button",
+    type: typeValue,
+  };
+
+  return useRender({
+    defaultTagName: "button",
+    props: mergeProps<"button">(defaultProps, props),
+    render,
+  });
+}
+
+export { Button, buttonVariants };

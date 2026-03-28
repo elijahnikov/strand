@@ -9,9 +9,13 @@
     "baseColor": "zinc",
     "cssVariables": true
   },
+  "iconLibrary": "radix",
   "aliases": {
-    "utils": "@strand/ui",
     "components": "src/",
+    "utils": "@strand/ui",
     "ui": "src/"
+  },
+  "registries": {
+    "@react-bits": "https://reactbits.dev/r/{name}.json"
   }
 }

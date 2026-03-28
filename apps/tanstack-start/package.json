@@ -11,9 +11,9 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@strand/ui": "*",
     "@fontsource-variable/geist": "^5.2.8",
     "@fontsource-variable/geist-mono": "^5.2.7",
+    "@strand/ui": "*",
     "@t3-oss/env-core": "^0.13.8",
     "@tanstack/react-form": "catalog:tanstack",
     "@tanstack/react-query": "catalog:tanstack",

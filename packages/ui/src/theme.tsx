@@ -1,9 +1,8 @@
 "use client";
 
-import { DesktopIcon, MoonIcon, SunIcon } from "@radix-ui/react-icons";
+import { RiComputerFill, RiMoonFill, RiSunFill } from "@remixicon/react";
 import * as React from "react";
 import * as z from "zod/v4";
-
 import { Button } from "./button";
 import {
   DropdownMenu,
@@ -72,6 +71,7 @@ const getNextTheme = (current: ThemeMode): ThemeMode => {
     getSystemTheme() === "dark"
       ? ["auto", "light", "dark"]
       : ["auto", "dark", "light"];
+  // biome-ignore lint/style/noNonNullAssertion: <>
   return themes[(themes.indexOf(current) + 1) % themes.length]!;
 };
 
@@ -99,9 +99,9 @@ export const themeDetectorScript = (() => {
 })();
 
 interface ThemeContextProps {
+  themeMode: ThemeMode;
   resolvedTheme: ResolvedTheme;
   setTheme: (theme: ThemeMode) => void;
-  themeMode: ThemeMode;
   toggleMode: () => void;
 }
 const ThemeContext = React.createContext<ThemeContextProps | undefined>(
@@ -140,6 +140,7 @@ export function ThemeProvider({ children }: React.PropsWithChildren) {
       }}
     >
       <script
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: <>
         dangerouslySetInnerHTML={{ __html: themeDetectorScript }}
         suppressHydrationWarning
       />
@@ -161,17 +162,19 @@ export function ThemeToggle() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          className="[&>svg]:absolute [&>svg]:size-5 [&>svg]:scale-0"
-          size="icon"
-          variant="outline"
-        >
-          <SunIcon className="auto:scale-0! light:scale-100!" />
-          <MoonIcon className="auto:scale-0! dark:scale-100!" />
-          <DesktopIcon className="auto:scale-100!" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            className="size-6 [&>svg]:absolute [&>svg]:size-4 [&>svg]:scale-0"
+            // size="small"
+            variant="outline"
+          />
+        }
+      >
+        <RiSunFill className="auto:scale-0! light:scale-100!" />
+        <RiMoonFill className="auto:scale-0! dark:scale-100!" />
+        <RiComputerFill className="auto:scale-100!" />
+        <span className="sr-only">Toggle theme</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => setTheme("light")}>

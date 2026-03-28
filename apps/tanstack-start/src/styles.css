@@ -1,14 +1,57 @@
 @import "tailwindcss";
 @import "@strand/tailwind-config/theme";
 
-@import "@fontsource-variable/geist";
-@import "@fontsource-variable/geist-mono";
+@config "../tailwind.config.ts";
 
 @source "../../../packages/ui/src/*.{ts,tsx}";
 
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant light (&:where(.light, .light *));
 @custom-variant auto (&:where(.auto, .auto *));
+
+@font-face {
+  font-family: "OpenRunde";
+  src: url("/fonts/OpenRunde-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "OpenRunde";
+  src: url("/fonts/OpenRunde-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "OpenRunde";
+  src: url("/fonts/OpenRunde-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "OpenRunde";
+  src: url("/fonts/OpenRunde-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "CommitMono";
+  src: url("/fonts/CommitMono-400-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "CommitMono";
+  src: url("/fonts/CommitMono-700-Regular.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 @utility container {
   padding-inline: 2rem;
@@ -23,13 +66,71 @@
 
 @layer base {
   :root {
-    --font-geist-sans: "Geist Variable";
-    --font-geist-mono: "Geist Mono Variable";
+    --font-commit-mono: "CommitMono";
+    --font-jetbrains-mono: "JetBrainsMono";
   }
   * {
+    scrollbar-color: var(--input) transparent;
+    scrollbar-width: thin;
     @apply border-border;
   }
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--input);
+    background-clip: content-box;
+    border: 2px solid transparent;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+    background-clip: content-box;
+  }
   body {
+    scrollbar-gutter: stable;
     letter-spacing: var(--tracking-normal);
+  }
+}
+
+@layer utilities {
+  html {
+    overscroll-behavior: none;
+  }
+
+  .debug {
+    @apply ring-1 ring-red-500 bg-red-500/10;
+  }
+}
+
+@layer utilities {
+  html {
+    overscroll-behavior: none;
+  }
+}
+
+/* Shiki dual-theme: activate dark variables when .dark class is present */
+.dark .shiki {
+  background-color: transparent !important;
+}
+.dark .shiki,
+.dark .shiki span {
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  color: var(--shiki-dark) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

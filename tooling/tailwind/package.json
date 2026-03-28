@@ -1,12 +1,14 @@
 {
   "name": "@strand/tailwind-config",
+  "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "exports": {
     "./theme": "./theme.css",
-    "./postcss-config": "./postcss-config.js"
+    "./postcss-config": "./postcss-config.js",
+    "./preset": "./preset/index.ts"
   },
-  "license": "MIT",
   "scripts": {
     "clean": "git clean -xdf .cache .turbo node_modules",
     "typecheck": "tsc --noEmit"
