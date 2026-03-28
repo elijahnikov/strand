@@ -99,9 +99,9 @@ export const themeDetectorScript = (() => {
 })();
 
 interface ThemeContextProps {
-  themeMode: ThemeMode;
   resolvedTheme: ResolvedTheme;
   setTheme: (theme: ThemeMode) => void;
+  themeMode: ThemeMode;
   toggleMode: () => void;
 }
 const ThemeContext = React.createContext<ThemeContextProps | undefined>(

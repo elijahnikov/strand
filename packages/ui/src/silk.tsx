@@ -5,7 +5,7 @@ import { forwardRef, useLayoutEffect, useMemo, useRef } from "react";
 import { Color } from "three";
 
 const hexToNormalizedRGB = (hex) => {
-  // @ts-ignore fdsaf
+  // @ts-expect-error fdsaf
   const normalizedHex = hex.replace("#", "");
   return [
     Number.parseInt(normalizedHex.slice(0, 2), 16) / 255,
