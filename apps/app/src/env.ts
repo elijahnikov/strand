@@ -31,7 +31,13 @@ export const env = createEnv({
   /**
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
    */
-  runtimeEnv: process.env,
+  runtimeEnvStrict: {
+    NODE_ENV: process.env.NODE_ENV,
+    CONVEX_URL: process.env.CONVEX_URL,
+    CONVEX_SITE_URL: process.env.CONVEX_SITE_URL,
+    VITE_CONVEX_URL: import.meta.env.VITE_CONVEX_URL,
+    VITE_CONVEX_SITE_URL: import.meta.env.VITE_CONVEX_SITE_URL,
+  },
   skipValidation:
     !!process.env.CI || process.env.npm_lifecycle_event === "lint",
 });

@@ -18,4 +18,7 @@ export default defineConfig({
     viteReact(),
     tailwindcss(),
   ],
+  ssr: {
+    noExternal: ["@convex-dev/better-auth"],
+  },
 });
