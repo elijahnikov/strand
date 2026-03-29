@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "bun with-env vite dev --port 3000",
-    "build": "vite build",
-    "start": "vite start",
+    "build": "bun with-env vite build",
+    "start": "bun with-env vite start",
     "typecheck": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env --"
   },
