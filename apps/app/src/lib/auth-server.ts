@@ -8,6 +8,6 @@ export const {
   fetchAuthMutation,
   fetchAuthAction,
 } = convexBetterAuthReactStart({
-  convexUrl: env.VITE_CONVEX_URL,
-  convexSiteUrl: env.VITE_CONVEX_SITE_URL,
+  convexUrl: env.CONVEX_URL,
+  convexSiteUrl: env.CONVEX_SITE_URL,
 });
