@@ -38,12 +38,16 @@
     }
   },
   "globalEnv": [
-    "POSTGRES_URL",
-    "AUTH_DISCORD_ID",
-    "AUTH_DISCORD_SECRET",
-    "AUTH_REDIRECT_PROXY_URL",
-    "AUTH_SECRET",
-    "PORT"
+    "CONVEX_URL",
+    "CONVEX_SITE_URL",
+    "CONVEX_DEPLOY_KEY",
+    "CONVEX_HTTP_ACTIONS_URL",
+    "VITE_CONVEX_URL",
+    "VITE_CONVEX_SITE_URL",
+    "VITE_SITE_URL",
+    "SITE_URL",
+    "DISCORD_CLIENT_ID",
+    "DISCORD_CLIENT_SECRET"
   ],
   "globalPassThroughEnv": [
     "NODE_ENV",
