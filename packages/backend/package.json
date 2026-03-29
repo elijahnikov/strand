@@ -15,6 +15,7 @@
     "build": "tsc",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "dev": "bunx convex dev",
+    "generate": "cd convex/betterAuth bunx @better-auth/cli generate -y",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "devDependencies": {
@@ -22,6 +23,7 @@
     "typescript": "catalog:"
   },
   "dependencies": {
+    "@convex-dev/better-auth": "catalog:convex",
     "convex": "catalog:convex"
   }
 }
