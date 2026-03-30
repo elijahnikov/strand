@@ -12,6 +12,8 @@ import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as user_queries from "../user/queries.js";
 import type * as utils from "../utils.js";
+import type * as workspace_mutations from "../workspace/mutations.js";
+import type * as workspace_queries from "../workspace/queries.js";
 
 import type {
   ApiFromModules,
@@ -24,6 +26,8 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   "user/queries": typeof user_queries;
   utils: typeof utils;
+  "workspace/mutations": typeof workspace_mutations;
+  "workspace/queries": typeof workspace_queries;
 }>;
 
 /**

@@ -31,6 +31,9 @@ export const authComponent = createClient<DataModel, typeof authSchema>(
             authId: doc._id,
             userId,
           });
+          await ctx.runMutation(internal.workspace.mutations.seedWorkspace, {
+            userId,
+          });
         },
       },
     },

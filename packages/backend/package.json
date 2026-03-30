@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@convex-dev/better-auth": "catalog:convex",
-    "convex": "catalog:convex"
+    "convex": "catalog:convex",
+    "convex-helpers": "catalog:convex"
   }
 }
