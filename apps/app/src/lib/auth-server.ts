@@ -1,5 +1,5 @@
 import { convexBetterAuthReactStart } from "@convex-dev/better-auth/react-start";
-import { isAuthError } from "@strand/backend/utils";
+import { isAuthError } from "@strand/backend/shared.js";
 
 export const {
   handler,

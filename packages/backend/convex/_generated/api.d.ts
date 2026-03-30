@@ -10,6 +10,7 @@
 
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
+import type * as shared from "../shared.js";
 import type * as user_queries from "../user/queries.js";
 import type * as utils from "../utils.js";
 import type * as workspace_mutations from "../workspace/mutations.js";
@@ -24,6 +25,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
+  shared: typeof shared;
   "user/queries": typeof user_queries;
   utils: typeof utils;
   "workspace/mutations": typeof workspace_mutations;

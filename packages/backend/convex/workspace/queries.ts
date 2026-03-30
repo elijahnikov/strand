@@ -1,7 +1,7 @@
 import type { Id } from "../_generated/dataModel";
 import { query } from "../_generated/server";
 import { authComponent } from "../auth";
-import { workspaceQuery } from "../utils";
+import { protectedQuery, workspaceQuery } from "../utils";
 
 export const getFirst = query({
   args: {},
@@ -26,9 +26,29 @@ export const getFirst = query({
   },
 });
 
-export const getById = workspaceQuery({
+export const listByUser = protectedQuery({
   args: {},
   handler: async (ctx) => {
+    const members = await ctx.db
+      .query("workspaceMember")
+      .withIndex("by_user_last_accessed", (q) => q.eq("userId", ctx.user._id))
+      .order("desc")
+      .collect();
+
+    const workspaces = await Promise.all(
+      members.map(async (member) => {
+        const workspace = await ctx.db.get(member.workspaceId);
+        return workspace ? { ...workspace, role: member.role } : null;
+      })
+    );
+
+    return workspaces.filter((w) => w !== null);
+  },
+});
+
+export const getById = workspaceQuery({
+  args: {},
+  handler: (ctx) => {
     return {
       workspace: ctx.workspace,
       member: ctx.member,

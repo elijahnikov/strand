@@ -4,7 +4,7 @@ import MainSidebar from "~/components/common/global-workspace-layout/workspace-s
 export function GlobalLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider
-      className="h-full bg-ui-bg-base"
+      className="h-full bg-ui-bg-subtle"
       defaultOpen={true}
       open={true}
     >

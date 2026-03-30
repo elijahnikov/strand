@@ -8,20 +8,12 @@ import type { Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 import { authComponent } from "./auth";
 
-const authErrorMessageRegex = /auth/i;
-export const isAuthError = (error: unknown) => {
-  const message =
-    (error instanceof ConvexError && error.data) ||
-    (error instanceof Error && error.message) ||
-    "";
-  return authErrorMessageRegex.test(message);
-};
-
 export const protectedQuery = customQuery(
   query,
   customCtx(async (ctx) => {
     const authUser = await authComponent.getAuthUser(ctx);
     const user = await ctx.db.get(authUser.userId as Id<"user">);
+    console.log({ user, authUser });
     if (!user) {
       throw new ConvexError("User not found");
     }
@@ -34,6 +26,7 @@ export const protectedMutation = customMutation(
   customCtx(async (ctx) => {
     const authUser = await authComponent.getAuthUser(ctx);
     const user = await ctx.db.get(authUser.userId as Id<"user">);
+
     if (!user) {
       throw new ConvexError("User not found");
     }

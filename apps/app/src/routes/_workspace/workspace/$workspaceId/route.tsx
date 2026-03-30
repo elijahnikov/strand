@@ -1,7 +1,7 @@
 import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { isAuthError } from "@strand/backend/utils.js";
+import { isAuthError } from "@strand/backend/shared.js";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_workspace/workspace/$workspaceId")({

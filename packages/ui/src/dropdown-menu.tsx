@@ -47,7 +47,7 @@ function MenuPopup({
           data-slot="menu-popup"
           {...props}
         >
-          <div className="max-h-(--available-height) w-full overflow-y-auto p-1">
+          <div className="max-h-(--available-height) w-full overflow-y-auto overflow-x-hidden p-1">
             {children}
           </div>
         </MenuPrimitive.Popup>
@@ -205,7 +205,7 @@ function MenuGroupLabel({
 function MenuSeparator({ className, ...props }: MenuPrimitive.Separator.Props) {
   return (
     <MenuPrimitive.Separator
-      className={cn("-mx-2 my-1 h-px bg-border", className)}
+      className={cn("-mx-2 my-1 h-px bg-ui-fg-muted/10", className)}
       data-slot="menu-separator"
       {...props}
     />
