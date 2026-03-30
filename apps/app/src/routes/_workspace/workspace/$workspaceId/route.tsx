@@ -1,0 +1,27 @@
+import { convexQuery } from "@convex-dev/react-query";
+import { api } from "@strand/backend/_generated/api.js";
+import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { isAuthError } from "@strand/backend/utils.js";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/_workspace/workspace/$workspaceId")({
+  loader: async ({ context, params }) => {
+    try {
+      return await context.queryClient.ensureQueryData(
+        convexQuery(api.workspace.queries.getById, {
+          workspaceId: params.workspaceId as Id<"workspace">,
+        })
+      );
+    } catch (error) {
+      if (isAuthError(error)) {
+        throw redirect({ to: "/login" });
+      }
+      throw redirect({ to: "/" });
+    }
+  },
+  component: WorkspaceLayout,
+});
+
+function WorkspaceLayout() {
+  return <Outlet />;
+}

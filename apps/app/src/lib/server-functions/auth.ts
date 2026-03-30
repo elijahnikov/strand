@@ -1,4 +1,4 @@
-import { api } from "@strand/backend/api";
+import { api } from "@strand/backend/_generated/api.js";
 import { createServerFn } from "@tanstack/react-start";
 import { fetchAuthQuery } from "../auth-server";
 

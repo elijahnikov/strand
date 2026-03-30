@@ -1,6 +1,7 @@
 import type { Id } from "../_generated/dataModel";
 import { query } from "../_generated/server";
 import { authComponent } from "../auth";
+import { workspaceQuery } from "../utils";
 
 export const getFirst = query({
   args: {},
@@ -22,5 +23,15 @@ export const getFirst = query({
     }
 
     return ctx.db.get(member.workspaceId);
+  },
+});
+
+export const getById = workspaceQuery({
+  args: {},
+  handler: async (ctx) => {
+    return {
+      workspace: ctx.workspace,
+      member: ctx.member,
+    };
   },
 });
