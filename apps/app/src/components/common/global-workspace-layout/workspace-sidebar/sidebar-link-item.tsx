@@ -46,7 +46,7 @@ function SidebarLinkItem({
             />
           }
         >
-          <Icon className="size-3.5 shrink-0" />
+          <Icon className="size-4 shrink-0" />
         </TooltipTrigger>
         <TooltipContent side="right">{title}</TooltipContent>
       </Tooltip>
@@ -69,7 +69,9 @@ function SidebarLinkItem({
       >
         <Icon className="size-4 shrink-0" />
       </TooltipTrigger>
-      <TooltipContent side="right">{title}</TooltipContent>
+      <TooltipContent className={"relative -top-px"} side="right">
+        {title}
+      </TooltipContent>
     </Tooltip>
   );
 }

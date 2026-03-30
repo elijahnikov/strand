@@ -4,6 +4,7 @@ import { TooltipProvider } from "@strand/ui/tooltip";
 import { useLocation, useParams } from "@tanstack/react-router";
 import { useMemo } from "react";
 import SidebarLinkItem from "~/components/common/global-workspace-layout/workspace-sidebar/sidebar-link-item";
+
 export default function WorkspaceSidebarContent() {
   const params = useParams({ strict: false }) as {
     workspaceId?: string;
@@ -22,9 +23,7 @@ export default function WorkspaceSidebarContent() {
         icon: RiHome3Fill,
         title: "Home",
         url: `/workspace/${params.workspaceId}`,
-        isActive:
-          pathname === workspacePath ||
-          pathname.startsWith(`${workspacePath}/`),
+        isActive: pathname === workspacePath,
       },
       {
         icon: RiBookmarkFill,

@@ -76,7 +76,7 @@ export function WorkspaceSwitcher() {
         align="start"
         className="-mt-0.75 w-56 max-w-56 overflow-x-hidden"
         side="right"
-        sideOffset={10}
+        sideOffset={9}
       >
         {owned.length > 0 && (
           <DropdownMenuGroup>
