@@ -16,6 +16,7 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { createServerFn } from "@tanstack/react-start";
 import type * as React from "react";
+import { ClientAuthBoundary } from "~/lib/auth-client";
 import { getToken } from "~/lib/auth-server";
 import appCss from "~/styles.css?url";
 
@@ -88,7 +89,9 @@ function RootComponent() {
         <ThemeProvider>
           <ToastProvider>
             <AnchoredToastProvider>
-              <Outlet />
+              <ClientAuthBoundary>
+                <Outlet />
+              </ClientAuthBoundary>
             </AnchoredToastProvider>
           </ToastProvider>
         </ThemeProvider>

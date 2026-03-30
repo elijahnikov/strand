@@ -2,6 +2,7 @@ import type { AuthFunctions, GenericCtx } from "@convex-dev/better-auth";
 import { createClient } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
 import { type BetterAuthOptions, betterAuth } from "better-auth/minimal";
+import { username } from "better-auth/plugins";
 import { components, internal } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
 import authConfig from "./auth.config";
@@ -16,7 +17,22 @@ export const authComponent = createClient<DataModel, typeof authSchema>(
     local: { schema: authSchema },
     authFunctions,
     triggers: {
-      user: {},
+      user: {
+        async onCreate(ctx, doc) {
+          const userId = await ctx.db.insert("user", {
+            email: doc.email,
+            username: doc.name ?? doc.email.split("@")[0] ?? "",
+            emailVerified: doc.emailVerified,
+            onboardedAt: undefined,
+            onboardingStep: 0,
+            image: doc.image ?? undefined,
+          });
+          await ctx.runMutation(components.betterAuth.mutations.setUserId, {
+            authId: doc._id,
+            userId,
+          });
+        },
+      },
     },
   }
 );
@@ -35,8 +51,14 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
         clientSecret: process.env.DISCORD_CLIENT_SECRET as string,
         clientId: process.env.DISCORD_CLIENT_ID as string,
       },
+      google: {
+        clientId: process.env.GOOGLE_CLIENT_ID as string,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+        accessType: "offline",
+        prompt: "select_account consent",
+      },
     },
-    plugins: [convex({ authConfig })],
+    plugins: [convex({ authConfig }), username()],
   } satisfies BetterAuthOptions;
 };
 
@@ -45,3 +67,4 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
 };
 
 export const { onCreate, onUpdate, onDelete } = authComponent.triggersApi();
+export const { getAuthUser } = authComponent.clientApi();

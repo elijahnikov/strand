@@ -1,4 +1,5 @@
 import { convexBetterAuthReactStart } from "@convex-dev/better-auth/react-start";
+import { isAuthError } from "@strand/backend/utils";
 
 export const {
   handler,
@@ -9,4 +10,8 @@ export const {
 } = convexBetterAuthReactStart({
   convexUrl: import.meta.env.VITE_CONVEX_URL,
   convexSiteUrl: import.meta.env.VITE_CONVEX_SITE_URL,
+  jwtCache: {
+    enabled: true,
+    isAuthError,
+  },
 });

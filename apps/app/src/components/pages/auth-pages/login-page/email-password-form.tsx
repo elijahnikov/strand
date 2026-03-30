@@ -1,0 +1,94 @@
+import { authClient } from "@strand/auth/client";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@strand/ui/form";
+import { Input } from "@strand/ui/input";
+import { LoadingButton } from "@strand/ui/loading-button";
+import { toastManager } from "@strand/ui/toast";
+import { useNavigate } from "@tanstack/react-router";
+import { useForm } from "react-hook-form";
+
+interface LoginFormValues {
+  email: string;
+  password: string;
+}
+
+export function EmailPasswordForm() {
+  const navigate = useNavigate();
+
+  const form = useForm<LoginFormValues>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = async (values: LoginFormValues) => {
+    const res = await authClient.signIn.email({
+      email: values.email,
+      password: values.password,
+    });
+
+    if (res.error) {
+      toastManager.add({
+        type: "error",
+        title: res.error.message ?? "Something went wrong",
+      });
+      return;
+    }
+
+    navigate({ to: "/" });
+  };
+
+  return (
+    <Form {...form}>
+      <form
+        className="flex flex-col gap-4"
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input placeholder="you@example.com" type="email" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+          rules={{ required: "Email is required" }}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  placeholder="Enter your password"
+                  type="password"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+          rules={{ required: "Password is required" }}
+        />
+        <LoadingButton
+          className="w-full"
+          loading={form.formState.isSubmitting}
+          type="submit"
+          variant={"strand"}
+        >
+          Sign in
+        </LoadingButton>
+      </form>
+    </Form>
+  );
+}

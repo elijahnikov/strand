@@ -10,7 +10,8 @@
 
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
-import type * as tasks from "../tasks.js";
+import type * as user_queries from "../user/queries.js";
+import type * as utils from "../utils.js";
 
 import type {
   ApiFromModules,
@@ -21,7 +22,8 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
-  tasks: typeof tasks;
+  "user/queries": typeof user_queries;
+  utils: typeof utils;
 }>;
 
 /**
@@ -1020,6 +1022,14 @@ export declare const components: {
               };
           onUpdateHandle?: string;
         },
+        any
+      >;
+    };
+    mutations: {
+      setUserId: FunctionReference<
+        "mutation",
+        "internal",
+        { authId: string; userId: string },
         any
       >;
     };

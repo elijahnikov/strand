@@ -6,7 +6,7 @@ import type * as React from "react";
 
 const buttonVariants = cva(
   [
-    "relative inline-flex w-fit items-center justify-center rounded-sm outline-none",
+    "relative inline-flex w-fit items-center justify-center rounded-lg outline-none",
     "disabled:border-ui-border-base disabled:opacity-50 disabled:after:hidden",
     "disabled:pointer-events-none",
     'after:absolute after:inset-0 after:content-[""]',
@@ -21,7 +21,7 @@ const buttonVariants = cva(
           "focus-visible:shadow-buttons-inverted-focus!"
         ),
         strand: cn(
-          "bg-linear-to-t from-blue-500 to-blue-400 text-white shadow-buttons-recall after:hidden",
+          "bg-linear-to-t from-blue-500 to-blue-400 text-white after:hidden",
           "hover:from-blue-600 hover:to-blue-500",
           "active:from-blue-700 active:to-blue-600",
           "focus-visible:shadow-buttons-recall-focus disabled:shadow-none"
