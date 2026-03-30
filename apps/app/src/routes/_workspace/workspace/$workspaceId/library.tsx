@@ -7,5 +7,5 @@ export const Route = createFileRoute(
 });
 
 function LibraryPage() {
-  return <div>Library</div>;
+  return <div />;
 }

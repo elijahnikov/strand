@@ -43,9 +43,9 @@ export function UserMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className={"relative top-1.75"}
+        className={"relative"}
         side="right"
-        sideOffset={8}
+        sideOffset={6}
       >
         <DropdownMenuItem>
           <SettingsIcon />

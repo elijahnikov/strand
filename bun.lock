@@ -105,6 +105,7 @@
       "dependencies": {
         "@convex-dev/better-auth": "catalog:convex",
         "convex": "catalog:convex",
+        "convex-helpers": "catalog:convex",
       },
       "devDependencies": {
         "@strand/tsconfig": "workspace:*",
@@ -196,6 +197,7 @@
     },
     "tanstack": {
       "@tanstack/react-form": "^1.27.7",
+      "@tanstack/react-hotkeys": "^0.9.0",
       "@tanstack/react-query": "^5.90.16",
       "@tanstack/react-router": "^1.146.0",
       "@tanstack/react-router-devtools": "^1.146.0",

@@ -7,5 +7,5 @@ export const Route = createFileRoute(
 });
 
 function SettingsPage() {
-  return <div>Settings</div>;
+  return <div />;
 }

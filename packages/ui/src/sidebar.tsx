@@ -25,7 +25,7 @@ import React, { useCallback, useMemo } from "react";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = "3rem";
+const SIDEBAR_WIDTH = "3.5rem";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
 
@@ -131,7 +131,7 @@ const SidebarProvider = ({
       <TooltipProvider delay={0}>
         <div
           className={cn(
-            "group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-ui-bg-subtle",
+            "group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-ui-bg-base",
             className
           )}
           ref={ref}
@@ -242,7 +242,7 @@ const Sidebar = ({
         {...props}
       >
         <div
-          className="flex h-full w-full flex-col bg-ui-bg-subtle group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
+          className="flex h-full w-full flex-col bg-ui-bg-base group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
           data-sidebar="sidebar"
         >
           {children}
@@ -324,8 +324,8 @@ const SidebarInset = ({
 }) => (
   <main
     className={cn(
-      "relative flex w-full flex-1 flex-col overflow-hidden bg-ui-bg-base dark:bg-ui-bg-base/50",
-      "md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-px md:peer-data-[variant=inset]:rounded-lg md:peer-data-[variant=inset]:shadow-buttons-neutral",
+      "relative flex w-full flex-col self-end overflow-hidden bg-ui-bg-base md:h-[calc(100vh-62px)]",
+      "md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-px md:peer-data-[variant=inset]:rounded-lg",
       className
     )}
     ref={ref}

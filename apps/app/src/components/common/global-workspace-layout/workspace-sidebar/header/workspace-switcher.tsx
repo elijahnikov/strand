@@ -1,6 +1,7 @@
 import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Doc, Id } from "@strand/backend/_generated/dataModel.js";
+import { Button } from "@strand/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,10 +12,11 @@ import {
   DropdownMenuTrigger,
 } from "@strand/ui/dropdown-menu";
 import { Skeleton } from "@strand/ui/skeleton";
+import { Text } from "@strand/ui/text";
 import { useQuery } from "@tanstack/react-query";
 import type { UseNavigateResult } from "@tanstack/react-router";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { PlusIcon } from "lucide-react";
+import { ChevronsUpDownIcon, PlusIcon } from "lucide-react";
 import { getWorkspaceIcon } from "~/lib/workspace-icons";
 
 type Workspace = Doc<"workspace"> & { role: string };
@@ -67,15 +69,25 @@ export function WorkspaceSwitcher() {
   const CurrentWorkspaceIcon = getWorkspaceIcon(current?.icon);
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="ml-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-ui-bg-base text-center text-sm shadow-buttons-neutral hover:bg-ui-bg-component-hover active:bg-ui-bg-component-pressed">
-        <span className="font-medium">
-          <CurrentWorkspaceIcon className="size-4 shrink-0 text-ui-fg-subtle" />
-        </span>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            className="gap-x-2 rounded-full"
+            size="small"
+            variant="ghost"
+          />
+        }
+      >
+        <CurrentWorkspaceIcon className="size-4 shrink-0 text-ui-fg-muted" />
+        <Text className="text-ui-fg-muted" size="small" weight={"plus"}>
+          {current?.name}
+        </Text>
+        <ChevronsUpDownIcon className="ml-1 size-3 stroke-[2.25px] text-ui-fg-muted" />
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
         className="-mt-0.75 w-56 max-w-56 overflow-x-hidden"
-        side="right"
+        side="bottom"
         sideOffset={9}
       >
         {owned.length > 0 && (

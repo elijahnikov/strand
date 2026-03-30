@@ -24,7 +24,7 @@ function SidebarLinkItem({
   const buttonClassName = cn(
     "group/menu flex h-7 w-7 items-center rounded-full text-left font-sans text-[13px] focus-visible:bg-transparent! focus-visible:shadow-borders-interactive-with-active!",
     isActive
-      ? "bg-[rgba(0,0,0,0.070)] text-ui-fg-base dark:bg-[rgba(255,255,255,0.070)]"
+      ? "pointer-events-none bg-[rgba(0,0,0,0.070)] text-ui-fg-base dark:bg-[rgba(255,255,255,0.070)]"
       : "text-ui-fg-muted/70 transition-colors duration-200 hover:bg-[rgba(0,0,0,0.070)] hover:text-ui-fg-base dark:hover:bg-[rgba(255,255,255,0.070)]"
   );
 
@@ -46,7 +46,7 @@ function SidebarLinkItem({
             />
           }
         >
-          <Icon className="size-4 shrink-0" />
+          <Icon className="size-3.5 shrink-0" />
         </TooltipTrigger>
         <TooltipContent side="right">{title}</TooltipContent>
       </Tooltip>
@@ -67,7 +67,7 @@ function SidebarLinkItem({
           />
         }
       >
-        <Icon className="size-4 shrink-0" />
+        <Icon className="size-3.5 shrink-0" />
       </TooltipTrigger>
       <TooltipContent className={"relative -top-px"} side="right">
         {title}
