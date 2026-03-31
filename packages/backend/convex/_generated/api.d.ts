@@ -10,7 +10,10 @@
 
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
+import type * as resource_actions from "../resource/actions.js";
+import type * as resource_internals from "../resource/internals.js";
 import type * as resource_mutations from "../resource/mutations.js";
+import type * as resource_queries from "../resource/queries.js";
 import type * as shared from "../shared.js";
 import type * as user_queries from "../user/queries.js";
 import type * as utils from "../utils.js";
@@ -26,7 +29,10 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
+  "resource/actions": typeof resource_actions;
+  "resource/internals": typeof resource_internals;
   "resource/mutations": typeof resource_mutations;
+  "resource/queries": typeof resource_queries;
   shared: typeof shared;
   "user/queries": typeof user_queries;
   utils: typeof utils;

@@ -17,7 +17,7 @@ export default function WorkspaceSidebarFooter() {
   return (
     <SidebarFooter className="relative bottom-2">
       <TooltipProvider>
-        <div className="ml-px flex flex-col gap-2">
+        <div className="relative left-2px flex flex-col gap-2">
           {params?.workspaceId && (
             <SidebarLinkItem
               icon={RiSettings4Fill}

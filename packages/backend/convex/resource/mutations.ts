@@ -1,6 +1,8 @@
 import { ConvexError, v } from "convex/values";
+import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
+import { mutation } from "../_generated/server";
 import { workspaceMutation } from "../utils";
 
 export const create = workspaceMutation({
@@ -63,6 +65,14 @@ export const create = workspaceMutation({
       status: "pending",
     });
 
+    if (args.type === "website") {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.resource.actions.extractWebsiteMetadata,
+        { resourceId }
+      );
+    }
+
     return resourceId;
   },
 });
@@ -88,6 +98,7 @@ async function insertWebsiteResource(
     url: args.url,
     domain,
     isEmbeddable: false,
+    metadataStatus: "pending",
   });
 }
 
@@ -138,3 +149,27 @@ async function insertFileResource(
     duration: args.duration,
   });
 }
+
+export const updateTitle = workspaceMutation({
+  args: {
+    resourceId: v.id("resource"),
+    title: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const resource = await ctx.db.get(args.resourceId);
+    if (!resource || resource.workspaceId !== ctx.workspace._id) {
+      throw new ConvexError("Resource not found");
+    }
+    await ctx.db.patch(args.resourceId, {
+      title: args.title,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const generateUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.storage.generateUploadUrl();
+  },
+});

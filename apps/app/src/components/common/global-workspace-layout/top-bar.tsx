@@ -27,7 +27,14 @@ export function TopBar() {
     <div className="absolute top-1 left-1.75 z-50 m-1 flex items-center justify-start">
       <img
         alt="Strand"
-        className="rounded-lg"
+        className="hidden rounded-lg dark:block"
+        height={36}
+        src="/STRAND_TRANSPARENT_WHITE.png"
+        width={36}
+      />
+      <img
+        alt="Strand"
+        className="rounded-lg dark:hidden"
         height={36}
         src="/STRAND_TRANSPARENT_BLACK.png"
         width={36}

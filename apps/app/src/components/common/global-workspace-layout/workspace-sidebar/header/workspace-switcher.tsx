@@ -72,7 +72,7 @@ export function WorkspaceSwitcher() {
       <DropdownMenuTrigger
         render={
           <Button
-            className="gap-x-2 rounded-full"
+            className="gap-x-2 rounded-full hover:bg-[rgba(0,0,0,0.070)] hover:dark:bg-[rgba(255,255,255,0.070)]"
             size="small"
             variant="ghost"
           />
@@ -132,8 +132,7 @@ export function WorkspaceSwitcher() {
 export function WorkspaceSwitcherSkeleton() {
   return (
     <div className="flex w-full items-center gap-2 p-1">
-      <Skeleton className="size-6 rounded-md" />
-      <Skeleton className="h-4 w-24" />
+      <Skeleton className="h-7 w-24 rounded-full" />
     </div>
   );
 }

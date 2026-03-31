@@ -143,7 +143,7 @@ export const colors = {
     "--tag-purple-bg": "rgba(237, 233, 254, 1)",
     "--contrast-bg-base-hover": "rgba(39, 39, 42, 1)",
     "--bg-component": "rgba(250, 250, 250, 1)",
-    "--bg-subtle": "rgba(250, 250, 250, 1)",
+    "--bg-subtle": "rgba(246, 246, 246, 1)",
     "--tag-purple-text": "rgba(91, 33, 182, 1)",
     "--contrast-border-bot": "rgba(255, 255, 255, 0.1)",
     "--button-inverted": "rgba(255, 255, 255, 1)",

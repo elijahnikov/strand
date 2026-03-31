@@ -242,7 +242,7 @@ const Sidebar = ({
         {...props}
       >
         <div
-          className="flex h-full w-full flex-col bg-ui-bg-base group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
+          className="flex h-full w-full flex-col bg-ui-bg-subtle group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
           data-sidebar="sidebar"
         >
           {children}
@@ -324,7 +324,7 @@ const SidebarInset = ({
 }) => (
   <main
     className={cn(
-      "relative flex w-full flex-col self-end overflow-hidden bg-ui-bg-base md:h-[calc(100vh-62px)]",
+      "relative flex w-full flex-col self-end overflow-hidden bg-ui-bg-base md:h-[calc(100vh-60px)]",
       "md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-px md:peer-data-[variant=inset]:rounded-lg",
       className
     )}
@@ -374,7 +374,10 @@ const SidebarFooter = ({
   ref?: React.Ref<HTMLDivElement>;
 }) => (
   <div
-    className={cn("flex flex-col gap-2 px-2", className)}
+    className={cn(
+      "flex flex-col items-center justify-center gap-2 px-2",
+      className
+    )}
     data-sidebar="footer"
     ref={ref}
     {...props}

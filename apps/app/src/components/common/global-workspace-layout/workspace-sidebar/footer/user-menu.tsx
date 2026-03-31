@@ -10,15 +10,29 @@ import {
   DropdownMenuTrigger,
 } from "@strand/ui/dropdown-menu";
 import { Skeleton } from "@strand/ui/skeleton";
+import { useTheme } from "@strand/ui/theme";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
-import { LogOutIcon, SettingsIcon } from "lucide-react";
+import {
+  LogOutIcon,
+  MonitorIcon,
+  MoonIcon,
+  SettingsIcon,
+  SunIcon,
+} from "lucide-react";
+
+const THEME_OPTIONS = [
+  { value: "light", label: "Light", icon: SunIcon },
+  { value: "dark", label: "Dark", icon: MoonIcon },
+  { value: "auto", label: "System", icon: MonitorIcon },
+] as const;
 
 export function UserMenu() {
   const router = useRouter();
   const { data } = useSuspenseQuery(
     convexQuery(api.user.queries.currentUser, {})
   );
+  const { themeMode, setTheme } = useTheme();
 
   const user = data.user;
   if (!user) {
@@ -34,12 +48,11 @@ export function UserMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex w-full items-center gap-2 rounded-md text-left text-sm hover:bg-accent">
-        <Avatar className="ml-0.5 size-7">
+      <DropdownMenuTrigger className="ml-2.5 flex w-full items-center gap-2 rounded-md text-left text-sm hover:bg-accent">
+        <Avatar className="size-7">
           {user.image && <AvatarImage src={user.image} />}
           <AvatarFallback className="text-xs">{initials}</AvatarFallback>
         </Avatar>
-        <span className="truncate font-medium">{user.username}</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
@@ -51,6 +64,24 @@ export function UserMenu() {
           <SettingsIcon />
           Settings
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <div className="flex items-center gap-1 px-0.5 py-1">
+          {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
+            <button
+              className={`flex h-7 flex-1 items-center justify-center gap-1.5 rounded-md px-2 text-xs transition-colors ${
+                themeMode === value
+                  ? "bg-ui-bg-component-hover text-ui-fg-base"
+                  : "text-ui-fg-muted hover:text-ui-fg-subtle"
+              }`}
+              key={value}
+              onClick={() => setTheme(value)}
+              type="button"
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {label}
+            </button>
+          ))}
+        </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={async () => {

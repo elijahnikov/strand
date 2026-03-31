@@ -78,6 +78,13 @@ export default defineSchema({
       )
     ),
     embedId: v.optional(v.string()),
+    metadataStatus: v.union(
+      v.literal("pending"),
+      v.literal("processing"),
+      v.literal("completed"),
+      v.literal("failed")
+    ),
+    metadataError: v.optional(v.string()),
   })
     .index("by_resource", ["resourceId"])
     .index("by_domain", ["resourceId", "domain"]),
