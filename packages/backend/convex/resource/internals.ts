@@ -21,6 +21,7 @@ export const updateWebsiteMetadata = internalMutation({
       )
     ),
     embedId: v.optional(v.string()),
+    articleContent: v.optional(v.string()),
     metadataStatus: v.union(
       v.literal("pending"),
       v.literal("processing"),
@@ -48,6 +49,7 @@ export const updateWebsiteMetadata = internalMutation({
       isEmbeddable: args.isEmbeddable ?? false,
       embedType: args.embedType,
       embedId: args.embedId,
+      articleContent: args.articleContent,
       metadataStatus: args.metadataStatus,
       metadataError: args.metadataError,
     });

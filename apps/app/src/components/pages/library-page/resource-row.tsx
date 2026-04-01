@@ -434,8 +434,6 @@ function RowDropdownMenu({
   );
 }
 
-// --- Dot Grid Loader ---
-
 const DOT_ORBIT_ORDER = [0, 1, 3, 5, 4, 2] as const;
 
 function DotGridLoader() {

@@ -28,7 +28,7 @@ function DropZoneInset({ children }: { children: React.ReactNode }) {
       className={cn(
         "mt-auto transition-[background-color,box-shadow] duration-200",
         isDragging &&
-          "bg-blue-50 ring-2 ring-blue-400 ring-inset dark:bg-blue-950/30 dark:ring-blue-500"
+          "z-40! bg-blue-50 ring-2 ring-blue-400 ring-inset dark:bg-blue-950/30 dark:ring-blue-500"
       )}
     >
       <main className="h-full flex-1 overflow-y-auto">{children}</main>

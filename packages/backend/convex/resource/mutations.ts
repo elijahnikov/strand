@@ -11,15 +11,12 @@ export const create = workspaceMutation({
     title: v.string(),
     description: v.optional(v.string()),
 
-    // Website fields
     url: v.optional(v.string()),
 
-    // Note fields
     htmlContent: v.optional(v.string()),
     jsonContent: v.optional(v.string()),
     plainTextContent: v.optional(v.string()),
 
-    // File fields
     storageId: v.optional(v.id("_storage")),
     fileName: v.optional(v.string()),
     fileSize: v.optional(v.number()),
@@ -69,6 +66,14 @@ export const create = workspaceMutation({
       await ctx.scheduler.runAfter(
         0,
         internal.resource.actions.extractWebsiteMetadata,
+        { resourceId }
+      );
+    }
+
+    if (args.type === "note" || args.type === "file") {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.resource.aiActions.processResourceAI,
         { resourceId }
       );
     }

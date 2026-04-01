@@ -1,5 +1,6 @@
 "use node";
 
+import { extractArticleContent } from "@strand/ai/extraction";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { internalAction } from "../_generated/server";
@@ -56,7 +57,6 @@ function extractMetaContent(
   html: string,
   property: string
 ): string | undefined {
-  // Match both property="" and name="" attributes
   const regex = new RegExp(
     `<meta[^>]*(?:property|name)=["']${property}["'][^>]*content=["']([^"']*)["']|<meta[^>]*content=["']([^"']*)["'][^>]*(?:property|name)=["']${property}["']`,
     "i"
@@ -122,7 +122,6 @@ export const extractWebsiteMetadata = internalAction({
     resourceId: v.id("resource"),
   },
   handler: async (ctx, args) => {
-    // Set status to processing
     await ctx.runMutation(
       internal.resource.internals.setWebsiteMetadataStatus,
       {
@@ -131,7 +130,6 @@ export const extractWebsiteMetadata = internalAction({
       }
     );
 
-    // Get the website resource to find the URL
     const websiteResource = await ctx.runQuery(
       internal.resource.internals.getWebsiteResource,
       { resourceId: args.resourceId }
@@ -156,8 +154,10 @@ export const extractWebsiteMetadata = internalAction({
       const response = await fetch(websiteResource.url, {
         headers: {
           "User-Agent":
-            "Mozilla/5.0 (compatible; StrandBot/1.0; +https://strand.app)",
-          Accept: "text/html,application/xhtml+xml",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+          Accept:
+            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9",
         },
         signal: controller.signal,
         redirect: "follow",
@@ -179,6 +179,8 @@ export const extractWebsiteMetadata = internalAction({
 
       const embed = detectEmbed(websiteResource.url);
 
+      const article = extractArticleContent(html, websiteResource.url);
+
       await ctx.runMutation(internal.resource.internals.updateWebsiteMetadata, {
         resourceId: args.resourceId,
         ogTitle,
@@ -189,8 +191,15 @@ export const extractWebsiteMetadata = internalAction({
         isEmbeddable: embed !== null,
         embedType: embed?.type,
         embedId: embed?.id,
+        articleContent: article?.textContent,
         metadataStatus: "completed",
       });
+
+      await ctx.scheduler.runAfter(
+        0,
+        internal.resource.aiActions.processResourceAI,
+        { resourceId: args.resourceId }
+      );
     } catch (error) {
       await ctx.runMutation(
         internal.resource.internals.setWebsiteMetadataStatus,
