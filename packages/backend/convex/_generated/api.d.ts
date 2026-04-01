@@ -11,6 +11,9 @@
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as resource_actions from "../resource/actions.js";
+import type * as resource_aiActions from "../resource/aiActions.js";
+import type * as resource_aiInternals from "../resource/aiInternals.js";
+import type * as resource_aiQueries from "../resource/aiQueries.js";
 import type * as resource_internals from "../resource/internals.js";
 import type * as resource_mutations from "../resource/mutations.js";
 import type * as resource_queries from "../resource/queries.js";
@@ -30,6 +33,9 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
   "resource/actions": typeof resource_actions;
+  "resource/aiActions": typeof resource_aiActions;
+  "resource/aiInternals": typeof resource_aiInternals;
+  "resource/aiQueries": typeof resource_aiQueries;
   "resource/internals": typeof resource_internals;
   "resource/mutations": typeof resource_mutations;
   "resource/queries": typeof resource_queries;

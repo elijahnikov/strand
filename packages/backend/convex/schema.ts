@@ -76,6 +76,7 @@ export default defineSchema({
     ogTitle: v.optional(v.string()),
     ogDescription: v.optional(v.string()),
     siteName: v.optional(v.string()),
+    articleContent: v.optional(v.string()),
     fullScreenshotStorageId: v.optional(v.id("_storage")),
     isEmbeddable: v.boolean(),
     embedType: v.optional(

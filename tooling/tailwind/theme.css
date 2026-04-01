@@ -57,10 +57,20 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --animate-skeleton: skeleton 3s -1s infinite linear;
+  --animate-ai-pulse: ai-pulse 2s ease-in-out infinite;
   --tw-shadow-color: #000;
   @keyframes skeleton {
     to {
       background-position: -200% 0;
+    }
+  }
+  @keyframes ai-pulse {
+    0%,
+    100% {
+      opacity: 0.4;
+    }
+    50% {
+      opacity: 1;
     }
   }
 }

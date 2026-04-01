@@ -69,6 +69,8 @@ export const list = workspaceQuery({
 
     const search = args.search?.trim();
 
+    // biome-ignore lint/suspicious/noEvolvingTypes: <>
+    // biome-ignore lint/suspicious/noImplicitAnyLet: <>
     let results;
 
     if (search) {
@@ -96,6 +98,7 @@ export const list = workspaceQuery({
         .withIndex(indexName, (q) =>
           q
             .eq("workspaceId", workspaceId)
+            // biome-ignore lint/style/noNonNullAssertion: <>
             .eq("type", args.type!)
             .eq("deletedAt", undefined)
         )
