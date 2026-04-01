@@ -1,4 +1,5 @@
 import {
+  convexQuery,
   useConvexMutation,
   useConvexPaginatedQuery,
 } from "@convex-dev/react-query";
@@ -6,10 +7,13 @@ import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { Heading } from "@strand/ui/heading";
 import { Kbd } from "@strand/ui/kbd";
+import { Separator } from "@strand/ui/separator";
 import { Skeleton } from "@strand/ui/skeleton";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
-import { memo, useCallback, useEffect, useRef } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { useInView } from "react-intersection-observer";
+import { useLibraryFilters } from "./library-toolbar";
 import { ResourceRow, UploadingFileRow } from "./resource-row";
 
 const PAGE_SIZE = 20;
@@ -17,29 +21,57 @@ const PAGE_SIZE = 20;
 export function ResourceList({
   workspaceId,
   uploadingFiles,
-  search,
-  type,
-  order,
 }: {
   uploadingFiles: { id: string; name: string }[];
   workspaceId: Id<"workspace">;
-  search?: string;
-  type?: "website" | "note" | "file";
-  order?: "newest" | "oldest" | "alphabetical";
 }) {
+  const { search, type, order } = useLibraryFilters();
+
   const { results, status, loadMore } = useConvexPaginatedQuery(
     api.resource.queries.list,
-    { workspaceId, search: search || undefined, type, order },
+    {
+      workspaceId,
+      search: search || undefined,
+      type: type ?? undefined,
+      order: order ?? undefined,
+    },
     { initialNumItems: PAGE_SIZE }
   );
 
-  const updateTitle = useConvexMutation(api.resource.mutations.updateTitle);
+  const { data: serverPinned } = useQuery(
+    convexQuery(api.resource.queries.listPinned, { workspaceId })
+  );
+
+  const pinnedIdSet = useMemo(
+    () => new Set((serverPinned ?? []).map((r) => r._id)),
+    [serverPinned]
+  );
+
+  const unpinnedResults = useMemo(
+    () => results.filter((r) => !pinnedIdSet.has(r._id)),
+    [results, pinnedIdSet]
+  );
+
+  const { mutate: updateTitle } = useMutation({
+    mutationFn: useConvexMutation(api.resource.mutations.updateTitle),
+  });
+
+  const { mutate: togglePin } = useMutation({
+    mutationFn: useConvexMutation(api.resource.mutations.togglePin),
+  });
 
   const handleUpdateTitle = useCallback(
     (resourceId: Id<"resource">, title: string) => {
       updateTitle({ resourceId, title, workspaceId });
     },
     [updateTitle, workspaceId]
+  );
+
+  const handleTogglePin = useCallback(
+    (resourceId: Id<"resource">) => {
+      togglePin({ resourceId, workspaceId });
+    },
+    [togglePin, workspaceId]
   );
 
   const { ref: loadMoreRef, inView } = useInView();
@@ -57,7 +89,11 @@ export function ResourceList({
     }
   }, [inView, status, loadMore]);
 
-  if (results.length === 0 && uploadingFiles.length === 0) {
+  const hasPinned = serverPinned && serverPinned.length > 0;
+  const isEmpty =
+    unpinnedResults.length === 0 && !hasPinned && uploadingFiles.length === 0;
+
+  if (isEmpty) {
     if (status === "LoadingFirstPage") {
       return <ResourceListSkeleton />;
     }
@@ -86,6 +122,25 @@ export function ResourceList({
 
   return (
     <div className="flex flex-col">
+      {hasPinned && (
+        <>
+          <AnimatePresence>
+            {serverPinned.map((resource) => (
+              <MemoizedResourceItem
+                handleTogglePin={handleTogglePin}
+                handleUpdateTitle={handleUpdateTitle}
+                index={0}
+                initialLoadDone
+                isPinned
+                key={resource._id}
+                resource={resource}
+                workspaceId={workspaceId}
+              />
+            ))}
+          </AnimatePresence>
+          <Separator className="my-1" />
+        </>
+      )}
       <AnimatePresence>
         {uploadingFiles.map((file) => (
           <motion.div
@@ -98,11 +153,13 @@ export function ResourceList({
             <UploadingFileRow fileName={file.name} />
           </motion.div>
         ))}
-        {results.map((resource, i) => (
+        {unpinnedResults.map((resource, i) => (
           <MemoizedResourceItem
+            handleTogglePin={handleTogglePin}
             handleUpdateTitle={handleUpdateTitle}
             index={i}
             initialLoadDone={initialLoadDone.current}
+            isPinned={false}
             key={resource._id}
             resource={resource}
             workspaceId={workspaceId}
@@ -118,13 +175,17 @@ export function ResourceList({
 const MemoizedResourceItem = memo(function ResourceItem({
   resource,
   handleUpdateTitle,
+  handleTogglePin,
   workspaceId,
+  isPinned,
   initialLoadDone,
   index,
 }: {
   resource: Parameters<typeof ResourceRow>[0]["resource"];
   handleUpdateTitle: (resourceId: Id<"resource">, title: string) => void;
+  handleTogglePin: (resourceId: Id<"resource">) => void;
   workspaceId: Id<"workspace">;
+  isPinned: boolean;
   initialLoadDone: boolean;
   index: number;
 }) {
@@ -141,6 +202,8 @@ const MemoizedResourceItem = memo(function ResourceItem({
       }}
     >
       <ResourceRow
+        isPinned={isPinned}
+        onTogglePin={handleTogglePin}
         onUpdateTitle={handleUpdateTitle}
         resource={resource}
         workspaceId={workspaceId}

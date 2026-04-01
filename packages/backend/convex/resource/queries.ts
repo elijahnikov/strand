@@ -1,6 +1,6 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
-import type { Doc, Id } from "../_generated/dataModel";
+import type { Doc } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 import { workspaceQuery } from "../utils";
 
@@ -121,6 +121,30 @@ export const list = workspaceQuery({
     );
 
     return { ...results, page: enrichedPage };
+  },
+});
+
+export const listPinned = workspaceQuery({
+  args: {},
+  handler: async (ctx) => {
+    const pins = await ctx.db
+      .query("userResourcePin")
+      .withIndex("by_user_workspace", (q) =>
+        q.eq("userId", ctx.user._id).eq("workspaceId", ctx.workspace._id)
+      )
+      .collect();
+
+    const resources = await Promise.all(
+      pins.map(async (pin) => {
+        const resource = await ctx.db.get(pin.resourceId);
+        if (!resource || resource.deletedAt) {
+          return null;
+        }
+        return enrichResource(ctx, resource);
+      })
+    );
+
+    return resources.filter((r) => r !== null);
   },
 });
 
