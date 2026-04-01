@@ -1,10 +1,11 @@
 import { useConvexMutation } from "@convex-dev/react-query";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { useMutation } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { useFileDropHandler } from "~/hooks/use-file-drop";
 import { usePasteHandler } from "~/hooks/use-paste-handler";
-import { LibraryToolbar, useLibraryFilters } from "./library-toolbar";
+import { LibraryToolbar } from "./library-toolbar";
 import { ResourceList } from "./resource-list";
 
 export function LibraryPageComponent({
@@ -12,16 +13,18 @@ export function LibraryPageComponent({
 }: {
   workspaceId: Id<"workspace">;
 }) {
-  const createResource = useConvexMutation(api.resource.mutations.create);
-  const generateUploadUrl = useConvexMutation(
-    api.resource.mutations.generateUploadUrl
-  );
+  const { mutate: createResource, mutateAsync: createResourceAsync } =
+    useMutation({
+      mutationFn: useConvexMutation(api.resource.mutations.create),
+    });
+
+  const { mutateAsync: generateUploadUrl } = useMutation({
+    mutationFn: useConvexMutation(api.resource.mutations.generateUploadUrl),
+  });
 
   const [uploadingFiles, setUploadingFiles] = useState<
     { id: string; name: string }[]
   >([]);
-
-  const { search, type, order } = useLibraryFilters();
 
   const handleUrl = useCallback(
     (url: string) => {
@@ -55,7 +58,7 @@ export function LibraryPageComponent({
 
         try {
           const uploadUrl = await generateUploadUrl({});
-          const response = await fetch(uploadUrl, {
+          const response = await fetch(uploadUrl as string, {
             method: "POST",
             headers: { "Content-Type": file.type },
             body: file,
@@ -64,7 +67,7 @@ export function LibraryPageComponent({
             storageId: Id<"_storage">;
           };
 
-          await createResource({
+          await createResourceAsync({
             workspaceId,
             type: "file",
             title: file.name,
@@ -78,7 +81,7 @@ export function LibraryPageComponent({
         }
       }
     },
-    [createResource, generateUploadUrl, workspaceId]
+    [createResourceAsync, generateUploadUrl, workspaceId]
   );
 
   usePasteHandler({
@@ -94,9 +97,6 @@ export function LibraryPageComponent({
       <LibraryToolbar />
       <div className="mx-auto w-2/3 px-6 pt-16 pb-4">
         <ResourceList
-          order={order ?? undefined}
-          search={search || undefined}
-          type={type ?? undefined}
           uploadingFiles={uploadingFiles}
           workspaceId={workspaceId}
         />

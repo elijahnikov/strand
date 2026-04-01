@@ -163,6 +163,16 @@ export default defineSchema({
       filterFields: ["workspaceId"],
     }),
 
+  // USER RESOURCE PIN (per-user pins, not workspace-wide)
+  userResourcePin: defineTable({
+    userId: v.id("user"),
+    resourceId: v.id("resource"),
+    workspaceId: v.id("workspace"),
+    pinnedAt: v.number(),
+  })
+    .index("by_user_workspace", ["userId", "workspaceId"])
+    .index("by_user_resource", ["userId", "resourceId"]),
+
   // TAG
   tag: defineTable({
     workspaceId: v.id("workspace"),

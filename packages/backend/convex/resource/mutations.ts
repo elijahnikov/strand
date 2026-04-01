@@ -167,6 +167,38 @@ export const updateTitle = workspaceMutation({
   },
 });
 
+export const togglePin = workspaceMutation({
+  args: {
+    resourceId: v.id("resource"),
+  },
+  handler: async (ctx, args) => {
+    const resource = await ctx.db.get(args.resourceId);
+    if (!resource || resource.workspaceId !== ctx.workspace._id) {
+      throw new ConvexError("Resource not found");
+    }
+
+    const existing = await ctx.db
+      .query("userResourcePin")
+      .withIndex("by_user_resource", (q) =>
+        q.eq("userId", ctx.user._id).eq("resourceId", args.resourceId)
+      )
+      .unique();
+
+    if (existing) {
+      await ctx.db.delete(existing._id);
+      return { pinned: false };
+    }
+
+    await ctx.db.insert("userResourcePin", {
+      userId: ctx.user._id,
+      resourceId: args.resourceId,
+      workspaceId: ctx.workspace._id,
+      pinnedAt: Date.now(),
+    });
+    return { pinned: true };
+  },
+});
+
 export const generateUploadUrl = mutation({
   args: {},
   handler: async (ctx) => {

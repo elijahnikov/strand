@@ -16,6 +16,7 @@ import {
   ExternalLinkIcon,
   MoreHorizontalIcon,
   PinIcon,
+  PinOffIcon,
   StarIcon,
   TrashIcon,
 } from "lucide-react";
@@ -30,6 +31,8 @@ type Resource = FunctionReturnType<
 >["page"][number];
 
 interface ResourceRowProps {
+  isPinned: boolean;
+  onTogglePin: (resourceId: Id<"resource">) => void;
   onUpdateTitle: (resourceId: Id<"resource">, title: string) => void;
   resource: Resource;
   workspaceId: Id<"workspace">;
@@ -47,36 +50,14 @@ function usePendingTitle(serverTitle: string) {
   return { pendingTitle, setPendingTitle };
 }
 
-export function ResourceRow({
-  resource,
-  onUpdateTitle,
-  workspaceId,
-}: ResourceRowProps) {
-  switch (resource.type) {
+export function ResourceRow(props: ResourceRowProps) {
+  switch (props.resource.type) {
     case "website":
-      return (
-        <WebsiteRow
-          onUpdateTitle={onUpdateTitle}
-          resource={resource}
-          workspaceId={workspaceId}
-        />
-      );
+      return <WebsiteRow {...props} />;
     case "note":
-      return (
-        <NoteRow
-          onUpdateTitle={onUpdateTitle}
-          resource={resource}
-          workspaceId={workspaceId}
-        />
-      );
+      return <NoteRow {...props} />;
     case "file":
-      return (
-        <FileRow
-          onUpdateTitle={onUpdateTitle}
-          resource={resource}
-          workspaceId={workspaceId}
-        />
-      );
+      return <FileRow {...props} />;
     default:
       return null;
   }
@@ -127,6 +108,8 @@ function useResourceNavigate(
 function WebsiteRow({
   resource,
   onUpdateTitle,
+  onTogglePin,
+  isPinned,
   workspaceId,
 }: ResourceRowProps) {
   const website = "website" in resource ? resource.website : null;
@@ -218,13 +201,23 @@ function WebsiteRow({
             <ExternalLinkIcon className="h-3.5 w-3.5" />
           </a>
         )}
-        <RowDropdownMenu resource={resource} />
+        <RowDropdownMenu
+          isPinned={isPinned}
+          onTogglePin={onTogglePin}
+          resource={resource}
+        />
       </div>
     </div>
   );
 }
 
-function NoteRow({ resource, onUpdateTitle, workspaceId }: ResourceRowProps) {
+function NoteRow({
+  resource,
+  onUpdateTitle,
+  onTogglePin,
+  isPinned,
+  workspaceId,
+}: ResourceRowProps) {
   const { pendingTitle, setPendingTitle } = usePendingTitle(resource.title);
   const handleNavigate = useResourceNavigate(workspaceId, resource._id);
 
@@ -270,13 +263,23 @@ function NoteRow({ resource, onUpdateTitle, workspaceId }: ResourceRowProps) {
         </AnimatePresence>
       </div>
       <div className="relative z-20 flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-        <RowDropdownMenu resource={resource} />
+        <RowDropdownMenu
+          isPinned={isPinned}
+          onTogglePin={onTogglePin}
+          resource={resource}
+        />
       </div>
     </div>
   );
 }
 
-function FileRow({ resource, onUpdateTitle, workspaceId }: ResourceRowProps) {
+function FileRow({
+  resource,
+  onUpdateTitle,
+  onTogglePin,
+  isPinned,
+  workspaceId,
+}: ResourceRowProps) {
   const file = "file" in resource ? resource.file : null;
   const fileUrl = "fileUrl" in resource ? resource.fileUrl : null;
   const isImage = file?.mimeType?.startsWith("image/");
@@ -347,13 +350,25 @@ function FileRow({ resource, onUpdateTitle, workspaceId }: ResourceRowProps) {
             <DownloadIcon className="h-3.5 w-3.5" />
           </a>
         )}
-        <RowDropdownMenu resource={resource} />
+        <RowDropdownMenu
+          isPinned={isPinned}
+          onTogglePin={onTogglePin}
+          resource={resource}
+        />
       </div>
     </div>
   );
 }
 
-function RowDropdownMenu({ resource }: { resource: Resource }) {
+function RowDropdownMenu({
+  resource,
+  isPinned,
+  onTogglePin,
+}: {
+  resource: Resource;
+  isPinned: boolean;
+  onTogglePin: (resourceId: Id<"resource">) => void;
+}) {
   const website = "website" in resource ? resource.website : null;
   const fileUrl = "fileUrl" in resource ? resource.fileUrl : null;
   const file = "file" in resource ? resource.file : null;
@@ -368,9 +383,13 @@ function RowDropdownMenu({ resource }: { resource: Resource }) {
           <StarIcon className="h-4 w-4" />
           Favorite
         </DropdownMenuItem>
-        <DropdownMenuItem>
-          <PinIcon className="h-4 w-4" />
-          Pin
+        <DropdownMenuItem onClick={() => onTogglePin(resource._id)}>
+          {isPinned ? (
+            <PinOffIcon className="h-4 w-4" />
+          ) : (
+            <PinIcon className="h-4 w-4" />
+          )}
+          {isPinned ? "Unpin" : "Pin"}
         </DropdownMenuItem>
         {resource.type === "website" && website?.url && (
           <>
