@@ -1,10 +1,11 @@
 import { useConvexMutation } from "@convex-dev/react-query";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { Suspense, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { useFileDropHandler } from "~/hooks/use-file-drop";
 import { usePasteHandler } from "~/hooks/use-paste-handler";
-import { ResourceList, ResourceListSkeleton } from "./resource-list";
+import { LibraryToolbar, useLibraryFilters } from "./library-toolbar";
+import { ResourceList } from "./resource-list";
 
 export function LibraryPageComponent({
   workspaceId,
@@ -19,6 +20,8 @@ export function LibraryPageComponent({
   const [uploadingFiles, setUploadingFiles] = useState<
     { id: string; name: string }[]
   >([]);
+
+  const { search, type, order } = useLibraryFilters();
 
   const handleUrl = useCallback(
     (url: string) => {
@@ -87,13 +90,17 @@ export function LibraryPageComponent({
   useFileDropHandler(handleFiles);
 
   return (
-    <div className="mx-auto w-2/3 px-6 pt-4 pb-4">
-      <Suspense fallback={<ResourceListSkeleton />}>
+    <div>
+      <LibraryToolbar />
+      <div className="mx-auto w-2/3 px-6 pt-16 pb-4">
         <ResourceList
+          order={order ?? undefined}
+          search={search || undefined}
+          type={type ?? undefined}
           uploadingFiles={uploadingFiles}
           workspaceId={workspaceId}
         />
-      </Suspense>
+      </div>
     </div>
   );
 }

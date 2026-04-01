@@ -41,7 +41,7 @@ function MenuPopup({
       >
         <MenuPrimitive.Popup
           className={cn(
-            "relative flex not-[class*='w-']:min-w-52 origin-(--transform-origin) rounded-lg border bg-ui-bg-component not-dark:bg-clip-padding outline-none before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] focus:outline-none",
+            "relative flex not-[class*='w-']:min-w-52 origin-(--transform-origin) rounded-2xl border bg-ui-bg-component not-dark:bg-clip-padding outline-none before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] focus:outline-none",
             className
           )}
           data-slot="menu-popup"
@@ -72,8 +72,8 @@ function MenuItem({
   return (
     <MenuPrimitive.Item
       className={cn(
-        "txt-compact-small relative flex cursor-pointer select-none items-center rounded-md bg-ui-bg-component px-2 py-1.5 font-medium text-ui-fg-subtle outline-none transition-colors [&_svg]:mr-2 [&_svg]:size-4 [&_svg]:text-ui-fg-base",
-        "focus:bg-ui-bg-component-hover focus:text-ui-fg-base focus-visible:bg-ui-bg-component-hover focus:[&_svg]:text-ui-fg-base",
+        "txt-compact-small group/menuitem relative flex cursor-pointer select-none items-center rounded-xl bg-ui-bg-component px-2 py-1.5 font-medium text-ui-fg-subtle outline-none transition-colors [&_svg]:mr-2 [&_svg]:size-4 [&_svg]:text-ui-fg-base",
+        "focus:bg-ui-bg-component-hover focus:text-ui-fg-base focus-visible:bg-ui-bg-component-hover [&_svg]:text-ui-fg-subtle focus:[&_svg]:text-ui-fg-base",
         "active:bg-ui-bg-component-hover",
         "data-disabled:pointer-events-none data-disabled:text-ui-fg-disabled data-disabled:[&_svg]:text-ui-fg-disabled",
         className

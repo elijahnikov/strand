@@ -25,7 +25,9 @@ import { EditableText } from "~/components/common/editable-text";
 import { TextShimmer } from "~/components/common/text-shimmer";
 import { getFileLabel } from "~/lib/format";
 
-type Resource = FunctionReturnType<typeof api.resource.queries.list>[number];
+type Resource = FunctionReturnType<
+  typeof api.resource.queries.list
+>["page"][number];
 
 interface ResourceRowProps {
   onUpdateTitle: (resourceId: Id<"resource">, title: string) => void;
@@ -143,7 +145,7 @@ function WebsiteRow({
   };
 
   return (
-    <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle dark:hover:bg-ui-bg-subtle/50">
+    <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle">
       <RowLink resourceId={resource._id} workspaceId={workspaceId} />
       <div
         className={cn(
@@ -232,7 +234,7 @@ function NoteRow({ resource, onUpdateTitle, workspaceId }: ResourceRowProps) {
   };
 
   return (
-    <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle dark:hover:bg-ui-bg-subtle/50">
+    <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle">
       <RowLink resourceId={resource._id} workspaceId={workspaceId} />
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-ui-bg-subtle text-ui-fg-muted">
         <NoteIcon />
@@ -288,9 +290,9 @@ function FileRow({ resource, onUpdateTitle, workspaceId }: ResourceRowProps) {
   };
 
   return (
-    <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle dark:hover:bg-ui-bg-subtle/50">
+    <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle">
       <RowLink resourceId={resource._id} workspaceId={workspaceId} />
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-ui-bg-subtle">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-ui-bg-subtle">
         {isImage && fileUrl ? (
           <img
             alt={file?.fileName ?? ""}
@@ -405,7 +407,7 @@ function RowDropdownMenu({ resource }: { resource: Resource }) {
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem className="text-ui-fg-error">
-          <TrashIcon className="h-4 w-4" />
+          <TrashIcon className="h-4 w-4 text-ui-fg-error! group-hover/menuitem:text-ui-fg-base!" />
           Delete
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -447,8 +449,6 @@ function DotGridLoader() {
     </>
   );
 }
-
-// --- Icons ---
 
 function WebsiteIcon({ favicon }: { favicon?: string | null }) {
   if (favicon) {

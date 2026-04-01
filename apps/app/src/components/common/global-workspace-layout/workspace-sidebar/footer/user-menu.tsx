@@ -68,7 +68,7 @@ export function UserMenu() {
         <div className="flex items-center gap-1 px-0.5 py-1">
           {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
             <button
-              className={`flex h-7 flex-1 items-center justify-center gap-1.5 rounded-md px-2 text-xs transition-colors ${
+              className={`flex h-7 flex-1 items-center justify-center gap-1.5 rounded-md px-2 font-medium text-xs transition-colors ${
                 themeMode === value
                   ? "bg-ui-bg-component-hover text-ui-fg-base"
                   : "text-ui-fg-muted hover:text-ui-fg-subtle"

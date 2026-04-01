@@ -15,6 +15,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { createServerFn } from "@tanstack/react-start";
+import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 import type * as React from "react";
 import { ClientAuthBoundary } from "~/lib/auth-client";
 import { getToken } from "~/lib/auth-server";
@@ -86,15 +87,17 @@ function RootComponent() {
       initialToken={context.token}
     >
       <RootDocument>
-        <ThemeProvider>
-          <ToastProvider>
-            <AnchoredToastProvider>
-              <ClientAuthBoundary>
-                <Outlet />
-              </ClientAuthBoundary>
-            </AnchoredToastProvider>
-          </ToastProvider>
-        </ThemeProvider>
+        <NuqsAdapter>
+          <ThemeProvider>
+            <ToastProvider>
+              <AnchoredToastProvider>
+                <ClientAuthBoundary>
+                  <Outlet />
+                </ClientAuthBoundary>
+              </AnchoredToastProvider>
+            </ToastProvider>
+          </ThemeProvider>
+        </NuqsAdapter>
       </RootDocument>
     </ConvexBetterAuthProvider>
   );
@@ -105,6 +108,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script
+          crossOrigin="anonymous"
+          src="//unpkg.com/react-scan/dist/auto.global.js"
+        />
       </head>
       <body className="isolate min-h-screen bg-ui-bg-base font-sans text-ui-fg-base antialiased">
         {children}

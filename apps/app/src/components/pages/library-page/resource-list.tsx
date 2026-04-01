@@ -1,23 +1,36 @@
-import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
+import {
+  useConvexMutation,
+  useConvexPaginatedQuery,
+} from "@convex-dev/react-query";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { Heading } from "@strand/ui/heading";
 import { Kbd } from "@strand/ui/kbd";
 import { Skeleton } from "@strand/ui/skeleton";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback } from "react";
+import { memo, useCallback, useEffect, useRef } from "react";
+import { useInView } from "react-intersection-observer";
 import { ResourceRow, UploadingFileRow } from "./resource-row";
+
+const PAGE_SIZE = 20;
 
 export function ResourceList({
   workspaceId,
   uploadingFiles,
+  search,
+  type,
+  order,
 }: {
   uploadingFiles: { id: string; name: string }[];
   workspaceId: Id<"workspace">;
+  search?: string;
+  type?: "website" | "note" | "file";
+  order?: "newest" | "oldest" | "alphabetical";
 }) {
-  const { data: resources } = useSuspenseQuery(
-    convexQuery(api.resource.queries.list, { workspaceId })
+  const { results, status, loadMore } = useConvexPaginatedQuery(
+    api.resource.queries.list,
+    { workspaceId, search: search || undefined, type, order },
+    { initialNumItems: PAGE_SIZE }
   );
 
   const updateTitle = useConvexMutation(api.resource.mutations.updateTitle);
@@ -29,7 +42,36 @@ export function ResourceList({
     [updateTitle, workspaceId]
   );
 
-  if (resources.length === 0 && uploadingFiles.length === 0) {
+  const { ref: loadMoreRef, inView } = useInView();
+  const initialLoadDone = useRef(false);
+
+  useEffect(() => {
+    if (results.length > 0 && !initialLoadDone.current) {
+      initialLoadDone.current = true;
+    }
+  }, [results.length]);
+
+  useEffect(() => {
+    if (inView && status === "CanLoadMore") {
+      loadMore(PAGE_SIZE);
+    }
+  }, [inView, status, loadMore]);
+
+  if (results.length === 0 && uploadingFiles.length === 0) {
+    if (status === "LoadingFirstPage") {
+      return <ResourceListSkeleton />;
+    }
+
+    if (search || type) {
+      return (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <Heading className="font-medium text-sm text-ui-fg-subtle">
+            No results found.
+          </Heading>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <Heading className="font-medium text-sm text-ui-fg-subtle">
@@ -44,41 +86,75 @@ export function ResourceList({
 
   return (
     <div className="flex flex-col">
-      <AnimatePresence mode="popLayout">
+      <AnimatePresence>
         {uploadingFiles.map((file) => (
           <motion.div
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, height: 0 }}
             initial={{ opacity: 0, y: 8 }}
             key={file.id}
-            layout
             transition={{ type: "spring", stiffness: 500, damping: 35 }}
           >
             <UploadingFileRow fileName={file.name} />
           </motion.div>
         ))}
-        {resources.map((resource, i) => (
-          <motion.div
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, height: 0 }}
-            initial={{ opacity: 0, y: 8 }}
+        {results.map((resource, i) => (
+          <MemoizedResourceItem
+            handleUpdateTitle={handleUpdateTitle}
+            index={i}
+            initialLoadDone={initialLoadDone.current}
             key={resource._id}
-            layout
-            transition={{
-              type: "spring",
-              stiffness: 500,
-              damping: 35,
-              delay: i * 0.03,
-            }}
-          >
-            <ResourceRow
-              onUpdateTitle={handleUpdateTitle}
-              resource={resource}
-              workspaceId={workspaceId}
-            />
-          </motion.div>
+            resource={resource}
+            workspaceId={workspaceId}
+          />
         ))}
       </AnimatePresence>
+      <div className="h-px" ref={loadMoreRef} />
+      {status === "LoadingMore" && <LoadingMoreSkeleton />}
+    </div>
+  );
+}
+
+const MemoizedResourceItem = memo(function ResourceItem({
+  resource,
+  handleUpdateTitle,
+  workspaceId,
+  initialLoadDone,
+  index,
+}: {
+  resource: Parameters<typeof ResourceRow>[0]["resource"];
+  handleUpdateTitle: (resourceId: Id<"resource">, title: string) => void;
+  workspaceId: Id<"workspace">;
+  initialLoadDone: boolean;
+  index: number;
+}) {
+  return (
+    <motion.div
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, height: 0 }}
+      initial={initialLoadDone ? false : { opacity: 0, y: 8 }}
+      transition={{
+        type: "spring",
+        stiffness: 500,
+        damping: 35,
+        delay: initialLoadDone ? 0 : index * 0.03,
+      }}
+    >
+      <ResourceRow
+        onUpdateTitle={handleUpdateTitle}
+        resource={resource}
+        workspaceId={workspaceId}
+      />
+    </motion.div>
+  );
+});
+
+function LoadingMoreSkeleton() {
+  return (
+    <div className="flex flex-col gap-y-2 py-2">
+      {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+        <Skeleton className="h-11 w-full" key={`loading-${i.toString()}`} />
+      ))}
     </div>
   );
 }

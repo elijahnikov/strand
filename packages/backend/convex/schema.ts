@@ -50,10 +50,21 @@ export default defineSchema({
   })
     .index("by_workspace", ["workspaceId", "deletedAt"])
     .index("by_workspace_type", ["workspaceId", "type", "deletedAt"])
+    .index("by_workspace_title", ["workspaceId", "deletedAt", "title"])
+    .index("by_workspace_type_title", [
+      "workspaceId",
+      "type",
+      "deletedAt",
+      "title",
+    ])
     .index("by_workspace_favorite", ["workspaceId", "isFavorite", "deletedAt"])
     .index("by_workspace_archived", ["workspaceId", "isArchived", "deletedAt"])
     .index("by_workspace_creator", ["workspaceId", "createdBy", "deletedAt"])
-    .index("by_workspace_pinned", ["workspaceId", "isPinned", "deletedAt"]),
+    .index("by_workspace_pinned", ["workspaceId", "isPinned", "deletedAt"])
+    .searchIndex("search_title", {
+      searchField: "title",
+      filterFields: ["workspaceId", "type", "deletedAt"],
+    }),
 
   // WEBSITE RESOURCE
   websiteResource: defineTable({
