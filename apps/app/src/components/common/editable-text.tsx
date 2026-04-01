@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 interface EditableTextProps {
   className?: string;
   inputClassName?: string;
+  onClick?: () => void;
   onSave: (value: string) => void;
   value: string;
 }
@@ -11,12 +12,14 @@ interface EditableTextProps {
 export function EditableText({
   value,
   onSave,
+  onClick,
   className,
   inputClassName,
 }: EditableTextProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
+  const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setEditValue(value);
@@ -33,9 +36,6 @@ export function EditableText({
     const trimmed = editValue.trim();
     if (trimmed && trimmed !== value) {
       onSave(trimmed);
-      // Don't setIsEditing(false) here — the parent will unmount us
-      // and replace with a shimmer/pending state. Exiting edit mode
-      // before that causes a flash of the old value.
     } else {
       setEditValue(value);
       setIsEditing(false);
@@ -56,12 +56,30 @@ export function EditableText({
     [handleSave, value]
   );
 
+  const handleClick = useCallback(() => {
+    if (clickTimer.current) {
+      return;
+    }
+    clickTimer.current = setTimeout(() => {
+      clickTimer.current = null;
+      onClick?.();
+    }, 200);
+  }, [onClick]);
+
+  const handleDoubleClick = useCallback(() => {
+    if (clickTimer.current) {
+      clearTimeout(clickTimer.current);
+      clickTimer.current = null;
+    }
+    setIsEditing(true);
+  }, []);
+
   if (isEditing) {
     return (
       <input
         autoComplete="off"
         className={cn(
-          "m-0 w-full truncate border-none bg-transparent p-0 outline-none",
+          "relative z-20 m-0 w-full truncate border-none bg-transparent p-0 outline-none",
           inputClassName ?? className
         )}
         onBlur={handleSave}
@@ -78,10 +96,11 @@ export function EditableText({
   return (
     <button
       className={cn(
-        "cursor-text truncate border-none bg-transparent p-0 text-left",
+        "relative z-20 cursor-text truncate border-none bg-transparent p-0 text-left",
         className
       )}
-      onClick={() => setIsEditing(true)}
+      onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
       type="button"
     >
       {value}

@@ -1,5 +1,6 @@
 import type { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { cn } from "@strand/ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,6 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@strand/ui/dropdown-menu";
+import { Link, useNavigate } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
 import {
   CopyIcon,
@@ -28,6 +30,7 @@ type Resource = FunctionReturnType<typeof api.resource.queries.list>[number];
 interface ResourceRowProps {
   onUpdateTitle: (resourceId: Id<"resource">, title: string) => void;
   resource: Resource;
+  workspaceId: Id<"workspace">;
 }
 
 function usePendingTitle(serverTitle: string) {
@@ -42,20 +45,88 @@ function usePendingTitle(serverTitle: string) {
   return { pendingTitle, setPendingTitle };
 }
 
-export function ResourceRow({ resource, onUpdateTitle }: ResourceRowProps) {
+export function ResourceRow({
+  resource,
+  onUpdateTitle,
+  workspaceId,
+}: ResourceRowProps) {
   switch (resource.type) {
     case "website":
-      return <WebsiteRow onUpdateTitle={onUpdateTitle} resource={resource} />;
+      return (
+        <WebsiteRow
+          onUpdateTitle={onUpdateTitle}
+          resource={resource}
+          workspaceId={workspaceId}
+        />
+      );
     case "note":
-      return <NoteRow onUpdateTitle={onUpdateTitle} resource={resource} />;
+      return (
+        <NoteRow
+          onUpdateTitle={onUpdateTitle}
+          resource={resource}
+          workspaceId={workspaceId}
+        />
+      );
     case "file":
-      return <FileRow onUpdateTitle={onUpdateTitle} resource={resource} />;
+      return (
+        <FileRow
+          onUpdateTitle={onUpdateTitle}
+          resource={resource}
+          workspaceId={workspaceId}
+        />
+      );
     default:
       return null;
   }
 }
 
-function WebsiteRow({ resource, onUpdateTitle }: ResourceRowProps) {
+export function UploadingFileRow({ fileName }: { fileName: string }) {
+  return (
+    <div className="flex items-center gap-3 rounded-lg px-3 py-2">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-ui-bg-subtle" />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <TextShimmer className="truncate font-medium text-sm">
+          {fileName}
+        </TextShimmer>
+      </div>
+    </div>
+  );
+}
+
+function RowLink({
+  workspaceId,
+  resourceId,
+}: {
+  workspaceId: Id<"workspace">;
+  resourceId: Id<"resource">;
+}) {
+  return (
+    <Link
+      className="absolute inset-0 z-10 rounded-lg"
+      params={{ workspaceId, resourceId }}
+      tabIndex={-1}
+      to="/workspace/$workspaceId/resource/$resourceId"
+    />
+  );
+}
+
+function useResourceNavigate(
+  workspaceId: Id<"workspace">,
+  resourceId: Id<"resource">
+) {
+  const navigate = useNavigate();
+  return () =>
+    navigate({
+      to: "/workspace/$workspaceId/resource/$resourceId",
+      params: { workspaceId, resourceId },
+    });
+}
+
+function WebsiteRow({
+  resource,
+  onUpdateTitle,
+  workspaceId,
+}: ResourceRowProps) {
   const website = "website" in resource ? resource.website : null;
   const isMetadataPending =
     !website ||
@@ -64,6 +135,7 @@ function WebsiteRow({ resource, onUpdateTitle }: ResourceRowProps) {
 
   const { pendingTitle, setPendingTitle } = usePendingTitle(resource.title);
   const isTitlePending = pendingTitle !== null;
+  const handleNavigate = useResourceNavigate(workspaceId, resource._id);
 
   const handleSave = (title: string) => {
     setPendingTitle(title);
@@ -71,8 +143,15 @@ function WebsiteRow({ resource, onUpdateTitle }: ResourceRowProps) {
   };
 
   return (
-    <div className="group flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle dark:hover:bg-ui-bg-subtle/50">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+    <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle dark:hover:bg-ui-bg-subtle/50">
+      <RowLink resourceId={resource._id} workspaceId={workspaceId} />
+      <div
+        className={cn(
+          "flex h-8 w-8 shrink-0 items-center justify-center rounded-md",
+          !(isMetadataPending || website?.favicon) &&
+            "bg-ui-bg-subtle text-ui-fg-muted"
+        )}
+      >
         <AnimatePresence mode="wait">
           {isMetadataPending ? (
             <motion.div
@@ -100,6 +179,7 @@ function WebsiteRow({ resource, onUpdateTitle }: ResourceRowProps) {
         <AnimatePresence mode="wait">
           {isMetadataPending || isTitlePending ? (
             <motion.div
+              className="w-full"
               exit={{ opacity: 0, transition: { duration: 0.15 } }}
               key="shimmer"
             >
@@ -110,12 +190,14 @@ function WebsiteRow({ resource, onUpdateTitle }: ResourceRowProps) {
           ) : (
             <motion.div
               animate={{ opacity: 1, y: 0 }}
+              className="w-full"
               initial={{ opacity: 0, y: 4 }}
               key="title"
               transition={{ type: "spring", stiffness: 500, damping: 30 }}
             >
               <EditableText
                 className="font-medium text-sm text-ui-fg-base"
+                onClick={handleNavigate}
                 onSave={handleSave}
                 value={resource.title}
               />
@@ -123,7 +205,7 @@ function WebsiteRow({ resource, onUpdateTitle }: ResourceRowProps) {
           )}
         </AnimatePresence>
       </div>
-      <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+      <div className="relative z-20 flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         {website?.url && (
           <a
             className="flex h-7 w-7 items-center justify-center rounded-md text-ui-fg-muted transition-colors hover:bg-ui-bg-base hover:text-ui-fg-base"
@@ -140,8 +222,9 @@ function WebsiteRow({ resource, onUpdateTitle }: ResourceRowProps) {
   );
 }
 
-function NoteRow({ resource, onUpdateTitle }: ResourceRowProps) {
+function NoteRow({ resource, onUpdateTitle, workspaceId }: ResourceRowProps) {
   const { pendingTitle, setPendingTitle } = usePendingTitle(resource.title);
+  const handleNavigate = useResourceNavigate(workspaceId, resource._id);
 
   const handleSave = (title: string) => {
     setPendingTitle(title);
@@ -149,7 +232,8 @@ function NoteRow({ resource, onUpdateTitle }: ResourceRowProps) {
   };
 
   return (
-    <div className="group flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle dark:hover:bg-ui-bg-subtle/50">
+    <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle dark:hover:bg-ui-bg-subtle/50">
+      <RowLink resourceId={resource._id} workspaceId={workspaceId} />
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-ui-bg-subtle text-ui-fg-muted">
         <NoteIcon />
       </div>
@@ -158,18 +242,21 @@ function NoteRow({ resource, onUpdateTitle }: ResourceRowProps) {
           {pendingTitle === null ? (
             <motion.div
               animate={{ opacity: 1, y: 0 }}
+              className="w-full"
               initial={{ opacity: 0, y: 4 }}
               key="title"
               transition={{ type: "spring", stiffness: 500, damping: 30 }}
             >
               <EditableText
                 className="font-medium text-sm text-ui-fg-base"
+                onClick={handleNavigate}
                 onSave={handleSave}
                 value={resource.title}
               />
             </motion.div>
           ) : (
             <motion.div
+              className="w-full"
               exit={{ opacity: 0, transition: { duration: 0.15 } }}
               key="shimmer"
             >
@@ -180,19 +267,20 @@ function NoteRow({ resource, onUpdateTitle }: ResourceRowProps) {
           )}
         </AnimatePresence>
       </div>
-      <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+      <div className="relative z-20 flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         <RowDropdownMenu resource={resource} />
       </div>
     </div>
   );
 }
 
-function FileRow({ resource, onUpdateTitle }: ResourceRowProps) {
+function FileRow({ resource, onUpdateTitle, workspaceId }: ResourceRowProps) {
   const file = "file" in resource ? resource.file : null;
   const fileUrl = "fileUrl" in resource ? resource.fileUrl : null;
   const isImage = file?.mimeType?.startsWith("image/");
 
   const { pendingTitle, setPendingTitle } = usePendingTitle(resource.title);
+  const handleNavigate = useResourceNavigate(workspaceId, resource._id);
 
   const handleSave = (title: string) => {
     setPendingTitle(title);
@@ -200,7 +288,8 @@ function FileRow({ resource, onUpdateTitle }: ResourceRowProps) {
   };
 
   return (
-    <div className="group flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle dark:hover:bg-ui-bg-subtle/50">
+    <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle dark:hover:bg-ui-bg-subtle/50">
+      <RowLink resourceId={resource._id} workspaceId={workspaceId} />
       <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-ui-bg-subtle">
         {isImage && fileUrl ? (
           <img
@@ -216,23 +305,26 @@ function FileRow({ resource, onUpdateTitle }: ResourceRowProps) {
           </span>
         )}
       </div>
-      <div className="flex min-w-0 flex-1 items-end gap-x-2">
+      <div className="flex min-w-0 flex-1 flex-col">
         <AnimatePresence mode="wait">
           {pendingTitle === null ? (
             <motion.div
               animate={{ opacity: 1, y: 0 }}
+              className="w-full"
               initial={{ opacity: 0, y: 4 }}
               key="title"
               transition={{ type: "spring", stiffness: 500, damping: 30 }}
             >
               <EditableText
                 className="font-medium text-sm text-ui-fg-base"
+                onClick={handleNavigate}
                 onSave={handleSave}
-                value={file?.fileName ?? resource.title}
+                value={resource.title}
               />
             </motion.div>
           ) : (
             <motion.div
+              className="w-full"
               exit={{ opacity: 0, transition: { duration: 0.15 } }}
               key="shimmer"
             >
@@ -243,7 +335,7 @@ function FileRow({ resource, onUpdateTitle }: ResourceRowProps) {
           )}
         </AnimatePresence>
       </div>
-      <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+      <div className="relative z-20 flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         {fileUrl && (
           <a
             className="flex h-7 w-7 items-center justify-center rounded-md text-ui-fg-muted transition-colors hover:bg-ui-bg-base hover:text-ui-fg-base"

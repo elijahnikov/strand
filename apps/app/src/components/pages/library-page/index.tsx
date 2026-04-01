@@ -1,9 +1,10 @@
 import { useConvexMutation } from "@convex-dev/react-query";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { useCallback, useState } from "react";
+import { Suspense, useCallback, useState } from "react";
+import { useFileDropHandler } from "~/hooks/use-file-drop";
 import { usePasteHandler } from "~/hooks/use-paste-handler";
-import { ResourceList } from "./resource-list";
+import { ResourceList, ResourceListSkeleton } from "./resource-list";
 
 export function LibraryPageComponent({
   workspaceId,
@@ -15,7 +16,9 @@ export function LibraryPageComponent({
     api.resource.mutations.generateUploadUrl
   );
 
-  const [uploadingFiles, setUploadingFiles] = useState<string[]>([]);
+  const [uploadingFiles, setUploadingFiles] = useState<
+    { id: string; name: string }[]
+  >([]);
 
   const handleUrl = useCallback(
     (url: string) => {
@@ -45,7 +48,7 @@ export function LibraryPageComponent({
     async (files: File[]) => {
       for (const file of files) {
         const fileId = `${file.name}-${Date.now()}`;
-        setUploadingFiles((prev) => [...prev, fileId]);
+        setUploadingFiles((prev) => [...prev, { id: fileId, name: file.name }]);
 
         try {
           const uploadUrl = await generateUploadUrl({});
@@ -68,7 +71,7 @@ export function LibraryPageComponent({
             mimeType: file.type,
           });
         } finally {
-          setUploadingFiles((prev) => prev.filter((id) => id !== fileId));
+          setUploadingFiles((prev) => prev.filter((f) => f.id !== fileId));
         }
       }
     },
@@ -81,15 +84,16 @@ export function LibraryPageComponent({
     onFiles: handleFiles,
   });
 
+  useFileDropHandler(handleFiles);
+
   return (
     <div className="mx-auto w-2/3 px-6 pt-4 pb-4">
-      <ResourceList workspaceId={workspaceId} />
-      {uploadingFiles.length > 0 && (
-        <div className="fixed right-4 bottom-4 rounded-lg bg-ui-bg-field p-3 text-sm text-ui-fg-subtle shadow-lg">
-          Uploading {uploadingFiles.length} file
-          {uploadingFiles.length > 1 ? "s" : ""}...
-        </div>
-      )}
+      <Suspense fallback={<ResourceListSkeleton />}>
+        <ResourceList
+          uploadingFiles={uploadingFiles}
+          workspaceId={workspaceId}
+        />
+      </Suspense>
     </div>
   );
 }

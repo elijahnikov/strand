@@ -20,6 +20,7 @@ import { Route as WorkspaceWorkspaceWorkspaceIdIndexRouteImport } from './routes
 import { Route as WorkspaceWorkspaceWorkspaceIdSettingsRouteImport } from './routes/_workspace/workspace/$workspaceId/settings'
 import { Route as WorkspaceWorkspaceWorkspaceIdSearchRouteImport } from './routes/_workspace/workspace/$workspaceId/search'
 import { Route as WorkspaceWorkspaceWorkspaceIdLibraryRouteImport } from './routes/_workspace/workspace/$workspaceId/library'
+import { Route as WorkspaceWorkspaceWorkspaceIdResourceResourceIdRouteImport } from './routes/_workspace/workspace/$workspaceId/resource/$resourceId'
 
 const WorkspaceRoute = WorkspaceRouteImport.update({
   id: '/_workspace',
@@ -79,6 +80,12 @@ const WorkspaceWorkspaceWorkspaceIdLibraryRoute =
     path: '/library',
     getParentRoute: () => WorkspaceWorkspaceWorkspaceIdRouteRoute,
   } as any)
+const WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute =
+  WorkspaceWorkspaceWorkspaceIdResourceResourceIdRouteImport.update({
+    id: '/resource/$resourceId',
+    path: '/resource/$resourceId',
+    getParentRoute: () => WorkspaceWorkspaceWorkspaceIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/workspace/$workspaceId/search': typeof WorkspaceWorkspaceWorkspaceIdSearchRoute
   '/workspace/$workspaceId/settings': typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   '/workspace/$workspaceId/': typeof WorkspaceWorkspaceWorkspaceIdIndexRoute
+  '/workspace/$workspaceId/resource/$resourceId': typeof WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -100,6 +108,7 @@ export interface FileRoutesByTo {
   '/workspace/$workspaceId/search': typeof WorkspaceWorkspaceWorkspaceIdSearchRoute
   '/workspace/$workspaceId/settings': typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceWorkspaceIdIndexRoute
+  '/workspace/$workspaceId/resource/$resourceId': typeof WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -114,6 +123,7 @@ export interface FileRoutesById {
   '/_workspace/workspace/$workspaceId/search': typeof WorkspaceWorkspaceWorkspaceIdSearchRoute
   '/_workspace/workspace/$workspaceId/settings': typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   '/_workspace/workspace/$workspaceId/': typeof WorkspaceWorkspaceWorkspaceIdIndexRoute
+  '/_workspace/workspace/$workspaceId/resource/$resourceId': typeof WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/workspace/$workspaceId/search'
     | '/workspace/$workspaceId/settings'
     | '/workspace/$workspaceId/'
+    | '/workspace/$workspaceId/resource/$resourceId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/workspace/$workspaceId/search'
     | '/workspace/$workspaceId/settings'
     | '/workspace/$workspaceId'
+    | '/workspace/$workspaceId/resource/$resourceId'
   id:
     | '__root__'
     | '/'
@@ -150,6 +162,7 @@ export interface FileRouteTypes {
     | '/_workspace/workspace/$workspaceId/search'
     | '/_workspace/workspace/$workspaceId/settings'
     | '/_workspace/workspace/$workspaceId/'
+    | '/_workspace/workspace/$workspaceId/resource/$resourceId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -238,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkspaceWorkspaceWorkspaceIdLibraryRouteImport
       parentRoute: typeof WorkspaceWorkspaceWorkspaceIdRouteRoute
     }
+    '/_workspace/workspace/$workspaceId/resource/$resourceId': {
+      id: '/_workspace/workspace/$workspaceId/resource/$resourceId'
+      path: '/resource/$resourceId'
+      fullPath: '/workspace/$workspaceId/resource/$resourceId'
+      preLoaderRoute: typeof WorkspaceWorkspaceWorkspaceIdResourceResourceIdRouteImport
+      parentRoute: typeof WorkspaceWorkspaceWorkspaceIdRouteRoute
+    }
   }
 }
 
@@ -258,6 +278,7 @@ interface WorkspaceWorkspaceWorkspaceIdRouteRouteChildren {
   WorkspaceWorkspaceWorkspaceIdSearchRoute: typeof WorkspaceWorkspaceWorkspaceIdSearchRoute
   WorkspaceWorkspaceWorkspaceIdSettingsRoute: typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   WorkspaceWorkspaceWorkspaceIdIndexRoute: typeof WorkspaceWorkspaceWorkspaceIdIndexRoute
+  WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute: typeof WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute
 }
 
 const WorkspaceWorkspaceWorkspaceIdRouteRouteChildren: WorkspaceWorkspaceWorkspaceIdRouteRouteChildren =
@@ -270,6 +291,8 @@ const WorkspaceWorkspaceWorkspaceIdRouteRouteChildren: WorkspaceWorkspaceWorkspa
       WorkspaceWorkspaceWorkspaceIdSettingsRoute,
     WorkspaceWorkspaceWorkspaceIdIndexRoute:
       WorkspaceWorkspaceWorkspaceIdIndexRoute,
+    WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute:
+      WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute,
   }
 
 const WorkspaceWorkspaceWorkspaceIdRouteRouteWithChildren =

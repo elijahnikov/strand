@@ -81,6 +81,42 @@ function extractFavicon(html: string, baseUrl: string): string | undefined {
   }
 }
 
+async function resolveValidFavicon(
+  html: string,
+  baseUrl: string
+): Promise<string | undefined> {
+  const candidates: string[] = [];
+
+  const declared = extractFavicon(html, baseUrl);
+  if (declared) {
+    candidates.push(declared);
+  }
+
+  try {
+    candidates.push(new URL("/favicon.ico", baseUrl).href);
+  } catch {
+    // invalid baseUrl, skip
+  }
+
+  for (const url of candidates) {
+    try {
+      const res = await fetch(url, {
+        method: "HEAD",
+        redirect: "follow",
+        signal: AbortSignal.timeout(3000),
+      });
+      const contentType = res.headers.get("content-type") ?? "";
+      if (res.ok && !contentType.includes("text/html")) {
+        return url;
+      }
+    } catch {
+      // timeout or network error, try next
+    }
+  }
+
+  return undefined;
+}
+
 export const extractWebsiteMetadata = internalAction({
   args: {
     resourceId: v.id("resource"),
@@ -139,7 +175,7 @@ export const extractWebsiteMetadata = internalAction({
       const ogDescription = extractMetaContent(html, "og:description");
       const ogImage = extractMetaContent(html, "og:image");
       const siteName = extractMetaContent(html, "og:site_name");
-      const favicon = extractFavicon(html, websiteResource.url);
+      const favicon = await resolveValidFavicon(html, websiteResource.url);
 
       const embed = detectEmbed(websiteResource.url);
 

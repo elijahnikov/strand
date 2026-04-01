@@ -3,14 +3,17 @@ import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { Heading } from "@strand/ui/heading";
 import { Kbd } from "@strand/ui/kbd";
+import { Skeleton } from "@strand/ui/skeleton";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback } from "react";
-import { ResourceRow } from "./resource-card";
+import { ResourceRow, UploadingFileRow } from "./resource-row";
 
 export function ResourceList({
   workspaceId,
+  uploadingFiles,
 }: {
+  uploadingFiles: { id: string; name: string }[];
   workspaceId: Id<"workspace">;
 }) {
   const { data: resources } = useSuspenseQuery(
@@ -26,7 +29,7 @@ export function ResourceList({
     [updateTitle, workspaceId]
   );
 
-  if (resources.length === 0) {
+  if (resources.length === 0 && uploadingFiles.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <Heading className="font-medium text-sm text-ui-fg-subtle">
@@ -41,23 +44,51 @@ export function ResourceList({
 
   return (
     <div className="flex flex-col">
-      <AnimatePresence initial={false}>
-        {resources.map((resource) => (
+      <AnimatePresence mode="popLayout">
+        {uploadingFiles.map((file) => (
           <motion.div
-            animate={{ opacity: 1, height: "auto", y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, height: 0 }}
-            initial={{ opacity: 0, height: 0, y: -8 }}
-            key={resource._id}
+            initial={{ opacity: 0, y: 8 }}
+            key={file.id}
             layout
             transition={{ type: "spring", stiffness: 500, damping: 35 }}
+          >
+            <UploadingFileRow fileName={file.name} />
+          </motion.div>
+        ))}
+        {resources.map((resource, i) => (
+          <motion.div
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, height: 0 }}
+            initial={{ opacity: 0, y: 8 }}
+            key={resource._id}
+            layout
+            transition={{
+              type: "spring",
+              stiffness: 500,
+              damping: 35,
+              delay: i * 0.03,
+            }}
           >
             <ResourceRow
               onUpdateTitle={handleUpdateTitle}
               resource={resource}
+              workspaceId={workspaceId}
             />
           </motion.div>
         ))}
       </AnimatePresence>
+    </div>
+  );
+}
+
+export function ResourceListSkeleton({ count = 14 }: { count?: number }) {
+  return (
+    <div className="flex flex-col gap-y-2">
+      {Array.from({ length: count }).map((_, i) => (
+        <Skeleton className="h-11 w-full" key={i} />
+      ))}
     </div>
   );
 }
