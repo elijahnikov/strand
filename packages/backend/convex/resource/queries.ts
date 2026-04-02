@@ -17,20 +17,37 @@ export const get = workspaceQuery({
       .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
       .unique();
 
+    const createdBy = await ctx.db
+      .query("user")
+      .withIndex("by_id", (q) => q.eq("_id", resource.createdBy))
+      .unique();
+
     switch (resource.type) {
       case "website": {
         const website = await ctx.db
           .query("websiteResource")
           .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
           .unique();
-        return { ...resource, website, aiStatus: resourceAI?.status };
+        return {
+          ...resource,
+          website,
+          type: resource.type,
+          resourceAI,
+          createdBy,
+        };
       }
       case "note": {
         const note = await ctx.db
           .query("noteResource")
           .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
           .unique();
-        return { ...resource, note, aiStatus: resourceAI?.status };
+        return {
+          ...resource,
+          note,
+          type: resource.type,
+          resourceAI,
+          createdBy,
+        };
       }
       case "file": {
         const file = await ctx.db
@@ -41,10 +58,23 @@ export const get = workspaceQuery({
           file?.mimeType?.startsWith("image/") && file.storageId
             ? await ctx.storage.getUrl(file.storageId)
             : null;
-        return { ...resource, file, fileUrl, aiStatus: resourceAI?.status };
+        return {
+          ...resource,
+          file,
+          fileUrl,
+          type: resource.type,
+          resourceAI,
+          createdBy,
+        };
       }
       default:
-        return { ...resource, aiStatus: resourceAI?.status };
+        return {
+          ...resource,
+          type: resource.type,
+          aiStatus: resourceAI?.status,
+          resourceAI,
+          createdBy,
+        };
     }
   },
 });
@@ -151,7 +181,7 @@ export const listPinned = workspaceQuery({
   },
 });
 
-async function enrichResource(ctx: QueryCtx, resource: Doc<"resource">) {
+const enrichResource = async (ctx: QueryCtx, resource: Doc<"resource">) => {
   const resourceAI = await ctx.db
     .query("resourceAI")
     .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
@@ -186,4 +216,4 @@ async function enrichResource(ctx: QueryCtx, resource: Doc<"resource">) {
     default:
       return { ...resource, aiStatus: resourceAI?.status };
   }
-}
+};

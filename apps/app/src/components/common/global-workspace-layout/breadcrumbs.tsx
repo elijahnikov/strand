@@ -2,6 +2,7 @@ import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { Separator } from "@strand/ui/separator";
+import { Text } from "@strand/ui/text";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation, useParams } from "@tanstack/react-router";
 import { getFileLabel } from "~/lib/format";
@@ -56,9 +57,9 @@ export function Breadcrumbs() {
   return (
     <>
       <BreadcrumbSeparator />
-      <span className="txt-small font-medium text-ui-fg-base">
+      <Text className="txt-small font-medium text-ui-fg-base">
         {PAGE_LABELS[currentPage] ?? currentPage}
-      </span>
+      </Text>
     </>
   );
 }

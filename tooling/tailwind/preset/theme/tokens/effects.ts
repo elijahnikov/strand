@@ -32,6 +32,8 @@ export const effects = {
       "0px 0px 0px 1px rgba(244, 63, 94, 1), 0px 0px 0px 3px rgba(225, 29, 72, 0.25)",
     "--buttons-inverted":
       "0px -1px 0px 0px rgba(255, 255, 255, 0.12), 0px 0px 0px 1px rgba(255, 255, 255, 0.1), 0px 0px 0px 1px rgba(82, 82, 91, 1), 0px 0px 0px 0px rgba(0, 0, 0, 0.24), 0px 0px 0px 0px rgba(0, 0, 0, 0.24)",
+    "--borders-base-light":
+      "0px -1px 0px 0px rgba(255, 255, 255, 0.05), 0px 0px 0px 1px rgba(255, 255, 255, 0.05), 0px 0px 0px 1px rgba(28, 28, 32, 1)",
     "--borders-base":
       "0px -1px 0px 0px rgba(255, 255, 255, 0.06), 0px 0px 0px 1px rgba(255, 255, 255, 0.06), 0px 0px 0px 1px rgba(39, 39, 42, 1), 0px 0px 0px 0px rgba(0, 0, 0, 0.24), 0px 0px 0px 0px rgba(0, 0, 0, 0.24)",
     "--elevation-card-hover":
@@ -76,6 +78,8 @@ export const effects = {
       "0px 0px 2px 1px rgba(255, 255, 255, 1) inset, 0px 1px 0px 0px rgba(255, 255, 255, 1) inset, 0px 0px 0px 0.5px rgba(0, 0, 0, 0.02), 0px 5px 4px 0px rgba(0, 0, 0, 0.02), 0px 3px 3px 0px rgba(0, 0, 0, 0.04), 0px 1px 2px 0px rgba(0, 0, 0, 0.12), 0px 0px 1px 0px rgba(0, 0, 0, 0.08)",
     "--buttons-neutral":
       "0px 0.5px 1px 0px rgba(0, 0, 0, 0.12), 0px 0px 0px 1px rgba(0, 0, 0, 0.08)",
+    "--borders-base-light":
+      "0px 1px 1px 0px rgba(0, 0, 0, 0.06), 0px 0px 0px 1px rgba(0, 0, 0, 0.04)",
     "--borders-base":
       "0px 1px 1px 0px rgba(0, 0, 0, 0.12), 0px 0px 0px 1px rgba(0, 0, 0, 0.08)",
     "--elevation-card-rest":

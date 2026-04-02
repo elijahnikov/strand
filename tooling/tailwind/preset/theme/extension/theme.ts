@@ -340,6 +340,7 @@ export const theme = {
       "details-switch-handle": "var(--details-switch-handle)",
       "buttons-neutral": "var(--buttons-neutral)",
       "borders-base": "var(--borders-base)",
+      "borders-base-light": "var(--borders-base-light)",
       "elevation-card-rest": "var(--elevation-card-rest)",
       "buttons-neutral-focus": "var(--buttons-neutral-focus)",
       "details-switch-background-focus":

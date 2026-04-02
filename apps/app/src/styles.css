@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "@strand/tailwind-config/theme";
-@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=swap");
 
 @config "../tailwind.config.ts";
 
@@ -54,6 +53,14 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "IoskeleyMono";
+  src: url("/fonts/IoskeleyMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @utility container {
   padding-inline: 2rem;
   margin-inline: auto;
@@ -67,8 +74,8 @@
 
 @layer base {
   :root {
-    --font-commit-mono: "CommitMono";
-    --font-jetbrains-mono: "JetBrainsMono";
+    --font-berkeley-mono: "IoskeleyMono";
+    --font-open-runde-sans: "OpenRunde", sans-serif;
   }
   * {
     scrollbar-color: var(--input) transparent;

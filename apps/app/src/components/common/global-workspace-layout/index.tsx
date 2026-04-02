@@ -26,7 +26,7 @@ function DropZoneInset({ children }: { children: React.ReactNode }) {
   return (
     <SidebarInset
       className={cn(
-        "mt-auto transition-[background-color,box-shadow] duration-200",
+        "mt-auto shadow-borders-base-light transition-[background-color,box-shadow] duration-200",
         isDragging &&
           "z-40! bg-blue-50 ring-2 ring-blue-400 ring-inset dark:bg-blue-950/30 dark:ring-blue-500"
       )}

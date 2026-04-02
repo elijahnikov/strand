@@ -95,7 +95,7 @@ export function LibraryPageComponent({
   return (
     <div>
       <LibraryToolbar />
-      <div className="mx-auto w-2/3 px-6 pt-16 pb-4">
+      <div className="mx-auto w-2/3 px-6 pt-4 pb-4">
         <ResourceList
           uploadingFiles={uploadingFiles}
           workspaceId={workspaceId}

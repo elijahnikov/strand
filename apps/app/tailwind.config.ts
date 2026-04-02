@@ -10,7 +10,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["OpenRunde", ...defaultTheme.fontFamily.sans],
-        mono: ["Geist Mono", ...defaultTheme.fontFamily.mono],
+        mono: ["IoskeleyMono", ...defaultTheme.fontFamily.mono],
       },
     },
   },

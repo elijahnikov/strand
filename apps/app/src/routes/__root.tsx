@@ -113,7 +113,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           src="//unpkg.com/react-scan/dist/auto.global.js"
         />
       </head>
-      <body className="isolate min-h-screen bg-ui-bg-base font-sans text-ui-fg-base antialiased">
+      <body className="isolate min-h-screen bg-ui-bg-base font-sans! text-ui-fg-base antialiased">
         {children}
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />

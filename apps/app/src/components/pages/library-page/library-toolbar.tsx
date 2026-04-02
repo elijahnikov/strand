@@ -64,20 +64,20 @@ export function LibraryToolbar() {
     ORDER_OPTIONS.find((o) => o.value === order)?.label ?? "Newest";
 
   return (
-    <div className="fixed z-30 flex w-[calc(100%-4.1rem)] items-center gap-x-2 rounded-t-lg bg-ui-bg-base! p-2">
+    <div className="sticky top-0 z-30 flex w-full items-center gap-x-2 rounded-t-lg bg-ui-bg-base! p-2">
       <Input
-        className="w-48 rounded-full bg-ui-bg-base-hover shadow-none"
+        className="w-48 rounded-full bg-ui-bg-base-hover shadow-borders-base"
         onChange={(e) => setSearch(e.target.value || null)}
         placeholder="Search"
         type="search"
         value={search}
       />
-      <div className="ml-auto flex items-center gap-x-1">
+      <div className="ml-auto flex items-center gap-x-2">
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
               <Button
-                className="whitespace-nowrap rounded-full"
+                className="whitespace-nowrap rounded-full shadow-borders-base"
                 variant="secondary"
               />
             }
@@ -102,7 +102,7 @@ export function LibraryToolbar() {
           <DropdownMenuTrigger
             render={
               <Button
-                className="whitespace-nowrap rounded-full"
+                className="whitespace-nowrap rounded-full shadow-borders-base"
                 variant="secondary"
               />
             }
