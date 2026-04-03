@@ -31,13 +31,10 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
         </AnimatePresence>
         <Heading>{resource.title}</Heading>
       </div>
-      <div className="flex items-center gap-x-2">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <TypeBadge resource={resource} />
         {resource.type !== "note" && (
-          <Separator
-            className="relative -top-0.5 mt-1.5 mb-0.5"
-            orientation="vertical"
-          />
+          <Separator className="h-4" orientation="vertical" />
         )}
         <Badge
           className="px-1 font-mono shadow-borders-base"
@@ -45,10 +42,7 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
         >
           {format(new Date(resource._creationTime), "d MMM yyyy HH:mm")}
         </Badge>
-        <Separator
-          className="relative -top-0.5 mt-1.5 mb-0.5"
-          orientation="vertical"
-        />
+        <Separator className="h-4" orientation="vertical" />
         <Badge
           className="px-1 font-mono shadow-borders-base"
           variant="secondary"
@@ -78,7 +72,7 @@ function TypeBadge({ resource }: { resource: GetResourceData }) {
       }
       return (
         <a
-          className="max-w-[420px]"
+          className="flex max-w-[420px]"
           href={website.url}
           rel="noopener"
           target="_blank"

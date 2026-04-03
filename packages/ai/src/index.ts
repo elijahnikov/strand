@@ -1,4 +1,5 @@
 export { normalizeConceptName } from "./concepts";
+export { type EmbedContent, extractEmbedContent } from "./embed-extraction";
 export { generateEmbedding, generateEmbeddings } from "./embeddings";
 export {
   createEnricher,

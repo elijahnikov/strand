@@ -1,5 +1,6 @@
 "use node";
 
+import { extractEmbedContent } from "@strand/ai/embed-extraction";
 import { extractArticleContent } from "@strand/ai/extraction";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
@@ -171,15 +172,39 @@ export const extractWebsiteMetadata = internalAction({
 
       const html = await response.text();
 
-      const ogTitle = extractMetaContent(html, "og:title");
+      let ogTitle = extractMetaContent(html, "og:title");
       const ogDescription = extractMetaContent(html, "og:description");
-      const ogImage = extractMetaContent(html, "og:image");
+      let ogImage = extractMetaContent(html, "og:image");
       const siteName = extractMetaContent(html, "og:site_name");
       const favicon = await resolveValidFavicon(html, websiteResource.url);
 
       const embed = detectEmbed(websiteResource.url);
 
-      const article = extractArticleContent(html, websiteResource.url);
+      let articleContent: string | undefined;
+
+      if (embed) {
+        const embedContent = await extractEmbedContent(
+          embed.type,
+          embed.id,
+          html,
+          websiteResource.url
+        );
+        articleContent = embedContent?.textContent;
+
+        // Embed APIs (Innertube, syndication) return reliable metadata
+        // even when the HTML page doesn't (e.g. YouTube bot-detection)
+        if (embedContent) {
+          ogTitle ??= embedContent.title;
+          ogImage ??= embedContent.thumbnailUrl;
+        }
+      }
+
+      // Only use Readability for non-embed URLs — embed sites
+      // (Twitter, YouTube, etc.) return useless HTML to scrapers
+      if (!(articleContent || embed)) {
+        const article = extractArticleContent(html, websiteResource.url);
+        articleContent = article?.textContent;
+      }
 
       await ctx.runMutation(internal.resource.internals.updateWebsiteMetadata, {
         resourceId: args.resourceId,
@@ -191,7 +216,7 @@ export const extractWebsiteMetadata = internalAction({
         isEmbeddable: embed !== null,
         embedType: embed?.type,
         embedId: embed?.id,
-        articleContent: article?.textContent,
+        articleContent,
         metadataStatus: "completed",
       });
 
