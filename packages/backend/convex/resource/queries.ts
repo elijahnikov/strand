@@ -179,7 +179,6 @@ export const get = workspaceQuery({
       .withIndex("by_id", (q) => q.eq("_id", resource.createdBy))
       .unique();
 
-    // Fetch concepts, links, and tags
     const concepts = await getConceptsForResource(ctx, resource._id);
     const links = await getLinksForResource(ctx, resource._id);
     const tags = await getTagsForResource(ctx, resource._id);
@@ -261,7 +260,7 @@ export const getResourceLinks = workspaceQuery({
 
 export const listWorkspaceTags = workspaceQuery({
   args: {},
-  handler: async (ctx) => {
+  handler: (ctx) => {
     return ctx.db
       .query("tag")
       .withIndex("by_workspace", (q) => q.eq("workspaceId", ctx.workspace._id))

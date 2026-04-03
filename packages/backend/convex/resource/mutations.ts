@@ -211,15 +211,12 @@ export const generateUploadUrl = mutation({
   },
 });
 
-// --- Link management ---
-
 export const pinLink = workspaceMutation({
   args: {
     sourceResourceId: v.id("resource"),
     targetResourceId: v.id("resource"),
   },
   handler: async (ctx, args) => {
-    // Verify both resources belong to this workspace
     const source = await ctx.db.get(args.sourceResourceId);
     const target = await ctx.db.get(args.targetResourceId);
     if (
@@ -230,7 +227,6 @@ export const pinLink = workspaceMutation({
       throw new ConvexError("Resource not found");
     }
 
-    // Check if link already exists in either direction
     const existingForward = await ctx.db
       .query("resourceLink")
       .withIndex("by_source_target", (q) =>
@@ -284,8 +280,6 @@ export const unpinLink = workspaceMutation({
   },
 });
 
-// --- Tag management ---
-
 export const addTag = workspaceMutation({
   args: {
     resourceId: v.id("resource"),
@@ -302,7 +296,6 @@ export const addTag = workspaceMutation({
       throw new ConvexError("Tag name cannot be empty");
     }
 
-    // Find or create the tag
     let tag = await ctx.db
       .query("tag")
       .withIndex("by_workspace_name", (q) =>
@@ -322,7 +315,6 @@ export const addTag = workspaceMutation({
       throw new ConvexError("Failed to create tag");
     }
 
-    // Check if already tagged
     const existing = await ctx.db
       .query("resourceTag")
       .withIndex("by_resource", (q) => q.eq("resourceId", args.resourceId))

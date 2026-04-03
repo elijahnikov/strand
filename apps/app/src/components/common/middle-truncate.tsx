@@ -24,7 +24,6 @@ function middleTruncate(text: string, font: string, maxWidth: number): string {
     return ELLIPSIS;
   }
 
-  // Binary search for best start length
   let lo = 0;
   let hi = text.length;
   while (lo < hi) {
@@ -38,7 +37,6 @@ function middleTruncate(text: string, font: string, maxWidth: number): string {
   const startLen = lo;
   const startWidth = startLen > 0 ? measure(text.slice(0, startLen), font) : 0;
 
-  // Binary search for best end length
   const remainingBudget = available - startWidth;
   lo = 0;
   hi = text.length - startLen;

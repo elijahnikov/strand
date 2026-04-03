@@ -129,8 +129,6 @@ export function RelatedResources({
 
   const isProcessing = aiStatus === "pending" || aiStatus === "processing";
 
-  // Link generation runs as a separate action after AI enrichment completes,
-  // so keep showing skeletons briefly after completion while links generate.
   const [wasProcessing, setWasProcessing] = useState(isProcessing);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -141,7 +139,6 @@ export function RelatedResources({
         clearTimeout(timerRef.current);
       }
     } else if (wasProcessing && links.length === 0) {
-      // Give link generation time to complete
       timerRef.current = setTimeout(() => setWasProcessing(false), 10_000);
       return () => clearTimeout(timerRef.current);
     } else {

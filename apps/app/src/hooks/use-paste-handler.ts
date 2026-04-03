@@ -15,7 +15,6 @@ export function usePasteHandler(callbacks: PasteHandlerCallbacks) {
   const handlePaste = useCallback((event: ClipboardEvent) => {
     const target = event.target as HTMLElement;
 
-    // Skip if user is typing in an input
     if (
       target.tagName === "INPUT" ||
       target.tagName === "TEXTAREA" ||
@@ -38,13 +37,11 @@ export function usePasteHandler(callbacks: PasteHandlerCallbacks) {
       return;
     }
 
-    // Priority 1: Files
     if (clipboardData.files.length > 0) {
       callbacksRef.current.onFiles(Array.from(clipboardData.files));
       return;
     }
 
-    // Priority 2: Text (URL or note)
     const text = clipboardData.getData("text/plain").trim();
     if (!text) {
       return;
@@ -60,7 +57,6 @@ export function usePasteHandler(callbacks: PasteHandlerCallbacks) {
       // Not a URL
     }
 
-    // Priority 3: Plain text → note
     callbacksRef.current.onText(text);
   }, []);
 

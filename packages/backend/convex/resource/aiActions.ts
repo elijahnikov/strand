@@ -7,6 +7,7 @@ import { createEnricher, type EnricherInput } from "@strand/ai/enrichment";
 import { createOpenAIProvider } from "@strand/ai/providers";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
+import type { Id } from "../_generated/dataModel";
 import { internalAction } from "../_generated/server";
 
 const RETRY_BACKOFFS = [5000, 30_000, 120_000];
@@ -134,7 +135,6 @@ export const processResourceAI = internalAction({
         keyQuotes: result.keyQuotes,
       });
 
-      // --- Auto-tag creation ---
       if (result.tags.length > 0) {
         await ctx.runMutation(
           internal.resource.linkInternals.upsertTagsForResource,
@@ -146,15 +146,12 @@ export const processResourceAI = internalAction({
         );
       }
 
-      // --- Concept resolution ---
       if (result.concepts && result.concepts.length > 0) {
-        // Clean up old concepts for re-processing safety
         await ctx.runMutation(
           internal.resource.linkInternals.deleteResourceConcepts,
           { resourceId: args.resourceId }
         );
 
-        // Normalize and batch-embed all concept names
         const normalizedConcepts = result.concepts.map((c) => ({
           name: normalizeConceptName(c.name),
           displayName: c.name,
@@ -167,7 +164,6 @@ export const processResourceAI = internalAction({
           conceptNames
         );
 
-        // Resolve each concept: dedup via vector search or create new
         for (let i = 0; i < normalizedConcepts.length; i++) {
           const concept = normalizedConcepts[i];
           const conceptEmbedding = conceptEmbeddings[i];
@@ -176,7 +172,6 @@ export const processResourceAI = internalAction({
             continue;
           }
 
-          // Search for existing similar concept in workspace
           const similar = await ctx.vectorSearch("concept", "by_embedding", {
             vector: conceptEmbedding,
             limit: 1,
@@ -204,7 +199,7 @@ export const processResourceAI = internalAction({
             internal.resource.linkInternals.insertResourceConcept,
             {
               resourceId: args.resourceId,
-              conceptId,
+              conceptId: conceptId as Id<"concept">,
               workspaceId: content.workspaceId,
               importance: concept.importance,
             }
@@ -212,7 +207,6 @@ export const processResourceAI = internalAction({
         }
       }
 
-      // --- Embedding generation ---
       if (content.type === "file") {
         embeddingText = `${result.summary} ${result.tags.join(" ")}`;
       }
@@ -234,7 +228,6 @@ export const processResourceAI = internalAction({
         }
       );
 
-      // --- Schedule link generation ---
       await ctx.scheduler.runAfter(
         0,
         internal.resource.aiActions.generateResourceLinks,
@@ -271,7 +264,6 @@ export const processResourceAI = internalAction({
   },
 });
 
-// --- Weighted Jaccard similarity for concept overlap ---
 function computeWeightedJaccard(
   conceptsA: Array<{ name: string; importance: number }>,
   conceptsB: Array<{ name: string; importance: number }>
@@ -308,13 +300,11 @@ export const generateResourceLinks = internalAction({
     workspaceId: v.id("workspace"),
   },
   handler: async (ctx, args) => {
-    // Get this resource's concepts
     const sourceConcepts = await ctx.runQuery(
       internal.resource.linkInternals.getResourceConcepts,
       { resourceId: args.resourceId }
     );
 
-    // Get this resource's embedding
     const sourceEmbedding = await ctx.runQuery(
       internal.resource.aiInternals.getResourceEmbedding,
       { resourceId: args.resourceId }
@@ -324,7 +314,6 @@ export const generateResourceLinks = internalAction({
       return;
     }
 
-    // Find semantically similar resources via vector search
     const similar = await ctx.vectorSearch(
       "resourceEmbedding",
       "by_embedding",
@@ -335,8 +324,6 @@ export const generateResourceLinks = internalAction({
       }
     );
 
-    // Scoring thresholds (calibrated for text-embedding-3-small)
-    // Cosine similarities from this model are typically 0.2-0.6 for related content
     const HYBRID_THRESHOLD = 0.35;
     const SEMANTIC_ONLY_THRESHOLD = 0.4;
     const AUTO_THRESHOLD = 0.6;
@@ -344,7 +331,6 @@ export const generateResourceLinks = internalAction({
     const SEMANTIC_WEIGHT = 0.3;
 
     for (const candidate of similar) {
-      // Resolve embedding to resource
       const embeddingDoc = await ctx.runQuery(
         internal.resource.aiInternals.getEmbeddingById,
         { embeddingId: candidate._id }
@@ -353,12 +339,10 @@ export const generateResourceLinks = internalAction({
         continue;
       }
 
-      // Skip self
       if (embeddingDoc.resourceId === args.resourceId) {
         continue;
       }
 
-      // Verify resource still exists and isn't deleted
       const candidateResource = await ctx.runQuery(
         internal.resource.aiInternals.getResourceById,
         { resourceId: embeddingDoc.resourceId }
@@ -367,13 +351,11 @@ export const generateResourceLinks = internalAction({
         continue;
       }
 
-      // Get candidate's concepts
       const candidateConcepts = await ctx.runQuery(
         internal.resource.linkInternals.getResourceConcepts,
         { resourceId: embeddingDoc.resourceId }
       );
 
-      // Compute weighted Jaccard overlap
       const { overlap: conceptOverlap, sharedNames } = computeWeightedJaccard(
         sourceConcepts,
         candidateConcepts
@@ -381,7 +363,6 @@ export const generateResourceLinks = internalAction({
 
       const semanticSimilarity = candidate._score;
 
-      // Adaptive scoring: use hybrid when concepts overlap, semantic-only as fallback
       let combinedScore: number;
       let meetsThreshold: boolean;
 
@@ -391,7 +372,6 @@ export const generateResourceLinks = internalAction({
           SEMANTIC_WEIGHT * semanticSimilarity;
         meetsThreshold = combinedScore >= HYBRID_THRESHOLD;
       } else {
-        // No shared concepts — fall back to pure semantic similarity
         combinedScore = semanticSimilarity;
         meetsThreshold = combinedScore >= SEMANTIC_ONLY_THRESHOLD;
       }

@@ -1,8 +1,6 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "../_generated/server";
 
-// --- Concept mutations ---
-
 export const insertConcept = internalMutation({
   args: {
     workspaceId: v.id("workspace"),
@@ -51,8 +49,6 @@ export const deleteResourceConcepts = internalMutation({
   },
 });
 
-// --- Concept queries ---
-
 export const getResourceConcepts = internalQuery({
   args: {
     resourceId: v.id("resource"),
@@ -82,8 +78,6 @@ export const getResourceConcepts = internalQuery({
   },
 });
 
-// --- Link mutations ---
-
 export const upsertResourceLink = internalMutation({
   args: {
     workspaceId: v.id("workspace"),
@@ -102,7 +96,6 @@ export const upsertResourceLink = internalMutation({
     ),
   },
   handler: async (ctx, args) => {
-    // Check both directions for existing link
     const existingForward = await ctx.db
       .query("resourceLink")
       .withIndex("by_source_target", (q) =>
@@ -124,7 +117,6 @@ export const upsertResourceLink = internalMutation({
     const existing = existingForward ?? existingReverse;
 
     if (existing) {
-      // Don't overwrite pinned or rejected links
       if (existing.status === "pinned" || existing.status === "rejected") {
         return existing._id;
       }
@@ -154,8 +146,6 @@ export const upsertResourceLink = internalMutation({
   },
 });
 
-// --- Link queries ---
-
 export const getResourceLinks = internalQuery({
   args: {
     resourceId: v.id("resource"),
@@ -175,14 +165,11 @@ export const getResourceLinks = internalQuery({
       (link) => link.status !== "rejected"
     );
 
-    // Sort by score descending
     allLinks.sort((a, b) => b.score - a.score);
 
     return allLinks;
   },
 });
-
-// --- Tag mutations ---
 
 export const upsertTagsForResource = internalMutation({
   args: {
@@ -197,7 +184,6 @@ export const upsertTagsForResource = internalMutation({
         continue;
       }
 
-      // Find or create the tag
       let tag = await ctx.db
         .query("tag")
         .withIndex("by_workspace_name", (q) =>
@@ -217,7 +203,6 @@ export const upsertTagsForResource = internalMutation({
         continue;
       }
 
-      // Check if junction already exists
       const existing = await ctx.db
         .query("resourceTag")
         .withIndex("by_resource", (q) => q.eq("resourceId", args.resourceId))
