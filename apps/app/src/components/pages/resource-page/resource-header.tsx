@@ -4,20 +4,41 @@ import { Heading } from "@strand/ui/heading";
 import { Separator } from "@strand/ui/separator";
 import { format } from "date-fns";
 import { FileIcon } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { DotGridLoader } from "~/components/common/dot-grid-loader";
+import { MiddleTruncate } from "~/components/common/middle-truncate";
 import type { GetResourceData } from "~/lib/convex-types";
 
 export function ResourceHeader({ resource }: { resource: GetResourceData }) {
+  const aiStatus = resource.resourceAI?.status;
+  const isAiProcessing = aiStatus === "pending" || aiStatus === "processing";
+
   return (
     <div className="flex flex-col gap-y-1">
-      <div className="flex w-full items-center">
+      <div className="relative flex w-full items-center">
+        <AnimatePresence>
+          {isAiProcessing && (
+            <motion.div
+              animate={{ opacity: 1, scale: 1 }}
+              className="absolute -left-5"
+              exit={{ opacity: 0, scale: 0.5 }}
+              initial={{ opacity: 0, scale: 0.5 }}
+              transition={{ type: "spring", stiffness: 500, damping: 25 }}
+            >
+              <DotGridLoader />
+            </motion.div>
+          )}
+        </AnimatePresence>
         <Heading>{resource.title}</Heading>
       </div>
       <div className="flex items-center gap-x-2">
         <TypeBadge resource={resource} />
-        <Separator
-          className="relative -top-0.5 mt-1.5 mb-0.5"
-          orientation="vertical"
-        />
+        {resource.type !== "note" && (
+          <Separator
+            className="relative -top-0.5 mt-1.5 mb-0.5"
+            orientation="vertical"
+          />
+        )}
         <Badge
           className="px-1 font-mono shadow-borders-base"
           variant="secondary"
@@ -56,22 +77,29 @@ function TypeBadge({ resource }: { resource: GetResourceData }) {
         return null;
       }
       return (
-        <a href={website.url} rel="noopener" target="_blank">
+        <a
+          className="max-w-[420px]"
+          href={website.url}
+          rel="noopener"
+          target="_blank"
+        >
           <Badge
-            className="mt-1 px-1 font-mono text-ui-fg-subtle shadow-borders-base"
+            className="max-w-full px-1 font-mono text-ui-fg-subtle shadow-borders-base"
             variant="secondary"
           >
             <img
               alt={website.url}
-              className="rounded-[4px]"
+              className="shrink-0 rounded-[4px]"
               height={14}
               src={website.favicon}
               width={14}
             />
-            <span className="text-ui-fg-base">
+            <span className="shrink-0 font-medium text-ui-fg-base">
               {new URL(website.url).hostname}
             </span>
-            <span className="-ml-1">{new URL(website.url).pathname}</span>
+            <span className="-ml-1 min-w-0 flex-1">
+              <MiddleTruncate text={new URL(website.url).pathname} />
+            </span>
           </Badge>
         </a>
       );
@@ -83,11 +111,13 @@ function TypeBadge({ resource }: { resource: GetResourceData }) {
       }
       return (
         <Badge
-          className="mt-1 px-1 font-mono text-ui-fg-subtle shadow-borders-base"
+          className="max-w-[460px] px-1 font-mono text-ui-fg-subtle shadow-borders-base"
           variant="secondary"
         >
-          <FileIcon className="h-3.5 w-3.5" />
-          <span>{file.fileName}</span>
+          <FileIcon className="h-3.5 w-3.5 shrink-0" />
+          <span className="min-w-0 flex-1">
+            <MiddleTruncate text={file.fileName} />
+          </span>
         </Badge>
       );
     }

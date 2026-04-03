@@ -11,6 +11,7 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
+    "@chenglou/pretext": "^0.0.4",
     "@convex-dev/react-query": "catalog:convex",
     "@fontsource-variable/geist": "^5.2.8",
     "@fontsource-variable/geist-mono": "^5.2.7",
@@ -35,7 +36,8 @@
     "react-hook-form": "^7.72.0",
     "react-intersection-observer": "^10.0.3",
     "superjson": "2.2.3",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@strand/tailwind-config": "*",

@@ -1,5 +1,5 @@
 import type { createOpenAI } from "@ai-sdk/openai";
-import { embed } from "ai";
+import { embed, embedMany } from "ai";
 
 const EMBEDDING_MODEL = "text-embedding-3-small";
 const MAX_INPUT_LENGTH = 8000;
@@ -14,4 +14,16 @@ export async function generateEmbedding(
   });
 
   return { embedding, model: EMBEDDING_MODEL };
+}
+
+export async function generateEmbeddings(
+  provider: ReturnType<typeof createOpenAI>,
+  texts: string[]
+): Promise<{ embeddings: number[][]; model: string }> {
+  const { embeddings } = await embedMany({
+    model: provider.embedding(EMBEDDING_MODEL),
+    values: texts.map((t) => t.slice(0, MAX_INPUT_LENGTH)),
+  });
+
+  return { embeddings, model: EMBEDDING_MODEL };
 }

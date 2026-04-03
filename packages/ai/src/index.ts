@@ -1,4 +1,5 @@
-export { generateEmbedding } from "./embeddings";
+export { normalizeConceptName } from "./concepts";
+export { generateEmbedding, generateEmbeddings } from "./embeddings";
 export {
   createEnricher,
   type EnricherInput,
@@ -9,4 +10,8 @@ export {
 } from "./enrichment";
 export { type ArticleContent, extractArticleContent } from "./extraction";
 export { createOpenAIProvider } from "./providers";
-export { type EnrichmentResult, enrichmentSchema } from "./schemas";
+export {
+  type ConceptResult,
+  type EnrichmentResult,
+  enrichmentSchema,
+} from "./schemas";

@@ -13,7 +13,6 @@ export const protectedQuery = customQuery(
   customCtx(async (ctx) => {
     const authUser = await authComponent.getAuthUser(ctx);
     const user = await ctx.db.get(authUser.userId as Id<"user">);
-    console.log({ user, authUser });
     if (!user) {
       throw new ConvexError("User not found");
     }

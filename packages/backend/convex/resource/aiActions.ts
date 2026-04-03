@@ -1,7 +1,8 @@
 "use node";
 
 import { createHash } from "node:crypto";
-import { generateEmbedding } from "@strand/ai/embeddings";
+import { normalizeConceptName } from "@strand/ai/concepts";
+import { generateEmbedding, generateEmbeddings } from "@strand/ai/embeddings";
 import { createEnricher, type EnricherInput } from "@strand/ai/enrichment";
 import { createOpenAIProvider } from "@strand/ai/providers";
 import { v } from "convex/values";
@@ -133,6 +134,85 @@ export const processResourceAI = internalAction({
         keyQuotes: result.keyQuotes,
       });
 
+      // --- Auto-tag creation ---
+      if (result.tags.length > 0) {
+        await ctx.runMutation(
+          internal.resource.linkInternals.upsertTagsForResource,
+          {
+            resourceId: args.resourceId,
+            workspaceId: content.workspaceId,
+            tags: result.tags,
+          }
+        );
+      }
+
+      // --- Concept resolution ---
+      if (result.concepts && result.concepts.length > 0) {
+        // Clean up old concepts for re-processing safety
+        await ctx.runMutation(
+          internal.resource.linkInternals.deleteResourceConcepts,
+          { resourceId: args.resourceId }
+        );
+
+        // Normalize and batch-embed all concept names
+        const normalizedConcepts = result.concepts.map((c) => ({
+          name: normalizeConceptName(c.name),
+          displayName: c.name,
+          importance: c.importance,
+        }));
+
+        const conceptNames = normalizedConcepts.map((c) => c.name);
+        const { embeddings: conceptEmbeddings } = await generateEmbeddings(
+          provider,
+          conceptNames
+        );
+
+        // Resolve each concept: dedup via vector search or create new
+        for (let i = 0; i < normalizedConcepts.length; i++) {
+          const concept = normalizedConcepts[i];
+          const conceptEmbedding = conceptEmbeddings[i];
+
+          if (!(concept && conceptEmbedding)) {
+            continue;
+          }
+
+          // Search for existing similar concept in workspace
+          const similar = await ctx.vectorSearch("concept", "by_embedding", {
+            vector: conceptEmbedding,
+            limit: 1,
+            filter: (q) => q.eq("workspaceId", content.workspaceId),
+          });
+
+          const DEDUP_THRESHOLD = 0.92;
+          const topMatch = similar[0];
+          let conceptId: string | undefined;
+
+          if (topMatch && topMatch._score >= DEDUP_THRESHOLD) {
+            conceptId = topMatch._id;
+          } else {
+            conceptId = await ctx.runMutation(
+              internal.resource.linkInternals.insertConcept,
+              {
+                workspaceId: content.workspaceId,
+                name: concept.displayName,
+                embedding: conceptEmbedding,
+              }
+            );
+          }
+
+          await ctx.runMutation(
+            internal.resource.linkInternals.insertResourceConcept,
+            {
+              resourceId: args.resourceId,
+              conceptId,
+              workspaceId: content.workspaceId,
+              importance: concept.importance,
+            }
+          );
+        }
+      }
+
+      // --- Embedding generation ---
       if (content.type === "file") {
         embeddingText = `${result.summary} ${result.tags.join(" ")}`;
       }
@@ -151,6 +231,16 @@ export const processResourceAI = internalAction({
           embedding,
           model,
           inputHash,
+        }
+      );
+
+      // --- Schedule link generation ---
+      await ctx.scheduler.runAfter(
+        0,
+        internal.resource.aiActions.generateResourceLinks,
+        {
+          resourceId: args.resourceId,
+          workspaceId: content.workspaceId,
         }
       );
     } catch (error) {
@@ -174,6 +264,152 @@ export const processResourceAI = internalAction({
             resourceId: args.resourceId,
             status: "failed",
             error: errorMessage,
+          }
+        );
+      }
+    }
+  },
+});
+
+// --- Weighted Jaccard similarity for concept overlap ---
+function computeWeightedJaccard(
+  conceptsA: Array<{ name: string; importance: number }>,
+  conceptsB: Array<{ name: string; importance: number }>
+): { overlap: number; sharedNames: string[] } {
+  const mapA = new Map(
+    conceptsA.map((c) => [c.name.toLowerCase(), c.importance])
+  );
+  const mapB = new Map(
+    conceptsB.map((c) => [c.name.toLowerCase(), c.importance])
+  );
+
+  const allKeys = new Set([...mapA.keys(), ...mapB.keys()]);
+  let intersectionSum = 0;
+  let unionSum = 0;
+  const sharedNames: string[] = [];
+
+  for (const key of allKeys) {
+    const a = mapA.get(key) ?? 0;
+    const b = mapB.get(key) ?? 0;
+    intersectionSum += Math.min(a, b);
+    unionSum += Math.max(a, b);
+    if (a > 0 && b > 0) {
+      sharedNames.push(key);
+    }
+  }
+
+  const overlap = unionSum > 0 ? intersectionSum / unionSum : 0;
+  return { overlap, sharedNames };
+}
+
+export const generateResourceLinks = internalAction({
+  args: {
+    resourceId: v.id("resource"),
+    workspaceId: v.id("workspace"),
+  },
+  handler: async (ctx, args) => {
+    // Get this resource's concepts
+    const sourceConcepts = await ctx.runQuery(
+      internal.resource.linkInternals.getResourceConcepts,
+      { resourceId: args.resourceId }
+    );
+
+    // Get this resource's embedding
+    const sourceEmbedding = await ctx.runQuery(
+      internal.resource.aiInternals.getResourceEmbedding,
+      { resourceId: args.resourceId }
+    );
+
+    if (!sourceEmbedding) {
+      return;
+    }
+
+    // Find semantically similar resources via vector search
+    const similar = await ctx.vectorSearch(
+      "resourceEmbedding",
+      "by_embedding",
+      {
+        vector: sourceEmbedding.embedding,
+        limit: 20,
+        filter: (q) => q.eq("workspaceId", args.workspaceId),
+      }
+    );
+
+    // Scoring thresholds (calibrated for text-embedding-3-small)
+    // Cosine similarities from this model are typically 0.2-0.6 for related content
+    const HYBRID_THRESHOLD = 0.35;
+    const SEMANTIC_ONLY_THRESHOLD = 0.4;
+    const AUTO_THRESHOLD = 0.6;
+    const CONCEPT_WEIGHT = 0.7;
+    const SEMANTIC_WEIGHT = 0.3;
+
+    for (const candidate of similar) {
+      // Resolve embedding to resource
+      const embeddingDoc = await ctx.runQuery(
+        internal.resource.aiInternals.getEmbeddingById,
+        { embeddingId: candidate._id }
+      );
+      if (!embeddingDoc) {
+        continue;
+      }
+
+      // Skip self
+      if (embeddingDoc.resourceId === args.resourceId) {
+        continue;
+      }
+
+      // Verify resource still exists and isn't deleted
+      const candidateResource = await ctx.runQuery(
+        internal.resource.aiInternals.getResourceById,
+        { resourceId: embeddingDoc.resourceId }
+      );
+      if (!candidateResource) {
+        continue;
+      }
+
+      // Get candidate's concepts
+      const candidateConcepts = await ctx.runQuery(
+        internal.resource.linkInternals.getResourceConcepts,
+        { resourceId: embeddingDoc.resourceId }
+      );
+
+      // Compute weighted Jaccard overlap
+      const { overlap: conceptOverlap, sharedNames } = computeWeightedJaccard(
+        sourceConcepts,
+        candidateConcepts
+      );
+
+      const semanticSimilarity = candidate._score;
+
+      // Adaptive scoring: use hybrid when concepts overlap, semantic-only as fallback
+      let combinedScore: number;
+      let meetsThreshold: boolean;
+
+      if (conceptOverlap > 0) {
+        combinedScore =
+          CONCEPT_WEIGHT * conceptOverlap +
+          SEMANTIC_WEIGHT * semanticSimilarity;
+        meetsThreshold = combinedScore >= HYBRID_THRESHOLD;
+      } else {
+        // No shared concepts — fall back to pure semantic similarity
+        combinedScore = semanticSimilarity;
+        meetsThreshold = combinedScore >= SEMANTIC_ONLY_THRESHOLD;
+      }
+
+      if (meetsThreshold) {
+        const status = combinedScore > AUTO_THRESHOLD ? "auto" : "suggested";
+
+        await ctx.runMutation(
+          internal.resource.linkInternals.upsertResourceLink,
+          {
+            workspaceId: args.workspaceId,
+            sourceResourceId: args.resourceId,
+            targetResourceId: embeddingDoc.resourceId,
+            score: combinedScore,
+            conceptOverlap,
+            semanticSimilarity,
+            sharedConcepts: sharedNames,
+            status: status as "auto" | "suggested",
           }
         );
       }

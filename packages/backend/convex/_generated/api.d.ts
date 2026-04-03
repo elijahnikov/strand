@@ -15,6 +15,7 @@ import type * as resource_aiActions from "../resource/aiActions.js";
 import type * as resource_aiInternals from "../resource/aiInternals.js";
 import type * as resource_aiQueries from "../resource/aiQueries.js";
 import type * as resource_internals from "../resource/internals.js";
+import type * as resource_linkInternals from "../resource/linkInternals.js";
 import type * as resource_mutations from "../resource/mutations.js";
 import type * as resource_queries from "../resource/queries.js";
 import type * as shared from "../shared.js";
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   "resource/aiInternals": typeof resource_aiInternals;
   "resource/aiQueries": typeof resource_aiQueries;
   "resource/internals": typeof resource_internals;
+  "resource/linkInternals": typeof resource_linkInternals;
   "resource/mutations": typeof resource_mutations;
   "resource/queries": typeof resource_queries;
   shared: typeof shared;

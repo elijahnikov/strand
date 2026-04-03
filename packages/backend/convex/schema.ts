@@ -174,6 +174,55 @@ export default defineSchema({
     .index("by_user_workspace", ["userId", "workspaceId"])
     .index("by_user_resource", ["userId", "resourceId"]),
 
+  // CONCEPT (AI-extracted canonical concepts with embeddings for dedup)
+  concept: defineTable({
+    workspaceId: v.id("workspace"),
+    name: v.string(),
+    embedding: v.array(v.float64()),
+  })
+    .index("by_workspace", ["workspaceId"])
+    .index("by_workspace_name", ["workspaceId", "name"])
+    .vectorIndex("by_embedding", {
+      vectorField: "embedding",
+      dimensions: 1536,
+      filterFields: ["workspaceId"],
+    }),
+
+  // RESOURCE CONCEPT (junction: resource <-> concept with importance weight)
+  resourceConcept: defineTable({
+    resourceId: v.id("resource"),
+    conceptId: v.id("concept"),
+    workspaceId: v.id("workspace"),
+    importance: v.float64(),
+  })
+    .index("by_resource", ["resourceId"])
+    .index("by_concept", ["conceptId"])
+    .index("by_workspace", ["workspaceId"]),
+
+  // RESOURCE LINK (scored bidirectional links between resources)
+  resourceLink: defineTable({
+    workspaceId: v.id("workspace"),
+    sourceResourceId: v.id("resource"),
+    targetResourceId: v.id("resource"),
+    score: v.float64(),
+    conceptOverlap: v.float64(),
+    semanticSimilarity: v.float64(),
+    sharedConcepts: v.array(v.string()),
+    status: v.union(
+      v.literal("auto"),
+      v.literal("suggested"),
+      v.literal("accepted"),
+      v.literal("rejected"),
+      v.literal("pinned")
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_source", ["sourceResourceId", "status"])
+    .index("by_target", ["targetResourceId", "status"])
+    .index("by_workspace", ["workspaceId"])
+    .index("by_source_target", ["sourceResourceId", "targetResourceId"]),
+
   // TAG
   tag: defineTable({
     workspaceId: v.id("workspace"),

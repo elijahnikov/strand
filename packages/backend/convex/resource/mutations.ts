@@ -210,3 +210,153 @@ export const generateUploadUrl = mutation({
     return await ctx.storage.generateUploadUrl();
   },
 });
+
+// --- Link management ---
+
+export const pinLink = workspaceMutation({
+  args: {
+    sourceResourceId: v.id("resource"),
+    targetResourceId: v.id("resource"),
+  },
+  handler: async (ctx, args) => {
+    // Verify both resources belong to this workspace
+    const source = await ctx.db.get(args.sourceResourceId);
+    const target = await ctx.db.get(args.targetResourceId);
+    if (
+      !(source && target) ||
+      source.workspaceId !== ctx.workspace._id ||
+      target.workspaceId !== ctx.workspace._id
+    ) {
+      throw new ConvexError("Resource not found");
+    }
+
+    // Check if link already exists in either direction
+    const existingForward = await ctx.db
+      .query("resourceLink")
+      .withIndex("by_source_target", (q) =>
+        q
+          .eq("sourceResourceId", args.sourceResourceId)
+          .eq("targetResourceId", args.targetResourceId)
+      )
+      .unique();
+
+    const existingReverse = await ctx.db
+      .query("resourceLink")
+      .withIndex("by_source_target", (q) =>
+        q
+          .eq("sourceResourceId", args.targetResourceId)
+          .eq("targetResourceId", args.sourceResourceId)
+      )
+      .unique();
+
+    const existing = existingForward ?? existingReverse;
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        status: "pinned",
+        updatedAt: Date.now(),
+      });
+      return existing._id;
+    }
+
+    return await ctx.db.insert("resourceLink", {
+      workspaceId: ctx.workspace._id,
+      sourceResourceId: args.sourceResourceId,
+      targetResourceId: args.targetResourceId,
+      score: 1.0,
+      conceptOverlap: 0,
+      semanticSimilarity: 0,
+      sharedConcepts: [],
+      status: "pinned",
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const unpinLink = workspaceMutation({
+  args: { linkId: v.id("resourceLink") },
+  handler: async (ctx, args) => {
+    const link = await ctx.db.get(args.linkId);
+    if (!link || link.workspaceId !== ctx.workspace._id) {
+      throw new ConvexError("Link not found");
+    }
+    await ctx.db.delete(args.linkId);
+  },
+});
+
+// --- Tag management ---
+
+export const addTag = workspaceMutation({
+  args: {
+    resourceId: v.id("resource"),
+    name: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const resource = await ctx.db.get(args.resourceId);
+    if (!resource || resource.workspaceId !== ctx.workspace._id) {
+      throw new ConvexError("Resource not found");
+    }
+
+    const normalized = args.name.trim().toLowerCase();
+    if (normalized.length === 0) {
+      throw new ConvexError("Tag name cannot be empty");
+    }
+
+    // Find or create the tag
+    let tag = await ctx.db
+      .query("tag")
+      .withIndex("by_workspace_name", (q) =>
+        q.eq("workspaceId", ctx.workspace._id).eq("name", normalized)
+      )
+      .unique();
+
+    if (!tag) {
+      const tagId = await ctx.db.insert("tag", {
+        workspaceId: ctx.workspace._id,
+        name: normalized,
+      });
+      tag = await ctx.db.get(tagId);
+    }
+
+    if (!tag) {
+      throw new ConvexError("Failed to create tag");
+    }
+
+    // Check if already tagged
+    const existing = await ctx.db
+      .query("resourceTag")
+      .withIndex("by_resource", (q) => q.eq("resourceId", args.resourceId))
+      .filter((q) => q.eq(q.field("tagId"), tag._id))
+      .unique();
+
+    if (existing) {
+      return tag._id;
+    }
+
+    await ctx.db.insert("resourceTag", {
+      resourceId: args.resourceId,
+      tagId: tag._id,
+      workspaceId: ctx.workspace._id,
+    });
+
+    return tag._id;
+  },
+});
+
+export const removeTag = workspaceMutation({
+  args: {
+    resourceId: v.id("resource"),
+    tagId: v.id("tag"),
+  },
+  handler: async (ctx, args) => {
+    const junction = await ctx.db
+      .query("resourceTag")
+      .withIndex("by_resource", (q) => q.eq("resourceId", args.resourceId))
+      .filter((q) => q.eq(q.field("tagId"), args.tagId))
+      .unique();
+
+    if (junction) {
+      await ctx.db.delete(junction._id);
+    }
+  },
+});

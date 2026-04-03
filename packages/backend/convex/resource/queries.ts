@@ -1,8 +1,165 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
-import type { Doc } from "../_generated/dataModel";
+import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 import { workspaceQuery } from "../utils";
+
+async function getTagsForResource(ctx: QueryCtx, resourceId: Id<"resource">) {
+  const resourceTags = await ctx.db
+    .query("resourceTag")
+    .withIndex("by_resource", (q) => q.eq("resourceId", resourceId))
+    .collect();
+
+  const results: Array<{ _id: Id<"tag">; name: string; color?: string }> = [];
+  for (const rt of resourceTags) {
+    const tag = await ctx.db.get(rt.tagId);
+    if (tag) {
+      results.push({ _id: tag._id, name: tag.name, color: tag.color });
+    }
+  }
+  return results;
+}
+
+async function getResourcePreview(ctx: QueryCtx, resource: Doc<"resource">) {
+  const preview: {
+    ogImage?: string | null;
+    favicon?: string | null;
+    domain?: string | null;
+    fileUrl?: string | null;
+    mimeType?: string | null;
+    fileName?: string | null;
+    plainTextSnippet?: string | null;
+  } = {};
+
+  switch (resource.type) {
+    case "website": {
+      const website = await ctx.db
+        .query("websiteResource")
+        .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
+        .unique();
+      if (website) {
+        preview.ogImage = website.ogImage;
+        preview.favicon = website.favicon;
+        preview.domain = website.domain;
+      }
+      break;
+    }
+    case "file": {
+      const file = await ctx.db
+        .query("fileResource")
+        .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
+        .unique();
+      if (file) {
+        preview.mimeType = file.mimeType;
+        preview.fileName = file.fileName;
+        if (file.mimeType?.startsWith("image/") && file.storageId) {
+          preview.fileUrl = await ctx.storage.getUrl(file.storageId);
+        }
+      }
+      break;
+    }
+    case "note": {
+      const note = await ctx.db
+        .query("noteResource")
+        .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
+        .unique();
+      if (note?.plainTextContent) {
+        preview.plainTextSnippet = note.plainTextContent.slice(0, 120);
+      }
+      break;
+    }
+    default:
+      break;
+  }
+
+  return preview;
+}
+
+async function getConceptsForResource(
+  ctx: QueryCtx,
+  resourceId: Id<"resource">
+) {
+  const resourceConcepts = await ctx.db
+    .query("resourceConcept")
+    .withIndex("by_resource", (q) => q.eq("resourceId", resourceId))
+    .collect();
+
+  const results: Array<{ name: string; importance: number }> = [];
+  for (const rc of resourceConcepts) {
+    const concept = await ctx.db.get(rc.conceptId);
+    if (concept) {
+      results.push({ name: concept.name, importance: rc.importance });
+    }
+  }
+  return results;
+}
+
+async function getLinksForResource(ctx: QueryCtx, resourceId: Id<"resource">) {
+  const asSource = await ctx.db
+    .query("resourceLink")
+    .withIndex("by_source", (q) => q.eq("sourceResourceId", resourceId))
+    .collect();
+
+  const asTarget = await ctx.db
+    .query("resourceLink")
+    .withIndex("by_target", (q) => q.eq("targetResourceId", resourceId))
+    .collect();
+
+  const allLinks = [...asSource, ...asTarget].filter(
+    (link) => link.status !== "rejected"
+  );
+
+  allLinks.sort((a, b) => b.score - a.score);
+
+  const results: Array<{
+    _id: Id<"resourceLink">;
+    resource: {
+      _id: Id<"resource">;
+      title: string;
+      type: string;
+      preview: {
+        ogImage?: string | null;
+        favicon?: string | null;
+        domain?: string | null;
+        fileUrl?: string | null;
+        mimeType?: string | null;
+        fileName?: string | null;
+        plainTextSnippet?: string | null;
+      };
+    };
+    score: number;
+    sharedConcepts: string[];
+    status: string;
+  }> = [];
+  for (const link of allLinks.slice(0, 10)) {
+    const linkedResourceId =
+      link.sourceResourceId === resourceId
+        ? link.targetResourceId
+        : link.sourceResourceId;
+
+    const linkedResource = await ctx.db.get(linkedResourceId);
+    if (!linkedResource || linkedResource.deletedAt) {
+      continue;
+    }
+
+    const preview = await getResourcePreview(ctx, linkedResource);
+
+    results.push({
+      _id: link._id,
+      resource: {
+        _id: linkedResource._id,
+        title: linkedResource.title,
+        type: linkedResource.type,
+        preview,
+      },
+      score: link.score,
+      sharedConcepts: link.sharedConcepts,
+      status: link.status,
+    });
+  }
+
+  return results;
+}
 
 export const get = workspaceQuery({
   args: { resourceId: v.id("resource") },
@@ -22,6 +179,11 @@ export const get = workspaceQuery({
       .withIndex("by_id", (q) => q.eq("_id", resource.createdBy))
       .unique();
 
+    // Fetch concepts, links, and tags
+    const concepts = await getConceptsForResource(ctx, resource._id);
+    const links = await getLinksForResource(ctx, resource._id);
+    const tags = await getTagsForResource(ctx, resource._id);
+
     switch (resource.type) {
       case "website": {
         const website = await ctx.db
@@ -34,6 +196,9 @@ export const get = workspaceQuery({
           type: resource.type,
           resourceAI,
           createdBy,
+          concepts,
+          links,
+          tags,
         };
       }
       case "note": {
@@ -47,6 +212,9 @@ export const get = workspaceQuery({
           type: resource.type,
           resourceAI,
           createdBy,
+          concepts,
+          links,
+          tags,
         };
       }
       case "file": {
@@ -54,10 +222,9 @@ export const get = workspaceQuery({
           .query("fileResource")
           .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
           .unique();
-        const fileUrl =
-          file?.mimeType?.startsWith("image/") && file.storageId
-            ? await ctx.storage.getUrl(file.storageId)
-            : null;
+        const fileUrl = file?.storageId
+          ? await ctx.storage.getUrl(file.storageId)
+          : null;
         return {
           ...resource,
           file,
@@ -65,6 +232,9 @@ export const get = workspaceQuery({
           type: resource.type,
           resourceAI,
           createdBy,
+          concepts,
+          links,
+          tags,
         };
       }
       default:
@@ -74,8 +244,28 @@ export const get = workspaceQuery({
           aiStatus: resourceAI?.status,
           resourceAI,
           createdBy,
+          concepts,
+          links,
+          tags,
         };
     }
+  },
+});
+
+export const getResourceLinks = workspaceQuery({
+  args: { resourceId: v.id("resource") },
+  handler: (ctx, args) => {
+    return getLinksForResource(ctx, args.resourceId);
+  },
+});
+
+export const listWorkspaceTags = workspaceQuery({
+  args: {},
+  handler: async (ctx) => {
+    return ctx.db
+      .query("tag")
+      .withIndex("by_workspace", (q) => q.eq("workspaceId", ctx.workspace._id))
+      .collect();
   },
 });
 
