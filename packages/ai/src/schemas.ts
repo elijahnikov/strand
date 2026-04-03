@@ -1,7 +1,13 @@
 import { jsonSchema } from "ai";
 
+export interface ConceptResult {
+  importance: number;
+  name: string;
+}
+
 export interface EnrichmentResult {
   category: string;
+  concepts: ConceptResult[];
   extractedEntities: string[];
   keyQuotes: string[];
   language: string;
@@ -49,6 +55,28 @@ export const enrichmentSchema = jsonSchema<EnrichmentResult>({
       maxItems: 5,
       description: "Notable quotes or key sentences from the content",
     },
+    concepts: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          name: {
+            type: "string",
+            description:
+              "A key concept, topic, or theme. Use canonical names (e.g. 'React' not 'ReactJS')",
+          },
+          importance: {
+            type: "number",
+            description: "Importance weight 0.0 to 1.0",
+          },
+        },
+        required: ["name", "importance"],
+      },
+      minItems: 3,
+      maxItems: 10,
+      description:
+        "3-10 key concepts/topics extracted from the content, with importance weights",
+    },
   },
   required: [
     "summary",
@@ -58,5 +86,6 @@ export const enrichmentSchema = jsonSchema<EnrichmentResult>({
     "language",
     "category",
     "keyQuotes",
+    "concepts",
   ],
 });

@@ -54,7 +54,6 @@ export const updateWebsiteMetadata = internalMutation({
       metadataError: args.metadataError,
     });
 
-    // Update resource title if we got an OG title
     if (args.ogTitle) {
       await ctx.db.patch(args.resourceId, {
         title: args.ogTitle,
