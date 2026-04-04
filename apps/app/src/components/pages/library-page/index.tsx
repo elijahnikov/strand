@@ -51,34 +51,43 @@ export function LibraryPageComponent({
 
   const handleFiles = useCallback(
     async (files: File[]) => {
-      for (const file of files) {
-        const fileId = `${file.name}-${Date.now()}`;
-        setUploadingFiles((prev) => [...prev, { id: fileId, name: file.name }]);
+      // Add all uploading indicators at once
+      const entries = files.map((file, i) => ({
+        id: `${file.name}-${Date.now()}-${i}`,
+        name: file.name,
+      }));
+      setUploadingFiles((prev) => [...entries, ...prev]);
 
-        try {
-          const uploadUrl = await generateUploadUrl({});
-          const response = await fetch(uploadUrl as string, {
-            method: "POST",
-            headers: { "Content-Type": file.type },
-            body: file,
-          });
-          const { storageId } = (await response.json()) as {
-            storageId: Id<"_storage">;
-          };
+      // Upload all files in parallel
+      await Promise.all(
+        files.map(async (file, i) => {
+          try {
+            const uploadUrl = await generateUploadUrl({});
+            const response = await fetch(uploadUrl as string, {
+              method: "POST",
+              headers: { "Content-Type": file.type },
+              body: file,
+            });
+            const { storageId } = (await response.json()) as {
+              storageId: Id<"_storage">;
+            };
 
-          createResource({
-            workspaceId,
-            type: "file",
-            title: file.name,
-            storageId,
-            fileName: file.name,
-            fileSize: file.size,
-            mimeType: file.type,
-          });
-        } catch {
-          setUploadingFiles((prev) => prev.filter((f) => f.id !== fileId));
-        }
-      }
+            createResource({
+              workspaceId,
+              type: "file",
+              title: file.name,
+              storageId,
+              fileName: file.name,
+              fileSize: file.size,
+              mimeType: file.type,
+            });
+          } catch {
+            setUploadingFiles((prev) =>
+              prev.filter((f) => f.id !== entries[i].id)
+            );
+          }
+        })
+      );
     },
     [createResource, generateUploadUrl, workspaceId]
   );
