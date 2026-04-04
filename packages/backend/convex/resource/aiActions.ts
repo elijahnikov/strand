@@ -144,6 +144,32 @@ export const processResourceAI = internalAction({
             tags: result.tags,
           }
         );
+
+        const normalizedTags = result.tags
+          .map((t) => t.trim().toLowerCase())
+          .filter((t) => t.length > 0);
+
+        if (normalizedTags.length > 0) {
+          const { embeddings: tagEmbeddings } = await generateEmbeddings(
+            provider,
+            normalizedTags
+          );
+
+          for (let i = 0; i < normalizedTags.length; i++) {
+            const tagName = normalizedTags[i];
+            const tagEmbedding = tagEmbeddings[i];
+            if (tagName && tagEmbedding) {
+              await ctx.runMutation(
+                internal.resource.linkInternals.updateTagEmbedding,
+                {
+                  workspaceId: content.workspaceId,
+                  name: tagName,
+                  embedding: tagEmbedding,
+                }
+              );
+            }
+          }
+        }
       }
 
       if (result.concepts && result.concepts.length > 0) {
@@ -326,7 +352,6 @@ export const generateResourceLinks = internalAction({
 
     const HYBRID_THRESHOLD = 0.35;
     const SEMANTIC_ONLY_THRESHOLD = 0.4;
-    const AUTO_THRESHOLD = 0.6;
     const CONCEPT_WEIGHT = 0.7;
     const SEMANTIC_WEIGHT = 0.3;
 
@@ -377,8 +402,6 @@ export const generateResourceLinks = internalAction({
       }
 
       if (meetsThreshold) {
-        const status = combinedScore > AUTO_THRESHOLD ? "auto" : "suggested";
-
         await ctx.runMutation(
           internal.resource.linkInternals.upsertResourceLink,
           {
@@ -389,10 +412,32 @@ export const generateResourceLinks = internalAction({
             conceptOverlap,
             semanticSimilarity,
             sharedConcepts: sharedNames,
-            status: status as "auto" | "suggested",
+            status: "auto",
           }
         );
       }
     }
+  },
+});
+
+export const generateTagEmbedding = internalAction({
+  args: {
+    workspaceId: v.id("workspace"),
+    tagName: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return;
+    }
+
+    const provider = createOpenAIProvider(apiKey);
+    const { embedding } = await generateEmbedding(provider, args.tagName);
+
+    await ctx.runMutation(internal.resource.linkInternals.updateTagEmbedding, {
+      workspaceId: args.workspaceId,
+      name: args.tagName,
+      embedding,
+    });
   },
 });

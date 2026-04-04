@@ -87,13 +87,7 @@ export const upsertResourceLink = internalMutation({
     conceptOverlap: v.float64(),
     semanticSimilarity: v.float64(),
     sharedConcepts: v.array(v.string()),
-    status: v.union(
-      v.literal("auto"),
-      v.literal("suggested"),
-      v.literal("accepted"),
-      v.literal("rejected"),
-      v.literal("pinned")
-    ),
+    status: v.union(v.literal("auto"), v.literal("pinned")),
   },
   handler: async (ctx, args) => {
     const existingForward = await ctx.db
@@ -117,7 +111,7 @@ export const upsertResourceLink = internalMutation({
     const existing = existingForward ?? existingReverse;
 
     if (existing) {
-      if (existing.status === "pinned" || existing.status === "rejected") {
+      if (existing.status === "pinned") {
         return existing._id;
       }
       await ctx.db.patch(existing._id, {
@@ -161,9 +155,7 @@ export const getResourceLinks = internalQuery({
       .withIndex("by_target", (q) => q.eq("targetResourceId", args.resourceId))
       .collect();
 
-    const allLinks = [...asSource, ...asTarget].filter(
-      (link) => link.status !== "rejected"
-    );
+    const allLinks = [...asSource, ...asTarget];
 
     allLinks.sort((a, b) => b.score - a.score);
 
@@ -217,6 +209,47 @@ export const upsertTagsForResource = internalMutation({
         });
       }
     }
+  },
+});
+
+export const updateTagEmbedding = internalMutation({
+  args: {
+    workspaceId: v.id("workspace"),
+    name: v.string(),
+    embedding: v.array(v.float64()),
+  },
+  handler: async (ctx, args) => {
+    const tag = await ctx.db
+      .query("tag")
+      .withIndex("by_workspace_name", (q) =>
+        q.eq("workspaceId", args.workspaceId).eq("name", args.name)
+      )
+      .unique();
+    if (tag && !tag.embedding) {
+      await ctx.db.patch(tag._id, { embedding: args.embedding });
+    }
+  },
+});
+
+export const migrateResourceLinkStatuses = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const allLinks = await ctx.db.query("resourceLink").collect();
+    let migrated = 0;
+    let deleted = 0;
+
+    for (const link of allLinks) {
+      const status = link.status as string;
+      if (status === "suggested" || status === "accepted") {
+        await ctx.db.patch(link._id, { status: "auto" });
+        migrated++;
+      } else if (status === "rejected") {
+        await ctx.db.delete(link._id);
+        deleted++;
+      }
+    }
+
+    return { migrated, deleted };
   },
 });
 

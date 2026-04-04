@@ -1,4 +1,9 @@
-import { RiBookmarkFill, RiHome3Fill, RiSearch2Fill } from "@remixicon/react";
+import {
+  RiBookmarkFill,
+  RiHashtag,
+  RiHome3Fill,
+  RiSearch2Fill,
+} from "@remixicon/react";
 import { SidebarContent } from "@strand/ui/sidebar";
 import { TooltipProvider } from "@strand/ui/tooltip";
 import { useLocation, useParams } from "@tanstack/react-router";
@@ -36,6 +41,14 @@ export default function WorkspaceSidebarContent() {
         title: "Search",
         url: `/workspace/${params.workspaceId}/search`,
         isActive: pathname === `${workspacePath}/search`,
+      },
+      {
+        icon: RiHashtag,
+        title: "Tags",
+        url: `/workspace/${params.workspaceId}/tags`,
+        isActive:
+          pathname === `${workspacePath}/tags` ||
+          pathname.includes(`${workspacePath}/tags`),
       },
     ];
   }, [pathname, params?.workspaceId]);

@@ -75,25 +75,6 @@ async function getResourcePreview(ctx: QueryCtx, resource: Doc<"resource">) {
   return preview;
 }
 
-async function getConceptsForResource(
-  ctx: QueryCtx,
-  resourceId: Id<"resource">
-) {
-  const resourceConcepts = await ctx.db
-    .query("resourceConcept")
-    .withIndex("by_resource", (q) => q.eq("resourceId", resourceId))
-    .collect();
-
-  const results: Array<{ name: string; importance: number }> = [];
-  for (const rc of resourceConcepts) {
-    const concept = await ctx.db.get(rc.conceptId);
-    if (concept) {
-      results.push({ name: concept.name, importance: rc.importance });
-    }
-  }
-  return results;
-}
-
 async function getLinksForResource(ctx: QueryCtx, resourceId: Id<"resource">) {
   const asSource = await ctx.db
     .query("resourceLink")
@@ -105,9 +86,7 @@ async function getLinksForResource(ctx: QueryCtx, resourceId: Id<"resource">) {
     .withIndex("by_target", (q) => q.eq("targetResourceId", resourceId))
     .collect();
 
-  const allLinks = [...asSource, ...asTarget].filter(
-    (link) => link.status !== "rejected"
-  );
+  const allLinks = [...asSource, ...asTarget];
 
   allLinks.sort((a, b) => b.score - a.score);
 
@@ -179,7 +158,6 @@ export const get = workspaceQuery({
       .withIndex("by_id", (q) => q.eq("_id", resource.createdBy))
       .unique();
 
-    const concepts = await getConceptsForResource(ctx, resource._id);
     const links = await getLinksForResource(ctx, resource._id);
     const tags = await getTagsForResource(ctx, resource._id);
 
@@ -195,7 +173,7 @@ export const get = workspaceQuery({
           type: resource.type,
           resourceAI,
           createdBy,
-          concepts,
+
           links,
           tags,
         };
@@ -211,7 +189,7 @@ export const get = workspaceQuery({
           type: resource.type,
           resourceAI,
           createdBy,
-          concepts,
+
           links,
           tags,
         };
@@ -231,7 +209,7 @@ export const get = workspaceQuery({
           type: resource.type,
           resourceAI,
           createdBy,
-          concepts,
+
           links,
           tags,
         };
@@ -243,7 +221,7 @@ export const get = workspaceQuery({
           aiStatus: resourceAI?.status,
           resourceAI,
           createdBy,
-          concepts,
+
           links,
           tags,
         };
@@ -255,6 +233,57 @@ export const getResourceLinks = workspaceQuery({
   args: { resourceId: v.id("resource") },
   handler: (ctx, args) => {
     return getLinksForResource(ctx, args.resourceId);
+  },
+});
+
+export const getTag = workspaceQuery({
+  args: { tagName: v.string() },
+  handler: async (ctx, args) => {
+    const tag = await ctx.db
+      .query("tag")
+      .withIndex("by_workspace_name", (q) =>
+        q.eq("workspaceId", ctx.workspace._id).eq("name", args.tagName)
+      )
+      .unique();
+    if (!tag) {
+      return null;
+    }
+    return { _id: tag._id, name: tag.name, color: tag.color };
+  },
+});
+
+export const listByTag = workspaceQuery({
+  args: { tagName: v.string() },
+  handler: async (ctx, args) => {
+    const tag = await ctx.db
+      .query("tag")
+      .withIndex("by_workspace_name", (q) =>
+        q.eq("workspaceId", ctx.workspace._id).eq("name", args.tagName)
+      )
+      .unique();
+
+    if (!tag) {
+      return [];
+    }
+
+    const resourceTags = await ctx.db
+      .query("resourceTag")
+      .withIndex("by_workspace_tag", (q) =>
+        q.eq("workspaceId", ctx.workspace._id).eq("tagId", tag._id)
+      )
+      .collect();
+
+    const resources = await Promise.all(
+      resourceTags.map(async (rt) => {
+        const resource = await ctx.db.get(rt.resourceId);
+        if (!resource || resource.deletedAt) {
+          return null;
+        }
+        return enrichResource(ctx, resource);
+      })
+    );
+
+    return resources.filter((r) => r !== null);
   },
 });
 

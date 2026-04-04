@@ -52,13 +52,16 @@ function FileImage({ alt, src }: { alt: string; src: string }) {
               />
             </div>
           </Card>
-          {/* Hidden img to trigger load/error */}
+
+          {/** biome-ignore lint/a11y/noNoninteractiveElementInteractions: <> */}
           <img
             alt={alt}
             className="hidden"
+            height={10}
             onError={() => setError(true)}
             onLoad={() => setLoaded(true)}
             src={src}
+            width={10}
           />
         </motion.div>
       )}
