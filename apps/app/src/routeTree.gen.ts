@@ -20,7 +20,7 @@ import { Route as WorkspaceWorkspaceWorkspaceIdIndexRouteImport } from './routes
 import { Route as WorkspaceWorkspaceWorkspaceIdSettingsRouteImport } from './routes/_workspace/workspace/$workspaceId/settings'
 import { Route as WorkspaceWorkspaceWorkspaceIdSearchRouteImport } from './routes/_workspace/workspace/$workspaceId/search'
 import { Route as WorkspaceWorkspaceWorkspaceIdLibraryRouteImport } from './routes/_workspace/workspace/$workspaceId/library'
-import { Route as WorkspaceWorkspaceWorkspaceIdTagsTagIdRouteImport } from './routes/_workspace/workspace/$workspaceId/tags/$tagId'
+import { Route as WorkspaceWorkspaceWorkspaceIdTagsTagNameRouteImport } from './routes/_workspace/workspace/$workspaceId/tags/$tagName'
 import { Route as WorkspaceWorkspaceWorkspaceIdResourceResourceIdRouteImport } from './routes/_workspace/workspace/$workspaceId/resource/$resourceId'
 
 const WorkspaceRoute = WorkspaceRouteImport.update({
@@ -81,10 +81,10 @@ const WorkspaceWorkspaceWorkspaceIdLibraryRoute =
     path: '/library',
     getParentRoute: () => WorkspaceWorkspaceWorkspaceIdRouteRoute,
   } as any)
-const WorkspaceWorkspaceWorkspaceIdTagsTagIdRoute =
-  WorkspaceWorkspaceWorkspaceIdTagsTagIdRouteImport.update({
-    id: '/tags/$tagId',
-    path: '/tags/$tagId',
+const WorkspaceWorkspaceWorkspaceIdTagsTagNameRoute =
+  WorkspaceWorkspaceWorkspaceIdTagsTagNameRouteImport.update({
+    id: '/tags/$tagName',
+    path: '/tags/$tagName',
     getParentRoute: () => WorkspaceWorkspaceWorkspaceIdRouteRoute,
   } as any)
 const WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute =
@@ -105,7 +105,7 @@ export interface FileRoutesByFullPath {
   '/workspace/$workspaceId/settings': typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   '/workspace/$workspaceId/': typeof WorkspaceWorkspaceWorkspaceIdIndexRoute
   '/workspace/$workspaceId/resource/$resourceId': typeof WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute
-  '/workspace/$workspaceId/tags/$tagId': typeof WorkspaceWorkspaceWorkspaceIdTagsTagIdRoute
+  '/workspace/$workspaceId/tags/$tagName': typeof WorkspaceWorkspaceWorkspaceIdTagsTagNameRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -117,7 +117,7 @@ export interface FileRoutesByTo {
   '/workspace/$workspaceId/settings': typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceWorkspaceIdIndexRoute
   '/workspace/$workspaceId/resource/$resourceId': typeof WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute
-  '/workspace/$workspaceId/tags/$tagId': typeof WorkspaceWorkspaceWorkspaceIdTagsTagIdRoute
+  '/workspace/$workspaceId/tags/$tagName': typeof WorkspaceWorkspaceWorkspaceIdTagsTagNameRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -133,7 +133,7 @@ export interface FileRoutesById {
   '/_workspace/workspace/$workspaceId/settings': typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   '/_workspace/workspace/$workspaceId/': typeof WorkspaceWorkspaceWorkspaceIdIndexRoute
   '/_workspace/workspace/$workspaceId/resource/$resourceId': typeof WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute
-  '/_workspace/workspace/$workspaceId/tags/$tagId': typeof WorkspaceWorkspaceWorkspaceIdTagsTagIdRoute
+  '/_workspace/workspace/$workspaceId/tags/$tagName': typeof WorkspaceWorkspaceWorkspaceIdTagsTagNameRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -148,7 +148,7 @@ export interface FileRouteTypes {
     | '/workspace/$workspaceId/settings'
     | '/workspace/$workspaceId/'
     | '/workspace/$workspaceId/resource/$resourceId'
-    | '/workspace/$workspaceId/tags/$tagId'
+    | '/workspace/$workspaceId/tags/$tagName'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -160,7 +160,7 @@ export interface FileRouteTypes {
     | '/workspace/$workspaceId/settings'
     | '/workspace/$workspaceId'
     | '/workspace/$workspaceId/resource/$resourceId'
-    | '/workspace/$workspaceId/tags/$tagId'
+    | '/workspace/$workspaceId/tags/$tagName'
   id:
     | '__root__'
     | '/'
@@ -175,7 +175,7 @@ export interface FileRouteTypes {
     | '/_workspace/workspace/$workspaceId/settings'
     | '/_workspace/workspace/$workspaceId/'
     | '/_workspace/workspace/$workspaceId/resource/$resourceId'
-    | '/_workspace/workspace/$workspaceId/tags/$tagId'
+    | '/_workspace/workspace/$workspaceId/tags/$tagName'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -264,11 +264,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkspaceWorkspaceWorkspaceIdLibraryRouteImport
       parentRoute: typeof WorkspaceWorkspaceWorkspaceIdRouteRoute
     }
-    '/_workspace/workspace/$workspaceId/tags/$tagId': {
-      id: '/_workspace/workspace/$workspaceId/tags/$tagId'
-      path: '/tags/$tagId'
-      fullPath: '/workspace/$workspaceId/tags/$tagId'
-      preLoaderRoute: typeof WorkspaceWorkspaceWorkspaceIdTagsTagIdRouteImport
+    '/_workspace/workspace/$workspaceId/tags/$tagName': {
+      id: '/_workspace/workspace/$workspaceId/tags/$tagName'
+      path: '/tags/$tagName'
+      fullPath: '/workspace/$workspaceId/tags/$tagName'
+      preLoaderRoute: typeof WorkspaceWorkspaceWorkspaceIdTagsTagNameRouteImport
       parentRoute: typeof WorkspaceWorkspaceWorkspaceIdRouteRoute
     }
     '/_workspace/workspace/$workspaceId/resource/$resourceId': {
@@ -299,7 +299,7 @@ interface WorkspaceWorkspaceWorkspaceIdRouteRouteChildren {
   WorkspaceWorkspaceWorkspaceIdSettingsRoute: typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   WorkspaceWorkspaceWorkspaceIdIndexRoute: typeof WorkspaceWorkspaceWorkspaceIdIndexRoute
   WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute: typeof WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute
-  WorkspaceWorkspaceWorkspaceIdTagsTagIdRoute: typeof WorkspaceWorkspaceWorkspaceIdTagsTagIdRoute
+  WorkspaceWorkspaceWorkspaceIdTagsTagNameRoute: typeof WorkspaceWorkspaceWorkspaceIdTagsTagNameRoute
 }
 
 const WorkspaceWorkspaceWorkspaceIdRouteRouteChildren: WorkspaceWorkspaceWorkspaceIdRouteRouteChildren =
@@ -314,8 +314,8 @@ const WorkspaceWorkspaceWorkspaceIdRouteRouteChildren: WorkspaceWorkspaceWorkspa
       WorkspaceWorkspaceWorkspaceIdIndexRoute,
     WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute:
       WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute,
-    WorkspaceWorkspaceWorkspaceIdTagsTagIdRoute:
-      WorkspaceWorkspaceWorkspaceIdTagsTagIdRoute,
+    WorkspaceWorkspaceWorkspaceIdTagsTagNameRoute:
+      WorkspaceWorkspaceWorkspaceIdTagsTagNameRoute,
   }
 
 const WorkspaceWorkspaceWorkspaceIdRouteRouteWithChildren =

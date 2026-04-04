@@ -1,4 +1,5 @@
 import { cn } from "@strand/ui";
+import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface EditableTextProps {
@@ -18,6 +19,7 @@ export function EditableText({
 }: EditableTextProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
+  const [justSaved, setJustSaved] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -36,10 +38,12 @@ export function EditableText({
     const trimmed = editValue.trim();
     if (trimmed && trimmed !== value) {
       onSave(trimmed);
+      setEditValue(trimmed);
+      setJustSaved(true);
     } else {
       setEditValue(value);
-      setIsEditing(false);
     }
+    setIsEditing(false);
   }, [editValue, value, onSave]);
 
   const handleKeyDown = useCallback(
@@ -94,16 +98,23 @@ export function EditableText({
   }
 
   return (
-    <button
-      className={cn(
-        "relative z-20 cursor-text truncate border-none bg-transparent p-0 text-left",
-        className
-      )}
-      onClick={handleClick}
-      onDoubleClick={handleDoubleClick}
-      type="button"
-    >
-      {value}
-    </button>
+    <AnimatePresence mode="wait">
+      <motion.button
+        animate={{ opacity: 1, y: 0 }}
+        className={cn(
+          "relative z-20 cursor-text truncate border-none bg-transparent p-0 text-left",
+          className
+        )}
+        initial={justSaved ? { opacity: 0, y: 4 } : false}
+        key={justSaved ? "saved" : "idle"}
+        onAnimationComplete={() => setJustSaved(false)}
+        onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
+        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        type="button"
+      >
+        {editValue}
+      </motion.button>
+    </AnimatePresence>
   );
 }

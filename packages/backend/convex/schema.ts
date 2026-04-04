@@ -208,13 +208,7 @@ export default defineSchema({
     conceptOverlap: v.float64(),
     semanticSimilarity: v.float64(),
     sharedConcepts: v.array(v.string()),
-    status: v.union(
-      v.literal("auto"),
-      v.literal("suggested"),
-      v.literal("accepted"),
-      v.literal("rejected"),
-      v.literal("pinned")
-    ),
+    status: v.union(v.literal("auto"), v.literal("pinned")),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -228,9 +222,15 @@ export default defineSchema({
     workspaceId: v.id("workspace"),
     name: v.string(),
     color: v.optional(v.string()),
+    embedding: v.optional(v.array(v.float64())),
   })
     .index("by_workspace", ["workspaceId"])
-    .index("by_workspace_name", ["workspaceId", "name"]),
+    .index("by_workspace_name", ["workspaceId", "name"])
+    .vectorIndex("by_embedding", {
+      vectorField: "embedding",
+      dimensions: 1536,
+      filterFields: ["workspaceId"],
+    }),
 
   // RESOURCE TAG (junction)
   resourceTag: defineTable({

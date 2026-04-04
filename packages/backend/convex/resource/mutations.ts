@@ -309,6 +309,15 @@ export const addTag = workspaceMutation({
         name: normalized,
       });
       tag = await ctx.db.get(tagId);
+
+      await ctx.scheduler.runAfter(
+        0,
+        internal.resource.aiActions.generateTagEmbedding,
+        {
+          workspaceId: ctx.workspace._id,
+          tagName: normalized,
+        }
+      );
     }
 
     if (!tag) {

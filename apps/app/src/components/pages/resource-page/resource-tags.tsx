@@ -139,8 +139,9 @@ export function ResourceTags({
             {tags.map((tag) => (
               <Link
                 key={tag._id}
-                params={{ tagId: tag.name, workspaceId }}
-                to="/workspace/$workspaceId/tags/$tagId"
+                params={{ tagName: tag.name, workspaceId }}
+                preload="intent"
+                to="/workspace/$workspaceId/tags/$tagName"
               >
                 <Badge
                   className="group flex items-center gap-x-0.5 px-[1.5px] font-mono text-xs shadow-borders-base"

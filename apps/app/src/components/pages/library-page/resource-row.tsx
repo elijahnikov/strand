@@ -21,7 +21,6 @@ import {
   TrashIcon,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
 import { DotGridLoader } from "~/components/common/dot-grid-loader";
 import { EditableText } from "~/components/common/editable-text";
 import { TextShimmer } from "~/components/common/text-shimmer";
@@ -37,18 +36,6 @@ interface ResourceRowProps {
   onUpdateTitle: (resourceId: Id<"resource">, title: string) => void;
   resource: Resource;
   workspaceId: Id<"workspace">;
-}
-
-function usePendingTitle(serverTitle: string) {
-  const [pendingTitle, setPendingTitle] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (pendingTitle && serverTitle === pendingTitle) {
-      setPendingTitle(null);
-    }
-  }, [serverTitle, pendingTitle]);
-
-  return { pendingTitle, setPendingTitle };
 }
 
 export function ResourceRow(props: ResourceRowProps) {
@@ -119,14 +106,7 @@ function WebsiteRow({
     website.metadataStatus === "pending" ||
     website.metadataStatus === "processing";
 
-  const { pendingTitle, setPendingTitle } = usePendingTitle(resource.title);
-  const isTitlePending = pendingTitle !== null;
   const handleNavigate = useResourceNavigate(workspaceId, resource._id);
-
-  const handleSave = (title: string) => {
-    setPendingTitle(title);
-    onUpdateTitle(resource._id, title);
-  };
 
   return (
     <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle">
@@ -163,14 +143,14 @@ function WebsiteRow({
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <AnimatePresence mode="wait">
-          {isMetadataPending || isTitlePending ? (
+          {isMetadataPending ? (
             <motion.div
               className="w-full"
               exit={{ opacity: 0, transition: { duration: 0.15 } }}
               key="shimmer"
             >
               <TextShimmer className="truncate font-medium text-sm">
-                {pendingTitle ?? website?.url ?? resource.title}
+                {website?.url ?? resource.title}
               </TextShimmer>
             </motion.div>
           ) : (
@@ -184,7 +164,7 @@ function WebsiteRow({
               <EditableText
                 className="font-medium text-sm text-ui-fg-base"
                 onClick={handleNavigate}
-                onSave={handleSave}
+                onSave={(title) => onUpdateTitle(resource._id, title)}
                 value={resource.title}
               />
             </motion.div>
@@ -219,13 +199,7 @@ function NoteRow({
   isPinned,
   workspaceId,
 }: ResourceRowProps) {
-  const { pendingTitle, setPendingTitle } = usePendingTitle(resource.title);
   const handleNavigate = useResourceNavigate(workspaceId, resource._id);
-
-  const handleSave = (title: string) => {
-    setPendingTitle(title);
-    onUpdateTitle(resource._id, title);
-  };
 
   return (
     <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle">
@@ -234,34 +208,12 @@ function NoteRow({
         <NoteIcon />
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
-        <AnimatePresence mode="wait">
-          {pendingTitle === null ? (
-            <motion.div
-              animate={{ opacity: 1, y: 0 }}
-              className="w-full"
-              initial={{ opacity: 0, y: 4 }}
-              key="title"
-              transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            >
-              <EditableText
-                className="font-medium text-sm text-ui-fg-base"
-                onClick={handleNavigate}
-                onSave={handleSave}
-                value={resource.title}
-              />
-            </motion.div>
-          ) : (
-            <motion.div
-              className="w-full"
-              exit={{ opacity: 0, transition: { duration: 0.15 } }}
-              key="shimmer"
-            >
-              <TextShimmer className="truncate font-medium text-sm">
-                {pendingTitle}
-              </TextShimmer>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <EditableText
+          className="font-medium text-sm text-ui-fg-base"
+          onClick={handleNavigate}
+          onSave={(title) => onUpdateTitle(resource._id, title)}
+          value={resource.title}
+        />
       </div>
       <div className="relative z-20 flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         <RowDropdownMenu
@@ -285,13 +237,7 @@ function FileRow({
   const fileUrl = "fileUrl" in resource ? resource.fileUrl : null;
   const isImage = file?.mimeType?.startsWith("image/");
 
-  const { pendingTitle, setPendingTitle } = usePendingTitle(resource.title);
   const handleNavigate = useResourceNavigate(workspaceId, resource._id);
-
-  const handleSave = (title: string) => {
-    setPendingTitle(title);
-    onUpdateTitle(resource._id, title);
-  };
 
   return (
     <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle">
@@ -312,34 +258,12 @@ function FileRow({
         )}
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
-        <AnimatePresence mode="wait">
-          {pendingTitle === null ? (
-            <motion.div
-              animate={{ opacity: 1, y: 0 }}
-              className="w-full"
-              initial={{ opacity: 0, y: 4 }}
-              key="title"
-              transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            >
-              <EditableText
-                className="font-medium text-sm text-ui-fg-base"
-                onClick={handleNavigate}
-                onSave={handleSave}
-                value={resource.title}
-              />
-            </motion.div>
-          ) : (
-            <motion.div
-              className="w-full"
-              exit={{ opacity: 0, transition: { duration: 0.15 } }}
-              key="shimmer"
-            >
-              <TextShimmer className="truncate font-medium text-sm">
-                {pendingTitle}
-              </TextShimmer>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <EditableText
+          className="font-medium text-sm text-ui-fg-base"
+          onClick={handleNavigate}
+          onSave={(title) => onUpdateTitle(resource._id, title)}
+          value={resource.title}
+        />
       </div>
       <div className="relative z-20 flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         {fileUrl && (

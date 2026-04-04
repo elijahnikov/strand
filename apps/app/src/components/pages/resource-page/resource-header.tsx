@@ -36,17 +36,11 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
         {resource.type !== "note" && (
           <Separator className="h-4" orientation="vertical" />
         )}
-        <Badge
-          className="px-1 font-mono shadow-borders-base"
-          variant="secondary"
-        >
+        <Badge variant="mono">
           {format(new Date(resource._creationTime), "d MMM yyyy HH:mm")}
         </Badge>
         <Separator className="h-4" orientation="vertical" />
-        <Badge
-          className="px-1 font-mono shadow-borders-base"
-          variant="secondary"
-        >
+        <Badge variant="mono">
           <Avatar className="size-3.5">
             <AvatarImage
               alt={resource.createdBy?.username}
@@ -77,10 +71,7 @@ function TypeBadge({ resource }: { resource: GetResourceData }) {
           rel="noopener"
           target="_blank"
         >
-          <Badge
-            className="max-w-full px-1 font-mono text-ui-fg-subtle shadow-borders-base"
-            variant="secondary"
-          >
+          <Badge className="max-w-full text-ui-fg-subtle" variant="mono">
             <img
               alt={website.url}
               className="shrink-0 rounded-[4px]"
@@ -104,10 +95,7 @@ function TypeBadge({ resource }: { resource: GetResourceData }) {
         return null;
       }
       return (
-        <Badge
-          className="max-w-[460px] px-1 font-mono text-ui-fg-subtle shadow-borders-base"
-          variant="secondary"
-        >
+        <Badge className="max-w-[460px] text-ui-fg-subtle" variant="mono">
           <FileIcon className="h-3.5 w-3.5 shrink-0" />
           <span className="min-w-0 flex-1">
             <MiddleTruncate text={file.fileName} />

@@ -1,7 +1,5 @@
-import { Heading } from "@strand/ui/heading";
-import { ChevronRightIcon } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
+import { CollapsibleSection as BaseCollapsibleSection } from "~/components/common/collapsible-section";
 import {
   useResourceSections,
   useResourceSectionsHydrated,
@@ -29,37 +27,14 @@ export function CollapsibleSection({
   }
 
   return (
-    <div className={className}>
-      <button
-        className="flex items-center gap-1"
-        onClick={() => toggle(id)}
-        type="button"
-      >
-        <motion.div
-          animate={{ rotate: collapsed ? 0 : 90 }}
-          initial={false}
-          transition={{ duration: 0.15, ease: "easeOut" }}
-        >
-          <ChevronRightIcon className="h-3.5 w-3.5 text-ui-fg-muted" />
-        </motion.div>
-        <Heading className="text-sm" level="h3">
-          {title}
-        </Heading>
-        {secondary}
-      </button>
-      <AnimatePresence initial={false}>
-        {!collapsed && (
-          <motion.div
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            initial={{ height: 0, opacity: 0 }}
-            style={{ overflow: "hidden" }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
-          >
-            {children}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+    <BaseCollapsibleSection
+      className={className}
+      collapsed={collapsed}
+      onToggle={() => toggle(id)}
+      secondary={secondary}
+      title={title}
+    >
+      {children}
+    </BaseCollapsibleSection>
   );
 }

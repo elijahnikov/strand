@@ -191,6 +191,77 @@ export const getResourceById = internalQuery({
   },
 });
 
+export const getTagById = internalQuery({
+  args: {
+    tagId: v.id("tag"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.tagId);
+  },
+});
+
+export const getTagByName = internalQuery({
+  args: {
+    workspaceId: v.id("workspace"),
+    tagName: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("tag")
+      .withIndex("by_workspace_name", (q) =>
+        q.eq("workspaceId", args.workspaceId).eq("name", args.tagName)
+      )
+      .unique();
+  },
+});
+
+export const enrichResourceById = internalQuery({
+  args: {
+    resourceId: v.id("resource"),
+  },
+  handler: async (ctx, args) => {
+    const resource = await ctx.db.get(args.resourceId);
+    if (!resource || resource.deletedAt) {
+      return null;
+    }
+
+    const resourceAI = await ctx.db
+      .query("resourceAI")
+      .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
+      .unique();
+
+    switch (resource.type) {
+      case "website": {
+        const website = await ctx.db
+          .query("websiteResource")
+          .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
+          .unique();
+        return { ...resource, website, aiStatus: resourceAI?.status };
+      }
+      case "note": {
+        const note = await ctx.db
+          .query("noteResource")
+          .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
+          .unique();
+        return { ...resource, note, aiStatus: resourceAI?.status };
+      }
+      case "file": {
+        const file = await ctx.db
+          .query("fileResource")
+          .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
+          .unique();
+        const fileUrl =
+          file?.mimeType?.startsWith("image/") && file.storageId
+            ? await ctx.storage.getUrl(file.storageId)
+            : null;
+        return { ...resource, file, fileUrl, aiStatus: resourceAI?.status };
+      }
+      default:
+        return { ...resource, aiStatus: resourceAI?.status };
+    }
+  },
+});
+
 export const getEmbeddingById = internalQuery({
   args: {
     embeddingId: v.id("resourceEmbedding"),

@@ -31,6 +31,7 @@ const badgeVariants = cva(
           "bg-secondary text-secondary-foreground [button,a&]:hover:bg-secondary/90",
         success: "bg-success/8 text-success-foreground dark:bg-success/16",
         warning: "bg-warning/8 text-warning-foreground dark:bg-warning/16",
+        mono: "bg-secondary px-1 font-mono text-secondary-foreground shadow-borders-base [button,a&]:hover:bg-secondary/90",
       },
     },
   }

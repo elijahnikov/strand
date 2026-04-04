@@ -27,7 +27,8 @@ export const enrichmentSchema = jsonSchema<EnrichmentResult>({
       type: "array",
       items: { type: "string" },
       maxItems: 10,
-      description: "Relevant topic tags, lowercase, under 10 characters each",
+      description:
+        "Broad topic tags for categorization and browsing. Use lowercase, human-readable labels like 'machine-learning', 'personal-finance', 'web-development'. Prefer general topics over highly specific proper nouns. Use hyphens for multi-word tags.",
     },
     extractedEntities: {
       type: "array",
