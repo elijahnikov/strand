@@ -22,6 +22,7 @@ function BreadcrumbSeparator() {
 export function Breadcrumbs() {
   const params = useParams({ strict: false }) as {
     resourceId?: string;
+    tagName?: string;
     workspaceId?: string;
   };
   const pathname = useLocation({ select: (l) => l.pathname });
@@ -39,6 +40,10 @@ export function Breadcrumbs() {
   const currentPage = segments[0];
   if (!currentPage) {
     return null;
+  }
+
+  if (currentPage === "tags" && params.tagName) {
+    return <TagBreadcrumbs tagName={params.tagName} />;
   }
 
   if (currentPage === "resource") {
@@ -67,6 +72,20 @@ export function Breadcrumbs() {
 function BreadcrumbTitleSkeleton() {
   return (
     <span className="inline-block h-3.5 w-24 animate-pulse rounded bg-ui-bg-subtle" />
+  );
+}
+
+function TagBreadcrumbs({ tagName }: { tagName: string }) {
+  return (
+    <>
+      <BreadcrumbSeparator />
+      <Text className="txt-small font-medium text-ui-fg-muted">Tags</Text>
+      <BreadcrumbSeparator />
+      <span className="txt-small font-medium text-ui-fg-base">
+        <span className="text-ui-fg-muted">#</span>
+        {tagName}
+      </span>
+    </>
   );
 }
 

@@ -29,8 +29,9 @@ export function EditableText({
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
+      const len = inputRef.current.value.length;
       inputRef.current.focus();
-      inputRef.current.select();
+      inputRef.current.setSelectionRange(len, len);
     }
   }, [isEditing]);
 

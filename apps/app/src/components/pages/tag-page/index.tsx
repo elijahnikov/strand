@@ -14,8 +14,8 @@ import { useParams } from "@tanstack/react-router";
 import { useAction } from "convex/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CollapsibleSection } from "~/components/common/collapsible-section";
 import { ResourceRow } from "~/components/pages/library-page/resource-row";
+import { CollapsibleSection } from "~/components/pages/resource-page/collapsible-section";
 
 export function TagPageComponent() {
   const { workspaceId, tagName } = useParams({
@@ -157,8 +157,9 @@ export function TagPageComponent() {
         </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-12">
         <CollapsibleSection
+          id="tag-tagged"
           secondary={
             allResources.direct.length > 0 ? (
               <Badge className="font-mono" size="sm" variant="outline">
@@ -200,7 +201,8 @@ export function TagPageComponent() {
         </CollapsibleSection>
 
         <CollapsibleSection
-          className="mt-4"
+          className="mt-12"
+          id="tag-related"
           secondary={
             semanticLoaded && allResources.semantic.length > 0 ? (
               <Badge className="font-mono" size="sm" variant="outline">

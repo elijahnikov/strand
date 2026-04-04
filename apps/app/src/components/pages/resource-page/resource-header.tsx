@@ -1,17 +1,51 @@
+import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
+import { api } from "@strand/backend/_generated/api.js";
+import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { Avatar, AvatarFallback, AvatarImage } from "@strand/ui/avatar";
 import { Badge } from "@strand/ui/badge";
-import { Heading } from "@strand/ui/heading";
 import { Separator } from "@strand/ui/separator";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useParams } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { FileIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { useCallback } from "react";
 import { DotGridLoader } from "~/components/common/dot-grid-loader";
+import { EditableText } from "~/components/common/editable-text";
 import { MiddleTruncate } from "~/components/common/middle-truncate";
 import type { GetResourceData } from "~/lib/convex-types";
 
 export function ResourceHeader({ resource }: { resource: GetResourceData }) {
+  const { workspaceId } = useParams({
+    from: "/_workspace/workspace/$workspaceId/resource/$resourceId",
+  });
+
   const aiStatus = resource.resourceAI?.status;
   const isAiProcessing = aiStatus === "pending" || aiStatus === "processing";
+
+  const queryClient = useQueryClient();
+  const queryKey = convexQuery(api.resource.queries.get, {
+    workspaceId: workspaceId as Id<"workspace">,
+    resourceId: resource._id,
+  }).queryKey;
+
+  const { mutate: updateTitle } = useMutation({
+    mutationFn: useConvexMutation(api.resource.mutations.updateTitle),
+  });
+
+  const handleSave = useCallback(
+    (title: string) => {
+      updateTitle({
+        resourceId: resource._id,
+        title,
+        workspaceId: workspaceId as Id<"workspace">,
+      });
+      queryClient.setQueryData(queryKey, (prev: GetResourceData | undefined) =>
+        prev ? { ...prev, title } : prev
+      );
+    },
+    [updateTitle, resource._id, workspaceId, queryClient, queryKey]
+  );
 
   return (
     <div className="flex flex-col gap-y-1">
@@ -29,7 +63,11 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
             </motion.div>
           )}
         </AnimatePresence>
-        <Heading>{resource.title}</Heading>
+        <EditableText
+          className="h1-core font-medium font-sans"
+          onSave={handleSave}
+          value={resource.title}
+        />
       </div>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <TypeBadge resource={resource} />
