@@ -21,8 +21,10 @@ const PAGE_SIZE = 20;
 export function ResourceList({
   workspaceId,
   uploadingFiles,
+  onClearBatch,
 }: {
-  uploadingFiles: { id: string; name: string }[];
+  uploadingFiles: { id: string; name: string; batchId: string }[];
+  onClearBatch: (batchId: string) => void;
   workspaceId: Id<"workspace">;
 }) {
   const { search, type, order } = useLibraryFilters();
@@ -47,9 +49,55 @@ export function ResourceList({
     [serverPinned]
   );
 
+  const uploadingNameSet = useMemo(
+    () => new Set(uploadingFiles.map((f) => f.name)),
+    [uploadingFiles]
+  );
+
+  // Group uploads by batch — clear entire batch when all its resources appear in results
+  const batches = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const f of uploadingFiles) {
+      const names = map.get(f.batchId) ?? [];
+      names.push(f.name);
+      map.set(f.batchId, names);
+    }
+    return map;
+  }, [uploadingFiles]);
+
+  const pendingResultTitles = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of results) {
+      const aiStatus = "aiStatus" in r ? r.aiStatus : null;
+      if (aiStatus === "pending" || aiStatus === "processing") {
+        set.add(r.title);
+      }
+    }
+    return set;
+  }, [results]);
+
+  useEffect(() => {
+    for (const [batchId, names] of batches) {
+      if (names.every((name) => pendingResultTitles.has(name))) {
+        onClearBatch(batchId);
+      }
+    }
+  }, [batches, pendingResultTitles, onClearBatch]);
+
   const unpinnedResults = useMemo(
-    () => results.filter((r) => !pinnedIdSet.has(r._id)),
-    [results, pinnedIdSet]
+    () =>
+      results.filter((r) => {
+        if (pinnedIdSet.has(r._id)) {
+          return false;
+        }
+        if (!uploadingNameSet.has(r.title)) {
+          return true;
+        }
+        // Only hide if this is the newly created resource (pending AI), not an older duplicate
+        const aiStatus = "aiStatus" in r ? r.aiStatus : null;
+        return aiStatus !== "pending" && aiStatus !== "processing";
+      }),
+    [results, pinnedIdSet, uploadingNameSet]
   );
 
   const { mutate: updateTitle } = useMutation({
@@ -141,18 +189,10 @@ export function ResourceList({
           <Separator className="my-1" />
         </>
       )}
+      {uploadingFiles.map((file) => (
+        <UploadingFileRow fileName={file.name} key={file.id} />
+      ))}
       <AnimatePresence>
-        {uploadingFiles.map((file) => (
-          <motion.div
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, height: 0 }}
-            initial={{ opacity: 0, y: 8 }}
-            key={file.id}
-            transition={{ type: "spring", stiffness: 500, damping: 35 }}
-          >
-            <UploadingFileRow fileName={file.name} />
-          </motion.div>
-        ))}
         {unpinnedResults.map((resource, i) => (
           <MemoizedResourceItem
             handleTogglePin={handleTogglePin}

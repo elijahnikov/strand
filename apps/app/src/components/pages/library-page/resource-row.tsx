@@ -54,7 +54,9 @@ export function ResourceRow(props: ResourceRowProps) {
 export function UploadingFileRow({ fileName }: { fileName: string }) {
   return (
     <div className="flex items-center gap-3 rounded-lg px-3 py-2">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-ui-bg-subtle" />
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+        <DotGridLoader />
+      </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <TextShimmer className="truncate font-medium text-sm">
           {fileName}
@@ -236,34 +238,85 @@ function FileRow({
   const file = "file" in resource ? resource.file : null;
   const fileUrl = "fileUrl" in resource ? resource.fileUrl : null;
   const isImage = file?.mimeType?.startsWith("image/");
+  const aiStatus = "aiStatus" in resource ? resource.aiStatus : null;
+  const isProcessing = aiStatus === "pending" || aiStatus === "processing";
 
   const handleNavigate = useResourceNavigate(workspaceId, resource._id);
 
   return (
     <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle">
       <RowLink resourceId={resource._id} workspaceId={workspaceId} />
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-ui-bg-subtle">
-        {isImage && fileUrl ? (
-          <img
-            alt={file?.fileName ?? ""}
-            className="h-full w-full object-cover"
-            height={32}
-            src={fileUrl}
-            width={32}
-          />
-        ) : (
-          <span className="font-semibold text-[10px] text-ui-fg-muted">
-            {getFileLabel(file?.mimeType)}
-          </span>
+      <div
+        className={cn(
+          "flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md",
+          !isProcessing && "border bg-ui-bg-subtle"
         )}
+      >
+        <AnimatePresence mode="wait">
+          {isProcessing ? (
+            <motion.div
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }}
+              key="loader"
+              transition={{ duration: 0.15 }}
+            >
+              <DotGridLoader />
+            </motion.div>
+          ) : (
+            <motion.div
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex h-full w-full items-center justify-center"
+              initial={{ opacity: 0, scale: 0.5 }}
+              key="icon"
+              transition={{ type: "spring", stiffness: 500, damping: 25 }}
+            >
+              {isImage && fileUrl ? (
+                <img
+                  alt={file?.fileName ?? ""}
+                  className="h-full w-full object-cover"
+                  height={32}
+                  src={fileUrl}
+                  width={32}
+                />
+              ) : (
+                <span className="font-semibold text-[10px] text-ui-fg-muted">
+                  {getFileLabel(file?.mimeType)}
+                </span>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
-        <EditableText
-          className="font-medium text-sm text-ui-fg-base"
-          onClick={handleNavigate}
-          onSave={(title) => onUpdateTitle(resource._id, title)}
-          value={resource.title}
-        />
+        <AnimatePresence mode="wait">
+          {isProcessing ? (
+            <motion.div
+              className="w-full"
+              exit={{ opacity: 0, transition: { duration: 0.15 } }}
+              key="shimmer"
+            >
+              <TextShimmer className="truncate font-medium text-sm">
+                {file?.fileName ?? resource.title}
+              </TextShimmer>
+            </motion.div>
+          ) : (
+            <motion.div
+              animate={{ opacity: 1, y: 0 }}
+              className="w-full"
+              initial={{ opacity: 0, y: 4 }}
+              key="title"
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            >
+              <EditableText
+                className="font-medium text-sm text-ui-fg-base"
+                onClick={handleNavigate}
+                onSave={(title) => onUpdateTitle(resource._id, title)}
+                value={resource.title}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       <div className="relative z-20 flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         {fileUrl && (

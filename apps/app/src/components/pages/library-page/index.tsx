@@ -13,17 +13,16 @@ export function LibraryPageComponent({
 }: {
   workspaceId: Id<"workspace">;
 }) {
-  const { mutate: createResource, mutateAsync: createResourceAsync } =
-    useMutation({
-      mutationFn: useConvexMutation(api.resource.mutations.create),
-    });
+  const { mutate: createResource } = useMutation({
+    mutationFn: useConvexMutation(api.resource.mutations.create),
+  });
 
   const { mutateAsync: generateUploadUrl } = useMutation({
     mutationFn: useConvexMutation(api.resource.mutations.generateUploadUrl),
   });
 
   const [uploadingFiles, setUploadingFiles] = useState<
-    { id: string; name: string }[]
+    { id: string; name: string; batchId: string }[]
   >([]);
 
   const handleUrl = useCallback(
@@ -52,37 +51,54 @@ export function LibraryPageComponent({
 
   const handleFiles = useCallback(
     async (files: File[]) => {
-      for (const file of files) {
-        const fileId = `${file.name}-${Date.now()}`;
-        setUploadingFiles((prev) => [...prev, { id: fileId, name: file.name }]);
+      const batchId = `batch-${Date.now()}`;
+      const entries = files.map((file, i) => ({
+        id: `${file.name}-${Date.now()}-${i}`,
+        name: file.name,
+        batchId,
+      }));
+      setUploadingFiles((prev) => [...entries, ...prev]);
 
-        try {
-          const uploadUrl = await generateUploadUrl({});
-          const response = await fetch(uploadUrl as string, {
-            method: "POST",
-            headers: { "Content-Type": file.type },
-            body: file,
-          });
-          const { storageId } = (await response.json()) as {
-            storageId: Id<"_storage">;
-          };
+      // Upload all files in parallel
+      await Promise.all(
+        files.map(async (file, i) => {
+          try {
+            const uploadUrl = await generateUploadUrl({});
+            const response = await fetch(uploadUrl as string, {
+              method: "POST",
+              headers: { "Content-Type": file.type },
+              body: file,
+            });
+            const { storageId } = (await response.json()) as {
+              storageId: Id<"_storage">;
+            };
 
-          await createResourceAsync({
-            workspaceId,
-            type: "file",
-            title: file.name,
-            storageId,
-            fileName: file.name,
-            fileSize: file.size,
-            mimeType: file.type,
-          });
-        } finally {
-          setUploadingFiles((prev) => prev.filter((f) => f.id !== fileId));
-        }
-      }
+            createResource({
+              workspaceId,
+              type: "file",
+              title: file.name,
+              storageId,
+              fileName: file.name,
+              fileSize: file.size,
+              mimeType: file.type,
+            });
+          } catch {
+            const entry = entries[i];
+            if (entry) {
+              setUploadingFiles((prev) =>
+                prev.filter((f) => f.id !== entry.id)
+              );
+            }
+          }
+        })
+      );
     },
-    [createResourceAsync, generateUploadUrl, workspaceId]
+    [createResource, generateUploadUrl, workspaceId]
   );
+
+  const handleClearBatch = useCallback((batchId: string) => {
+    setUploadingFiles((prev) => prev.filter((f) => f.batchId !== batchId));
+  }, []);
 
   usePasteHandler({
     onUrl: handleUrl,
@@ -97,6 +113,7 @@ export function LibraryPageComponent({
       <LibraryToolbar />
       <div className="mx-auto w-2/3 px-6 pt-4 pb-4">
         <ResourceList
+          onClearBatch={handleClearBatch}
           uploadingFiles={uploadingFiles}
           workspaceId={workspaceId}
         />
