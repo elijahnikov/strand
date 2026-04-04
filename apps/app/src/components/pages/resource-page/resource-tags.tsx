@@ -4,7 +4,7 @@ import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { Badge } from "@strand/ui/badge";
 import { Skeleton } from "@strand/ui/skeleton";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
+import { Link, useParams } from "@tanstack/react-router";
 import { PlusIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
@@ -137,14 +137,19 @@ export function ResourceTags({
             transition={{ type: "spring", stiffness: 500, damping: 30 }}
           >
             {tags.map((tag) => (
-              <Badge
-                className="group flex items-center gap-x-0.5 px-[1.5px] font-mono text-xs shadow-borders-base"
+              <Link
                 key={tag._id}
-                variant="secondary"
+                params={{ tagId: tag.name, workspaceId }}
+                to="/workspace/$workspaceId/tags/$tagId"
               >
-                <span className="text-ui-fg-muted">#</span>
-                {tag.name}
-              </Badge>
+                <Badge
+                  className="group flex items-center gap-x-0.5 px-[1.5px] font-mono text-xs shadow-borders-base"
+                  variant="secondary"
+                >
+                  <span className="text-ui-fg-muted">#</span>
+                  {tag.name}
+                </Badge>
+              </Link>
             ))}
             {isAdding ? (
               <input
