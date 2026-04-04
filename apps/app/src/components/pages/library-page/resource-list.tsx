@@ -21,10 +21,10 @@ const PAGE_SIZE = 20;
 export function ResourceList({
   workspaceId,
   uploadingFiles,
-  onClearUpload,
+  onClearBatch,
 }: {
-  uploadingFiles: { id: string; name: string }[];
-  onClearUpload: (id: string) => void;
+  uploadingFiles: { id: string; name: string; batchId: string }[];
+  onClearBatch: (batchId: string) => void;
   workspaceId: Id<"workspace">;
 }) {
   const { search, type, order } = useLibraryFilters();
@@ -49,24 +49,40 @@ export function ResourceList({
     [serverPinned]
   );
 
-  const uploadingNameMap = useMemo(
-    () => new Map(uploadingFiles.map((f) => [f.name, f.id])),
+  const uploadingNameSet = useMemo(
+    () => new Set(uploadingFiles.map((f) => f.name)),
     [uploadingFiles]
   );
 
-  // When a newly created resource (pending AI) with a matching title appears, clear the upload entry
-  useEffect(() => {
+  // Group uploads by batch — clear entire batch when all its resources appear in results
+  const batches = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const f of uploadingFiles) {
+      const names = map.get(f.batchId) ?? [];
+      names.push(f.name);
+      map.set(f.batchId, names);
+    }
+    return map;
+  }, [uploadingFiles]);
+
+  const pendingResultTitles = useMemo(() => {
+    const set = new Set<string>();
     for (const r of results) {
       const aiStatus = "aiStatus" in r ? r.aiStatus : null;
-      if (aiStatus !== "pending" && aiStatus !== "processing") {
-        continue;
-      }
-      const uploadId = uploadingNameMap.get(r.title);
-      if (uploadId) {
-        onClearUpload(uploadId);
+      if (aiStatus === "pending" || aiStatus === "processing") {
+        set.add(r.title);
       }
     }
-  }, [results, uploadingNameMap, onClearUpload]);
+    return set;
+  }, [results]);
+
+  useEffect(() => {
+    for (const [batchId, names] of batches) {
+      if (names.every((name) => pendingResultTitles.has(name))) {
+        onClearBatch(batchId);
+      }
+    }
+  }, [batches, pendingResultTitles, onClearBatch]);
 
   const unpinnedResults = useMemo(
     () =>
@@ -74,14 +90,14 @@ export function ResourceList({
         if (pinnedIdSet.has(r._id)) {
           return false;
         }
-        if (!uploadingNameMap.has(r.title)) {
+        if (!uploadingNameSet.has(r.title)) {
           return true;
         }
         // Only hide if this is the newly created resource (pending AI), not an older duplicate
         const aiStatus = "aiStatus" in r ? r.aiStatus : null;
         return aiStatus !== "pending" && aiStatus !== "processing";
       }),
-    [results, pinnedIdSet, uploadingNameMap]
+    [results, pinnedIdSet, uploadingNameSet]
   );
 
   const { mutate: updateTitle } = useMutation({

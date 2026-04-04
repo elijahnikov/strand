@@ -22,7 +22,7 @@ export function LibraryPageComponent({
   });
 
   const [uploadingFiles, setUploadingFiles] = useState<
-    { id: string; name: string }[]
+    { id: string; name: string; batchId: string }[]
   >([]);
 
   const handleUrl = useCallback(
@@ -51,10 +51,11 @@ export function LibraryPageComponent({
 
   const handleFiles = useCallback(
     async (files: File[]) => {
-      // Add all uploading indicators at once
+      const batchId = `batch-${Date.now()}`;
       const entries = files.map((file, i) => ({
         id: `${file.name}-${Date.now()}-${i}`,
         name: file.name,
+        batchId,
       }));
       setUploadingFiles((prev) => [...entries, ...prev]);
 
@@ -82,9 +83,12 @@ export function LibraryPageComponent({
               mimeType: file.type,
             });
           } catch {
-            setUploadingFiles((prev) =>
-              prev.filter((f) => f.id !== entries[i].id)
-            );
+            const entry = entries[i];
+            if (entry) {
+              setUploadingFiles((prev) =>
+                prev.filter((f) => f.id !== entry.id)
+              );
+            }
           }
         })
       );
@@ -92,8 +96,8 @@ export function LibraryPageComponent({
     [createResource, generateUploadUrl, workspaceId]
   );
 
-  const handleClearUpload = useCallback((id: string) => {
-    setUploadingFiles((prev) => prev.filter((f) => f.id !== id));
+  const handleClearBatch = useCallback((batchId: string) => {
+    setUploadingFiles((prev) => prev.filter((f) => f.batchId !== batchId));
   }, []);
 
   usePasteHandler({
@@ -109,7 +113,7 @@ export function LibraryPageComponent({
       <LibraryToolbar />
       <div className="mx-auto w-2/3 px-6 pt-4 pb-4">
         <ResourceList
-          onClearUpload={handleClearUpload}
+          onClearBatch={handleClearBatch}
           uploadingFiles={uploadingFiles}
           workspaceId={workspaceId}
         />
