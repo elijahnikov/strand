@@ -21,8 +21,10 @@ const PAGE_SIZE = 20;
 export function ResourceList({
   workspaceId,
   uploadingFiles,
+  onClearUpload,
 }: {
   uploadingFiles: { id: string; name: string }[];
+  onClearUpload: (id: string) => void;
   workspaceId: Id<"workspace">;
 }) {
   const { search, type, order } = useLibraryFilters();
@@ -47,9 +49,39 @@ export function ResourceList({
     [serverPinned]
   );
 
+  const uploadingNameMap = useMemo(
+    () => new Map(uploadingFiles.map((f) => [f.name, f.id])),
+    [uploadingFiles]
+  );
+
+  // When a newly created resource (pending AI) with a matching title appears, clear the upload entry
+  useEffect(() => {
+    for (const r of results) {
+      const aiStatus = "aiStatus" in r ? r.aiStatus : null;
+      if (aiStatus !== "pending" && aiStatus !== "processing") {
+        continue;
+      }
+      const uploadId = uploadingNameMap.get(r.title);
+      if (uploadId) {
+        onClearUpload(uploadId);
+      }
+    }
+  }, [results, uploadingNameMap, onClearUpload]);
+
   const unpinnedResults = useMemo(
-    () => results.filter((r) => !pinnedIdSet.has(r._id)),
-    [results, pinnedIdSet]
+    () =>
+      results.filter((r) => {
+        if (pinnedIdSet.has(r._id)) {
+          return false;
+        }
+        if (!uploadingNameMap.has(r.title)) {
+          return true;
+        }
+        // Only hide if this is the newly created resource (pending AI), not an older duplicate
+        const aiStatus = "aiStatus" in r ? r.aiStatus : null;
+        return aiStatus !== "pending" && aiStatus !== "processing";
+      }),
+    [results, pinnedIdSet, uploadingNameMap]
   );
 
   const { mutate: updateTitle } = useMutation({
@@ -141,18 +173,10 @@ export function ResourceList({
           <Separator className="my-1" />
         </>
       )}
+      {uploadingFiles.map((file) => (
+        <UploadingFileRow fileName={file.name} key={file.id} />
+      ))}
       <AnimatePresence>
-        {uploadingFiles.map((file) => (
-          <motion.div
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, height: 0 }}
-            initial={{ opacity: 0, y: 8 }}
-            key={file.id}
-            transition={{ type: "spring", stiffness: 500, damping: 35 }}
-          >
-            <UploadingFileRow fileName={file.name} />
-          </motion.div>
-        ))}
         {unpinnedResults.map((resource, i) => (
           <MemoizedResourceItem
             handleTogglePin={handleTogglePin}

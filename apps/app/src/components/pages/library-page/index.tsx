@@ -13,10 +13,9 @@ export function LibraryPageComponent({
 }: {
   workspaceId: Id<"workspace">;
 }) {
-  const { mutate: createResource, mutateAsync: createResourceAsync } =
-    useMutation({
-      mutationFn: useConvexMutation(api.resource.mutations.create),
-    });
+  const { mutate: createResource } = useMutation({
+    mutationFn: useConvexMutation(api.resource.mutations.create),
+  });
 
   const { mutateAsync: generateUploadUrl } = useMutation({
     mutationFn: useConvexMutation(api.resource.mutations.generateUploadUrl),
@@ -67,7 +66,7 @@ export function LibraryPageComponent({
             storageId: Id<"_storage">;
           };
 
-          await createResourceAsync({
+          createResource({
             workspaceId,
             type: "file",
             title: file.name,
@@ -76,13 +75,17 @@ export function LibraryPageComponent({
             fileSize: file.size,
             mimeType: file.type,
           });
-        } finally {
+        } catch {
           setUploadingFiles((prev) => prev.filter((f) => f.id !== fileId));
         }
       }
     },
-    [createResourceAsync, generateUploadUrl, workspaceId]
+    [createResource, generateUploadUrl, workspaceId]
   );
+
+  const handleClearUpload = useCallback((id: string) => {
+    setUploadingFiles((prev) => prev.filter((f) => f.id !== id));
+  }, []);
 
   usePasteHandler({
     onUrl: handleUrl,
@@ -97,6 +100,7 @@ export function LibraryPageComponent({
       <LibraryToolbar />
       <div className="mx-auto w-2/3 px-6 pt-4 pb-4">
         <ResourceList
+          onClearUpload={handleClearUpload}
           uploadingFiles={uploadingFiles}
           workspaceId={workspaceId}
         />
