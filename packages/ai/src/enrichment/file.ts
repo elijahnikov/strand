@@ -67,7 +67,7 @@ Carefully read the PDF and extract key information including a summary, tags, en
               type: "text",
               text: `${basePrompt}
 
-Describe the image in detail. Extract any visible text (OCR). Identify subjects, objects, scenes, and themes.`,
+Describe the image in detail. Extract any visible text (OCR). Identify subjects, objects, scenes, and themes. Note the dominant colors, visual style (photo, illustration, screenshot, diagram, etc.), and overall mood or aesthetic.`,
             },
             {
               type: "image",
