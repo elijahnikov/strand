@@ -24,9 +24,22 @@ export const create = workspaceMutation({
     width: v.optional(v.number()),
     height: v.optional(v.number()),
     duration: v.optional(v.number()),
+
+    collectionId: v.optional(v.id("collection")),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
+
+    if (args.collectionId) {
+      const collection = await ctx.db.get(args.collectionId);
+      if (
+        !collection ||
+        collection.workspaceId !== ctx.workspace._id ||
+        collection.deletedAt
+      ) {
+        throw new ConvexError("Collection not found");
+      }
+    }
 
     const resourceId = await ctx.db.insert("resource", {
       workspaceId: ctx.workspace._id,
@@ -34,6 +47,7 @@ export const create = workspaceMutation({
       type: args.type,
       title: args.title,
       description: args.description,
+      collectionId: args.collectionId,
       isFavorite: false,
       isPinned: false,
       isArchived: false,
@@ -341,6 +355,35 @@ export const addTag = workspaceMutation({
     });
 
     return tag._id;
+  },
+});
+
+export const moveToCollection = workspaceMutation({
+  args: {
+    resourceId: v.id("resource"),
+    collectionId: v.optional(v.id("collection")),
+  },
+  handler: async (ctx, args) => {
+    const resource = await ctx.db.get(args.resourceId);
+    if (!resource || resource.workspaceId !== ctx.workspace._id) {
+      throw new ConvexError("Resource not found");
+    }
+
+    if (args.collectionId) {
+      const collection = await ctx.db.get(args.collectionId);
+      if (
+        !collection ||
+        collection.workspaceId !== ctx.workspace._id ||
+        collection.deletedAt
+      ) {
+        throw new ConvexError("Collection not found");
+      }
+    }
+
+    await ctx.db.patch(args.resourceId, {
+      collectionId: args.collectionId,
+      updatedAt: Date.now(),
+    });
   },
 });
 

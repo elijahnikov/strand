@@ -47,8 +47,33 @@ export default defineSchema({
     isArchived: v.boolean(),
     deletedAt: v.optional(v.number()),
     updatedAt: v.number(),
+    collectionId: v.optional(v.id("collection")),
   })
     .index("by_workspace", ["workspaceId", "deletedAt"])
+    .index("by_workspace_collection", [
+      "workspaceId",
+      "collectionId",
+      "deletedAt",
+    ])
+    .index("by_workspace_collection_title", [
+      "workspaceId",
+      "collectionId",
+      "deletedAt",
+      "title",
+    ])
+    .index("by_workspace_collection_type", [
+      "workspaceId",
+      "collectionId",
+      "type",
+      "deletedAt",
+    ])
+    .index("by_workspace_collection_type_title", [
+      "workspaceId",
+      "collectionId",
+      "type",
+      "deletedAt",
+      "title",
+    ])
     .index("by_workspace_type", ["workspaceId", "type", "deletedAt"])
     .index("by_workspace_title", ["workspaceId", "deletedAt", "title"])
     .index("by_workspace_type_title", [
@@ -231,6 +256,20 @@ export default defineSchema({
       dimensions: 1536,
       filterFields: ["workspaceId"],
     }),
+
+  // COLLECTION (folder)
+  collection: defineTable({
+    workspaceId: v.id("workspace"),
+    parentId: v.optional(v.id("collection")),
+    name: v.string(),
+    icon: v.optional(v.string()),
+    createdBy: v.id("user"),
+    updatedAt: v.number(),
+    deletedAt: v.optional(v.number()),
+  })
+    .index("by_workspace", ["workspaceId", "deletedAt"])
+    .index("by_workspace_parent", ["workspaceId", "parentId", "deletedAt"])
+    .index("by_workspace_name", ["workspaceId", "deletedAt", "name"]),
 
   // RESOURCE TAG (junction)
   resourceTag: defineTable({

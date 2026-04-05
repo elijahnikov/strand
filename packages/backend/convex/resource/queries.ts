@@ -311,11 +311,13 @@ export const list = workspaceQuery({
     search: v.optional(v.string()),
     type: typeValidator,
     order: orderValidator,
+    collectionId: v.optional(v.id("collection")),
+    allResources: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const workspaceId = ctx.workspace._id;
-
     const search = args.search?.trim();
+    const scopeToCollection = !args.allResources;
 
     // biome-ignore lint/suspicious/noEvolvingTypes: <>
     // biome-ignore lint/suspicious/noImplicitAnyLet: <>
@@ -335,6 +337,46 @@ export const list = workspaceQuery({
           return sq;
         });
       results = await query.paginate(args.paginationOpts);
+    } else if (scopeToCollection) {
+      // Collection-scoped queries (root when collectionId is undefined)
+      const collectionId = args.collectionId;
+      if (args.type) {
+        const isAlpha = args.order === "alphabetical";
+        const indexName = isAlpha
+          ? "by_workspace_collection_type_title"
+          : "by_workspace_collection_type";
+
+        const query = ctx.db
+          .query("resource")
+          .withIndex(indexName, (q) =>
+            q
+              .eq("workspaceId", workspaceId)
+              .eq("collectionId", collectionId)
+              // biome-ignore lint/style/noNonNullAssertion: <>
+              .eq("type", args.type!)
+              .eq("deletedAt", undefined)
+          )
+          .order(isAlpha || args.order === "oldest" ? "asc" : "desc");
+
+        results = await query.paginate(args.paginationOpts);
+      } else {
+        const isAlpha = args.order === "alphabetical";
+        const indexName = isAlpha
+          ? "by_workspace_collection_title"
+          : "by_workspace_collection";
+
+        const query = ctx.db
+          .query("resource")
+          .withIndex(indexName, (q) =>
+            q
+              .eq("workspaceId", workspaceId)
+              .eq("collectionId", collectionId)
+              .eq("deletedAt", undefined)
+          )
+          .order(isAlpha || args.order === "oldest" ? "asc" : "desc");
+
+        results = await query.paginate(args.paginationOpts);
+      }
     } else if (args.type) {
       const isAlpha = args.order === "alphabetical";
       const indexName = isAlpha

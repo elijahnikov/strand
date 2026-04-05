@@ -199,6 +199,7 @@ export function RelatedResources({
                   workspaceId,
                   resourceId: link.resource._id,
                 }}
+                preload="intent"
                 to="/workspace/$workspaceId/resource/$resourceId"
               >
                 <div className="h-8 w-8 shrink-0 overflow-hidden rounded-md border border-ui-border-base">

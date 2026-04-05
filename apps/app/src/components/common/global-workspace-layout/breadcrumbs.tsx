@@ -1,10 +1,23 @@
 import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@strand/ui/dropdown-menu";
 import { Separator } from "@strand/ui/separator";
 import { Text } from "@strand/ui/text";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useLocation, useParams } from "@tanstack/react-router";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "@tanstack/react-router";
+import { EllipsisIcon } from "lucide-react";
+import { Fragment } from "react";
 import { getFileLabel } from "~/lib/format";
 
 const PAGE_LABELS: Record<string, string> = {
@@ -13,6 +26,13 @@ const PAGE_LABELS: Record<string, string> = {
   settings: "Settings",
 };
 
+interface BreadcrumbParams {
+  collectionId?: string;
+  resourceId?: string;
+  tagName?: string;
+  workspaceId?: string;
+}
+
 function BreadcrumbSeparator() {
   return (
     <Separator className="my-3 mr-3 ml-3 rotate-30" orientation="vertical" />
@@ -20,11 +40,7 @@ function BreadcrumbSeparator() {
 }
 
 export function Breadcrumbs() {
-  const params = useParams({ strict: false }) as {
-    resourceId?: string;
-    tagName?: string;
-    workspaceId?: string;
-  };
+  const params = useParams({ strict: false }) as BreadcrumbParams;
   const pathname = useLocation({ select: (l) => l.pathname });
 
   if (!params?.workspaceId) {
@@ -54,6 +70,19 @@ export function Breadcrumbs() {
       />
     ) : (
       <ResourceBreadcrumbsSkeleton
+        workspaceId={params.workspaceId as Id<"workspace">}
+      />
+    );
+  }
+
+  if (
+    currentPage === "library" &&
+    segments[1] === "collection" &&
+    params.collectionId
+  ) {
+    return (
+      <CollectionBreadcrumbs
+        collectionId={params.collectionId as Id<"collection">}
         workspaceId={params.workspaceId as Id<"workspace">}
       />
     );
@@ -100,6 +129,7 @@ function ResourceBreadcrumbsSkeleton({
       <Link
         className="txt-small font-medium text-ui-fg-muted transition-colors hover:text-ui-fg-base"
         params={{ workspaceId }}
+        preload="intent"
         to="/workspace/$workspaceId/library"
       >
         Library
@@ -127,6 +157,7 @@ function ResourceBreadcrumbs({
       <Link
         className="txt-small font-medium text-ui-fg-muted transition-colors hover:text-ui-fg-base"
         params={{ workspaceId }}
+        preload="intent"
         to="/workspace/$workspaceId/library"
       >
         Library
@@ -238,5 +269,133 @@ function FileLabel({ mimeType }: { mimeType?: string | null }) {
     <span className="flex h-3.5 shrink-0 items-center rounded-[2px] bg-ui-bg-subtle px-0.5 font-semibold text-[8px] text-ui-fg-muted leading-none">
       {getFileLabel(mimeType ?? undefined)}
     </span>
+  );
+}
+
+function CollectionBreadcrumbs({
+  workspaceId,
+  collectionId,
+}: {
+  workspaceId: Id<"workspace">;
+  collectionId: Id<"collection">;
+}) {
+  const { data: collection, isLoading } = useQuery(
+    convexQuery(api.collection.queries.get, { workspaceId, collectionId })
+  );
+  const navigate = useNavigate();
+
+  return (
+    <>
+      <BreadcrumbSeparator />
+      <Link
+        className="txt-small font-medium text-ui-fg-muted transition-colors hover:text-ui-fg-base"
+        params={{ workspaceId }}
+        preload="intent"
+        to="/workspace/$workspaceId/library"
+      >
+        Library
+      </Link>
+      {isLoading || !collection ? (
+        <>
+          <BreadcrumbSeparator />
+          <BreadcrumbTitleSkeleton />
+        </>
+      ) : (
+        <>
+          <TruncatedBreadcrumbs
+            crumbs={collection.breadcrumbs}
+            navigate={navigate}
+            workspaceId={workspaceId}
+          />
+          <BreadcrumbSeparator />
+          <span className="txt-small truncate font-medium text-ui-fg-base">
+            {collection.icon ? (
+              <span className="mr-1">{collection.icon}</span>
+            ) : null}
+            {collection.name}
+          </span>
+        </>
+      )}
+    </>
+  );
+}
+
+const MAX_VISIBLE_CRUMBS = 2;
+
+function TruncatedBreadcrumbs({
+  crumbs,
+  workspaceId,
+  navigate,
+}: {
+  crumbs: Array<{ _id: Id<"collection">; name: string }>;
+  workspaceId: Id<"workspace">;
+  navigate: ReturnType<typeof useNavigate>;
+}) {
+  if (crumbs.length <= MAX_VISIBLE_CRUMBS) {
+    return (
+      <>
+        {crumbs.map((crumb) => (
+          <Fragment key={crumb._id}>
+            <BreadcrumbSeparator />
+            <Link
+              className="txt-small font-medium text-ui-fg-muted transition-colors hover:text-ui-fg-base"
+              params={{ workspaceId, collectionId: crumb._id }}
+              preload="intent"
+              to="/workspace/$workspaceId/library/collection/$collectionId"
+            >
+              {crumb.name}
+            </Link>
+          </Fragment>
+        ))}
+      </>
+    );
+  }
+
+  const first = crumbs[0] as (typeof crumbs)[number];
+  const hidden = crumbs.slice(1, -1);
+  const last = crumbs.at(-1) as (typeof crumbs)[number];
+
+  return (
+    <>
+      <BreadcrumbSeparator />
+      <Link
+        className="txt-small font-medium text-ui-fg-muted transition-colors hover:text-ui-fg-base"
+        params={{ workspaceId, collectionId: first._id }}
+        preload="intent"
+        to="/workspace/$workspaceId/library/collection/$collectionId"
+      >
+        {first.name}
+      </Link>
+      <BreadcrumbSeparator />
+      <DropdownMenu>
+        <DropdownMenuTrigger className="flex h-5 w-5 items-center justify-center rounded text-ui-fg-muted transition-colors hover:bg-ui-bg-subtle hover:text-ui-fg-base">
+          <EllipsisIcon className="h-3.5 w-3.5" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" sideOffset={4}>
+          {hidden.map((crumb) => (
+            <DropdownMenuItem
+              key={crumb._id}
+              onClick={() =>
+                navigate({
+                  to: "/workspace/$workspaceId/library/collection/$collectionId",
+                  params: { workspaceId, collectionId: crumb._id },
+                })
+              }
+            >
+              {crumb.name}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <BreadcrumbSeparator />
+      <Link
+        className="txt-small font-medium text-ui-fg-muted transition-colors hover:text-ui-fg-base"
+        params={{ workspaceId, collectionId: last._id }}
+        preload="intent"
+        to="/workspace/$workspaceId/library/collection/$collectionId"
+      >
+        {last.name}
+      </Link>
+    </>
   );
 }
