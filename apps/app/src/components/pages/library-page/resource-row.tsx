@@ -1,3 +1,4 @@
+import { useDraggable } from "@dnd-kit/core";
 import type { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { cn } from "@strand/ui";
@@ -25,6 +26,7 @@ import { DotGridLoader } from "~/components/common/dot-grid-loader";
 import { EditableText } from "~/components/common/editable-text";
 import { TextShimmer } from "~/components/common/text-shimmer";
 import { getFileLabel } from "~/lib/format";
+import type { DragItemData } from "./use-library-dnd";
 
 type Resource = FunctionReturnType<
   typeof api.resource.queries.list
@@ -39,6 +41,30 @@ interface ResourceRowProps {
 }
 
 export function ResourceRow(props: ResourceRowProps) {
+  const dragData: DragItemData = {
+    type: "resource",
+    resourceId: props.resource._id,
+    resource: props.resource,
+  };
+
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: props.resource._id,
+    data: dragData,
+  });
+
+  return (
+    <div
+      className={cn(isDragging && "opacity-50")}
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+    >
+      <ResourceRowInner {...props} />
+    </div>
+  );
+}
+
+export function ResourceRowInner(props: ResourceRowProps) {
   switch (props.resource.type) {
     case "website":
       return <WebsiteRow {...props} />;
@@ -77,6 +103,7 @@ function RowLink({
     <Link
       className="absolute inset-0 z-10 rounded-lg"
       params={{ workspaceId, resourceId }}
+      preload="intent"
       tabIndex={-1}
       to="/workspace/$workspaceId/resource/$resourceId"
     />

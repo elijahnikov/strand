@@ -1,6 +1,8 @@
 import { useConvexMutation } from "@convex-dev/react-query";
+import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { cn } from "@strand/ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +12,9 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { FolderIcon, MoreHorizontalIcon, TrashIcon } from "lucide-react";
+import { type Ref, useCallback } from "react";
 import { EditableText } from "~/components/common/editable-text";
+import type { DragItemData, DropTargetData } from "./use-library-dnd";
 
 interface CollectionRowProps {
   autoEdit?: boolean;
@@ -40,6 +44,34 @@ export function CollectionRow({
     mutationFn: useConvexMutation(api.collection.mutations.remove),
   });
 
+  const dragData: DragItemData = {
+    type: "collection",
+    collectionId: collection._id,
+    collection,
+  };
+
+  const dropData: DropTargetData = { collectionId: collection._id };
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setDragRef,
+    isDragging,
+  } = useDraggable({ id: collection._id, data: dragData });
+
+  const { setNodeRef: setDropRef, isOver } = useDroppable({
+    id: `drop-${collection._id}`,
+    data: dropData,
+  });
+
+  const mergedRef = useCallback(
+    (node: HTMLElement | null) => {
+      setDragRef(node);
+      setDropRef(node);
+    },
+    [setDragRef, setDropRef]
+  );
+
   const handleNavigate = () =>
     navigate({
       to: "/workspace/$workspaceId/library/collection/$collectionId",
@@ -47,10 +79,20 @@ export function CollectionRow({
     });
 
   return (
-    <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle">
+    <div
+      className={cn(
+        "group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle",
+        isDragging && "opacity-50",
+        isOver && "bg-ui-bg-subtle-hover ring-2 ring-ui-fg-interactive"
+      )}
+      ref={mergedRef as Ref<HTMLDivElement>}
+      {...listeners}
+      {...attributes}
+    >
       <Link
         className="absolute inset-0 z-10 rounded-lg"
         params={{ workspaceId, collectionId: collection._id }}
+        preload="intent"
         tabIndex={-1}
         to="/workspace/$workspaceId/library/collection/$collectionId"
       />

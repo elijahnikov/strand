@@ -3,6 +3,7 @@ import {
   useConvexMutation,
   useConvexPaginatedQuery,
 } from "@convex-dev/react-query";
+import { DndContext, DragOverlay } from "@dnd-kit/core";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { Heading } from "@strand/ui/heading";
@@ -14,8 +15,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { useInView } from "react-intersection-observer";
 import { CollectionRow } from "./collection-row";
+import { LibraryDragOverlay } from "./drag-overlay";
 import { useLibraryFilters } from "./library-toolbar";
 import { ResourceRow, UploadingFileRow } from "./resource-row";
+import { useLibraryDnd } from "./use-library-dnd";
 
 const PAGE_SIZE = 20;
 
@@ -49,6 +52,15 @@ export function ResourceList({
   pendingCollection?: { id: string; name: string } | null;
   onClearPendingCollection?: () => void;
 }) {
+  const {
+    sensors,
+    activeItem,
+    movingIds,
+    clearMovingIds,
+    onDragStart,
+    onDragEnd,
+    onDragCancel,
+  } = useLibraryDnd(workspaceId);
   const { search, type, order } = useLibraryFilters();
 
   const { results, status, loadMore } = useConvexPaginatedQuery(
@@ -120,9 +132,10 @@ export function ResourceList({
     }
   }, [batches, pendingResultTitles, onClearBatch]);
 
-  // Clear pending collection when a matching collection appears in the live query
   useEffect(() => {
-    if (!pendingCollection || !childCollections) return;
+    if (!(pendingCollection && childCollections)) {
+      return;
+    }
     const found = childCollections.some(
       (c) => "name" in c && c.name === pendingCollection.name
     );
@@ -134,7 +147,7 @@ export function ResourceList({
   const unpinnedResults = useMemo(
     () =>
       results.filter((r) => {
-        if (pinnedIdSet.has(r._id)) {
+        if (pinnedIdSet.has(r._id) || movingIds.has(r._id)) {
           return false;
         }
         if (!uploadingNameSet.has(r.title)) {
@@ -144,7 +157,7 @@ export function ResourceList({
         const aiStatus = "aiStatus" in r ? r.aiStatus : null;
         return aiStatus !== "pending" && aiStatus !== "processing";
       }),
-    [results, pinnedIdSet, uploadingNameSet]
+    [results, pinnedIdSet, uploadingNameSet, movingIds]
   );
 
   const { mutate: updateTitle } = useMutation({
@@ -184,15 +197,37 @@ export function ResourceList({
     }
   }, [inView, status, loadMore]);
 
-  // Merge collections into the resource list based on sort order
-  // Hide collections that match the pending optimistic collection to avoid duplicates
   const filteredCollections = useMemo(() => {
     const collections = childCollections ?? [];
-    if (!pendingCollection) return collections;
-    return collections.filter(
-      (c) => !("name" in c && c.name === pendingCollection.name)
+    return collections.filter((c) => {
+      if (movingIds.has(c._id)) {
+        return false;
+      }
+      if (
+        pendingCollection &&
+        "name" in c &&
+        c.name === pendingCollection.name
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [childCollections, pendingCollection, movingIds]);
+
+  // Clear movingIds once the live query no longer contains them
+  useEffect(() => {
+    if (movingIds.size === 0) {
+      return;
+    }
+    const resultIds = new Set(results.map((r) => r._id));
+    const collectionIds = new Set((childCollections ?? []).map((c) => c._id));
+    const stale = [...movingIds].filter(
+      (id) => !(resultIds.has(id as never) || collectionIds.has(id as never))
     );
-  }, [childCollections, pendingCollection]);
+    if (stale.length > 0) {
+      clearMovingIds(stale);
+    }
+  }, [results, childCollections, movingIds, clearMovingIds]);
 
   const mergedList = useMemo((): ListItem[] => {
     const resourceItems: ListItem[] = unpinnedResults.map((r) => ({
@@ -235,10 +270,13 @@ export function ResourceList({
   }, [unpinnedResults, filteredCollections, order]);
 
   const hasPinned = serverPinned && serverPinned.length > 0;
+  const isFirstLoad =
+    (status === "LoadingFirstPage" && results.length === 0) ||
+    (collectionsLoading && !childCollections);
   const isEmpty =
     mergedList.length === 0 && !hasPinned && uploadingFiles.length === 0;
 
-  if (status === "LoadingFirstPage" || collectionsLoading) {
+  if (isFirstLoad) {
     return <ResourceListSkeleton />;
   }
 
@@ -266,77 +304,89 @@ export function ResourceList({
   }
 
   return (
-    <div className="flex flex-col">
-      {hasPinned && (
-        <>
-          <AnimatePresence>
-            {serverPinned.map((resource) => (
+    <DndContext
+      onDragCancel={onDragCancel}
+      onDragEnd={onDragEnd}
+      onDragStart={onDragStart}
+      sensors={sensors}
+    >
+      <div className="flex flex-col">
+        {hasPinned && (
+          <>
+            <AnimatePresence>
+              {serverPinned.map((resource) => (
+                <MemoizedResourceItem
+                  handleTogglePin={handleTogglePin}
+                  handleUpdateTitle={handleUpdateTitle}
+                  index={0}
+                  initialLoadDone
+                  isPinned
+                  key={resource._id}
+                  resource={resource}
+                  workspaceId={workspaceId}
+                />
+              ))}
+            </AnimatePresence>
+            <Separator className="my-1" />
+          </>
+        )}
+        {pendingCollection && (
+          <CollectionRow
+            autoEdit
+            collection={{
+              _id: pendingCollection.id as Id<"collection">,
+              name: pendingCollection.name,
+              _creationTime: Date.now(),
+            }}
+            workspaceId={workspaceId}
+          />
+        )}
+        {uploadingFiles.map((file) => (
+          <UploadingFileRow fileName={file.name} key={file.id} />
+        ))}
+        <AnimatePresence>
+          {mergedList.map((item, i) =>
+            item.kind === "collection" ? (
+              <motion.div
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, height: 0 }}
+                initial={initialLoadDone.current ? false : { opacity: 0, y: 8 }}
+                key={`col-${item.collection._id}`}
+                transition={{
+                  type: "spring",
+                  stiffness: 500,
+                  damping: 35,
+                  delay: initialLoadDone.current ? 0 : i * 0.03,
+                }}
+              >
+                <CollectionRow
+                  collection={item.collection}
+                  workspaceId={workspaceId}
+                />
+              </motion.div>
+            ) : (
               <MemoizedResourceItem
                 handleTogglePin={handleTogglePin}
                 handleUpdateTitle={handleUpdateTitle}
-                index={0}
-                initialLoadDone
-                isPinned
-                key={resource._id}
-                resource={resource}
+                index={i}
+                initialLoadDone={initialLoadDone.current}
+                isPinned={false}
+                key={item.resource._id}
+                resource={item.resource}
                 workspaceId={workspaceId}
               />
-            ))}
-          </AnimatePresence>
-          <Separator className="my-1" />
-        </>
-      )}
-      {pendingCollection && (
-        <CollectionRow
-          autoEdit
-          collection={{
-            _id: pendingCollection.id as Id<"collection">,
-            name: pendingCollection.name,
-            _creationTime: Date.now(),
-          }}
-          workspaceId={workspaceId}
-        />
-      )}
-      {uploadingFiles.map((file) => (
-        <UploadingFileRow fileName={file.name} key={file.id} />
-      ))}
-      <AnimatePresence>
-        {mergedList.map((item, i) =>
-          item.kind === "collection" ? (
-            <motion.div
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, height: 0 }}
-              initial={initialLoadDone.current ? false : { opacity: 0, y: 8 }}
-              key={`col-${item.collection._id}`}
-              transition={{
-                type: "spring",
-                stiffness: 500,
-                damping: 35,
-                delay: initialLoadDone.current ? 0 : i * 0.03,
-              }}
-            >
-              <CollectionRow
-                collection={item.collection}
-                workspaceId={workspaceId}
-              />
-            </motion.div>
-          ) : (
-            <MemoizedResourceItem
-              handleTogglePin={handleTogglePin}
-              handleUpdateTitle={handleUpdateTitle}
-              index={i}
-              initialLoadDone={initialLoadDone.current}
-              isPinned={false}
-              key={item.resource._id}
-              resource={item.resource}
-              workspaceId={workspaceId}
-            />
-          )
-        )}
-      </AnimatePresence>
-      <div className="h-px" ref={loadMoreRef} />
-      {status === "LoadingMore" && <LoadingMoreSkeleton />}
-    </div>
+            )
+          )}
+        </AnimatePresence>
+        <div className="h-px" ref={loadMoreRef} />
+        {status === "LoadingMore" && <LoadingMoreSkeleton />}
+      </div>
+      <DragOverlay dropAnimation={null}>
+        {activeItem ? (
+          <LibraryDragOverlay item={activeItem} workspaceId={workspaceId} />
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   );
 }
 
