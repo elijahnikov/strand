@@ -13,16 +13,23 @@ import { FolderIcon, MoreHorizontalIcon, TrashIcon } from "lucide-react";
 import { EditableText } from "~/components/common/editable-text";
 
 interface CollectionRowProps {
+  autoEdit?: boolean;
   collection: {
     _id: Id<"collection">;
     name: string;
     icon?: string | null;
     _creationTime: number;
   };
+  onEdited?: () => void;
   workspaceId: Id<"workspace">;
 }
 
-export function CollectionRow({ collection, workspaceId }: CollectionRowProps) {
+export function CollectionRow({
+  autoEdit,
+  collection,
+  onEdited,
+  workspaceId,
+}: CollectionRowProps) {
   const navigate = useNavigate();
 
   const { mutate: rename } = useMutation({
@@ -56,11 +63,13 @@ export function CollectionRow({ collection, workspaceId }: CollectionRowProps) {
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <EditableText
+          autoEdit={autoEdit}
           className="font-medium text-sm text-ui-fg-base"
           onClick={handleNavigate}
-          onSave={(name) =>
-            rename({ workspaceId, collectionId: collection._id, name })
-          }
+          onSave={(name) => {
+            rename({ workspaceId, collectionId: collection._id, name });
+            onEdited?.();
+          }}
           value={collection.name}
         />
       </div>

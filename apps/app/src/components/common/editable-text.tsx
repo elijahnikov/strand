@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface EditableTextProps {
+  autoEdit?: boolean;
   className?: string;
   inputClassName?: string;
   onClick?: () => void;
@@ -16,8 +17,9 @@ export function EditableText({
   onClick,
   className,
   inputClassName,
+  autoEdit = false,
 }: EditableTextProps) {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(autoEdit);
   const [editValue, setEditValue] = useState(value);
   const [justSaved, setJustSaved] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -29,11 +31,15 @@ export function EditableText({
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
-      const len = inputRef.current.value.length;
       inputRef.current.focus();
-      inputRef.current.setSelectionRange(len, len);
+      if (autoEdit) {
+        inputRef.current.select();
+      } else {
+        const len = inputRef.current.value.length;
+        inputRef.current.setSelectionRange(len, len);
+      }
     }
-  }, [isEditing]);
+  }, [isEditing, autoEdit]);
 
   const handleSave = useCallback(() => {
     const trimmed = editValue.trim();

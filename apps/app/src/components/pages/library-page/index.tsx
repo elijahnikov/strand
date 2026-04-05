@@ -17,6 +17,15 @@ export function LibraryPageComponent({
     mutationFn: useConvexMutation(api.resource.mutations.create),
   });
 
+  const { mutate: createCollection } = useMutation({
+    mutationFn: useConvexMutation(api.collection.mutations.create),
+  });
+
+  const [pendingCollection, setPendingCollection] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
   const { mutateAsync: generateUploadUrl } = useMutation({
     mutationFn: useConvexMutation(api.resource.mutations.generateUploadUrl),
   });
@@ -100,6 +109,13 @@ export function LibraryPageComponent({
     setUploadingFiles((prev) => prev.filter((f) => f.batchId !== batchId));
   }, []);
 
+  const handleCreateCollection = useCallback(() => {
+    const name = "New collection";
+    const id = `pending-${Date.now()}`;
+    setPendingCollection({ id, name });
+    createCollection({ workspaceId, name });
+  }, [createCollection, workspaceId]);
+
   usePasteHandler({
     onUrl: handleUrl,
     onText: handleText,
@@ -110,10 +126,12 @@ export function LibraryPageComponent({
 
   return (
     <div>
-      <LibraryToolbar />
+      <LibraryToolbar onCreateCollection={handleCreateCollection} />
       <div className="mx-auto w-2/3 px-6 pt-4 pb-4">
         <ResourceList
           onClearBatch={handleClearBatch}
+          onClearPendingCollection={() => setPendingCollection(null)}
+          pendingCollection={pendingCollection}
           uploadingFiles={uploadingFiles}
           workspaceId={workspaceId}
         />

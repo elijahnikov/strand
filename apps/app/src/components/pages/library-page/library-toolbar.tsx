@@ -12,6 +12,7 @@ import {
   ChevronDownIcon,
   ClockIcon,
   FileIcon,
+  FolderPlusIcon,
   GlobeIcon,
   StickyNoteIcon,
 } from "lucide-react";
@@ -54,7 +55,11 @@ export function useLibraryFilters() {
   return { search, setSearch, type, setType, order, setOrder };
 }
 
-export function LibraryToolbar() {
+export function LibraryToolbar({
+  onCreateCollection,
+}: {
+  onCreateCollection?: () => void;
+}) {
   const { search, setSearch, type, setType, order, setOrder } =
     useLibraryFilters();
 
@@ -73,6 +78,15 @@ export function LibraryToolbar() {
         value={search}
       />
       <div className="ml-auto flex items-center gap-x-2">
+        {onCreateCollection && (
+          <Button
+            className="size-8! shrink-0 rounded-full shadow-borders-base"
+            onClick={onCreateCollection}
+            variant="secondary"
+          >
+            <FolderPlusIcon className="size-4 shrink-0" />
+          </Button>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger
             render={

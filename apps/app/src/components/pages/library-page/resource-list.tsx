@@ -39,11 +39,15 @@ export function ResourceList({
   uploadingFiles,
   onClearBatch,
   collectionId,
+  pendingCollection,
+  onClearPendingCollection,
 }: {
   uploadingFiles: { id: string; name: string; batchId: string }[];
   onClearBatch: (batchId: string) => void;
   workspaceId: Id<"workspace">;
   collectionId?: Id<"collection">;
+  pendingCollection?: { id: string; name: string } | null;
+  onClearPendingCollection?: () => void;
 }) {
   const { search, type, order } = useLibraryFilters();
 
@@ -116,6 +120,17 @@ export function ResourceList({
     }
   }, [batches, pendingResultTitles, onClearBatch]);
 
+  // Clear pending collection when a matching collection appears in the live query
+  useEffect(() => {
+    if (!pendingCollection || !childCollections) return;
+    const found = childCollections.some(
+      (c) => "name" in c && c.name === pendingCollection.name
+    );
+    if (found) {
+      onClearPendingCollection?.();
+    }
+  }, [childCollections, pendingCollection, onClearPendingCollection]);
+
   const unpinnedResults = useMemo(
     () =>
       results.filter((r) => {
@@ -170,7 +185,14 @@ export function ResourceList({
   }, [inView, status, loadMore]);
 
   // Merge collections into the resource list based on sort order
-  const filteredCollections = childCollections ?? [];
+  // Hide collections that match the pending optimistic collection to avoid duplicates
+  const filteredCollections = useMemo(() => {
+    const collections = childCollections ?? [];
+    if (!pendingCollection) return collections;
+    return collections.filter(
+      (c) => !("name" in c && c.name === pendingCollection.name)
+    );
+  }, [childCollections, pendingCollection]);
 
   const mergedList = useMemo((): ListItem[] => {
     const resourceItems: ListItem[] = unpinnedResults.map((r) => ({
@@ -263,6 +285,17 @@ export function ResourceList({
           </AnimatePresence>
           <Separator className="my-1" />
         </>
+      )}
+      {pendingCollection && (
+        <CollectionRow
+          autoEdit
+          collection={{
+            _id: pendingCollection.id as Id<"collection">,
+            name: pendingCollection.name,
+            _creationTime: Date.now(),
+          }}
+          workspaceId={workspaceId}
+        />
       )}
       {uploadingFiles.map((file) => (
         <UploadingFileRow fileName={file.name} key={file.id} />
