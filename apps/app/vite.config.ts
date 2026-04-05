@@ -19,6 +19,6 @@ export default defineConfig({
     tailwindcss(),
   ],
   ssr: {
-    noExternal: ["@convex-dev/better-auth"],
+    noExternal: ["@convex-dev/better-auth", /react-tweet.*/],
   },
 });

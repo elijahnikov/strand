@@ -9,6 +9,8 @@ import { RelatedResources } from "../related-resources";
 import { ResourceHeader } from "../resource-header";
 import { ResourceSummary } from "../resource-summary";
 import { ResourceTags } from "../resource-tags";
+import { ImagePreviewDialog, PdfPreviewDialog } from "./file-preview-dialog";
+import { PdfPreview } from "./pdf-preview";
 
 function FileImage({ alt, src }: { alt: string; src: string }) {
   const [loaded, setLoaded] = useState(false);
@@ -85,12 +87,23 @@ export function FileResource({ resource }: { resource: GetResourceData }) {
   const fileUrl =
     "fileUrl" in resource ? (resource.fileUrl as string | null) : null;
   const isImage = file?.mimeType?.startsWith("image/");
+  const isPdf = file?.mimeType === "application/pdf";
 
   return (
     <div className="mx-auto mt-2 w-[55%]">
       <ResourceHeader resource={resource} />
       {isImage && fileUrl ? (
-        <FileImage alt={file?.fileName ?? resource.title} src={fileUrl} />
+        <ImagePreviewDialog
+          alt={file?.fileName ?? resource.title}
+          fileName={file?.fileName ?? undefined}
+          src={fileUrl}
+        >
+          <FileImage alt={file?.fileName ?? resource.title} src={fileUrl} />
+        </ImagePreviewDialog>
+      ) : isPdf && fileUrl ? (
+        <PdfPreviewDialog fileName={file?.fileName ?? undefined} url={fileUrl}>
+          <PdfPreview url={fileUrl} />
+        </PdfPreviewDialog>
       ) : (
         <FilePreviewEmpty mimeType={file?.mimeType ?? undefined} />
       )}

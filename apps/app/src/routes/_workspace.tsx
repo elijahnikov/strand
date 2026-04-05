@@ -1,6 +1,7 @@
 import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@strand/backend/_generated/api.js";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { Authenticated } from "convex/react";
 import { GlobalLayout } from "~/components/common/global-workspace-layout";
 
 export const Route = createFileRoute("/_workspace")({
@@ -15,16 +16,20 @@ export const Route = createFileRoute("/_workspace")({
 
 function PendingComponent() {
   return (
-    <GlobalLayout>
-      <div />
-    </GlobalLayout>
+    <Authenticated>
+      <GlobalLayout>
+        <div />
+      </GlobalLayout>
+    </Authenticated>
   );
 }
 
 function WorkspaceLayoutComponent() {
   return (
-    <GlobalLayout>
-      <Outlet />
-    </GlobalLayout>
+    <Authenticated>
+      <GlobalLayout>
+        <Outlet />
+      </GlobalLayout>
+    </Authenticated>
   );
 }

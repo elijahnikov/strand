@@ -54,7 +54,7 @@ export function CollectionHeader({
     <div className="mb-4 flex flex-col gap-2">
       <nav className="flex items-center gap-1 text-ui-fg-muted text-xs">
         <Link
-          className="font-mono transition-colors hover:text-ui-fg-base"
+          className="font-mono tracking-normal transition-colors hover:text-ui-fg-base"
           params={{ workspaceId }}
           preload="intent"
           to="/workspace/$workspaceId/library"
@@ -101,7 +101,7 @@ function HeaderBreadcrumbs({
           <Fragment key={crumb._id}>
             <Separator className="mx-2 h-3 rotate-30" orientation="vertical" />
             <Link
-              className="font-mono transition-colors hover:text-ui-fg-base"
+              className="font-mono tracking-normal transition-colors hover:text-ui-fg-base"
               params={{ workspaceId, collectionId: crumb._id }}
               preload="intent"
               to="/workspace/$workspaceId/library/collection/$collectionId"
