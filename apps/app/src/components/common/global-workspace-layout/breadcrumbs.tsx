@@ -5,6 +5,7 @@ import { Separator } from "@strand/ui/separator";
 import { Text } from "@strand/ui/text";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation, useParams } from "@tanstack/react-router";
+import { Fragment } from "react";
 import { getFileLabel } from "~/lib/format";
 
 const PAGE_LABELS: Record<string, string> = {
@@ -13,6 +14,13 @@ const PAGE_LABELS: Record<string, string> = {
   settings: "Settings",
 };
 
+interface BreadcrumbParams {
+  collectionId?: string;
+  resourceId?: string;
+  tagName?: string;
+  workspaceId?: string;
+}
+
 function BreadcrumbSeparator() {
   return (
     <Separator className="my-3 mr-3 ml-3 rotate-30" orientation="vertical" />
@@ -20,11 +28,7 @@ function BreadcrumbSeparator() {
 }
 
 export function Breadcrumbs() {
-  const params = useParams({ strict: false }) as {
-    resourceId?: string;
-    tagName?: string;
-    workspaceId?: string;
-  };
+  const params = useParams({ strict: false }) as BreadcrumbParams;
   const pathname = useLocation({ select: (l) => l.pathname });
 
   if (!params?.workspaceId) {
@@ -54,6 +58,19 @@ export function Breadcrumbs() {
       />
     ) : (
       <ResourceBreadcrumbsSkeleton
+        workspaceId={params.workspaceId as Id<"workspace">}
+      />
+    );
+  }
+
+  if (
+    currentPage === "library" &&
+    segments[1] === "collection" &&
+    params.collectionId
+  ) {
+    return (
+      <CollectionBreadcrumbs
+        collectionId={params.collectionId as Id<"collection">}
         workspaceId={params.workspaceId as Id<"workspace">}
       />
     );
@@ -238,5 +255,58 @@ function FileLabel({ mimeType }: { mimeType?: string | null }) {
     <span className="flex h-3.5 shrink-0 items-center rounded-[2px] bg-ui-bg-subtle px-0.5 font-semibold text-[8px] text-ui-fg-muted leading-none">
       {getFileLabel(mimeType ?? undefined)}
     </span>
+  );
+}
+
+function CollectionBreadcrumbs({
+  workspaceId,
+  collectionId,
+}: {
+  workspaceId: Id<"workspace">;
+  collectionId: Id<"collection">;
+}) {
+  const { data: collection, isLoading } = useQuery(
+    convexQuery(api.collection.queries.get, { workspaceId, collectionId })
+  );
+
+  return (
+    <>
+      <BreadcrumbSeparator />
+      <Link
+        className="txt-small font-medium text-ui-fg-muted transition-colors hover:text-ui-fg-base"
+        params={{ workspaceId }}
+        to="/workspace/$workspaceId/library"
+      >
+        Library
+      </Link>
+      {isLoading || !collection ? (
+        <>
+          <BreadcrumbSeparator />
+          <BreadcrumbTitleSkeleton />
+        </>
+      ) : (
+        <>
+          {collection.breadcrumbs.map((crumb) => (
+            <Fragment key={crumb._id}>
+              <BreadcrumbSeparator />
+              <Link
+                className="txt-small font-medium text-ui-fg-muted transition-colors hover:text-ui-fg-base"
+                params={{ workspaceId, collectionId: crumb._id }}
+                to="/workspace/$workspaceId/library/collection/$collectionId"
+              >
+                {crumb.name}
+              </Link>
+            </Fragment>
+          ))}
+          <BreadcrumbSeparator />
+          <span className="txt-small truncate font-medium text-ui-fg-base">
+            {collection.icon ? (
+              <span className="mr-1">{collection.icon}</span>
+            ) : null}
+            {collection.name}
+          </span>
+        </>
+      )}
+    </>
   );
 }

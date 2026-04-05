@@ -19,9 +19,11 @@ import { Route as WorkspaceWorkspaceWorkspaceIdRouteRouteImport } from './routes
 import { Route as WorkspaceWorkspaceWorkspaceIdIndexRouteImport } from './routes/_workspace/workspace/$workspaceId/index'
 import { Route as WorkspaceWorkspaceWorkspaceIdSettingsRouteImport } from './routes/_workspace/workspace/$workspaceId/settings'
 import { Route as WorkspaceWorkspaceWorkspaceIdSearchRouteImport } from './routes/_workspace/workspace/$workspaceId/search'
-import { Route as WorkspaceWorkspaceWorkspaceIdLibraryRouteImport } from './routes/_workspace/workspace/$workspaceId/library'
+import { Route as WorkspaceWorkspaceWorkspaceIdLibraryRouteRouteImport } from './routes/_workspace/workspace/$workspaceId/library/route'
+import { Route as WorkspaceWorkspaceWorkspaceIdLibraryIndexRouteImport } from './routes/_workspace/workspace/$workspaceId/library/index'
 import { Route as WorkspaceWorkspaceWorkspaceIdTagsTagNameRouteImport } from './routes/_workspace/workspace/$workspaceId/tags/$tagName'
 import { Route as WorkspaceWorkspaceWorkspaceIdResourceResourceIdRouteImport } from './routes/_workspace/workspace/$workspaceId/resource/$resourceId'
+import { Route as WorkspaceWorkspaceWorkspaceIdLibraryCollectionCollectionIdRouteImport } from './routes/_workspace/workspace/$workspaceId/library/collection/$collectionId'
 
 const WorkspaceRoute = WorkspaceRouteImport.update({
   id: '/_workspace',
@@ -75,11 +77,17 @@ const WorkspaceWorkspaceWorkspaceIdSearchRoute =
     path: '/search',
     getParentRoute: () => WorkspaceWorkspaceWorkspaceIdRouteRoute,
   } as any)
-const WorkspaceWorkspaceWorkspaceIdLibraryRoute =
-  WorkspaceWorkspaceWorkspaceIdLibraryRouteImport.update({
+const WorkspaceWorkspaceWorkspaceIdLibraryRouteRoute =
+  WorkspaceWorkspaceWorkspaceIdLibraryRouteRouteImport.update({
     id: '/library',
     path: '/library',
     getParentRoute: () => WorkspaceWorkspaceWorkspaceIdRouteRoute,
+  } as any)
+const WorkspaceWorkspaceWorkspaceIdLibraryIndexRoute =
+  WorkspaceWorkspaceWorkspaceIdLibraryIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => WorkspaceWorkspaceWorkspaceIdLibraryRouteRoute,
   } as any)
 const WorkspaceWorkspaceWorkspaceIdTagsTagNameRoute =
   WorkspaceWorkspaceWorkspaceIdTagsTagNameRouteImport.update({
@@ -93,6 +101,12 @@ const WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute =
     path: '/resource/$resourceId',
     getParentRoute: () => WorkspaceWorkspaceWorkspaceIdRouteRoute,
   } as any)
+const WorkspaceWorkspaceWorkspaceIdLibraryCollectionCollectionIdRoute =
+  WorkspaceWorkspaceWorkspaceIdLibraryCollectionCollectionIdRouteImport.update({
+    id: '/collection/$collectionId',
+    path: '/collection/$collectionId',
+    getParentRoute: () => WorkspaceWorkspaceWorkspaceIdLibraryRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -100,24 +114,27 @@ export interface FileRoutesByFullPath {
   '/register': typeof AuthRegisterRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceWorkspaceIdRouteRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/workspace/$workspaceId/library': typeof WorkspaceWorkspaceWorkspaceIdLibraryRoute
+  '/workspace/$workspaceId/library': typeof WorkspaceWorkspaceWorkspaceIdLibraryRouteRouteWithChildren
   '/workspace/$workspaceId/search': typeof WorkspaceWorkspaceWorkspaceIdSearchRoute
   '/workspace/$workspaceId/settings': typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   '/workspace/$workspaceId/': typeof WorkspaceWorkspaceWorkspaceIdIndexRoute
   '/workspace/$workspaceId/resource/$resourceId': typeof WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute
   '/workspace/$workspaceId/tags/$tagName': typeof WorkspaceWorkspaceWorkspaceIdTagsTagNameRoute
+  '/workspace/$workspaceId/library/': typeof WorkspaceWorkspaceWorkspaceIdLibraryIndexRoute
+  '/workspace/$workspaceId/library/collection/$collectionId': typeof WorkspaceWorkspaceWorkspaceIdLibraryCollectionCollectionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/workspace/$workspaceId/library': typeof WorkspaceWorkspaceWorkspaceIdLibraryRoute
   '/workspace/$workspaceId/search': typeof WorkspaceWorkspaceWorkspaceIdSearchRoute
   '/workspace/$workspaceId/settings': typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceWorkspaceIdIndexRoute
   '/workspace/$workspaceId/resource/$resourceId': typeof WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute
   '/workspace/$workspaceId/tags/$tagName': typeof WorkspaceWorkspaceWorkspaceIdTagsTagNameRoute
+  '/workspace/$workspaceId/library': typeof WorkspaceWorkspaceWorkspaceIdLibraryIndexRoute
+  '/workspace/$workspaceId/library/collection/$collectionId': typeof WorkspaceWorkspaceWorkspaceIdLibraryCollectionCollectionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -128,12 +145,14 @@ export interface FileRoutesById {
   '/_auth/register': typeof AuthRegisterRoute
   '/_workspace/workspace/$workspaceId': typeof WorkspaceWorkspaceWorkspaceIdRouteRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/_workspace/workspace/$workspaceId/library': typeof WorkspaceWorkspaceWorkspaceIdLibraryRoute
+  '/_workspace/workspace/$workspaceId/library': typeof WorkspaceWorkspaceWorkspaceIdLibraryRouteRouteWithChildren
   '/_workspace/workspace/$workspaceId/search': typeof WorkspaceWorkspaceWorkspaceIdSearchRoute
   '/_workspace/workspace/$workspaceId/settings': typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   '/_workspace/workspace/$workspaceId/': typeof WorkspaceWorkspaceWorkspaceIdIndexRoute
   '/_workspace/workspace/$workspaceId/resource/$resourceId': typeof WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute
   '/_workspace/workspace/$workspaceId/tags/$tagName': typeof WorkspaceWorkspaceWorkspaceIdTagsTagNameRoute
+  '/_workspace/workspace/$workspaceId/library/': typeof WorkspaceWorkspaceWorkspaceIdLibraryIndexRoute
+  '/_workspace/workspace/$workspaceId/library/collection/$collectionId': typeof WorkspaceWorkspaceWorkspaceIdLibraryCollectionCollectionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -149,18 +168,21 @@ export interface FileRouteTypes {
     | '/workspace/$workspaceId/'
     | '/workspace/$workspaceId/resource/$resourceId'
     | '/workspace/$workspaceId/tags/$tagName'
+    | '/workspace/$workspaceId/library/'
+    | '/workspace/$workspaceId/library/collection/$collectionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/register'
     | '/api/auth/$'
-    | '/workspace/$workspaceId/library'
     | '/workspace/$workspaceId/search'
     | '/workspace/$workspaceId/settings'
     | '/workspace/$workspaceId'
     | '/workspace/$workspaceId/resource/$resourceId'
     | '/workspace/$workspaceId/tags/$tagName'
+    | '/workspace/$workspaceId/library'
+    | '/workspace/$workspaceId/library/collection/$collectionId'
   id:
     | '__root__'
     | '/'
@@ -176,6 +198,8 @@ export interface FileRouteTypes {
     | '/_workspace/workspace/$workspaceId/'
     | '/_workspace/workspace/$workspaceId/resource/$resourceId'
     | '/_workspace/workspace/$workspaceId/tags/$tagName'
+    | '/_workspace/workspace/$workspaceId/library/'
+    | '/_workspace/workspace/$workspaceId/library/collection/$collectionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -261,8 +285,15 @@ declare module '@tanstack/react-router' {
       id: '/_workspace/workspace/$workspaceId/library'
       path: '/library'
       fullPath: '/workspace/$workspaceId/library'
-      preLoaderRoute: typeof WorkspaceWorkspaceWorkspaceIdLibraryRouteImport
+      preLoaderRoute: typeof WorkspaceWorkspaceWorkspaceIdLibraryRouteRouteImport
       parentRoute: typeof WorkspaceWorkspaceWorkspaceIdRouteRoute
+    }
+    '/_workspace/workspace/$workspaceId/library/': {
+      id: '/_workspace/workspace/$workspaceId/library/'
+      path: '/'
+      fullPath: '/workspace/$workspaceId/library/'
+      preLoaderRoute: typeof WorkspaceWorkspaceWorkspaceIdLibraryIndexRouteImport
+      parentRoute: typeof WorkspaceWorkspaceWorkspaceIdLibraryRouteRoute
     }
     '/_workspace/workspace/$workspaceId/tags/$tagName': {
       id: '/_workspace/workspace/$workspaceId/tags/$tagName'
@@ -277,6 +308,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/workspace/$workspaceId/resource/$resourceId'
       preLoaderRoute: typeof WorkspaceWorkspaceWorkspaceIdResourceResourceIdRouteImport
       parentRoute: typeof WorkspaceWorkspaceWorkspaceIdRouteRoute
+    }
+    '/_workspace/workspace/$workspaceId/library/collection/$collectionId': {
+      id: '/_workspace/workspace/$workspaceId/library/collection/$collectionId'
+      path: '/collection/$collectionId'
+      fullPath: '/workspace/$workspaceId/library/collection/$collectionId'
+      preLoaderRoute: typeof WorkspaceWorkspaceWorkspaceIdLibraryCollectionCollectionIdRouteImport
+      parentRoute: typeof WorkspaceWorkspaceWorkspaceIdLibraryRouteRoute
     }
   }
 }
@@ -293,8 +331,26 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+interface WorkspaceWorkspaceWorkspaceIdLibraryRouteRouteChildren {
+  WorkspaceWorkspaceWorkspaceIdLibraryIndexRoute: typeof WorkspaceWorkspaceWorkspaceIdLibraryIndexRoute
+  WorkspaceWorkspaceWorkspaceIdLibraryCollectionCollectionIdRoute: typeof WorkspaceWorkspaceWorkspaceIdLibraryCollectionCollectionIdRoute
+}
+
+const WorkspaceWorkspaceWorkspaceIdLibraryRouteRouteChildren: WorkspaceWorkspaceWorkspaceIdLibraryRouteRouteChildren =
+  {
+    WorkspaceWorkspaceWorkspaceIdLibraryIndexRoute:
+      WorkspaceWorkspaceWorkspaceIdLibraryIndexRoute,
+    WorkspaceWorkspaceWorkspaceIdLibraryCollectionCollectionIdRoute:
+      WorkspaceWorkspaceWorkspaceIdLibraryCollectionCollectionIdRoute,
+  }
+
+const WorkspaceWorkspaceWorkspaceIdLibraryRouteRouteWithChildren =
+  WorkspaceWorkspaceWorkspaceIdLibraryRouteRoute._addFileChildren(
+    WorkspaceWorkspaceWorkspaceIdLibraryRouteRouteChildren,
+  )
+
 interface WorkspaceWorkspaceWorkspaceIdRouteRouteChildren {
-  WorkspaceWorkspaceWorkspaceIdLibraryRoute: typeof WorkspaceWorkspaceWorkspaceIdLibraryRoute
+  WorkspaceWorkspaceWorkspaceIdLibraryRouteRoute: typeof WorkspaceWorkspaceWorkspaceIdLibraryRouteRouteWithChildren
   WorkspaceWorkspaceWorkspaceIdSearchRoute: typeof WorkspaceWorkspaceWorkspaceIdSearchRoute
   WorkspaceWorkspaceWorkspaceIdSettingsRoute: typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   WorkspaceWorkspaceWorkspaceIdIndexRoute: typeof WorkspaceWorkspaceWorkspaceIdIndexRoute
@@ -304,8 +360,8 @@ interface WorkspaceWorkspaceWorkspaceIdRouteRouteChildren {
 
 const WorkspaceWorkspaceWorkspaceIdRouteRouteChildren: WorkspaceWorkspaceWorkspaceIdRouteRouteChildren =
   {
-    WorkspaceWorkspaceWorkspaceIdLibraryRoute:
-      WorkspaceWorkspaceWorkspaceIdLibraryRoute,
+    WorkspaceWorkspaceWorkspaceIdLibraryRouteRoute:
+      WorkspaceWorkspaceWorkspaceIdLibraryRouteRouteWithChildren,
     WorkspaceWorkspaceWorkspaceIdSearchRoute:
       WorkspaceWorkspaceWorkspaceIdSearchRoute,
     WorkspaceWorkspaceWorkspaceIdSettingsRoute:

@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LibraryPageComponent } from "~/components/pages/library-page";
 
 export const Route = createFileRoute(
-  "/_workspace/workspace/$workspaceId/library"
+  "/_workspace/workspace/$workspaceId/library/"
 )({
   component: LibraryPage,
 });

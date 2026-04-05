@@ -9,6 +9,8 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as collection_mutations from "../collection/mutations.js";
+import type * as collection_queries from "../collection/queries.js";
 import type * as http from "../http.js";
 import type * as resource_actions from "../resource/actions.js";
 import type * as resource_aiActions from "../resource/aiActions.js";
@@ -33,6 +35,8 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  "collection/mutations": typeof collection_mutations;
+  "collection/queries": typeof collection_queries;
   http: typeof http;
   "resource/actions": typeof resource_actions;
   "resource/aiActions": typeof resource_aiActions;

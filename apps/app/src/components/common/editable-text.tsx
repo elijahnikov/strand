@@ -103,7 +103,7 @@ export function EditableText({
       <motion.button
         animate={{ opacity: 1, y: 0 }}
         className={cn(
-          "relative z-20 cursor-text truncate border-none bg-transparent p-0 text-left",
+          "relative z-20 block max-w-fit cursor-text truncate border-none bg-transparent p-0 text-left",
           className
         )}
         initial={justSaved ? { opacity: 0, y: 4 } : false}
