@@ -160,6 +160,10 @@ export const get = workspaceQuery({
 
     const links = await getLinksForResource(ctx, resource._id);
     const tags = await getTagsForResource(ctx, resource._id);
+    const content = await ctx.db
+      .query("resourceContent")
+      .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
+      .unique();
 
     switch (resource.type) {
       case "website": {
@@ -170,6 +174,7 @@ export const get = workspaceQuery({
         return {
           ...resource,
           website,
+          content,
           type: resource.type,
           resourceAI,
           createdBy,
@@ -186,6 +191,7 @@ export const get = workspaceQuery({
         return {
           ...resource,
           note,
+          content,
           type: resource.type,
           resourceAI,
           createdBy,
@@ -206,6 +212,7 @@ export const get = workspaceQuery({
           ...resource,
           file,
           fileUrl,
+          content,
           type: resource.type,
           resourceAI,
           createdBy,
@@ -217,6 +224,7 @@ export const get = workspaceQuery({
       default:
         return {
           ...resource,
+          content,
           type: resource.type,
           aiStatus: resourceAI?.status,
           resourceAI,

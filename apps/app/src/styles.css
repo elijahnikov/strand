@@ -4,6 +4,7 @@
 @config "../tailwind.config.ts";
 
 @source "../../../packages/ui/src/*.{ts,tsx}";
+@source "../../../node_modules/@blocknote/shadcn";
 
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant light (&:where(.light, .light *));

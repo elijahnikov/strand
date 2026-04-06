@@ -1,0 +1,341 @@
+/* Map BlockNote CSS variables to Strand design tokens.
+   Use !important to beat the [data-color-scheme="dark"] selector
+   which BlockNote applies based on prefers-color-scheme (not our .dark class). */
+.bn-container {
+  /* Editor text & background */
+  --bn-colors-editor-text: var(--fg-base) !important;
+  --bn-colors-editor-background: transparent !important;
+
+  /* Menus & toolbars */
+  --bn-colors-menu-text: var(--fg-base) !important;
+  --bn-colors-menu-background: var(--bg-base) !important;
+  --bn-colors-tooltip-text: var(--fg-base) !important;
+  --bn-colors-tooltip-background: var(--bg-base) !important;
+  --bn-colors-hovered-text: var(--fg-base) !important;
+  --bn-colors-hovered-background: var(--bg-subtle-hover) !important;
+  --bn-colors-selected-text: var(--fg-base) !important;
+  --bn-colors-selected-background: var(--bg-highlight) !important;
+  --bn-colors-disabled-text: var(--fg-disabled) !important;
+  --bn-colors-disabled-background: var(--bg-disabled) !important;
+
+  /* Borders & shadows */
+  --bn-colors-border: var(--border-base) !important;
+  --bn-colors-shadow: var(--elevation-flyout) !important;
+  --bn-shadow-medium: var(--elevation-flyout) !important;
+  --bn-shadow-light: var(--borders-base) !important;
+  --bn-border: 1px solid var(--border-base) !important;
+
+  /* Side menu (drag handle, add block) */
+  --bn-colors-side-menu: var(--fg-muted) !important;
+
+  /* Typography */
+  --bn-font-family: var(--font-sans) !important;
+  --bn-border-radius: var(--radius) !important;
+
+  /* Ensure floating menus sit above sidebar/layout chrome */
+  --bn-ui-base-z-index: 50;
+}
+
+/* Editor body text */
+.bn-editor {
+  min-height: 300px;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.3125rem;
+  color: var(--fg-base) !important;
+  background-color: transparent !important;
+}
+
+/* Links — blue in both light and dark mode */
+.bn-editor a {
+  color: var(--fg-interactive) !important;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Headings */
+.bn-editor [data-content-type="heading"][data-level="1"] {
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.75rem;
+}
+
+.bn-editor [data-content-type="heading"][data-level="2"] {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5rem;
+}
+
+.bn-editor [data-content-type="heading"][data-level="3"] {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+}
+
+/* Code blocks & inline code */
+.bn-editor [data-content-type="codeBlock"],
+.bn-editor code {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+}
+
+.bn-editor [data-content-type="codeBlock"] {
+  padding: 0.5rem 0.75rem;
+  color: var(--fg-base) !important;
+  background-color: var(--bg-subtle) !important;
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius);
+}
+
+/* Language selector on code blocks */
+.bn-editor [data-content-type="codeBlock"] > div > select {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem !important;
+  color: var(--fg-muted) !important;
+}
+
+.bn-editor [data-content-type="codeBlock"] > div > select > option {
+  color: var(--fg-base) !important;
+  background-color: var(--bg-base) !important;
+}
+
+.bn-editor :not([data-content-type="codeBlock"]) > .bn-inline-content code {
+  padding: 0.1rem 0.3rem;
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-base);
+  border-radius: calc(var(--radius) - 4px);
+}
+
+/* Blockquote — same text color as body, styled left border */
+.bn-editor [data-content-type="quote"] blockquote {
+  color: var(--fg-base) !important;
+  border-left-color: var(--border-base);
+}
+
+/* Lists */
+.bn-editor [data-content-type="bulletListItem"],
+.bn-editor [data-content-type="numberedListItem"],
+.bn-editor [data-content-type="checkListItem"] {
+  font-size: 0.875rem;
+  line-height: 1.3125rem;
+}
+
+/* Placeholder text — override BlockNote's italic from
+   .bn-inline-content:has(>.ProseMirror-trailingBreak:only-child):before */
+.bn-editor
+.bn-inline-content:has(> .ProseMirror-trailingBreak:only-child)::before {
+  font-style: normal !important;
+  color: var(--fg-muted) !important;
+}
+
+/* Remove default padding on editor for seamless integration */
+.bn-editor {
+  padding-inline: 0 !important;
+}
+
+/* Ensure the editor fills its parent container */
+.bn-container,
+.bn-container > .bn-editor {
+  width: 100%;
+}
+
+/* Prevent scroll chaining on all BlockNote popover/dropdown surfaces */
+.bn-container [data-radix-popper-content-wrapper],
+.bn-container [data-radix-menu-content],
+.bn-container [role="listbox"],
+.bn-container [role="menu"] {
+  overscroll-behavior: contain;
+}
+
+/* ------------------------------------------------------------------ */
+/* Suggestion menu (slash menu / block dropdown)                      */
+/* Match Strand MenuPopup / MenuItem 1:1                              */
+/* ------------------------------------------------------------------ */
+
+/* Container — rounded-lg, base bg, border (no shadow) — match Strand PopoverContent */
+.bn-suggestion-menu[role="listbox"] {
+  padding: 0.25rem;
+  overscroll-behavior: contain;
+  background-color: var(--bg-base);
+  border: 1px solid var(--border-base);
+  border-radius: 0.5rem;
+  box-shadow: none;
+}
+
+/* Group label — xs, muted, medium weight */
+.bn-suggestion-menu .bn-suggestion-menu-label {
+  padding: 0.375rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.125rem;
+  color: var(--fg-muted);
+}
+
+/* Item row — rounded-xl, compact-small text, medium weight */
+.bn-suggestion-menu [role="option"] {
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  color: var(--fg-subtle);
+  background-color: transparent;
+  border-radius: var(--radius-xl, 0.75rem);
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+
+.bn-suggestion-menu [role="option"]:hover,
+.bn-suggestion-menu [role="option"][aria-selected="true"] {
+  color: var(--fg-base);
+  background-color: var(--bg-component-hover);
+}
+
+/* Icon container — tighten padding to match Strand items */
+.bn-suggestion-menu [role="option"] [data-position="left"] {
+  padding: 0;
+}
+
+.bn-suggestion-menu [role="option"] [data-position="left"] svg {
+  width: 1rem;
+  height: 1rem;
+  color: var(--fg-subtle);
+}
+
+.bn-suggestion-menu [role="option"]:hover [data-position="left"] svg,
+.bn-suggestion-menu
+  [role="option"][aria-selected="true"]
+  [data-position="left"]
+  svg {
+  color: var(--fg-base);
+}
+
+/* Title text — inherit item font sizing, not text-base */
+.bn-suggestion-menu [role="option"] .flex-1 > .text-base {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* Subtext — hidden */
+.bn-suggestion-menu [role="option"] .flex-1 > .text-xs {
+  display: none;
+}
+
+/* Badge / keyboard shortcut — mono font */
+.bn-suggestion-menu [role="option"] [data-position="right"] {
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.bn-suggestion-menu
+  [role="option"]
+  [data-position="right"]
+  [data-slot="badge"] {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.05em;
+}
+
+/* ------------------------------------------------------------------ */
+/* Side menu buttons (+ and drag handle)                              */
+/* Match Strand Button secondary variant 1:1                          */
+/* ------------------------------------------------------------------ */
+
+.bn-side-menu {
+  gap: 0.25rem;
+  margin-top: -2px;
+  margin-right: 0.5rem;
+}
+
+.bn-side-menu .bn-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  padding: 0 !important;
+  color: var(--fg-base) !important;
+  outline: none !important;
+  background-color: transparent !important;
+  border-radius: 0.5rem !important;
+}
+
+.bn-side-menu .bn-button svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
+.bn-side-menu .bn-button:hover {
+  background-color: var(--button-transparent-hover) !important;
+}
+
+.bn-side-menu .bn-button:active {
+  background-color: var(--button-transparent-pressed) !important;
+}
+
+.bn-side-menu .bn-button:focus-visible {
+  background-color: var(--bg-base) !important;
+  box-shadow: var(--shadow-buttons-neutral-focus) !important;
+}
+
+.bn-side-menu .bn-button:disabled {
+  pointer-events: none !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  opacity: 0.5 !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Toolbar (formatting bar, link edit panel)                          */
+/* Match Strand popover — border only, no shadow                     */
+/* ------------------------------------------------------------------ */
+.bn-toolbar.bn-toolbar {
+  padding: 0.25rem !important;
+  background-color: var(--bg-base) !important;
+  border: 1px solid var(--border-base) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: none !important;
+}
+
+/* Edit link text input wrapper — strip BlockNote's bg/border/shadow,
+   make it a transparent layout container inside the toolbar card */
+.bn-text-input.bn-text-input {
+  height: auto !important;
+  padding: 0.25rem 0.25rem 0.25rem 0.5rem !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Actual input inside — Strand input base style
+   BlockNote injects "h-auto border-none p-0" via className, so we
+   need !important on every property to guarantee our styles win. */
+.bn-text-input.bn-text-input input.bn-text-input,
+.bn-text-input.bn-text-input input {
+  height: 2rem !important;
+  padding: 0.375rem 0.5rem !important;
+  font-size: 0.8125rem !important;
+  line-height: 1.25rem !important;
+  color: var(--fg-base) !important;
+  outline: none !important;
+  background-color: var(--bg-field-component) !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  box-shadow: var(--borders-base) !important;
+  transition: all 0.15s !important;
+}
+
+.bn-text-input.bn-text-input input:hover {
+  background-color: var(--bg-field-component-hover) !important;
+}
+
+.bn-text-input.bn-text-input input:focus-visible {
+  box-shadow: var(--borders-interactive-with-active) !important;
+}
