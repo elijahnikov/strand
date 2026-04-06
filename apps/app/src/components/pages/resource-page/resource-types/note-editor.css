@@ -156,13 +156,13 @@
 /* Match Strand MenuPopup / MenuItem 1:1                              */
 /* ------------------------------------------------------------------ */
 
-/* Container — rounded-lg, base bg, border (no shadow) — match Strand PopoverContent */
+/* Container — rounded-2xl, component bg, border (no shadow) — match Strand MenuPopup */
 .bn-suggestion-menu[role="listbox"] {
   padding: 0.25rem;
   overscroll-behavior: contain;
-  background-color: var(--bg-base);
+  background-color: var(--bg-component);
   border: 1px solid var(--border-base);
-  border-radius: 0.5rem;
+  border-radius: 1rem;
   box-shadow: none;
 }
 
@@ -297,9 +297,9 @@
 /* ------------------------------------------------------------------ */
 .bn-toolbar.bn-toolbar {
   padding: 0.25rem !important;
-  background-color: var(--bg-base) !important;
+  background-color: var(--bg-component) !important;
   border: 1px solid var(--border-base) !important;
-  border-radius: 0.5rem !important;
+  border-radius: 1rem !important;
   box-shadow: none !important;
 }
 
@@ -338,4 +338,19 @@
 
 .bn-text-input.bn-text-input input:focus-visible {
   box-shadow: var(--borders-interactive-with-active) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Grid suggestion menu (emoji picker)                                */
+/* Match Strand MenuPopup — rounded-2xl, component bg, border, no shadow */
+/* ------------------------------------------------------------------ */
+.bn-grid-suggestion-menu {
+  background-color: var(--bg-component) !important;
+  border: 1px solid var(--border-base) !important;
+  border-radius: 1rem !important;
+  box-shadow: none !important;
+}
+
+.bn-grid-suggestion-menu-item {
+  border-radius: var(--radius-xl, 0.75rem) !important;
 }
