@@ -169,6 +169,43 @@ async function insertFileResource(
   });
 }
 
+export const updateContent = workspaceMutation({
+  args: {
+    resourceId: v.id("resource"),
+    htmlContent: v.optional(v.string()),
+    jsonContent: v.optional(v.string()),
+    plainTextContent: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const resource = await ctx.db.get(args.resourceId);
+    if (!resource || resource.workspaceId !== ctx.workspace._id) {
+      throw new ConvexError("Resource not found");
+    }
+
+    const existing = await ctx.db
+      .query("resourceContent")
+      .withIndex("by_resource", (q) => q.eq("resourceId", args.resourceId))
+      .unique();
+
+    const patch = {
+      htmlContent: args.htmlContent,
+      jsonContent: args.jsonContent,
+      plainTextContent: args.plainTextContent,
+    };
+
+    if (existing) {
+      await ctx.db.patch(existing._id, patch);
+    } else {
+      await ctx.db.insert("resourceContent", {
+        resourceId: args.resourceId,
+        ...patch,
+      });
+    }
+
+    await ctx.db.patch(args.resourceId, { updatedAt: Date.now() });
+  },
+});
+
 export const updateTitle = workspaceMutation({
   args: {
     resourceId: v.id("resource"),

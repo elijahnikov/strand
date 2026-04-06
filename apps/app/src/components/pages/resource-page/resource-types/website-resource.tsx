@@ -3,7 +3,17 @@ import { Card } from "@strand/ui/card";
 import { FlickeringGrid } from "@strand/ui/flickering-grid";
 import { FileCodeIcon, GlobeIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+const NoteEditor = lazy(() => import("./note-editor"));
+
 import { Tweet } from "react-tweet";
 import type { GetResourceData } from "~/lib/convex-types";
 import { RelatedResources } from "../related-resources";
@@ -375,10 +385,13 @@ export function WebsiteResource({ resource }: { resource: GetResourceData }) {
     return <WebsiteImage title={resource.title} website={website} />;
   };
 
+  const content = "content" in resource ? resource.content : null;
+
   return (
     <div className="mx-auto mt-2 w-[55%]">
       <ResourceHeader resource={resource} />
       {renderPreview()}
+
       <ResourceTags
         aiStatus={resource.resourceAI?.status}
         resourceId={resource._id}
@@ -391,6 +404,13 @@ export function WebsiteResource({ resource }: { resource: GetResourceData }) {
           links={resource.links}
         />
       )}
+      <Suspense fallback={<div className="mt-6 min-h-[100px]" />}>
+        <NoteEditor
+          jsonContent={content?.jsonContent ?? undefined}
+          key={resource._id}
+          resourceId={resource._id}
+        />
+      </Suspense>
     </div>
   );
 }

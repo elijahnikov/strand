@@ -134,6 +134,14 @@ export default defineSchema({
     plainTextContent: v.optional(v.string()),
   }).index("by_resource", ["resourceId"]),
 
+  // RESOURCE CONTENT (editor content for all resource types)
+  resourceContent: defineTable({
+    resourceId: v.id("resource"),
+    htmlContent: v.optional(v.string()),
+    jsonContent: v.optional(v.string()),
+    plainTextContent: v.optional(v.string()),
+  }).index("by_resource", ["resourceId"]),
+
   // FILE RESOURCE
   fileResource: defineTable({
     resourceId: v.id("resource"),

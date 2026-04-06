@@ -2,7 +2,10 @@ import { Card } from "@strand/ui/card";
 import { FlickeringGrid } from "@strand/ui/flickering-grid";
 import { FileIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
+
+const NoteEditor = lazy(() => import("./note-editor"));
+
 import type { GetResourceData } from "~/lib/convex-types";
 import { getFileLabel } from "~/lib/format";
 import { RelatedResources } from "../related-resources";
@@ -107,6 +110,7 @@ export function FileResource({ resource }: { resource: GetResourceData }) {
       ) : (
         <FilePreviewEmpty mimeType={file?.mimeType ?? undefined} />
       )}
+
       <ResourceTags
         aiStatus={resource.resourceAI?.status}
         resourceId={resource._id}
@@ -119,6 +123,17 @@ export function FileResource({ resource }: { resource: GetResourceData }) {
           links={resource.links}
         />
       )}
+      <Suspense fallback={<div className="mt-6 min-h-[100px]" />}>
+        <NoteEditor
+          jsonContent={
+            "content" in resource
+              ? (resource.content?.jsonContent ?? undefined)
+              : undefined
+          }
+          key={resource._id}
+          resourceId={resource._id}
+        />
+      </Suspense>
     </div>
   );
 }
