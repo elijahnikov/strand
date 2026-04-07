@@ -3,6 +3,7 @@ import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
+import { PageContent } from "~/components/common/page-content";
 import { useFileDropHandler } from "~/hooks/use-file-drop";
 import { usePasteHandler } from "~/hooks/use-paste-handler";
 import { LibraryToolbar } from "./library-toolbar";
@@ -127,7 +128,7 @@ export function LibraryPageComponent({
   return (
     <div>
       <LibraryToolbar onCreateCollection={handleCreateCollection} />
-      <div className="mx-auto w-2/3 px-6 pt-4 pb-4">
+      <PageContent className="pt-4 pb-4" width="xl:w-2/3">
         <ResourceList
           onClearBatch={handleClearBatch}
           onClearPendingCollection={() => setPendingCollection(null)}
@@ -135,7 +136,7 @@ export function LibraryPageComponent({
           uploadingFiles={uploadingFiles}
           workspaceId={workspaceId}
         />
-      </div>
+      </PageContent>
     </div>
   );
 }

@@ -11,6 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { PageContent } from "~/components/common/page-content";
 
 const NoteEditor = lazy(() => import("./note-editor"));
 
@@ -388,7 +389,7 @@ export function WebsiteResource({ resource }: { resource: GetResourceData }) {
   const content = "content" in resource ? resource.content : null;
 
   return (
-    <div className="mx-auto mt-2 w-[55%]">
+    <PageContent className="mt-2">
       <ResourceHeader resource={resource} />
       {renderPreview()}
 
@@ -411,6 +412,6 @@ export function WebsiteResource({ resource }: { resource: GetResourceData }) {
           resourceId={resource._id}
         />
       </Suspense>
-    </div>
+    </PageContent>
   );
 }

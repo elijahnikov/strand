@@ -1,8 +1,9 @@
 import { Skeleton } from "@strand/ui/skeleton";
+import { PageContent } from "~/components/common/page-content";
 
 export function ResourcePageSkeleton() {
   return (
-    <div className="mx-auto mt-2 w-[55%]">
+    <PageContent className="mt-2">
       {/* Header: title */}
       <Skeleton className="h-8 w-3/4" />
       {/* Header: badges row */}
@@ -26,6 +27,6 @@ export function ResourcePageSkeleton() {
         <Skeleton className="h-4 w-5/6" />
         <Skeleton className="h-4 w-4/6" />
       </div>
-    </div>
+    </PageContent>
   );
 }

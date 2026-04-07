@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { PageContent } from "~/components/common/page-content";
 import type { GetResourceData } from "~/lib/convex-types";
 import { RelatedResources } from "../related-resources";
 import { ResourceHeader } from "../resource-header";
@@ -21,7 +22,7 @@ export function NoteResource({ resource }: { resource: GetResourceData }) {
       : (content?.plainTextContent ?? note?.plainTextContent ?? undefined);
 
   return (
-    <div className="mx-auto mt-2 w-1/2">
+    <PageContent className="mt-2">
       <ResourceHeader resource={resource} />
 
       <ResourceTags
@@ -45,6 +46,6 @@ export function NoteResource({ resource }: { resource: GetResourceData }) {
           resourceId={resource._id}
         />
       </Suspense>
-    </div>
+    </PageContent>
   );
 }

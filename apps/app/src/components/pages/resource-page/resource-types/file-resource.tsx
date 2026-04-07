@@ -3,6 +3,7 @@ import { FlickeringGrid } from "@strand/ui/flickering-grid";
 import { FileIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { lazy, Suspense, useState } from "react";
+import { PageContent } from "~/components/common/page-content";
 
 const NoteEditor = lazy(() => import("./note-editor"));
 
@@ -93,7 +94,7 @@ export function FileResource({ resource }: { resource: GetResourceData }) {
   const isPdf = file?.mimeType === "application/pdf";
 
   return (
-    <div className="mx-auto mt-2 w-[55%]">
+    <PageContent className="mt-2">
       <ResourceHeader resource={resource} />
       {isImage && fileUrl ? (
         <ImagePreviewDialog
@@ -134,6 +135,6 @@ export function FileResource({ resource }: { resource: GetResourceData }) {
           resourceId={resource._id}
         />
       </Suspense>
-    </div>
+    </PageContent>
   );
 }

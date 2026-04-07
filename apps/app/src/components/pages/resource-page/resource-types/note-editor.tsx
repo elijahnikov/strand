@@ -1,6 +1,7 @@
 import {
   BlockNoteSchema,
   createCodeBlockSpec,
+  createExtension,
   defaultBlockSpecs,
 } from "@blocknote/core";
 import {
@@ -67,6 +68,20 @@ const schema = BlockNoteSchema.create({
   },
 });
 
+const codeBlockTripleBacktick = createExtension({
+  key: "codeBlockTripleBacktick",
+  inputRules: [
+    {
+      find: /^```$/,
+      replace: () => ({
+        type: "codeBlock" as const,
+        props: { language: "text" },
+        content: [],
+      }),
+    },
+  ],
+});
+
 interface NoteEditorProps {
   htmlContent?: string;
   jsonContent?: string;
@@ -105,6 +120,7 @@ export default function NoteEditor({
 
   const editor = useCreateBlockNote({
     schema,
+    extensions: [codeBlockTripleBacktick],
     initialContent: getInitialContent(jsonContent),
   });
 

@@ -14,6 +14,7 @@ import { useParams } from "@tanstack/react-router";
 import { useAction } from "convex/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { PageContent } from "~/components/common/page-content";
 import { ResourceRow } from "~/components/pages/library-page/resource-row";
 import { CollapsibleSection } from "~/components/pages/resource-page/collapsible-section";
 
@@ -147,7 +148,7 @@ export function TagPageComponent() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-6 py-8">
+    <PageContent className="py-8" width="xl:w-2/3">
       <div className="flex items-center gap-3">
         <div>
           <Heading>
@@ -272,6 +273,6 @@ export function TagPageComponent() {
           </AnimatePresence>
         </CollapsibleSection>
       </div>
-    </div>
+    </PageContent>
   );
 }

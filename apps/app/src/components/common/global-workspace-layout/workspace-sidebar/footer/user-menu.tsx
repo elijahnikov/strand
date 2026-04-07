@@ -48,11 +48,12 @@ export function UserMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="ml-2.5 flex w-full items-center gap-2 rounded-md text-left text-sm hover:bg-accent">
-        <Avatar className="size-7">
-          {user.image && <AvatarImage src={user.image} />}
-          <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-        </Avatar>
+      <DropdownMenuTrigger
+        className="flex size-8! w-full items-center gap-2 rounded-full text-left text-sm hover:bg-accent"
+        render={<Avatar className="size-7" />}
+      >
+        {user.image && <AvatarImage src={user.image} />}
+        <AvatarFallback className="text-xs">{initials}</AvatarFallback>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
