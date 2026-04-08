@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@convex-dev/better-auth": "catalog:convex",
+    "@convex-dev/presence": "catalog:convex",
     "@convex-dev/prosemirror-sync": "catalog:convex",
     "convex": "catalog:convex",
     "convex-helpers": "catalog:convex",
