@@ -1,7 +1,6 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { Avatar, AvatarFallback, AvatarImage } from "@strand/ui/avatar";
 import { Badge } from "@strand/ui/badge";
 import { Separator } from "@strand/ui/separator";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -13,6 +12,7 @@ import { useCallback } from "react";
 import { DotGridLoader } from "~/components/common/dot-grid-loader";
 import { EditableText } from "~/components/common/editable-text";
 import { MiddleTruncate } from "~/components/common/middle-truncate";
+import { UserAvatar } from "~/components/common/user-avatar";
 import type { GetResourceData } from "~/lib/convex-types";
 
 export function ResourceHeader({ resource }: { resource: GetResourceData }) {
@@ -79,15 +79,12 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
         </Badge>
         <Separator className="h-4" orientation="vertical" />
         <Badge variant="mono">
-          <Avatar className="size-3.5">
-            <AvatarImage
-              alt={resource.createdBy?.username}
-              src={resource.createdBy?.image}
-            />
-            <AvatarFallback>
-              {resource.createdBy?.username.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            className="size-3.5"
+            image={resource.createdBy?.image}
+            name={resource.createdBy?.username ?? ""}
+            size={14}
+          />
           {resource.createdBy?.username}
         </Badge>
       </div>

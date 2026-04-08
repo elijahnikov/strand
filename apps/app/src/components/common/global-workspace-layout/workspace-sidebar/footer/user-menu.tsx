@@ -13,6 +13,7 @@ import { Skeleton } from "@strand/ui/skeleton";
 import { useTheme } from "@strand/ui/theme";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
+import BoringAvatar from "boring-avatars";
 import {
   LogOutIcon,
   MonitorIcon,
@@ -39,13 +40,6 @@ export function UserMenu() {
     return null;
   }
 
-  const initials = user.username
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -53,7 +47,9 @@ export function UserMenu() {
         render={<Avatar className="size-7" />}
       >
         {user.image && <AvatarImage src={user.image} />}
-        <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+        <AvatarFallback>
+          <BoringAvatar name={user.username} size={28} variant="marble" />
+        </AvatarFallback>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"

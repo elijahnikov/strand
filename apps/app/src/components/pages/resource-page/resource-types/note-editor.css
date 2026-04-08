@@ -34,6 +34,9 @@
 
   /* Ensure floating menus sit above sidebar/layout chrome */
   --bn-ui-base-z-index: 50;
+  /* Scope BlockNote z-indices so side menu/toolbars don't escape over app chrome (popover, sidebar) */
+  position: relative;
+  z-index: 0;
 }
 
 /* Editor body text */

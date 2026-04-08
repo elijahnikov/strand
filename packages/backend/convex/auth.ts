@@ -26,7 +26,7 @@ export const authComponent = createClient<DataModel, typeof authSchema>(
             emailVerified: doc.emailVerified,
             onboardedAt: undefined,
             onboardingStep: 0,
-            image: doc.image ?? undefined,
+            image: undefined,
           });
           await ctx.runMutation(components.betterAuth.mutations.setUserId, {
             authId: doc._id,
