@@ -47,7 +47,8 @@
     "VITE_SITE_URL",
     "SITE_URL",
     "DISCORD_CLIENT_ID",
-    "DISCORD_CLIENT_SECRET"
+    "DISCORD_CLIENT_SECRET",
+    "JWKS"
   ],
   "globalPassThroughEnv": [
     "NODE_ENV",
