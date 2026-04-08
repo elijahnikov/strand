@@ -78,6 +78,6 @@ export const getLatestJwks = internalAction({
   handler: async (ctx) => {
     const auth = createAuth(ctx);
     const jwks = await auth.api.getLatestJwks();
-    return JSON.parse(JSON.stringify(jwks));
+    return jwks;
   },
 });
