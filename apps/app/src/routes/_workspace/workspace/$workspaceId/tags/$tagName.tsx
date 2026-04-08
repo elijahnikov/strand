@@ -3,6 +3,7 @@ import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { Skeleton } from "@strand/ui/skeleton";
 import { createFileRoute } from "@tanstack/react-router";
+import { PageContent } from "~/components/common/page-content";
 import { TagPageComponent } from "~/components/pages/tag-page";
 
 export const Route = createFileRoute(
@@ -26,13 +27,13 @@ export const Route = createFileRoute(
 
 function TagPageSkeleton() {
   return (
-    <div className="mx-auto w-full max-w-4xl px-6 py-8">
+    <PageContent className="mt-2 py-8" width="xl:w-2/3">
       <Skeleton className="h-8 w-48" />
       <div className="mt-12 flex flex-col gap-y-2">
         {Array.from({ length: 8 }).map((_, i) => (
           <Skeleton className="h-11 w-full" key={i} />
         ))}
       </div>
-    </div>
+    </PageContent>
   );
 }

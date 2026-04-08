@@ -148,7 +148,7 @@ export function TagPageComponent() {
   }
 
   return (
-    <PageContent className="py-8" width="xl:w-2/3">
+    <PageContent className="mt-8 py-8" width="xl:w-2/3">
       <div className="flex items-center gap-3">
         <div>
           <Heading>

@@ -69,7 +69,6 @@ export function LibraryPageComponent({
       }));
       setUploadingFiles((prev) => [...entries, ...prev]);
 
-      // Upload all files in parallel
       await Promise.all(
         files.map(async (file, i) => {
           try {
@@ -128,7 +127,7 @@ export function LibraryPageComponent({
   return (
     <div>
       <LibraryToolbar onCreateCollection={handleCreateCollection} />
-      <PageContent className="pt-4 pb-4" width="xl:w-2/3">
+      <PageContent className="pt-14 pb-4 md:pt-4" width="xl:w-2/3">
         <ResourceList
           onClearBatch={handleClearBatch}
           onClearPendingCollection={() => setPendingCollection(null)}

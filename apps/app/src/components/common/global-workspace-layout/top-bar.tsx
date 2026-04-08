@@ -5,7 +5,7 @@ import { Breadcrumbs } from "./breadcrumbs";
 
 export function TopBar() {
   return (
-    <div className="pointer-events-none absolute top-1 right-1.75 left-1.75 z-50 m-1 flex items-center justify-between">
+    <div className="pointer-events-none fixed right-1.75 left-1.75 z-100 flex h-12.5 items-center justify-between bg-ui-bg-base px-1 md:absolute md:bg-transparent">
       <div className="pointer-events-auto flex items-center">
         <img
           alt="Strand"

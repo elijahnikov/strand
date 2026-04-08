@@ -69,7 +69,7 @@ export function LibraryToolbar({
     ORDER_OPTIONS.find((o) => o.value === order)?.label ?? "Newest";
 
   return (
-    <div className="sticky top-0 z-30 flex w-full items-center gap-x-2 rounded-t-lg bg-ui-bg-base! p-2">
+    <div className="fixed inset-x-0 top-11 z-30 flex w-full items-center gap-x-2 bg-ui-bg-base! p-2 md:sticky md:inset-x-auto md:top-0 md:rounded-t-lg">
       <Input
         className="w-48 rounded-full bg-ui-bg-base-hover shadow-borders-base"
         onChange={(e) => setSearch(e.target.value || null)}

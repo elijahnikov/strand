@@ -17,9 +17,9 @@ export function GlobalLayout({ children }: { children: React.ReactNode }) {
         defaultOpen={true}
         open={true}
       >
+        <TopBar />
         <MainSidebar />
         <DropZoneInset>{children}</DropZoneInset>
-        <TopBar />
       </SidebarProvider>
     </FileDropProvider>
   );
@@ -43,7 +43,9 @@ function DropZoneInset({ children }: { children: React.ReactNode }) {
       {isDragging && (
         <div className="pointer-events-none absolute inset-0 z-50 rounded-[inherit] bg-blue-50 ring-2 ring-blue-400 ring-inset dark:bg-blue-950/30 dark:ring-blue-500" />
       )}
-      <main className="h-full flex-1 overflow-y-auto">{children}</main>
+      <main className="h-full flex-1 overflow-y-auto pt-11 md:pt-0">
+        {children}
+      </main>
     </SidebarInset>
   );
 }
