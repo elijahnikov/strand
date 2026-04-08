@@ -407,7 +407,7 @@ export function WebsiteResource({ resource }: { resource: GetResourceData }) {
       )}
       <Suspense fallback={<div className="mt-6 min-h-[100px]" />}>
         <NoteEditor
-          jsonContent={content?.jsonContent ?? undefined}
+          initialContent={content?.jsonContent ?? undefined}
           key={resource._id}
           resourceId={resource._id}
         />

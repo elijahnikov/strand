@@ -11,15 +11,7 @@ const NoteEditor = lazy(() => import("./note-editor"));
 export function NoteResource({ resource }: { resource: GetResourceData }) {
   const content = "content" in resource ? resource.content : null;
   const note = "note" in resource ? resource.note : null;
-
   const jsonContent = content?.jsonContent ?? note?.jsonContent ?? undefined;
-  const htmlContent = jsonContent
-    ? undefined
-    : (content?.htmlContent ?? note?.htmlContent ?? undefined);
-  const plainTextContent =
-    jsonContent || htmlContent
-      ? undefined
-      : (content?.plainTextContent ?? note?.plainTextContent ?? undefined);
 
   return (
     <PageContent className="mt-2">
@@ -39,10 +31,8 @@ export function NoteResource({ resource }: { resource: GetResourceData }) {
       )}
       <Suspense fallback={<div className="mt-6 min-h-[100px]" />}>
         <NoteEditor
-          htmlContent={htmlContent}
-          jsonContent={jsonContent}
+          initialContent={jsonContent}
           key={resource._id}
-          plainTextContent={plainTextContent}
           resourceId={resource._id}
         />
       </Suspense>

@@ -1,10 +1,16 @@
 import { SidebarInset, SidebarProvider } from "@strand/ui/sidebar";
+import { useParams } from "@tanstack/react-router";
 import { TopBar } from "~/components/common/global-workspace-layout/top-bar";
 import MainSidebar from "~/components/common/global-workspace-layout/workspace-sidebar";
+import { WorkspacePresenceProvider } from "~/components/common/workspace-presence";
 import { FileDropProvider, useFileDrop } from "~/hooks/use-file-drop";
 
 export function GlobalLayout({ children }: { children: React.ReactNode }) {
-  return (
+  const { workspaceId } = useParams({ strict: false }) as {
+    workspaceId?: string;
+  };
+
+  const content = (
     <FileDropProvider>
       <SidebarProvider
         className="bg-ui-bg-subtle!"
@@ -17,6 +23,16 @@ export function GlobalLayout({ children }: { children: React.ReactNode }) {
       </SidebarProvider>
     </FileDropProvider>
   );
+
+  if (workspaceId) {
+    return (
+      <WorkspacePresenceProvider workspaceId={workspaceId}>
+        {content}
+      </WorkspacePresenceProvider>
+    );
+  }
+
+  return content;
 }
 
 function DropZoneInset({ children }: { children: React.ReactNode }) {
