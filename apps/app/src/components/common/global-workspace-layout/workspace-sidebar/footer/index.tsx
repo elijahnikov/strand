@@ -8,6 +8,7 @@ import {
   UserMenuSkeleton,
 } from "~/components/common/global-workspace-layout/workspace-sidebar/footer/user-menu";
 import SidebarLinkItem from "~/components/common/global-workspace-layout/workspace-sidebar/sidebar-link-item";
+import { NotificationsPopover } from "~/components/common/notifications-popover";
 
 export default function WorkspaceSidebarFooter() {
   const params = useParams({ strict: false }) as {
@@ -32,10 +33,15 @@ export default function WorkspaceSidebarFooter() {
             url="https://github.com/your-repo/strand/issues"
           />
         </div>
+        <Suspense>
+          <NotificationsPopover />
+        </Suspense>
       </TooltipProvider>
-      <Suspense fallback={<UserMenuSkeleton />}>
-        <UserMenu />
-      </Suspense>
+      <div className="flex items-center gap-1">
+        <Suspense fallback={<UserMenuSkeleton />}>
+          <UserMenu />
+        </Suspense>
+      </div>
     </SidebarFooter>
   );
 }

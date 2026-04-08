@@ -22,7 +22,6 @@ import {
   SparklesIcon,
   StarIcon,
   TargetIcon,
-  TreesIcon,
   ZapIcon,
 } from "lucide-react";
 
@@ -51,7 +50,6 @@ export const workspaceIcons = [
   { name: "coffee", icon: CoffeeIcon },
   { name: "music", icon: MusicIcon },
   { name: "school", icon: SchoolIcon },
-  { name: "trees", icon: TreesIcon },
 ] as const;
 
 export type WorkspaceIconName = (typeof workspaceIcons)[number]["name"];

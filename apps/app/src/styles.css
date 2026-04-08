@@ -114,6 +114,13 @@
   .debug {
     @apply ring-1 ring-red-500 bg-red-500/10;
   }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
 }
 
 @layer utilities {

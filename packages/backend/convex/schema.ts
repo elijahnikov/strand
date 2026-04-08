@@ -17,6 +17,7 @@ export default defineSchema({
     name: v.string(),
     ownerId: v.id("user"),
     icon: v.optional(v.string()),
+    iconColor: v.optional(v.string()),
     emoji: v.optional(v.string()),
     deletedAt: v.optional(v.number()),
   })
@@ -34,6 +35,27 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_user_last_accessed", ["userId", "lastAccessedAt"])
     .index("by_workspace_user", ["workspaceId", "userId"]),
+
+  // WORKSPACE INVITATION
+  workspaceInvitation: defineTable({
+    workspaceId: v.id("workspace"),
+    invitedEmail: v.string(),
+    invitedUserId: v.optional(v.id("user")),
+    invitedByUserId: v.id("user"),
+    role: v.union(v.literal("admin"), v.literal("member")),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("accepted"),
+      v.literal("declined"),
+      v.literal("revoked")
+    ),
+    createdAt: v.number(),
+    respondedAt: v.optional(v.number()),
+  })
+    .index("by_workspace", ["workspaceId", "status"])
+    .index("by_invited_email", ["invitedEmail", "status"])
+    .index("by_invited_user", ["invitedUserId", "status"])
+    .index("by_workspace_email", ["workspaceId", "invitedEmail"]),
 
   // RESOURCE (base table)
   resource: defineTable({

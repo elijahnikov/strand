@@ -1,6 +1,7 @@
 import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Doc, Id } from "@strand/backend/_generated/dataModel.js";
+import { cn } from "@strand/ui";
 import { Button } from "@strand/ui/button";
 import {
   DropdownMenu,
@@ -17,7 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { UseNavigateResult } from "@tanstack/react-router";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { ChevronsUpDownIcon, PlusIcon } from "lucide-react";
-import { getWorkspaceIcon } from "~/lib/workspace-icons";
+import { WorkspaceIcon } from "~/components/common/workspace-icon";
 
 type Workspace = Doc<"workspace"> & { role: string };
 
@@ -30,7 +31,6 @@ function WorkspaceItem({
   isActive: boolean;
   onSelect: UseNavigateResult<string>;
 }) {
-  const WorkspaceIcon = getWorkspaceIcon(workspace.icon);
   return (
     <DropdownMenuItem
       className={isActive ? "bg-ui-bg-component-hover" : ""}
@@ -41,10 +41,15 @@ function WorkspaceItem({
         })
       }
     >
-      <span className="flex size-5 shrink-0 items-center justify-center rounded text-xs">
-        <WorkspaceIcon className="size-4 shrink-0 text-ui-fg-subtle!" />
+      <WorkspaceIcon
+        emoji={workspace.emoji}
+        icon={workspace.icon}
+        iconColor={workspace.iconColor}
+        size="xs"
+      />
+      <span className={cn("truncate", isActive && "text-ui-fg-base")}>
+        {workspace.name}
       </span>
-      <span className="truncate">{workspace.name}</span>
     </DropdownMenuItem>
   );
 }
@@ -66,20 +71,24 @@ export function WorkspaceSwitcher() {
   const owned = workspaces?.filter((w) => w.role === "owner") ?? [];
   const memberOf = workspaces?.filter((w) => w.role !== "owner") ?? [];
 
-  const CurrentWorkspaceIcon = getWorkspaceIcon(current?.icon);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
           <Button
-            className="gap-x-2 rounded-full hover:bg-[rgba(0,0,0,0.070)] hover:dark:bg-[rgba(255,255,255,0.070)]"
+            className="gap-x-1 rounded-full hover:bg-[rgba(0,0,0,0.070)] hover:dark:bg-[rgba(255,255,255,0.070)]"
             size="small"
             variant="ghost"
           />
         }
       >
-        <CurrentWorkspaceIcon className="size-4 shrink-0 text-ui-fg-muted" />
-        <Text className="text-ui-fg-muted" size="small" weight={"plus"}>
+        <WorkspaceIcon
+          emoji={current?.emoji}
+          icon={current?.icon}
+          iconColor={current?.iconColor}
+          size="sm"
+        />
+        <Text size="small" weight={"plus"}>
           {current?.name}
         </Text>
         <ChevronsUpDownIcon className="ml-1 size-3 stroke-[2.25px] text-ui-fg-muted" />
