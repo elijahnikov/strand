@@ -25,7 +25,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { DotGridLoader } from "~/components/common/dot-grid-loader";
 import { EditableText } from "~/components/common/editable-text";
 import { TextShimmer } from "~/components/common/text-shimmer";
-import { downloadFile } from "~/lib/download";
 import { getFileLabel } from "~/lib/format";
 import type { DragItemData } from "./use-library-dnd";
 
@@ -348,15 +347,13 @@ function FileRow({
       </div>
       <div className="relative z-20 flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         {fileUrl && (
-          <button
+          <a
             className="flex h-7 w-7 items-center justify-center rounded-md text-ui-fg-muted transition-colors hover:bg-ui-bg-base hover:text-ui-fg-base"
-            onClick={() =>
-              downloadFile(fileUrl as string, file?.fileName ?? undefined)
-            }
-            type="button"
+            download={file?.fileName}
+            href={fileUrl}
           >
             <DownloadIcon className="h-3.5 w-3.5" />
-          </button>
+          </a>
         )}
         <RowDropdownMenu
           isPinned={isPinned}
@@ -420,9 +417,12 @@ function RowDropdownMenu({
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() =>
-                downloadFile(fileUrl as string, file?.fileName ?? undefined)
-              }
+              onClick={() => {
+                const a = document.createElement("a");
+                a.href = fileUrl as string;
+                a.download = file?.fileName ?? "download";
+                a.click();
+              }}
             >
               <DownloadIcon className="h-4 w-4" />
               Download

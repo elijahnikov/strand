@@ -36,10 +36,10 @@ export function ImagePreviewDialog({
         {children}
       </DialogTrigger>
       <DialogPortal>
-        <DialogBackdrop className="bg-white/50 backdrop-blur-sm dark:bg-black/50" />
-        <DialogPrimitive.Popup className="fixed inset-0 z-50 flex items-center justify-center p-8 outline-none data-ending-style:opacity-0 data-starting-style:opacity-0">
+        <DialogBackdrop className="z-[100] bg-white/50 backdrop-blur-sm dark:bg-black/50" />
+        <DialogPrimitive.Popup className="fixed inset-0 z-[100] flex items-center justify-center p-8 outline-none data-ending-style:opacity-0 data-starting-style:opacity-0">
           <DialogPrimitive.Close className="absolute inset-0" />
-          <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
+          <div className="absolute top-15 right-4 z-[101] flex items-center gap-2">
             <button
               className="flex h-8 w-8 items-center justify-center rounded-full bg-linear-to-t from-blue-500 to-blue-400 text-white outline-none transition-colors hover:from-blue-600 hover:to-blue-500"
               onClick={() => downloadFile(src, fileName)}
@@ -50,7 +50,7 @@ export function ImagePreviewDialog({
             <DialogPrimitive.Close
               className={cn(
                 "min-size-8! flex size-8! items-center justify-center rounded-full! outline-none",
-                buttonVariants({ variant: "outline" })
+                buttonVariants({ variant: "default" })
               )}
             >
               <XIcon className="h-4 w-4 shrink-0" />
@@ -86,10 +86,10 @@ export function PdfPreviewDialog({
         {children}
       </DialogTrigger>
       <DialogPortal>
-        <DialogBackdrop className="bg-black/80 backdrop-blur-sm dark:bg-black/80" />
-        <DialogPrimitive.Popup className="fixed inset-0 z-50 flex flex-col outline-none data-ending-style:opacity-0 data-starting-style:opacity-0">
+        <DialogBackdrop className="z-[100] bg-black/80 backdrop-blur-sm dark:bg-black/80" />
+        <DialogPrimitive.Popup className="fixed inset-0 z-[100] flex flex-col outline-none data-ending-style:opacity-0 data-starting-style:opacity-0">
           <DialogPrimitive.Close className="absolute inset-0" />
-          <div className="relative z-10 flex items-center justify-end gap-2 p-4">
+          <div className="relative top-11 z-10 flex items-center justify-end gap-2 p-4">
             <button
               className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-t from-blue-500 to-blue-400 text-white outline-none transition-colors hover:from-blue-600 hover:to-blue-500"
               onClick={() => downloadFile(url, fileName)}
@@ -97,11 +97,16 @@ export function PdfPreviewDialog({
             >
               <DownloadIcon className="h-4 w-4" />
             </button>
-            <DialogPrimitive.Close className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white outline-none transition-colors hover:bg-white/20">
-              <XIcon className="h-4 w-4" />
+            <DialogPrimitive.Close
+              className={cn(
+                "min-size-8! flex size-8! items-center justify-center rounded-full! outline-none",
+                buttonVariants({ variant: "default" })
+              )}
+            >
+              <XIcon className="h-4 w-4 shrink-0" />
             </DialogPrimitive.Close>
           </div>
-          <div className="relative z-10 flex-1 overflow-y-auto">
+          <div className="pointer-events-none relative z-10 flex-1 overflow-y-auto">
             <Document
               file={url}
               onLoadSuccess={({ numPages: n }) => setNumPages(n)}
@@ -109,7 +114,7 @@ export function PdfPreviewDialog({
               <div className="flex flex-col items-center gap-2 pb-8">
                 {Array.from({ length: numPages }, (_, i) => (
                   <div
-                    className="flex flex-col items-center"
+                    className="pointer-events-auto flex flex-col items-center"
                     key={`page-${i + 1}`}
                   >
                     <Page

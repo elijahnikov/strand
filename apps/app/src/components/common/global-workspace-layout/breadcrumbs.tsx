@@ -24,6 +24,7 @@ const PAGE_LABELS: Record<string, string> = {
   library: "Library",
   search: "Search",
   settings: "Settings",
+  tags: "Tags",
 };
 
 interface BreadcrumbParams {
@@ -59,7 +60,12 @@ export function Breadcrumbs() {
   }
 
   if (currentPage === "tags" && params.tagName) {
-    return <TagBreadcrumbs tagName={params.tagName} />;
+    return (
+      <TagBreadcrumbs
+        tagName={params.tagName}
+        workspaceId={params.workspaceId as string}
+      />
+    );
   }
 
   if (currentPage === "resource") {
@@ -104,11 +110,24 @@ function BreadcrumbTitleSkeleton() {
   );
 }
 
-function TagBreadcrumbs({ tagName }: { tagName: string }) {
+function TagBreadcrumbs({
+  tagName,
+  workspaceId,
+}: {
+  tagName: string;
+  workspaceId: string;
+}) {
   return (
     <>
       <BreadcrumbSeparator />
-      <Text className="txt-small font-medium text-ui-fg-muted">Tags</Text>
+      <Link
+        className="txt-small font-medium text-ui-fg-muted transition-colors hover:text-ui-fg-base"
+        params={{ workspaceId }}
+        preload="intent"
+        to="/workspace/$workspaceId/tags"
+      >
+        Tags
+      </Link>
       <BreadcrumbSeparator />
       <span className="txt-small font-medium text-ui-fg-base">
         <span className="text-ui-fg-muted">#</span>

@@ -281,6 +281,10 @@ export default defineSchema({
   })
     .index("by_workspace", ["workspaceId"])
     .index("by_workspace_name", ["workspaceId", "name"])
+    .searchIndex("search_name", {
+      searchField: "name",
+      filterFields: ["workspaceId"],
+    })
     .vectorIndex("by_embedding", {
       vectorField: "embedding",
       dimensions: 1536,

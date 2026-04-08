@@ -296,12 +296,57 @@ export const listByTag = workspaceQuery({
 });
 
 export const listWorkspaceTags = workspaceQuery({
-  args: {},
-  handler: (ctx) => {
-    return ctx.db
-      .query("tag")
-      .withIndex("by_workspace", (q) => q.eq("workspaceId", ctx.workspace._id))
-      .collect();
+  args: {
+    paginationOpts: paginationOptsValidator,
+    search: v.optional(v.string()),
+    order: v.optional(
+      v.union(
+        v.literal("alphabetical"),
+        v.literal("newest"),
+        v.literal("oldest"),
+        v.literal("most_resources")
+      )
+    ),
+  },
+  handler: async (ctx, args) => {
+    const workspaceId = ctx.workspace._id;
+    const search = args.search?.trim();
+
+    let results;
+
+    if (search) {
+      results = await ctx.db
+        .query("tag")
+        .withSearchIndex("search_name", (q) =>
+          q.search("name", search).eq("workspaceId", workspaceId)
+        )
+        .paginate(args.paginationOpts);
+    } else {
+      results = await ctx.db
+        .query("tag")
+        .withIndex("by_workspace", (q) => q.eq("workspaceId", workspaceId))
+        .paginate(args.paginationOpts);
+    }
+
+    const enrichedPage = await Promise.all(
+      results.page.map(async (tag) => {
+        const resourceTags = await ctx.db
+          .query("resourceTag")
+          .withIndex("by_workspace_tag", (q) =>
+            q.eq("workspaceId", workspaceId).eq("tagId", tag._id)
+          )
+          .collect();
+        return {
+          _id: tag._id,
+          _creationTime: tag._creationTime,
+          name: tag.name,
+          color: tag.color,
+          resourceCount: resourceTags.length,
+        };
+      })
+    );
+
+    return { ...results, page: enrichedPage };
   },
 });
 

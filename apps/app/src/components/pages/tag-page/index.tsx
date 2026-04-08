@@ -104,13 +104,11 @@ export function TagPageComponent() {
         title,
         workspaceId: workspaceId as Id<"workspace">,
       });
-      // Optimistically update direct resources (live query would update eventually, but this avoids the shimmer)
       queryClient.setQueryData(
         listByTagQueryKey,
         (prev: typeof directResources) =>
           prev?.map((r) => (r._id === resourceId ? { ...r, title } : r))
       );
-      // Optimistically update semantic resources (action results are not live)
       setSemanticResources((prev) =>
         prev.map((r) =>
           (r.resource as { _id?: string })._id === resourceId
@@ -148,7 +146,7 @@ export function TagPageComponent() {
   }
 
   return (
-    <PageContent className="mt-8 py-8" width="xl:w-2/3">
+    <PageContent className="mt-12 py-8" width="xl:w-2/3">
       <div className="flex items-center gap-3">
         <div>
           <Heading>
