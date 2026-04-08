@@ -101,9 +101,7 @@ export function WorkspaceSwitcher() {
       >
         {owned.length > 0 && (
           <DropdownMenuGroup>
-            <DropdownMenuLabel className="m-0 p-0 py-1! pl-1! text-[11px] text-ui-fg-subtle">
-              Your workspaces
-            </DropdownMenuLabel>
+            <DropdownMenuLabel>Your workspaces</DropdownMenuLabel>
             {owned.map((workspace) => (
               <WorkspaceItem
                 isActive={workspace._id === workspaceId}
