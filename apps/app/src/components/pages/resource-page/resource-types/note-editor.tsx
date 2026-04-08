@@ -1,4 +1,5 @@
 import {
+  type BlockNoteEditor,
   BlockNoteSchema,
   createCodeBlockSpec,
   createExtension,
@@ -7,18 +8,14 @@ import {
 import {
   FormattingToolbarController,
   SuggestionMenuController,
-  useCreateBlockNote,
 } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
-import { useConvexMutation } from "@convex-dev/react-query";
 import "@blocknote/shadcn/style.css";
 import "./note-editor.css";
+import { useBlockNoteSync } from "@convex-dev/prosemirror-sync/blocknote";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { useTheme } from "@strand/ui/theme";
-import { useMutation } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
-import { useRef } from "react";
 import { strandShadCNComponents } from "./note-editor-components";
 
 const supportedLanguages = {
@@ -83,97 +80,35 @@ const codeBlockTripleBacktick = createExtension({
 });
 
 interface NoteEditorProps {
-  htmlContent?: string;
-  jsonContent?: string;
-  plainTextContent?: string;
+  initialContent?: string;
   resourceId: Id<"resource">;
-}
-
-function getInitialContent(
-  jsonContent?: string,
-  htmlContent?: string,
-  plainTextContent?: string
-) {
-  if (jsonContent) {
-    try {
-      return JSON.parse(jsonContent);
-    } catch {
-      // fall through
-    }
-  }
-  if (htmlContent || plainTextContent) {
-    return undefined;
-  }
-  return undefined;
 }
 
 export default function NoteEditor({
   resourceId,
-  jsonContent,
-  htmlContent,
-  plainTextContent,
+  initialContent,
 }: NoteEditorProps) {
-  const { workspaceId } = useParams({
-    from: "/_workspace/workspace/$workspaceId/resource/$resourceId",
-  });
   const { resolvedTheme } = useTheme();
 
-  const editor = useCreateBlockNote({
-    schema,
-    extensions: [codeBlockTripleBacktick],
-    initialContent: getInitialContent(jsonContent),
+  const sync = useBlockNoteSync<BlockNoteEditor>(api.prosemirror, resourceId, {
+    snapshotDebounceMs: 1500,
+    editorOptions: {
+      schema,
+      extensions: [codeBlockTripleBacktick],
+    },
   });
 
-  const { mutate: saveContent } = useMutation({
-    mutationFn: useConvexMutation(api.resource.mutations.updateContent),
-  });
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const initializedRef = useRef(false);
-
-  if (!initializedRef.current) {
-    initializedRef.current = true;
-    if (!jsonContent && (htmlContent || plainTextContent)) {
-      try {
-        const blocks = htmlContent
-          ? editor.tryParseHTMLToBlocks(htmlContent)
-          : editor.tryParseMarkdownToBlocks(plainTextContent ?? "");
-        if (blocks.length > 0) {
-          editor.replaceBlocks(editor.document, blocks);
-        }
-      } catch {
-        // If parsing fails, start with empty editor
-      }
-    }
+  if (sync.isLoading) {
+    return <div className="mt-12" />;
   }
 
-  const handleChange = () => {
-    clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => {
-      const blocks = editor.document;
-      const json = JSON.stringify(blocks);
-      const html = editor.blocksToHTMLLossy(blocks);
-
-      const textParts: string[] = [];
-      for (const block of blocks) {
-        if ("content" in block && Array.isArray(block.content)) {
-          for (const inline of block.content) {
-            if ("text" in inline && typeof inline.text === "string") {
-              textParts.push(inline.text);
-            }
-          }
-        }
-      }
-      const plain = textParts.join("\n");
-
-      saveContent({
-        resourceId,
-        workspaceId: workspaceId as Id<"workspace">,
-        jsonContent: json,
-        htmlContent: html,
-        plainTextContent: plain,
-      });
-    }, 800);
-  };
+  if (!sync.editor) {
+    const initial = initialContent
+      ? JSON.parse(initialContent)
+      : { type: "doc", content: [] };
+    sync.create(initial);
+    return <div className="mt-12" />;
+  }
 
   const fixedFloating = {
     useFloatingOptions: { strategy: "fixed" as const },
@@ -182,9 +117,8 @@ export default function NoteEditor({
   return (
     <div className="mt-12">
       <BlockNoteView
-        editor={editor}
+        editor={sync.editor}
         formattingToolbar={false}
-        onChange={handleChange}
         shadCNComponents={strandShadCNComponents}
         slashMenu={false}
         theme={resolvedTheme}

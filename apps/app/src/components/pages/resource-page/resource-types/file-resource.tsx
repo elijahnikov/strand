@@ -126,7 +126,7 @@ export function FileResource({ resource }: { resource: GetResourceData }) {
       )}
       <Suspense fallback={<div className="mt-6 min-h-[100px]" />}>
         <NoteEditor
-          jsonContent={
+          initialContent={
             "content" in resource
               ? (resource.content?.jsonContent ?? undefined)
               : undefined
