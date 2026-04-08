@@ -1,9 +1,11 @@
 "use node";
 
 import { createHash } from "node:crypto";
+import { chunkPdfPages, chunkText } from "@strand/ai/chunking";
 import { normalizeConceptName } from "@strand/ai/concepts";
 import { generateEmbedding, generateEmbeddings } from "@strand/ai/embeddings";
 import { createEnricher, type EnricherInput } from "@strand/ai/enrichment";
+import { extractPdfText } from "@strand/ai/pdf";
 import { createOpenAIProvider } from "@strand/ai/providers";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
@@ -233,7 +235,36 @@ export const processResourceAI = internalAction({
         }
       }
 
-      if (content.type === "file") {
+      let extractedPdfText: string | undefined;
+      let pdfPages: Array<{ pageNumber: number; text: string }> | undefined;
+
+      if (
+        content.type === "file" &&
+        content.mimeType === "application/pdf" &&
+        content.fileUrl
+      ) {
+        try {
+          const response = await fetch(content.fileUrl);
+          const buffer = await response.arrayBuffer();
+          const extraction = await extractPdfText(buffer);
+          extractedPdfText = extraction.fullText;
+          pdfPages = extraction.pages;
+
+          await ctx.runMutation(
+            internal.resource.aiInternals.updateFileExtractedText,
+            {
+              resourceId: args.resourceId,
+              extractedText: extraction.fullText.slice(0, 100_000),
+            }
+          );
+
+          embeddingText = extraction.fullText;
+        } catch {
+          // PDF extraction failed — fall back to summary-based embedding
+        }
+      }
+
+      if (content.type === "file" && !extractedPdfText) {
         embeddingText = `${result.summary} ${result.tags.join(" ")}`;
       }
 
@@ -262,6 +293,62 @@ export const processResourceAI = internalAction({
           workspaceId: content.workspaceId,
         }
       );
+
+      const CHUNK_MIN_LENGTH = 2000;
+      const MAX_CHUNKS = 100;
+
+      let chunkableText: string | undefined;
+
+      if (content.type === "website") {
+        chunkableText = content.articleContent ?? undefined;
+      } else if (content.type === "note") {
+        chunkableText = content.plainTextContent ?? undefined;
+      } else if (extractedPdfText) {
+        chunkableText = extractedPdfText;
+      }
+
+      if (chunkableText && chunkableText.length > CHUNK_MIN_LENGTH) {
+        const contentHash = computeHash(chunkableText);
+
+        const existingHash = await ctx.runQuery(
+          internal.resource.aiInternals.getResourceChunkHash,
+          { resourceId: args.resourceId }
+        );
+
+        if (existingHash !== contentHash) {
+          await ctx.runMutation(
+            internal.resource.aiInternals.deleteResourceChunks,
+            { resourceId: args.resourceId }
+          );
+
+          const chunks = pdfPages
+            ? chunkPdfPages(pdfPages)
+            : chunkText(chunkableText);
+
+          const cappedChunks = chunks.slice(0, MAX_CHUNKS);
+          const chunkTexts = cappedChunks.map((c) => c.content);
+          const { embeddings: chunkEmbeddings, model: chunkModel } =
+            await generateEmbeddings(provider, chunkTexts);
+
+          const chunkDocs = cappedChunks.map((chunk, i) => ({
+            resourceId: args.resourceId,
+            workspaceId: content.workspaceId,
+            chunkIndex: i,
+            content: chunk.content,
+            embedding: chunkEmbeddings[i] as number[],
+            model: chunkModel,
+            startOffset: chunk.startOffset,
+            endOffset: chunk.endOffset,
+            metadata: chunk.metadata,
+            contentHash,
+          }));
+
+          await ctx.runMutation(
+            internal.resource.aiInternals.insertResourceChunks,
+            { chunks: chunkDocs }
+          );
+        }
+      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
@@ -417,6 +504,89 @@ export const generateResourceLinks = internalAction({
         );
       }
     }
+  },
+});
+
+export const chunkSemanticSearch = internalAction({
+  args: {
+    workspaceId: v.id("workspace"),
+    query: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return [];
+    }
+
+    const provider = createOpenAIProvider(apiKey);
+    const { embedding } = await generateEmbedding(provider, args.query);
+
+    const results = await ctx.vectorSearch("resourceChunk", "by_embedding", {
+      vector: embedding,
+      limit: (args.limit ?? 10) * 3,
+      filter: (q) => q.eq("workspaceId", args.workspaceId),
+    });
+
+    const seen = new Set<string>();
+    const chunks: Array<{
+      chunkId: string;
+      resourceId: string;
+      content: string;
+      score: number;
+      chunkIndex: number;
+      metadata?: { pageNumber?: number; sectionHeader?: string };
+      resource: {
+        _id: string;
+        title: string;
+        type: string;
+      };
+    }> = [];
+
+    const maxResults = args.limit ?? 10;
+
+    for (const result of results) {
+      if (chunks.length >= maxResults) {
+        break;
+      }
+
+      const chunk = await ctx.runQuery(
+        internal.resource.aiInternals.getChunkById,
+        { chunkId: result._id }
+      );
+      if (!chunk) {
+        continue;
+      }
+
+      if (seen.has(chunk.resourceId)) {
+        continue;
+      }
+      seen.add(chunk.resourceId);
+
+      const resource = await ctx.runQuery(
+        internal.resource.aiInternals.getResourceById,
+        { resourceId: chunk.resourceId }
+      );
+      if (!resource) {
+        continue;
+      }
+
+      chunks.push({
+        chunkId: chunk._id,
+        resourceId: chunk.resourceId,
+        content: chunk.content,
+        score: result._score,
+        chunkIndex: chunk.chunkIndex,
+        metadata: chunk.metadata,
+        resource: {
+          _id: resource._id,
+          title: resource.title,
+          type: resource.type,
+        },
+      });
+    }
+
+    return chunks;
   },
 });
 

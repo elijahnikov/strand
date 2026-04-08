@@ -175,6 +175,7 @@ export default defineSchema({
     height: v.optional(v.number()),
     duration: v.optional(v.number()),
     thumbnailStorageId: v.optional(v.id("_storage")),
+    extractedText: v.optional(v.string()),
   })
     .index("by_resource", ["resourceId"])
     .index("by_mime_type", ["resourceId", "mimeType"]),
@@ -212,6 +213,33 @@ export default defineSchema({
     inputHash: v.optional(v.string()),
   })
     .index("by_resource", ["resourceId"])
+    .index("by_workspace", ["workspaceId"])
+    .vectorIndex("by_embedding", {
+      vectorField: "embedding",
+      dimensions: 1536,
+      filterFields: ["workspaceId"],
+    }),
+
+  // RESOURCE CHUNK (content chunks with per-chunk embeddings for RAG)
+  resourceChunk: defineTable({
+    resourceId: v.id("resource"),
+    workspaceId: v.id("workspace"),
+    chunkIndex: v.number(),
+    content: v.string(),
+    embedding: v.array(v.float64()),
+    model: v.string(),
+    startOffset: v.number(),
+    endOffset: v.number(),
+    metadata: v.optional(
+      v.object({
+        pageNumber: v.optional(v.number()),
+        sectionHeader: v.optional(v.string()),
+      })
+    ),
+    contentHash: v.string(),
+  })
+    .index("by_resource", ["resourceId"])
+    .index("by_resource_chunk", ["resourceId", "chunkIndex"])
     .index("by_workspace", ["workspaceId"])
     .vectorIndex("by_embedding", {
       vectorField: "embedding",

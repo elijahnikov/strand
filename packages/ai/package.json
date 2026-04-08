@@ -10,7 +10,9 @@
     "./embeddings": "./src/embeddings.ts",
     "./providers": "./src/providers.ts",
     "./schemas": "./src/schemas.ts",
-    "./concepts": "./src/concepts.ts"
+    "./concepts": "./src/concepts.ts",
+    "./chunking": "./src/chunking.ts",
+    "./pdf": "./src/pdf.ts"
   },
   "license": "MIT",
   "scripts": {
@@ -24,7 +26,8 @@
     "@mozilla/readability": "^0.5.0",
     "ai": "^4.3.16",
     "linkedom": "^0.18.9",
-    "react-tweet": "^3.3.0"
+    "react-tweet": "^3.3.0",
+    "unpdf": "^1.4.0"
   },
   "devDependencies": {
     "@strand/tsconfig": "workspace:*",

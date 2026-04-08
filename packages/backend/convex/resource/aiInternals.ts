@@ -56,6 +56,7 @@ export const getResourceContent = internalQuery({
           workspaceId: resource.workspaceId,
           fileName: file?.fileName,
           mimeType: file?.mimeType,
+          extractedText: file?.extractedText,
           fileUrl,
         };
       }
@@ -268,5 +269,87 @@ export const getEmbeddingById = internalQuery({
   },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.embeddingId);
+  },
+});
+
+export const getResourceChunkHash = internalQuery({
+  args: {
+    resourceId: v.id("resource"),
+  },
+  handler: async (ctx, args) => {
+    const chunk = await ctx.db
+      .query("resourceChunk")
+      .withIndex("by_resource", (q) => q.eq("resourceId", args.resourceId))
+      .first();
+    return chunk?.contentHash ?? null;
+  },
+});
+
+export const deleteResourceChunks = internalMutation({
+  args: {
+    resourceId: v.id("resource"),
+  },
+  handler: async (ctx, args) => {
+    const chunks = await ctx.db
+      .query("resourceChunk")
+      .withIndex("by_resource", (q) => q.eq("resourceId", args.resourceId))
+      .collect();
+    for (const chunk of chunks) {
+      await ctx.db.delete(chunk._id);
+    }
+  },
+});
+
+export const insertResourceChunks = internalMutation({
+  args: {
+    chunks: v.array(
+      v.object({
+        resourceId: v.id("resource"),
+        workspaceId: v.id("workspace"),
+        chunkIndex: v.number(),
+        content: v.string(),
+        embedding: v.array(v.float64()),
+        model: v.string(),
+        startOffset: v.number(),
+        endOffset: v.number(),
+        metadata: v.optional(
+          v.object({
+            pageNumber: v.optional(v.number()),
+            sectionHeader: v.optional(v.string()),
+          })
+        ),
+        contentHash: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    for (const chunk of args.chunks) {
+      await ctx.db.insert("resourceChunk", chunk);
+    }
+  },
+});
+
+export const getChunkById = internalQuery({
+  args: {
+    chunkId: v.id("resourceChunk"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.chunkId);
+  },
+});
+
+export const updateFileExtractedText = internalMutation({
+  args: {
+    resourceId: v.id("resource"),
+    extractedText: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const file = await ctx.db
+      .query("fileResource")
+      .withIndex("by_resource", (q) => q.eq("resourceId", args.resourceId))
+      .unique();
+    if (file) {
+      await ctx.db.patch(file._id, { extractedText: args.extractedText });
+    }
   },
 });

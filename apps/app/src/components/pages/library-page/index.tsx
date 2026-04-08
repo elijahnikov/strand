@@ -1,6 +1,7 @@
 import { useConvexMutation } from "@convex-dev/react-query";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { toastManager } from "@strand/ui/toast";
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { PageContent } from "~/components/common/page-content";
@@ -8,6 +9,8 @@ import { useFileDropHandler } from "~/hooks/use-file-drop";
 import { usePasteHandler } from "~/hooks/use-paste-handler";
 import { LibraryToolbar } from "./library-toolbar";
 import { ResourceList } from "./resource-list";
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 export function LibraryPageComponent({
   workspaceId,
@@ -61,8 +64,19 @@ export function LibraryPageComponent({
 
   const handleFiles = useCallback(
     async (files: File[]) => {
+      const validFiles = files.filter((f) => f.size <= MAX_FILE_SIZE);
+      if (validFiles.length < files.length) {
+        toastManager.add({
+          type: "error",
+          title: "Files over 50MB are not supported",
+        });
+        if (validFiles.length === 0) {
+          return;
+        }
+      }
+
       const batchId = `batch-${Date.now()}`;
-      const entries = files.map((file, i) => ({
+      const entries = validFiles.map((file, i) => ({
         id: `${file.name}-${Date.now()}-${i}`,
         name: file.name,
         batchId,
@@ -70,7 +84,7 @@ export function LibraryPageComponent({
       setUploadingFiles((prev) => [...entries, ...prev]);
 
       await Promise.all(
-        files.map(async (file, i) => {
+        validFiles.map(async (file, i) => {
           try {
             const uploadUrl = await generateUploadUrl({});
             const response = await fetch(uploadUrl as string, {
