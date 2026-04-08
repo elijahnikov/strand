@@ -157,6 +157,11 @@ async function insertFileResource(
     );
   }
 
+  const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+  if (args.fileSize > MAX_FILE_SIZE) {
+    throw new ConvexError("File size exceeds the 50MB limit");
+  }
+
   await ctx.db.insert("fileResource", {
     resourceId,
     storageId: args.storageId,
