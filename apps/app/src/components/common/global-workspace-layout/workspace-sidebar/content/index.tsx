@@ -47,7 +47,7 @@ export default function WorkspaceSidebarContent() {
         icon: RiChat1Fill,
         title: "Chat",
         url: `/workspace/${params.workspaceId}/chat`,
-        isActive: pathname === `${workspacePath}/chat`,
+        isActive: pathname.startsWith(`${workspacePath}/chat`),
       },
       {
         icon: RiHashtag,

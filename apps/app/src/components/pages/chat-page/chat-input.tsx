@@ -1,4 +1,5 @@
 import { RiSendPlaneFill, RiStopFill } from "@remixicon/react";
+import { cn } from "@strand/ui";
 import { Button } from "@strand/ui/button";
 import { useCallback, useRef, useState } from "react";
 
@@ -47,10 +48,17 @@ export function ChatInput({
   );
 
   return (
-    <div className="border-t px-4 py-3">
-      <div className="mx-auto flex max-w-2xl items-end gap-2">
+    <div className="px-4 pt-0 pb-3">
+      <div
+        className={cn("relative mx-auto max-w-2xl", [
+          "txt-compact-small w-full rounded-md bg-ui-bg-field-component text-ui-fg-base placeholder-ui-fg-muted caret-ui-fg-base shadow-borders-base outline-none transition-fg hover:bg-ui-bg-field-component-hover",
+          "focus-visible:shadow-borders-interactive-with-active",
+          "disabled:cursor-not-allowed disabled:bg-ui-bg-disabled! disabled:text-ui-fg-disabled disabled:placeholder-ui-fg-disabled",
+          "invalid:shadow-borders-error! aria-invalid:shadow-borders-error!",
+        ])}
+      >
         <textarea
-          className="min-h-[40px] flex-1 resize-none rounded-lg border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-ring"
+          className="txt-compact-small max-h-[200px] min-h-[80px] w-full resize-none py-2 pr-10 pl-3 outline-none placeholder:text-muted-foreground"
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           placeholder="Ask about your library..."
@@ -59,17 +67,23 @@ export function ChatInput({
           value={value}
         />
         {isStreaming ? (
-          <Button onClick={onStop} size="small" variant="outline">
-            <RiStopFill className="size-4" />
+          <Button
+            className="absolute right-2 bottom-1.5 size-7 rounded-full"
+            onClick={onStop}
+            size="small"
+            variant="outline"
+          >
+            <RiStopFill className="size-4 shrink-0" />
           </Button>
         ) : (
           <Button
+            className="absolute right-2 bottom-1.5 size-7 rounded-full"
             disabled={!value.trim()}
             onClick={handleSubmit}
             size="small"
-            variant="default"
+            variant="strand"
           >
-            <RiSendPlaneFill className="size-4" />
+            <RiSendPlaneFill className="size-4 shrink-0" />
           </Button>
         )}
       </div>

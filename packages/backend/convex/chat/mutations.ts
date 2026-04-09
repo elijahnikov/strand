@@ -67,6 +67,25 @@ export const saveUserMessage = workspaceMutation({
   },
 });
 
+export const updateThreadTitle = workspaceMutation({
+  args: {
+    threadId: v.id("chatThread"),
+    title: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const thread = await ctx.db.get(args.threadId);
+    if (
+      !thread ||
+      thread.workspaceId !== ctx.workspace._id ||
+      thread.userId !== ctx.user._id
+    ) {
+      throw new ConvexError("Thread not found");
+    }
+
+    await ctx.db.patch(args.threadId, { title: args.title });
+  },
+});
+
 export const saveAssistantMessage = workspaceMutation({
   args: {
     threadId: v.id("chatThread"),

@@ -90,7 +90,7 @@ export function buildSystemPrompt(ragContext: RAGContext): string {
 
 Rules:
 - Ground your answers in the user's library content whenever possible.
-- When referencing a specific resource, mention its title so the user knows the source.
+- When mentioning a resource by name, use this syntax inline in your text: [[resource:RESOURCE_ID|Title|type]] — for example, write "I found relevant info in [[resource:abc123|My Article|website]] about..." instead of "I found relevant info in **My Article** about...". Never bold the title separately or add the reference at the end — always use the inline syntax wherever the title naturally appears in the sentence.
 - Use the searchLibrary tool when the user asks about topics not covered in the provided context.
 - Be concise but thorough.
 - When you don't have enough context from the library, say so honestly.

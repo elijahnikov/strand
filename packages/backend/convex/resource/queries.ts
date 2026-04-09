@@ -1,4 +1,4 @@
-import { paginationOptsValidator } from "convex/server";
+import { type PaginationResult, paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
@@ -312,7 +312,7 @@ export const listWorkspaceTags = workspaceQuery({
     const workspaceId = ctx.workspace._id;
     const search = args.search?.trim();
 
-    let results;
+    let results: PaginationResult<Doc<"tag">>;
 
     if (search) {
       results = await ctx.db
@@ -530,3 +530,20 @@ const enrichResource = async (ctx: QueryCtx, resource: Doc<"resource">) => {
       return { ...resource, aiStatus: resourceAI?.status };
   }
 };
+
+export const getPreview = workspaceQuery({
+  args: { resourceId: v.id("resource") },
+  handler: async (ctx, args) => {
+    const resource = await ctx.db.get(args.resourceId);
+    if (!resource || resource.workspaceId !== ctx.workspace._id) {
+      return null;
+    }
+    const preview = await getResourcePreview(ctx, resource);
+    return {
+      _id: resource._id,
+      title: resource.title,
+      type: resource.type,
+      preview,
+    };
+  },
+});

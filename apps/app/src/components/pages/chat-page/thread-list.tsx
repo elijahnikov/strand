@@ -1,81 +1,111 @@
 import { useConvexPaginatedQuery } from "@convex-dev/react-query";
+import { RiAddLine } from "@remixicon/react";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { cn } from "@strand/ui";
+import { Button } from "@strand/ui/button";
 import { ScrollArea } from "@strand/ui/scroll-area";
+import { Skeleton } from "@strand/ui/skeleton";
+import { Text } from "@strand/ui/text";
+import { Link } from "@tanstack/react-router";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useRef } from "react";
 
-function formatRelativeTime(timestamp: number): string {
-  const now = Date.now();
-  const diff = now - timestamp;
-  const minutes = Math.floor(diff / 60_000);
-  if (minutes < 1) {
-    return "Just now";
-  }
-  if (minutes < 60) {
-    return `${minutes}m ago`;
-  }
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) {
-    return `${hours}h ago`;
-  }
-  const days = Math.floor(hours / 24);
-  if (days < 7) {
-    return `${days}d ago`;
-  }
-  return new Date(timestamp).toLocaleDateString();
+function ThreadListSkeleton() {
+  return (
+    <div className="flex flex-col gap-2 p-2">
+      {Array.from({ length: 17 }).map((_, i) => (
+        <Skeleton className="h-8 w-full rounded-md" key={i} />
+      ))}
+    </div>
+  );
 }
 
 export function ThreadList({
   workspaceId,
   activeThreadId,
-  onSelectThread,
   onNewChat,
 }: {
   workspaceId: Id<"workspace">;
   activeThreadId?: Id<"chatThread">;
-  onSelectThread: (threadId: Id<"chatThread">) => void;
   onNewChat: () => void;
 }) {
-  const { results: threads, isLoading } = useConvexPaginatedQuery(
+  const { results: threads, status } = useConvexPaginatedQuery(
     api.chat.queries.listThreads,
     { workspaceId },
     { initialNumItems: 50 }
   );
 
+  const initialLoadDone = useRef(false);
+
+  useEffect(() => {
+    if (threads.length > 0 && !initialLoadDone.current) {
+      initialLoadDone.current = true;
+    }
+  }, [threads.length]);
+
+  const isFirstLoad = status === "LoadingFirstPage" && threads.length === 0;
+
   return (
-    <div className="flex h-full w-64 shrink-0 flex-col border-r">
-      {/* <div className="flex items-center justify-between border-b p-3">
-        <span className="font-medium text-sm">Threads</span>
-        <Button onClick={onNewChat} size="small" variant="ghost">
-          <RiAddLine className="size-4" />
+    <div className="relative flex h-full w-64 shrink-0 flex-col">
+      <div className="flex items-center justify-between pt-2 pl-2">
+        <Button
+          className="mr-2"
+          onClick={onNewChat}
+          size="small"
+          variant="outline"
+        >
+          New chat
+          <RiAddLine className="size-4 shrink-0" />
         </Button>
-      </div> */}
+      </div>
       <ScrollArea className="flex-1">
-        <div className="flex flex-col gap-0.5 p-2">
-          {threads.map((thread) => (
-            <button
-              className={cn(
-                "flex flex-col items-start gap-0.5 rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-muted",
-                activeThreadId === thread._id && "bg-muted"
-              )}
-              key={thread._id}
-              onClick={() => onSelectThread(thread._id)}
-              type="button"
-            >
-              <span className="line-clamp-1 font-medium">
-                {thread.title ?? "New chat"}
-              </span>
-              <span className="text-muted-foreground text-xs">
-                {formatRelativeTime(thread.lastMessageAt)}
-              </span>
-            </button>
-          ))}
-          {threads.length === 0 && !isLoading && (
-            <div className="px-3 py-6 text-center text-muted-foreground text-sm">
-              No conversations yet
-            </div>
-          )}
-        </div>
+        {isFirstLoad ? (
+          <ThreadListSkeleton />
+        ) : (
+          <div className="flex flex-col gap-1.5 p-2">
+            <AnimatePresence>
+              {threads.map((thread, i) => (
+                <Link
+                  key={thread._id}
+                  params={{
+                    workspaceId: workspaceId as string,
+                    threadId: thread._id as string,
+                  }}
+                  preload="intent"
+                  to="/workspace/$workspaceId/chat/$threadId"
+                >
+                  <motion.div
+                    animate={{ opacity: 1, y: 0 }}
+                    className={cn(
+                      "flex flex-col items-start rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-muted",
+                      activeThreadId === thread._id && "bg-muted"
+                    )}
+                    exit={{ opacity: 0, height: 0 }}
+                    initial={
+                      initialLoadDone.current ? false : { opacity: 0, y: 8 }
+                    }
+                    transition={{
+                      type: "spring",
+                      stiffness: 500,
+                      damping: 35,
+                      delay: initialLoadDone.current ? 0 : i * 0.03,
+                    }}
+                  >
+                    <Text className="line-clamp-1 font-medium" size="small">
+                      {thread.title ?? "New chat"}
+                    </Text>
+                  </motion.div>
+                </Link>
+              ))}
+            </AnimatePresence>
+            {threads.length === 0 && (
+              <div className="px-3 py-6 text-center text-muted-foreground text-sm">
+                No conversations yet
+              </div>
+            )}
+          </div>
+        )}
       </ScrollArea>
     </div>
   );

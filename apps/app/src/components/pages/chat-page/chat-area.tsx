@@ -1,9 +1,12 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { Skeleton } from "@strand/ui/skeleton";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { UIMessage } from "ai";
 import { useCallback, useEffect, useRef } from "react";
+import { DotGridLoader } from "~/components/common/dot-grid-loader";
+import { TextShimmer } from "~/components/common/text-shimmer";
 import { useLibraryChat } from "~/hooks/use-library-chat";
 import { ChatInput } from "./chat-input";
 import { MessageBubble } from "./message-bubble";
@@ -37,47 +40,103 @@ export function ChatArea({
     mutationFn: useConvexMutation(api.chat.mutations.createThread),
   });
 
-  const { data: thread } = useQuery(
-    threadId
-      ? convexQuery(api.chat.queries.getThread, { threadId, workspaceId })
-      : { queryKey: ["chat", "thread", "none"], queryFn: () => null }
+  const { data: thread, isLoading: isLoadingThread } = useQuery(
+    convexQuery(
+      api.chat.queries.getThread,
+      threadId ? { threadId, workspaceId } : "skip"
+    )
   );
 
-  const initialMessages = thread?.messages
-    ? convertToUIMessages(thread.messages)
-    : undefined;
-
-  const { messages, sendMessage, status, stop } = useLibraryChat({
+  const { messages, sendMessage, setMessages, status, stop } = useLibraryChat({
     workspaceId,
     threadId,
-    initialMessages,
   });
 
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const threadIdRef = useRef(threadId);
-  threadIdRef.current = threadId;
+  const hasSyncedRef = useRef(false);
+  const prevThreadIdRef = useRef(threadId);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on new messages
+  // Reset sync flag when threadId changes (switching threads)
+  if (prevThreadIdRef.current !== threadId) {
+    prevThreadIdRef.current = threadId;
+    hasSyncedRef.current = false;
+  }
+
+  useEffect(() => {
+    if (thread?.messages?.length && !hasSyncedRef.current) {
+      hasSyncedRef.current = true;
+      setMessages(convertToUIMessages(thread.messages));
+    }
+  }, [thread?.messages, setMessages]);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const lastMessageContent = messages
+    .at(-1)
+    ?.parts?.filter(
+      (p): p is Extract<typeof p, { type: "text" }> => p.type === "text"
+    )
+    .map((p) => p.text)
+    .join("");
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on new messages and streaming content
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages.length]);
+  }, [messages.length, lastMessageContent]);
 
   const isStreaming = status === "streaming" || status === "submitted";
 
   const handleSend = useCallback(
     async (content: string) => {
-      let currentThreadId = threadIdRef.current;
+      let currentThreadId = threadId;
       if (!currentThreadId) {
         currentThreadId = await createThread({ workspaceId });
-        threadIdRef.current = currentThreadId;
         onThreadCreated?.(currentThreadId);
       }
       sendMessage({ text: content }, { body: { threadId: currentThreadId } });
     },
-    [createThread, workspaceId, onThreadCreated, sendMessage]
+    [threadId, createThread, workspaceId, onThreadCreated, sendMessage]
   );
+
+  if (threadId && isLoadingThread) {
+    return (
+      <div className="flex flex-1 flex-col">
+        <div className="flex-1 overflow-y-auto">
+          <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-8">
+            {/* User message skeleton */}
+            <div className="flex flex-row-reverse gap-3">
+              <Skeleton className="size-7 shrink-0 rounded-full" />
+              <Skeleton className="h-10 w-48 rounded-xl" />
+            </div>
+            {/* Assistant message skeleton */}
+            <div className="flex gap-3">
+              <Skeleton className="size-7 shrink-0 rounded-full" />
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-4 w-72 rounded-xl" />
+                <Skeleton className="h-4 w-56 rounded-xl" />
+                <Skeleton className="h-4 w-64 rounded-xl" />
+              </div>
+            </div>
+            {/* User message skeleton */}
+            <div className="flex flex-row-reverse gap-3">
+              <Skeleton className="size-7 shrink-0 rounded-full" />
+              <Skeleton className="h-10 w-36 rounded-xl" />
+            </div>
+            {/* Assistant message skeleton */}
+            <div className="flex gap-3">
+              <Skeleton className="size-7 shrink-0 rounded-full" />
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-4 w-64 rounded-xl" />
+                <Skeleton className="h-4 w-80 rounded-xl" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <ChatInput isStreaming={false} onSend={handleSend} onStop={stop} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-1 flex-col">
@@ -95,9 +154,11 @@ export function ChatArea({
             <MessageBubble key={message.id} message={message} />
           ))}
           {isStreaming && messages.at(-1)?.role !== "assistant" && (
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <div className="size-1.5 animate-pulse rounded-full bg-muted-foreground" />
-              Thinking...
+            <div className="ml-4 flex items-center gap-2">
+              <DotGridLoader />
+              <TextShimmer className="ml-2 text-[13px]">
+                Thinking...
+              </TextShimmer>
             </div>
           )}
         </div>
