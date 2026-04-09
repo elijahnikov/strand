@@ -58,12 +58,6 @@ export const saveUserMessage = workspaceMutation({
     });
 
     await ctx.db.patch(args.threadId, { lastMessageAt: now });
-
-    if (!thread.title) {
-      await ctx.db.patch(args.threadId, {
-        title: args.content.slice(0, 60).trim(),
-      });
-    }
   },
 });
 

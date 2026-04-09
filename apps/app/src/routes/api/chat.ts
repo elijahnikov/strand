@@ -8,6 +8,7 @@ import {
   buildSystemPrompt,
   createOpenAIModel,
   extractCitations,
+  generateThreadTitle,
   saveAssistantMessage,
 } from "~/lib/chat-server";
 
@@ -91,6 +92,22 @@ export const Route = createFileRoute("/api/chat")({
               text,
               citations
             );
+
+            const isFirstExchange =
+              messages.filter((m) => m.role === "user").length === 1;
+            if (isFirstExchange) {
+              generateThreadTitle(lastUserContent, text)
+                .then((title) =>
+                  fetchAuthMutation(api.chat.mutations.updateThreadTitle, {
+                    workspaceId: workspaceId as Id<"workspace">,
+                    threadId: threadId as Id<"chatThread">,
+                    title,
+                  })
+                )
+                .catch(() => {
+                  // Title generation failed — thread keeps no title, not critical
+                });
+            }
           },
         });
 

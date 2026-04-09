@@ -1,7 +1,7 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { jsonSchema, tool } from "ai";
+import { generateText, jsonSchema, tool } from "ai";
 import {
   fetchAuthAction,
   fetchAuthMutation,
@@ -231,6 +231,20 @@ export function extractCitations(ragContext: RAGContext): Citation[] {
   }
 
   return citations;
+}
+
+export async function generateThreadTitle(
+  userMessage: string,
+  assistantMessage: string
+): Promise<string> {
+  const model = createOpenAIModel();
+  const { text } = await generateText({
+    model,
+    system:
+      "Generate a short, concise title (max 50 chars) for this conversation. Return ONLY the title text, no quotes or extra punctuation.",
+    prompt: `User: ${userMessage.slice(0, 500)}\n\nAssistant: ${assistantMessage.slice(0, 500)}`,
+  });
+  return text.trim().slice(0, 60);
 }
 
 export async function saveAssistantMessage(

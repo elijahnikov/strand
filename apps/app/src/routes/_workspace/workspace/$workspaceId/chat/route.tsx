@@ -28,20 +28,21 @@ function ChatLayout() {
     routeThreadId
   );
 
-  // Track when we just created a thread so we skip the route sync
+  const [chatKey, setChatKey] = useState(() => routeThreadId ?? "new");
   const justCreatedRef = useRef(false);
 
-  // Sync when route params change (clicking sidebar links, browser back/forward)
   useEffect(() => {
     if (justCreatedRef.current) {
       justCreatedRef.current = false;
       return;
     }
     setActiveThreadId(routeThreadId);
+    setChatKey(routeThreadId ?? "new");
   }, [routeThreadId]);
 
   const handleNewChat = useCallback(() => {
     setActiveThreadId(undefined);
+    setChatKey("new");
     navigate({
       to: "/workspace/$workspaceId/chat",
       params: { workspaceId },
@@ -51,6 +52,7 @@ function ChatLayout() {
   const handleThreadCreated = useCallback(
     (newThreadId: Id<"chatThread">) => {
       justCreatedRef.current = true;
+      setActiveThreadId(newThreadId);
       navigate({
         to: "/workspace/$workspaceId/chat/$threadId",
         params: { workspaceId, threadId: newThreadId },
@@ -68,7 +70,7 @@ function ChatLayout() {
         workspaceId={workspaceId as Id<"workspace">}
       />
       <ChatArea
-        key={activeThreadId ?? "new"}
+        key={chatKey}
         onThreadCreated={handleThreadCreated}
         threadId={activeThreadId as Id<"chatThread"> | undefined}
         workspaceId={workspaceId as Id<"workspace">}
