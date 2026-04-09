@@ -16,10 +16,9 @@ const MAX_PAGES = 50;
 export async function extractPdfText(
   pdfBuffer: ArrayBuffer
 ): Promise<PdfExtraction> {
-  const { text, totalPages } = await extractText(
-    new Uint8Array(pdfBuffer),
-    { mergePages: false }
-  );
+  const { text, totalPages } = await extractText(new Uint8Array(pdfBuffer), {
+    mergePages: false,
+  });
 
   const pages: PdfPage[] = text
     .slice(0, MAX_PAGES)

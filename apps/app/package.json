@@ -11,6 +11,8 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.52",
+    "@ai-sdk/react": "^3.0.156",
     "@blocknote/core": "^0.47.3",
     "@blocknote/react": "^0.47.3",
     "@blocknote/shadcn": "^0.47.3",
@@ -32,6 +34,7 @@
     "@tanstack/react-router-ssr-query": "catalog:tanstack",
     "@tanstack/react-router-with-query": "catalog:tanstack",
     "@tanstack/react-start": "catalog:tanstack",
+    "ai": "^6.0.154",
     "better-auth": "catalog:better-auth",
     "boring-avatars": "^2.0.4",
     "date-fns": "^4.1.0",

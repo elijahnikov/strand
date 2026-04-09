@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkspaceRouteImport } from './routes/_workspace'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -20,6 +21,7 @@ import { Route as WorkspaceWorkspaceWorkspaceIdIndexRouteImport } from './routes
 import { Route as WorkspaceWorkspaceWorkspaceIdTagsRouteImport } from './routes/_workspace/workspace/$workspaceId/tags'
 import { Route as WorkspaceWorkspaceWorkspaceIdSettingsRouteImport } from './routes/_workspace/workspace/$workspaceId/settings'
 import { Route as WorkspaceWorkspaceWorkspaceIdSearchRouteImport } from './routes/_workspace/workspace/$workspaceId/search'
+import { Route as WorkspaceWorkspaceWorkspaceIdChatRouteImport } from './routes/_workspace/workspace/$workspaceId/chat'
 import { Route as WorkspaceWorkspaceWorkspaceIdLibraryRouteRouteImport } from './routes/_workspace/workspace/$workspaceId/library/route'
 import { Route as WorkspaceWorkspaceWorkspaceIdTagsIndexRouteImport } from './routes/_workspace/workspace/$workspaceId/tags/index'
 import { Route as WorkspaceWorkspaceWorkspaceIdLibraryIndexRouteImport } from './routes/_workspace/workspace/$workspaceId/library/index'
@@ -38,6 +40,11 @@ const AuthRoute = AuthRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
@@ -85,6 +92,12 @@ const WorkspaceWorkspaceWorkspaceIdSearchRoute =
     path: '/search',
     getParentRoute: () => WorkspaceWorkspaceWorkspaceIdRouteRoute,
   } as any)
+const WorkspaceWorkspaceWorkspaceIdChatRoute =
+  WorkspaceWorkspaceWorkspaceIdChatRouteImport.update({
+    id: '/chat',
+    path: '/chat',
+    getParentRoute: () => WorkspaceWorkspaceWorkspaceIdRouteRoute,
+  } as any)
 const WorkspaceWorkspaceWorkspaceIdLibraryRouteRoute =
   WorkspaceWorkspaceWorkspaceIdLibraryRouteRouteImport.update({
     id: '/library',
@@ -126,9 +139,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
+  '/api/chat': typeof ApiChatRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceWorkspaceIdRouteRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/workspace/$workspaceId/library': typeof WorkspaceWorkspaceWorkspaceIdLibraryRouteRouteWithChildren
+  '/workspace/$workspaceId/chat': typeof WorkspaceWorkspaceWorkspaceIdChatRoute
   '/workspace/$workspaceId/search': typeof WorkspaceWorkspaceWorkspaceIdSearchRoute
   '/workspace/$workspaceId/settings': typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   '/workspace/$workspaceId/tags': typeof WorkspaceWorkspaceWorkspaceIdTagsRouteWithChildren
@@ -143,7 +158,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
+  '/api/chat': typeof ApiChatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/workspace/$workspaceId/chat': typeof WorkspaceWorkspaceWorkspaceIdChatRoute
   '/workspace/$workspaceId/search': typeof WorkspaceWorkspaceWorkspaceIdSearchRoute
   '/workspace/$workspaceId/settings': typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceWorkspaceIdIndexRoute
@@ -160,9 +177,11 @@ export interface FileRoutesById {
   '/_workspace': typeof WorkspaceRouteWithChildren
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
+  '/api/chat': typeof ApiChatRoute
   '/_workspace/workspace/$workspaceId': typeof WorkspaceWorkspaceWorkspaceIdRouteRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_workspace/workspace/$workspaceId/library': typeof WorkspaceWorkspaceWorkspaceIdLibraryRouteRouteWithChildren
+  '/_workspace/workspace/$workspaceId/chat': typeof WorkspaceWorkspaceWorkspaceIdChatRoute
   '/_workspace/workspace/$workspaceId/search': typeof WorkspaceWorkspaceWorkspaceIdSearchRoute
   '/_workspace/workspace/$workspaceId/settings': typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   '/_workspace/workspace/$workspaceId/tags': typeof WorkspaceWorkspaceWorkspaceIdTagsRouteWithChildren
@@ -179,9 +198,11 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
+    | '/api/chat'
     | '/workspace/$workspaceId'
     | '/api/auth/$'
     | '/workspace/$workspaceId/library'
+    | '/workspace/$workspaceId/chat'
     | '/workspace/$workspaceId/search'
     | '/workspace/$workspaceId/settings'
     | '/workspace/$workspaceId/tags'
@@ -196,7 +217,9 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
+    | '/api/chat'
     | '/api/auth/$'
+    | '/workspace/$workspaceId/chat'
     | '/workspace/$workspaceId/search'
     | '/workspace/$workspaceId/settings'
     | '/workspace/$workspaceId'
@@ -212,9 +235,11 @@ export interface FileRouteTypes {
     | '/_workspace'
     | '/_auth/login'
     | '/_auth/register'
+    | '/api/chat'
     | '/_workspace/workspace/$workspaceId'
     | '/api/auth/$'
     | '/_workspace/workspace/$workspaceId/library'
+    | '/_workspace/workspace/$workspaceId/chat'
     | '/_workspace/workspace/$workspaceId/search'
     | '/_workspace/workspace/$workspaceId/settings'
     | '/_workspace/workspace/$workspaceId/tags'
@@ -230,6 +255,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
   WorkspaceRoute: typeof WorkspaceRouteWithChildren
+  ApiChatRoute: typeof ApiChatRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -254,6 +280,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_auth/register': {
@@ -310,6 +343,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/workspace/$workspaceId/search'
       preLoaderRoute: typeof WorkspaceWorkspaceWorkspaceIdSearchRouteImport
+      parentRoute: typeof WorkspaceWorkspaceWorkspaceIdRouteRoute
+    }
+    '/_workspace/workspace/$workspaceId/chat': {
+      id: '/_workspace/workspace/$workspaceId/chat'
+      path: '/chat'
+      fullPath: '/workspace/$workspaceId/chat'
+      preLoaderRoute: typeof WorkspaceWorkspaceWorkspaceIdChatRouteImport
       parentRoute: typeof WorkspaceWorkspaceWorkspaceIdRouteRoute
     }
     '/_workspace/workspace/$workspaceId/library': {
@@ -407,6 +447,7 @@ const WorkspaceWorkspaceWorkspaceIdTagsRouteWithChildren =
 
 interface WorkspaceWorkspaceWorkspaceIdRouteRouteChildren {
   WorkspaceWorkspaceWorkspaceIdLibraryRouteRoute: typeof WorkspaceWorkspaceWorkspaceIdLibraryRouteRouteWithChildren
+  WorkspaceWorkspaceWorkspaceIdChatRoute: typeof WorkspaceWorkspaceWorkspaceIdChatRoute
   WorkspaceWorkspaceWorkspaceIdSearchRoute: typeof WorkspaceWorkspaceWorkspaceIdSearchRoute
   WorkspaceWorkspaceWorkspaceIdSettingsRoute: typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   WorkspaceWorkspaceWorkspaceIdTagsRoute: typeof WorkspaceWorkspaceWorkspaceIdTagsRouteWithChildren
@@ -418,6 +459,8 @@ const WorkspaceWorkspaceWorkspaceIdRouteRouteChildren: WorkspaceWorkspaceWorkspa
   {
     WorkspaceWorkspaceWorkspaceIdLibraryRouteRoute:
       WorkspaceWorkspaceWorkspaceIdLibraryRouteRouteWithChildren,
+    WorkspaceWorkspaceWorkspaceIdChatRoute:
+      WorkspaceWorkspaceWorkspaceIdChatRoute,
     WorkspaceWorkspaceWorkspaceIdSearchRoute:
       WorkspaceWorkspaceWorkspaceIdSearchRoute,
     WorkspaceWorkspaceWorkspaceIdSettingsRoute:
@@ -452,6 +495,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
   WorkspaceRoute: WorkspaceRouteWithChildren,
+  ApiChatRoute: ApiChatRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

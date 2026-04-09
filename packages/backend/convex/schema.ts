@@ -342,4 +342,40 @@ export default defineSchema({
     .index("by_resource", ["resourceId"])
     .index("by_tag", ["tagId"])
     .index("by_workspace_tag", ["workspaceId", "tagId"]),
+
+  // CHAT THREAD
+  chatThread: defineTable({
+    workspaceId: v.id("workspace"),
+    userId: v.id("user"),
+    title: v.optional(v.string()),
+    resourceId: v.optional(v.id("resource")),
+    lastMessageAt: v.number(),
+    deletedAt: v.optional(v.number()),
+  })
+    .index("by_workspace_user", [
+      "workspaceId",
+      "userId",
+      "deletedAt",
+      "lastMessageAt",
+    ])
+    .index("by_workspace_resource", ["workspaceId", "resourceId", "deletedAt"]),
+
+  // CHAT MESSAGE
+  chatMessage: defineTable({
+    threadId: v.id("chatThread"),
+    role: v.union(v.literal("user"), v.literal("assistant")),
+    content: v.string(),
+    citations: v.optional(
+      v.array(
+        v.object({
+          resourceId: v.id("resource"),
+          title: v.string(),
+          type: v.string(),
+          snippet: v.optional(v.string()),
+          chunkIndex: v.optional(v.number()),
+        })
+      )
+    ),
+    createdAt: v.number(),
+  }).index("by_thread", ["threadId", "createdAt"]),
 });

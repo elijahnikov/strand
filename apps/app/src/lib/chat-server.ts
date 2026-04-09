@@ -1,0 +1,254 @@
+import { createOpenAI } from "@ai-sdk/openai";
+import { api } from "@strand/backend/_generated/api.js";
+import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { jsonSchema, tool } from "ai";
+import {
+  fetchAuthAction,
+  fetchAuthMutation,
+  fetchAuthQuery,
+} from "./auth-server";
+
+interface ChunkResult {
+  chunkId: string;
+  chunkIndex: number;
+  content: string;
+  metadata?: { pageNumber?: number; sectionHeader?: string };
+  resource: { _id: string; title: string; type: string };
+  resourceId: string;
+  score: number;
+}
+
+export interface RAGContext {
+  chunks: ChunkResult[];
+  scopedResource?: {
+    title: string;
+    type: string;
+    summary?: string;
+    content?: string;
+  } | null;
+}
+
+export function createOpenAIModel() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is not configured");
+  }
+  return createOpenAI({ apiKey }).chat("gpt-4o");
+}
+
+export async function buildRAGContext(
+  workspaceId: string,
+  query: string,
+  resourceId?: string
+): Promise<RAGContext> {
+  const chunks = (await fetchAuthAction(api.chat.actions.searchChunks, {
+    workspaceId: workspaceId as Id<"workspace">,
+    query,
+    limit: 6,
+  })) as ChunkResult[];
+
+  let scopedResource: RAGContext["scopedResource"] = null;
+
+  if (resourceId) {
+    const resource = await fetchAuthQuery(api.resource.queries.get, {
+      workspaceId: workspaceId as Id<"workspace">,
+      resourceId: resourceId as Id<"resource">,
+    });
+
+    if (resource) {
+      const noteContent =
+        resource.type === "note" && "note" in resource
+          ? (resource.note as { plainTextContent?: string } | undefined)
+              ?.plainTextContent
+          : undefined;
+
+      const websiteContent =
+        resource.type === "website" && "website" in resource
+          ? (
+              resource.website as
+                | {
+                    articleContent?: string;
+                  }
+                | undefined
+            )?.articleContent
+          : undefined;
+
+      scopedResource = {
+        title: resource.title,
+        type: resource.type,
+        summary: resource.resourceAI?.summary,
+        content: (noteContent ?? websiteContent)?.slice(0, 4000),
+      };
+    }
+  }
+
+  return { chunks, scopedResource };
+}
+
+export function buildSystemPrompt(ragContext: RAGContext): string {
+  const basePrompt = `You are a knowledgeable assistant for the user's personal knowledge library in Strand. You help users explore, understand, and connect their saved resources (articles, notes, files).
+
+Rules:
+- Ground your answers in the user's library content whenever possible.
+- When referencing a specific resource, mention its title so the user knows the source.
+- Use the searchLibrary tool when the user asks about topics not covered in the provided context.
+- Be concise but thorough.
+- When you don't have enough context from the library, say so honestly.
+- Format responses with markdown for readability.`;
+
+  const sections: string[] = [basePrompt];
+
+  if (ragContext.scopedResource) {
+    const r = ragContext.scopedResource;
+    sections.push(
+      `\n## Current Resource\nTitle: ${r.title}\nType: ${r.type}${r.summary ? `\nSummary: ${r.summary}` : ""}${r.content ? `\nContent:\n${r.content}` : ""}`
+    );
+  }
+
+  if (ragContext.chunks.length > 0) {
+    sections.push("\n## Relevant Library Passages");
+    for (const chunk of ragContext.chunks) {
+      sections.push(
+        `\n### ${chunk.resource.title} (${chunk.resource.type}) [ID: ${chunk.resourceId}]\n${chunk.content}`
+      );
+    }
+  }
+
+  return sections.join("\n");
+}
+
+export function createChatTools(workspaceId: string) {
+  return {
+    searchLibrary: tool({
+      description:
+        "Search the user's library for relevant resources and passages. Use this when the user asks about topics not covered in the provided context.",
+      parameters: jsonSchema<{ query: string; limit?: number }>({
+        type: "object",
+        properties: {
+          query: { type: "string", description: "The search query" },
+          limit: {
+            type: "number",
+            description: "Max results to return, defaults to 5",
+          },
+        },
+        required: ["query"],
+      }),
+      execute: async ({ query, limit = 5 }) => {
+        const [chunks, titleMatches] = await Promise.all([
+          fetchAuthAction(api.chat.actions.searchChunks, {
+            workspaceId: workspaceId as Id<"workspace">,
+            query,
+            limit,
+          }) as Promise<ChunkResult[]>,
+          fetchAuthQuery(api.chat.queries.searchResources, {
+            workspaceId: workspaceId as Id<"workspace">,
+            query,
+            limit: 3,
+          }),
+        ]);
+
+        return {
+          passages: chunks.map((c) => ({
+            resourceId: c.resourceId,
+            resourceTitle: c.resource.title,
+            resourceType: c.resource.type,
+            content: c.content,
+            score: c.score,
+          })),
+          titleMatches: (
+            titleMatches as Array<{
+              _id: string;
+              title: string;
+              type: string;
+            }>
+          ).map((r) => ({
+            resourceId: r._id,
+            title: r.title,
+            type: r.type,
+          })),
+        };
+      },
+    }),
+
+    getResourceDetails: tool({
+      description:
+        "Get full details about a specific resource including its content and AI summary.",
+      parameters: jsonSchema<{ resourceId: string }>({
+        type: "object",
+        properties: {
+          resourceId: {
+            type: "string",
+            description: "The resource ID to look up",
+          },
+        },
+        required: ["resourceId"],
+      }),
+      execute: async ({ resourceId }) => {
+        const resource = await fetchAuthQuery(api.resource.queries.get, {
+          workspaceId: workspaceId as Id<"workspace">,
+          resourceId: resourceId as Id<"resource">,
+        });
+
+        if (!resource) {
+          return { error: "Resource not found" };
+        }
+
+        return {
+          title: resource.title,
+          type: resource.type,
+          summary: resource.resourceAI?.summary,
+          tags: resource.resourceAI?.tags,
+        };
+      },
+    }),
+  };
+}
+
+export interface Citation {
+  chunkIndex?: number;
+  resourceId: string;
+  snippet?: string;
+  title: string;
+  type: string;
+}
+
+export function extractCitations(ragContext: RAGContext): Citation[] {
+  const citations: Citation[] = [];
+  const seen = new Set<string>();
+
+  for (const chunk of ragContext.chunks) {
+    if (seen.has(chunk.resourceId)) {
+      continue;
+    }
+    seen.add(chunk.resourceId);
+    citations.push({
+      resourceId: chunk.resourceId,
+      title: chunk.resource.title,
+      type: chunk.resource.type,
+      snippet: chunk.content.slice(0, 200),
+      chunkIndex: chunk.chunkIndex,
+    });
+  }
+
+  return citations;
+}
+
+export async function saveAssistantMessage(
+  workspaceId: string,
+  threadId: string,
+  content: string,
+  citations: Citation[]
+) {
+  await fetchAuthMutation(api.chat.mutations.saveAssistantMessage, {
+    workspaceId: workspaceId as Id<"workspace">,
+    threadId: threadId as Id<"chatThread">,
+    content,
+    citations: citations.map((c) => ({
+      resourceId: c.resourceId as Id<"resource">,
+      title: c.title,
+      type: c.type,
+      snippet: c.snippet,
+      chunkIndex: c.chunkIndex,
+    })),
+  });
+}

@@ -1,5 +1,6 @@
 import {
   RiBookmarkFill,
+  RiChat1Fill,
   RiHashtag,
   RiHome3Fill,
   RiSearch2Fill,
@@ -41,6 +42,12 @@ export default function WorkspaceSidebarContent() {
         title: "Search",
         url: `/workspace/${params.workspaceId}/search`,
         isActive: pathname === `${workspacePath}/search`,
+      },
+      {
+        icon: RiChat1Fill,
+        title: "Chat",
+        url: `/workspace/${params.workspaceId}/chat`,
+        isActive: pathname === `${workspacePath}/chat`,
       },
       {
         icon: RiHashtag,

@@ -25,6 +25,7 @@ const PAGE_LABELS: Record<string, string> = {
   search: "Search",
   settings: "Settings",
   tags: "Tags",
+  chat: "Chat",
 };
 
 interface BreadcrumbParams {
