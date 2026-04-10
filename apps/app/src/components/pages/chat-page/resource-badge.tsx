@@ -144,7 +144,7 @@ export function ResourceBadge({
           mimeType={resource?.preview?.mimeType}
           type={displayType}
         />
-        <span className="max-w-[200px] truncate font-medium font-mono text-xs">
+        <span className="max-w-[400px] truncate font-medium font-mono text-xs">
           {displayTitle}
         </span>
       </Badge>

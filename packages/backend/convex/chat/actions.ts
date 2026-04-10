@@ -41,7 +41,7 @@ export const searchChunks = action({
 
     const results = await ctx.vectorSearch("resourceChunk", "by_embedding", {
       vector: embedding,
-      limit: (args.limit ?? 5) * 3,
+      limit: (args.limit ?? 10) * 4,
       filter: (q) => q.eq("workspaceId", args.workspaceId),
     });
 
@@ -56,7 +56,7 @@ export const searchChunks = action({
       resource: { _id: string; title: string; type: string };
     }> = [];
 
-    const maxResults = args.limit ?? 5;
+    const maxResults = args.limit ?? 10;
 
     for (const result of results) {
       if (chunks.length >= maxResults) {

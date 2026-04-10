@@ -1,12 +1,13 @@
+import { openai } from "@ai-sdk/openai";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { createFileRoute } from "@tanstack/react-router";
-import { streamText } from "ai";
+import { stepCountIs, streamText } from "ai";
 import { fetchAuthMutation, getToken } from "~/lib/auth-server";
 import {
   buildRAGContext,
   buildSystemPrompt,
-  createOpenAIModel,
+  createChatTools,
   extractCitations,
   generateThreadTitle,
   saveAssistantMessage,
@@ -69,11 +70,14 @@ export const Route = createFileRoute("/api/chat")({
         );
 
         const systemPrompt = buildSystemPrompt(ragContext);
-        const model = createOpenAIModel();
+
+        const tools = createChatTools(workspaceId);
 
         const result = streamText({
-          model,
+          model: openai("gpt-4.1-mini"),
           system: systemPrompt,
+          tools,
+          stopWhen: stepCountIs(5),
           messages: messages.map((m) => ({
             role: m.role as "user" | "assistant",
             content:

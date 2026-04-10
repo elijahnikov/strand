@@ -87,7 +87,7 @@ export function ThreadList({
 
   return (
     <div className="relative flex h-full w-64 shrink-0 flex-col">
-      <div className="flex items-center justify-between pt-2 pl-2">
+      <div className="flex items-center justify-between py-2 pl-2">
         <Button
           className="mr-2"
           onClick={onNewChat}

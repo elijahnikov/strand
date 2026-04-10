@@ -11,6 +11,52 @@ import { useLibraryChat } from "~/hooks/use-library-chat";
 import { ChatInput } from "./chat-input";
 import { MessageBubble } from "./message-bubble";
 
+const TOOL_LABELS: Record<string, string> = {
+  searchLibrary: "Searching library...",
+  getResourceDetails: "Reading resource...",
+};
+
+function StreamingIndicator({ messages }: { messages: UIMessage[] }) {
+  const lastMessage = messages.at(-1);
+
+  // Check if the last assistant message has an in-progress tool invocation
+  if (lastMessage?.role === "assistant") {
+    const toolPart = lastMessage.parts.find(
+      (p) =>
+        p.type.startsWith("tool-") &&
+        "state" in p &&
+        p.state !== "output-available"
+    );
+    if (toolPart && "toolCallId" in toolPart) {
+      // Extract tool name from the type field (e.g. "tool-invocation" parts have type like "tool-searchLibrary")
+      const toolName = toolPart.type.replace("tool-", "");
+      const label = TOOL_LABELS[toolName] ?? "Using tool...";
+      return (
+        <div className="ml-4 flex items-center gap-2">
+          <DotGridLoader />
+          <TextShimmer className="ml-2 text-[13px]">{label}</TextShimmer>
+        </div>
+      );
+    }
+
+    // Assistant message exists with text content — model is streaming text, no indicator needed
+    const hasText = lastMessage.parts.some(
+      (p) => p.type === "text" && "text" in p && (p.text as string).length > 0
+    );
+    if (hasText) {
+      return null;
+    }
+  }
+
+  // Default: waiting for first response
+  return (
+    <div className="ml-4 flex items-center gap-2">
+      <DotGridLoader />
+      <TextShimmer className="ml-2 text-[13px]">Thinking...</TextShimmer>
+    </div>
+  );
+}
+
 function convertToUIMessages(
   messages: Array<{
     _id: string;
@@ -153,14 +199,7 @@ export function ChatArea({
           {messages.map((message) => (
             <MessageBubble key={message.id} message={message} />
           ))}
-          {isStreaming && messages.at(-1)?.role !== "assistant" && (
-            <div className="ml-4 flex items-center gap-2">
-              <DotGridLoader />
-              <TextShimmer className="ml-2 text-[13px]">
-                Thinking...
-              </TextShimmer>
-            </div>
-          )}
+          {isStreaming && <StreamingIndicator messages={messages} />}
         </div>
       </div>
       <ChatInput isStreaming={isStreaming} onSend={handleSend} onStop={stop} />

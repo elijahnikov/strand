@@ -1,7 +1,8 @@
-import { createOpenAI } from "@ai-sdk/openai";
+import { openai } from "@ai-sdk/openai";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { generateText, jsonSchema, tool } from "ai";
+import { generateText, tool } from "ai";
+import { z } from "zod";
 import {
   fetchAuthAction,
   fetchAuthMutation,
@@ -29,11 +30,7 @@ export interface RAGContext {
 }
 
 export function createOpenAIModel() {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
-  }
-  return createOpenAI({ apiKey }).chat("gpt-4o");
+  return openai("gpt-4.1-mini");
 }
 
 export async function buildRAGContext(
@@ -44,7 +41,7 @@ export async function buildRAGContext(
   const chunks = (await fetchAuthAction(api.chat.actions.searchChunks, {
     workspaceId: workspaceId as Id<"workspace">,
     query,
-    limit: 6,
+    limit: 10,
   })) as ChunkResult[];
 
   let scopedResource: RAGContext["scopedResource"] = null;
@@ -122,28 +119,26 @@ export function createChatTools(workspaceId: string) {
     searchLibrary: tool({
       description:
         "Search the user's library for relevant resources and passages. Use this when the user asks about topics not covered in the provided context.",
-      parameters: jsonSchema<{ query: string; limit?: number }>({
-        type: "object",
-        properties: {
-          query: { type: "string", description: "The search query" },
-          limit: {
-            type: "number",
-            description: "Max results to return, defaults to 5",
-          },
-        },
-        required: ["query"],
+      inputSchema: z.object({
+        query: z.string().describe("The search query"),
+        limit: z
+          .number()
+          .describe("Max results to return, defaults to 5")
+          .nullable(),
       }),
-      execute: async ({ query, limit = 5 }) => {
+      execute: async ({ query, limit }) => {
+        console.log("[tool:searchLibrary]", { query, limit });
+        const effectiveLimit = limit ?? 10;
         const [chunks, titleMatches] = await Promise.all([
           fetchAuthAction(api.chat.actions.searchChunks, {
             workspaceId: workspaceId as Id<"workspace">,
             query,
-            limit,
+            limit: effectiveLimit,
           }) as Promise<ChunkResult[]>,
           fetchAuthQuery(api.chat.queries.searchResources, {
             workspaceId: workspaceId as Id<"workspace">,
             query,
-            limit: 3,
+            limit: 10,
           }),
         ]);
 
@@ -172,33 +167,33 @@ export function createChatTools(workspaceId: string) {
 
     getResourceDetails: tool({
       description:
-        "Get full details about a specific resource including its content and AI summary.",
-      parameters: jsonSchema<{ resourceId: string }>({
-        type: "object",
-        properties: {
-          resourceId: {
-            type: "string",
-            description: "The resource ID to look up",
-          },
-        },
-        required: ["resourceId"],
+        "Get full details about a specific resource including its content and AI summary. IMPORTANT: Only use resourceId values that were returned by the searchLibrary tool or provided in the system prompt context (they look like 'k57abc...' format). Never guess or fabricate an ID.",
+      inputSchema: z.object({
+        resourceId: z
+          .string()
+          .describe("The exact resource ID from search results or context"),
       }),
       execute: async ({ resourceId }) => {
-        const resource = await fetchAuthQuery(api.resource.queries.get, {
-          workspaceId: workspaceId as Id<"workspace">,
-          resourceId: resourceId as Id<"resource">,
-        });
+        console.log("[tool:getResourceDetails]", { resourceId });
+        try {
+          const resource = await fetchAuthQuery(api.resource.queries.get, {
+            workspaceId: workspaceId as Id<"workspace">,
+            resourceId: resourceId as Id<"resource">,
+          });
 
-        if (!resource) {
-          return { error: "Resource not found" };
+          if (!resource) {
+            return { error: "Resource not found" };
+          }
+
+          return {
+            title: resource.title,
+            type: resource.type,
+            summary: resource.resourceAI?.summary,
+            tags: resource.resourceAI?.tags,
+          };
+        } catch {
+          return { error: "Invalid resource ID or resource not found" };
         }
-
-        return {
-          title: resource.title,
-          type: resource.type,
-          summary: resource.resourceAI?.summary,
-          tags: resource.resourceAI?.tags,
-        };
       },
     }),
   };
