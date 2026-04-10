@@ -4,44 +4,55 @@ import { api } from "@strand/backend/_generated/api.js";
 import { cn } from "@strand/ui";
 import { useQuery } from "@tanstack/react-query";
 import type { UIMessage } from "ai";
-import type { ReactNode } from "react";
+import { Streamdown } from "streamdown";
 import { UserAvatar } from "~/components/common/user-avatar";
 import { ResourceBadge } from "./resource-badge";
 
 const RESOURCE_PATTERN = /\[\[resource:([^|]+)\|([^|]+)\|([^\]]+)\]\]/g;
 
-function parseMessageContent(text: string): ReactNode[] {
-  const parts: ReactNode[] = [];
-  let lastIndex = 0;
-
-  for (const match of text.matchAll(RESOURCE_PATTERN)) {
-    const [full, resourceId = "", title = "", type = ""] = match;
-    const index = match.index;
-
-    if (index > lastIndex) {
-      parts.push(text.slice(lastIndex, index));
-    }
-
-    parts.push(
-      <ResourceBadge
-        key={`${resourceId}-${index}`}
-        resourceId={resourceId}
-        title={title}
-        type={type}
-      />
-    );
-
-    lastIndex = index + full.length;
-  }
-
-  if (lastIndex < text.length) {
-    parts.push(text.slice(lastIndex));
-  }
-
-  return parts;
+// Convert [[resource:ID|Title|type]] → [Title](resource://ID/type)
+// so Streamdown can parse it as a markdown link, then we override the `a`
+// component to render a ResourceBadge for these links.
+function preprocessResourceLinks(text: string): string {
+  return text.replace(RESOURCE_PATTERN, (_full, id, title, type) => {
+    // Escape pipes/brackets in title for markdown safety
+    const safeTitle = title.replace(/[[\]]/g, "");
+    return `[${safeTitle}](resource://${id}/${type})`;
+  });
 }
 
-export function MessageBubble({ message }: { message: UIMessage }) {
+const markdownComponents = {
+  a: ({
+    href,
+    children,
+  }: {
+    href?: string;
+    children?: React.ReactNode;
+  }) => {
+    if (href?.startsWith("resource://")) {
+      const withoutScheme = href.slice("resource://".length);
+      const slashIdx = withoutScheme.indexOf("/");
+      const resourceId =
+        slashIdx >= 0 ? withoutScheme.slice(0, slashIdx) : withoutScheme;
+      const type = slashIdx >= 0 ? withoutScheme.slice(slashIdx + 1) : "";
+      const title = typeof children === "string" ? children : String(children);
+      return <ResourceBadge resourceId={resourceId} title={title} type={type} />;
+    }
+    return (
+      <a href={href} rel="noopener noreferrer" target="_blank">
+        {children}
+      </a>
+    );
+  },
+};
+
+export function MessageBubble({
+  message,
+  isStreaming,
+}: {
+  message: UIMessage;
+  isStreaming?: boolean;
+}) {
   const isUser = message.role === "user";
 
   const { data } = useQuery(convexQuery(api.user.queries.currentUser, {}));
@@ -55,9 +66,9 @@ export function MessageBubble({ message }: { message: UIMessage }) {
     .map((part) => part.text)
     .join("");
 
-  const renderedContent = isUser
+  const processedText = isUser
     ? textContent
-    : parseMessageContent(textContent);
+    : preprocessResourceLinks(textContent);
 
   return (
     <div className={cn("flex gap-2", isUser && "flex-row-reverse")}>
@@ -81,8 +92,18 @@ export function MessageBubble({ message }: { message: UIMessage }) {
             : "bg-transparent"
         )}
       >
-        <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap leading-relaxed">
-          {renderedContent}
+        <div className="prose prose-sm dark:prose-invert max-w-none leading-relaxed">
+          {isUser ? (
+            <div className="whitespace-pre-wrap">{processedText}</div>
+          ) : (
+            <Streamdown
+              animated
+              components={markdownComponents}
+              isAnimating={isStreaming}
+            >
+              {processedText}
+            </Streamdown>
+          )}
         </div>
       </div>
     </div>

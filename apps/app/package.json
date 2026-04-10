@@ -48,6 +48,7 @@
     "react-intersection-observer": "^10.0.3",
     "react-pdf": "^10.4.1",
     "react-tweet": "^3.3.0",
+    "streamdown": "^2.5.0",
     "superjson": "2.2.3",
     "zod": "catalog:",
     "zustand": "^5.0.12"

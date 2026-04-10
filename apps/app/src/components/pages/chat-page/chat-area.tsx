@@ -196,8 +196,12 @@ export function ChatArea({
               </p>
             </div>
           )}
-          {messages.map((message) => (
-            <MessageBubble key={message.id} message={message} />
+          {messages.map((message, idx) => (
+            <MessageBubble
+              isStreaming={isStreaming && idx === messages.length - 1}
+              key={message.id}
+              message={message}
+            />
           ))}
           {isStreaming && <StreamingIndicator messages={messages} />}
         </div>
