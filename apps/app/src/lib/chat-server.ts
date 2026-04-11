@@ -30,7 +30,7 @@ export interface RAGContext {
 }
 
 export function createOpenAIModel() {
-  return openai("gpt-4.1-mini");
+  return openai("gpt-5.1-mini");
 }
 
 export async function buildRAGContext(
@@ -106,8 +106,14 @@ EXAMPLES — these are ALL WRONG, never do these:
 - "[My Article](resource://k57abc/website)" — wrong syntax, this is a markdown link
 - "**My Article**" — bold instead of resource reference
 - "the article (resource:k57abc)" — wrong format
+- "...as covered here:\\n\\n[[resource:k57abc|My Article|website]]\\n." — NEVER put the reference on its own line. NEVER let punctuation dangle on a line by itself. The reference must sit INSIDE a sentence.
 
-Every single time you reference a saved resource, replace its title in your prose with the full [[resource:ID|Title|type]] syntax. Never write the title separately. Never use markdown links for library resources. Always include all three fields.
+CRITICAL placement rules:
+- The reference must be inline within a sentence — surrounded by words on both sides.
+- Punctuation (period, comma, etc.) goes IMMEDIATELY after the closing ]] with no line break, like: "...as practiced in [[resource:k57abc|My Article|website]]." — note the period directly after ]].
+- Never insert a blank line before or after a [[resource:...]] reference unless it's the only content in the sentence.
+
+Every single time you reference a saved resource, replace its title in your prose with the full [[resource:ID|Title|type]] syntax. Never write the title separately. Never use markdown links for library resources. Always include all three fields. Always inline the reference within a sentence.
 
 ## Other Rules
 
@@ -279,9 +285,8 @@ export async function generateThreadTitle(
   userMessage: string,
   assistantMessage: string
 ): Promise<string> {
-  const model = createOpenAIModel();
   const { text } = await generateText({
-    model,
+    model: openai("gpt-5-nano"),
     system:
       "Generate a short, concise title (max 50 chars) for this conversation. Return ONLY the title text, no quotes or extra punctuation.",
     prompt: `User: ${userMessage.slice(0, 500)}\n\nAssistant: ${assistantMessage.slice(0, 500)}`,

@@ -144,8 +144,8 @@ export function ResourceTags({
                 to="/workspace/$workspaceId/tags/$tagName"
               >
                 <Badge
-                  className="group flex items-center gap-x-0.5 px-[1.5px] font-mono text-xs shadow-borders-base"
-                  variant="secondary"
+                  className="group flex items-center gap-x-0.5 text-xs"
+                  variant="mono"
                 >
                   <span className="text-ui-fg-muted">#</span>
                   {tag.name}

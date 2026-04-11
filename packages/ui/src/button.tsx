@@ -6,7 +6,7 @@ import type * as React from "react";
 
 const buttonVariants = cva(
   [
-    "relative inline-flex w-fit items-center justify-center rounded-lg outline-none",
+    "relative inline-flex group w-fit items-center justify-center rounded-lg outline-none",
     "disabled:border-ui-border-base disabled:opacity-50 disabled:after:hidden",
     "disabled:pointer-events-none",
     'after:absolute after:inset-0 after:content-[""]',

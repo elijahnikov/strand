@@ -130,21 +130,21 @@ export function ResourceBadge({
 
   return (
     <Link
-      className="inline-flex -translate-y-[2px] align-middle"
+      className="inline-flex max-w-full -translate-y-[2px] align-middle"
       params={{
         workspaceId: workspaceId as string,
         resourceId,
       }}
       to="/workspace/$workspaceId/resource/$resourceId"
     >
-      <Badge className="border" size="sm" variant={"mono"}>
+      <Badge className="max-w-full" variant={"mono"}>
         <ResourceIcon
           favicon={resource?.preview?.favicon}
           fileUrl={resource?.preview?.fileUrl}
           mimeType={resource?.preview?.mimeType}
           type={displayType}
         />
-        <span className="max-w-[400px] truncate font-medium font-mono text-xs">
+        <span className="min-w-0 truncate font-medium font-mono text-xs">
           {displayTitle}
         </span>
       </Badge>

@@ -108,8 +108,8 @@ export const Route = createFileRoute("/api/chat")({
                     title,
                   })
                 )
-                .catch(() => {
-                  // Title generation failed — thread keeps no title, not critical
+                .catch((err) => {
+                  console.error("[generateThreadTitle] failed:", err);
                 });
             }
           },

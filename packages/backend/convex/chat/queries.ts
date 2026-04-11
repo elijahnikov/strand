@@ -93,6 +93,25 @@ export const listThreads = workspaceQuery({
   },
 });
 
+export const getLatestThreadForResource = workspaceQuery({
+  args: {
+    resourceId: v.id("resource"),
+  },
+  handler: async (ctx, args) => {
+    const thread = await ctx.db
+      .query("chatThread")
+      .withIndex("by_workspace_resource", (q) =>
+        q
+          .eq("workspaceId", ctx.workspace._id)
+          .eq("resourceId", args.resourceId)
+          .eq("deletedAt", undefined)
+      )
+      .order("desc")
+      .first();
+    return thread;
+  },
+});
+
 export const getThread = workspaceQuery({
   args: {
     threadId: v.id("chatThread"),

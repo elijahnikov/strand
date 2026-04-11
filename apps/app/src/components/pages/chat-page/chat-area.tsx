@@ -76,10 +76,12 @@ function convertToUIMessages(
 export function ChatArea({
   workspaceId,
   threadId,
+  resourceId,
   onThreadCreated,
 }: {
   workspaceId: Id<"workspace">;
   threadId?: Id<"chatThread">;
+  resourceId?: Id<"resource">;
   onThreadCreated?: (threadId: Id<"chatThread">) => void;
 }) {
   const { mutateAsync: createThread } = useMutation({
@@ -96,6 +98,7 @@ export function ChatArea({
   const { messages, sendMessage, setMessages, status, stop } = useLibraryChat({
     workspaceId,
     threadId,
+    resourceId,
   });
 
   const hasSyncedRef = useRef(false);
@@ -137,12 +140,19 @@ export function ChatArea({
     async (content: string, _mentions: unknown[]) => {
       let currentThreadId = threadId;
       if (!currentThreadId) {
-        currentThreadId = await createThread({ workspaceId });
+        currentThreadId = await createThread({ workspaceId, resourceId });
         onThreadCreated?.(currentThreadId);
       }
       sendMessage({ text: content }, { body: { threadId: currentThreadId } });
     },
-    [threadId, createThread, workspaceId, onThreadCreated, sendMessage]
+    [
+      threadId,
+      createThread,
+      workspaceId,
+      resourceId,
+      onThreadCreated,
+      sendMessage,
+    ]
   );
 
   if (threadId && isLoadingThread) {
@@ -185,9 +195,9 @@ export function ChatArea({
   }
 
   return (
-    <div className="flex flex-1 flex-col">
-      <div className="flex-1 overflow-y-auto" ref={scrollRef}>
-        <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-8">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <div className="min-h-0 flex-1 overflow-y-auto" ref={scrollRef}>
+        <div className="mx-auto flex w-full min-w-0 max-w-2xl flex-col gap-4 px-4 py-8">
           {messages.length === 0 && (
             <div className="flex flex-1 flex-col items-center justify-center gap-2 py-20">
               <p className="font-medium text-lg">Ask your library</p>

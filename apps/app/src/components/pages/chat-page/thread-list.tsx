@@ -86,7 +86,7 @@ export function ThreadList({
   const isFirstLoad = status === "LoadingFirstPage" && threads.length === 0;
 
   return (
-    <div className="relative flex h-full w-64 shrink-0 flex-col">
+    <div className="relative flex border-r h-full w-64 shrink-0 flex-col">
       <div className="flex items-center justify-between py-2 pl-2">
         <Button
           className="mr-2"
@@ -98,7 +98,7 @@ export function ThreadList({
           <RiAddLine className="size-4 shrink-0" />
         </Button>
       </div>
-      <ScrollArea className="[&>div>div[style]]:!overflow-y-auto flex-1 [&_::-webkit-scrollbar]:hidden">
+      <ScrollArea className="[&>div>div[style]]:overflow-y-auto! flex-1 [&_::-webkit-scrollbar]:hidden">
         {isFirstLoad ? (
           <ThreadListSkeleton />
         ) : (

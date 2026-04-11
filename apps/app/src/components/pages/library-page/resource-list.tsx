@@ -4,12 +4,14 @@ import {
   useConvexPaginatedQuery,
 } from "@convex-dev/react-query";
 import { DndContext, DragOverlay } from "@dnd-kit/core";
+import { RiPushpinFill } from "@remixicon/react";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { Heading } from "@strand/ui/heading";
 import { Kbd } from "@strand/ui/kbd";
 import { Separator } from "@strand/ui/separator";
 import { Skeleton } from "@strand/ui/skeleton";
+import { Text } from "@strand/ui/text";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
@@ -102,7 +104,6 @@ export function ResourceList({
     [uploadingFiles]
   );
 
-  // Group uploads by batch — clear entire batch when all its resources appear in results
   const batches = useMemo(() => {
     const map = new Map<string, string[]>();
     for (const f of uploadingFiles) {
@@ -153,7 +154,6 @@ export function ResourceList({
         if (!uploadingNameSet.has(r.title)) {
           return true;
         }
-        // Only hide if this is the newly created resource (pending AI), not an older duplicate
         const aiStatus = "aiStatus" in r ? r.aiStatus : null;
         return aiStatus !== "pending" && aiStatus !== "processing";
       }),
@@ -214,7 +214,6 @@ export function ResourceList({
     });
   }, [childCollections, pendingCollection, movingIds]);
 
-  // Clear movingIds once the live query no longer contains them
   useEffect(() => {
     if (movingIds.size === 0) {
       return;
@@ -263,7 +262,6 @@ export function ResourceList({
       );
     }
 
-    // Default: newest first
     return [...collectionItems, ...resourceItems].sort(
       (a, b) => getTime(b) - getTime(a)
     );
@@ -313,6 +311,12 @@ export function ResourceList({
       <div className="flex flex-col">
         {hasPinned && (
           <>
+            <div className="ml-4 flex items-center gap-x-1">
+              <RiPushpinFill className="size-4 shrink-0 text-ui-fg-muted" />
+              <Text className="font-medium text-sm text-ui-fg-muted">
+                Pinned
+              </Text>
+            </div>
             <AnimatePresence>
               {serverPinned.map((resource) => (
                 <MemoizedResourceItem

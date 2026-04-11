@@ -6,9 +6,10 @@ import { Button } from "@strand/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import type { UIMessage } from "ai";
 import { CheckIcon, CopyIcon } from "lucide-react";
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { Streamdown } from "streamdown";
 import { UserAvatar } from "~/components/common/user-avatar";
+import { formatRelativeTime } from "~/lib/format";
 import { ResourceBadge } from "./resource-badge";
 
 const RESOURCE_PATTERN = /\[\[resource:([^|\]]+)(?:\|([^|\]]+))?(?:\|([^\]]+))?\]\]/g;
@@ -52,12 +53,14 @@ function parsePlainTextWithResources(text: string): ReactNode[] {
     }
 
     parts.push(
+      <div className="-mt-5">
       <ResourceBadge
         key={`${resourceId}-${index}`}
         resourceId={resourceId}
         title={title}
         type={type}
       />
+      </div>
     );
 
     lastIndex = index + full.length;
@@ -71,7 +74,23 @@ function parsePlainTextWithResources(text: string): ReactNode[] {
 }
 
 function preprocessResourceLinks(text: string): string {
-  return text.replace(RESOURCE_PATTERN, (_full, rawId, field2, field3) => {
+  // Clean up patterns where the model put a resource reference on its own
+  // line followed by stray punctuation on the next line. E.g.:
+  //   "...some text\n\n[[resource:...]]\n."
+  // becomes:
+  //   "...some text [[resource:...]]."
+  let cleaned = text.replace(
+    /[ \t]*\n\s*(\[\[resource:[^\]]+\]\])\s*\n+([.,;:!?])/g,
+    " $1$2"
+  );
+  // Also collapse a resource reference that sits alone on its own line
+  // (no trailing punctuation) into the preceding paragraph.
+  cleaned = cleaned.replace(
+    /([^\n])[ \t]*\n+[ \t]*(\[\[resource:[^\]]+\]\])(?=\s*(?:\n|$))/g,
+    "$1 $2"
+  );
+
+  return cleaned.replace(RESOURCE_PATTERN, (_full, rawId, field2, field3) => {
     const { resourceId, title, type } = parseResourceMatch(
       rawId,
       field2,
@@ -113,6 +132,22 @@ const markdownComponents = {
   },
 };
 
+function Timestamp({ date }: { date: Date }) {
+  const [, tick] = useState(0);
+
+  // Re-render every 30s so relative time stays fresh
+  useEffect(() => {
+    const interval = setInterval(() => tick((n) => n + 1), 30_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <span className="text-[11px] text-ui-fg-muted tabular-nums">
+      {formatRelativeTime(date.getTime())}
+    </span>
+  );
+}
+
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -128,7 +163,7 @@ function CopyButton({ text }: { text: string }) {
 
   return (
     <Button
-      className="size-6 text-ui-fg-muted opacity-0 transition-opacity group-hover:opacity-100"
+      className="size-6 text-ui-fg-muted"
       onClick={handleCopy}
       size="xsmall"
       variant="ghost"
@@ -165,8 +200,6 @@ export function MessageBubble({
   const userParts = isUser ? parsePlainTextWithResources(textContent) : null;
   const assistantText = isUser ? "" : preprocessResourceLinks(textContent);
 
-  // Build clean copy text: replace resource markers with just their titles,
-  // then collapse the extra whitespace left by markers without titles.
   const copyText = textContent
     .replace(RESOURCE_PATTERN, (_full, _id, field2, field3) => {
       if (field3 !== undefined) {
@@ -177,18 +210,20 @@ export function MessageBubble({
       }
       return "";
     })
-    // Collapse runs of spaces/tabs (but preserve newlines)
     .replace(/[ \t]+/g, " ")
-    // Remove space immediately before punctuation
     .replace(/ ([,.;:!?])/g, "$1")
-    // Trim leading/trailing whitespace per line
     .split("\n")
     .map((line) => line.trim())
     .join("\n")
     .trim();
 
   return (
-    <div className={cn("group flex gap-2", isUser && "flex-row-reverse")}>
+    <div
+      className={cn(
+        "group flex min-w-0",
+        isUser ? "flex-row-reverse gap-2" : "gap-0 -ml-2"
+      )}
+    >
       {isUser ? (
         <UserAvatar
           className="relative top-2 size-7 shrink-0 text-[10px]"
@@ -197,25 +232,38 @@ export function MessageBubble({
           size={28}
         />
       ) : (
-        <div className="relative top-4 left-2 flex size-5 shrink-0 items-center justify-center">
-          <RiChatSmileAiFill />
+        <div className="relative top-0 left-3.5 flex size-10  shrink-0 items-center justify-center">
+                 <img
+          alt="Strand"
+          className="hidden rounded-lg dark:block"
+          height={64}
+          src="/STRAND_TRANSPARENT_WHITE.png"
+          width={64}
+        />
+        <img
+          alt="Strand"
+          className="rounded-lg dark:hidden"
+          height={64}
+          src="/STRAND_TRANSPARENT_BLACK.png"
+          width={64}
+        />
         </div>
       )}
       <div
         className={cn(
-          "flex max-w-[80%] flex-col",
+          "flex min-w-0 max-w-[80%] flex-col",
           isUser ? "items-end" : "items-start"
         )}
       >
         <div
           className={cn(
-            "rounded-xl px-3 py-2 text-sm",
+            "min-w-0 max-w-full rounded-xl px-3 py-2 text-sm",
             isUser
               ? "bg-ui-bg-component-hover dark:bg-ui-bg-component"
               : "bg-transparent"
           )}
         >
-          <div className="prose prose-sm dark:prose-invert max-w-none leading-relaxed">
+          <div className="prose prose-sm dark:prose-invert min-w-0 max-w-none break-words leading-relaxed">
             {isUser ? (
               <div className="whitespace-pre-wrap">{userParts}</div>
             ) : (
@@ -230,8 +278,18 @@ export function MessageBubble({
           </div>
         </div>
         {!isStreaming && textContent.length > 0 && (
-          <div className={cn("mt-0.5", isUser ? "mr-1" : "ml-1")}>
+          <div
+            className={cn(
+              "mt-0.5 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100",
+              isUser ? "mr-1 flex-row-reverse" : "ml-1"
+            )}
+          >
             <CopyButton text={copyText} />
+            <Timestamp
+              date={
+                (message as { createdAt?: Date }).createdAt ?? new Date()
+              }
+            />
           </div>
         )}
       </div>
