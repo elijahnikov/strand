@@ -349,6 +349,12 @@ export const processResourceAI = internalAction({
           );
         }
       }
+
+      // All processing (enrichment + embedding + chunking) is done
+      await ctx.runMutation(internal.resource.aiInternals.setResourceAIStatus, {
+        resourceId: args.resourceId,
+        status: "completed",
+      });
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";

@@ -126,8 +126,7 @@ export const updateResourceAI = internalMutation({
       language: args.language,
       category: args.category,
       keyQuotes: args.keyQuotes,
-      status: "completed",
-      processedAt: Date.now(),
+      // status stays "processing" — completion is set after chunking finishes
     });
   },
 });

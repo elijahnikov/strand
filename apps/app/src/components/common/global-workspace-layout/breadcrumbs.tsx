@@ -25,6 +25,7 @@ const PAGE_LABELS: Record<string, string> = {
   search: "Search",
   settings: "Settings",
   tags: "Tags",
+  chat: "Chat",
 };
 
 interface BreadcrumbParams {
@@ -57,6 +58,15 @@ export function Breadcrumbs() {
   const currentPage = segments[0];
   if (!currentPage) {
     return null;
+  }
+
+  if (currentPage === "chat" && segments[1]) {
+    return (
+      <ChatThreadBreadcrumbs
+        threadId={segments[1] as Id<"chatThread">}
+        workspaceId={params.workspaceId as Id<"workspace">}
+      />
+    );
   }
 
   if (currentPage === "tags" && params.tagName) {
@@ -288,6 +298,40 @@ function FileLabel({ mimeType }: { mimeType?: string | null }) {
     <span className="flex h-3.5 shrink-0 items-center rounded-[2px] bg-ui-bg-subtle px-0.5 font-semibold text-[8px] text-ui-fg-muted leading-none">
       {getFileLabel(mimeType ?? undefined)}
     </span>
+  );
+}
+
+function ChatThreadBreadcrumbs({
+  workspaceId,
+  threadId,
+}: {
+  workspaceId: Id<"workspace">;
+  threadId: Id<"chatThread">;
+}) {
+  const { data: thread, isLoading } = useQuery(
+    convexQuery(api.chat.queries.getThread, { workspaceId, threadId })
+  );
+
+  return (
+    <>
+      <BreadcrumbSeparator />
+      <Link
+        className="txt-small font-medium text-ui-fg-muted transition-colors hover:text-ui-fg-base"
+        params={{ workspaceId }}
+        preload="intent"
+        to="/workspace/$workspaceId/chat"
+      >
+        Chat
+      </Link>
+      <BreadcrumbSeparator />
+      {isLoading || !thread ? (
+        <BreadcrumbTitleSkeleton />
+      ) : (
+        <span className="txt-small max-w-48 truncate font-medium text-ui-fg-base">
+          {thread.title ?? "New chat"}
+        </span>
+      )}
+    </>
   );
 }
 

@@ -1,24 +1,29 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
+import { RiChat3Line, RiChatAi3Fill } from "@remixicon/react";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { Badge } from "@strand/ui/badge";
+import { Button } from "@strand/ui/button";
 import { Separator } from "@strand/ui/separator";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { FileIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { DotGridLoader } from "~/components/common/dot-grid-loader";
 import { EditableText } from "~/components/common/editable-text";
 import { MiddleTruncate } from "~/components/common/middle-truncate";
 import { UserAvatar } from "~/components/common/user-avatar";
 import type { GetResourceData } from "~/lib/convex-types";
+import { ResourceChatPanel } from "./resource-chat-panel";
 
 export function ResourceHeader({ resource }: { resource: GetResourceData }) {
   const { workspaceId } = useParams({
     from: "/_workspace/workspace/$workspaceId/resource/$resourceId",
   });
+
+  const [chatOpen, setChatOpen] = useState(false);
 
   const aiStatus = resource.resourceAI?.status;
   const isAiProcessing = aiStatus === "pending" || aiStatus === "processing";
@@ -69,6 +74,26 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
           value={resource.title}
         />
       </div>
+      <div className="ml-auto absolute z-50 right-1 top-1 size-8 shrink-0 flex gap-x-2 items-center">
+      <Button
+        aria-label="Chat about this resource"
+        className="size-8 shrink-0"
+        onClick={() => setChatOpen(true)}
+        size="small"
+        variant="ghost"
+      >
+        <RiChatAi3Fill className="size-4 group-hover:text-ui-fg-base text-ui-fg-subtle shrink-0" />
+      </Button>
+      <Button
+        aria-label="Chat about this resource"
+        className="size-8 shrink-0"
+        onClick={() => setChatOpen(true)}
+        size="small"
+        variant="ghost"
+      >
+        <RiChatAi3Fill className="size-4 group-hover:text-ui-fg-base text-ui-fg-subtle shrink-0" />
+      </Button>
+      </div>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <TypeBadge resource={resource} />
         {resource.type !== "note" && (
@@ -88,6 +113,16 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
           {resource.createdBy?.username}
         </Badge>
       </div>
+      <ResourceChatPanel
+        onOpenChange={setChatOpen}
+        open={chatOpen}
+        resource={{
+          _id: resource._id,
+          title: resource.title,
+          type: resource.type,
+        }}
+        workspaceId={workspaceId as Id<"workspace">}
+      />
     </div>
   );
 }

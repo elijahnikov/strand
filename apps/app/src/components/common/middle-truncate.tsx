@@ -80,18 +80,36 @@ export function MiddleTruncate({
       return;
     }
 
+    // Track max width to prevent oscillation: parent may shrink as a consequence
+    // of our own truncation, which would otherwise cause an infinite shrink loop.
+    let maxObservedWidth = 0;
+
     const update = () => {
       const style = getComputedStyle(el);
       const font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-      const maxWidth = parent.clientWidth;
-      setTruncated(middleTruncate(text, font, maxWidth));
+      const currentWidth = parent.clientWidth;
+      if (currentWidth > maxObservedWidth) {
+        maxObservedWidth = currentWidth;
+      }
+      setTruncated(middleTruncate(text, font, maxObservedWidth));
+    };
+
+    // On window resize, reset and re-measure from full text
+    const handleWindowResize = () => {
+      maxObservedWidth = 0;
+      setTruncated(text);
+      requestAnimationFrame(update);
     };
 
     update();
 
     const observer = new ResizeObserver(update);
     observer.observe(parent);
-    return () => observer.disconnect();
+    window.addEventListener("resize", handleWindowResize);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", handleWindowResize);
+    };
   }, [text]);
 
   return (

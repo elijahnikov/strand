@@ -4,7 +4,7 @@ import { cn } from "@strand/ui";
 import { cva, type VariantProps } from "class-variance-authority";
 
 const badgeVariants = cva(
-  "relative inline-flex shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-sm border border-transparent font-medium outline-none transition-shadow focus-visible:shadow-borders-focus disabled:pointer-events-none disabled:opacity-64 [&_svg:not([class*='opacity-'])]:opacity-80 [&_svg:not([class*='size-'])]:size-3.5 sm:[&_svg:not([class*='size-'])]:size-3 [&_svg]:pointer-events-none [&_svg]:shrink-0 [button,a&]:cursor-pointer [button,a&]:pointer-coarse:after:absolute [button,a&]:pointer-coarse:after:size-full [button,a&]:pointer-coarse:after:min-h-11 [button,a&]:pointer-coarse:after:min-w-11",
+  "relative inline-flex shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-sm border font-medium outline-none transition-shadow focus-visible:shadow-borders-focus disabled:pointer-events-none disabled:opacity-64 [&_svg:not([class*='opacity-'])]:opacity-80 [&_svg:not([class*='size-'])]:size-3.5 sm:[&_svg:not([class*='size-'])]:size-3 [&_svg]:pointer-events-none [&_svg]:shrink-0 [button,a&]:cursor-pointer [button,a&]:pointer-coarse:after:absolute [button,a&]:pointer-coarse:after:size-full [button,a&]:pointer-coarse:after:min-h-11 [button,a&]:pointer-coarse:after:min-w-11",
   {
     defaultVariants: {
       size: "default",
@@ -13,7 +13,7 @@ const badgeVariants = cva(
     variants: {
       size: {
         default:
-          "h-5.5 min-w-5.5 px-[calc(--spacing(1)-1px)] text-sm sm:h-4.5 sm:min-w-4.5 sm:text-xs",
+          "text-sm",
         lg: "h-6.5 min-w-6.5 px-[calc(--spacing(1.5)-1px)] text-base sm:h-5.5 sm:min-w-5.5 sm:text-sm",
         sm: "h-5 min-w-5 rounded-[calc(var(--radius-sm)-2px)] px-[calc(--spacing(1)-1px)] text-xs sm:h-4 sm:min-w-4 sm:text-[.625rem]",
       },
@@ -31,7 +31,7 @@ const badgeVariants = cva(
           "bg-secondary text-secondary-foreground [button,a&]:hover:bg-secondary/90",
         success: "bg-success/8 text-success-foreground dark:bg-success/16",
         warning: "bg-warning/8 text-warning-foreground dark:bg-warning/16",
-        mono: "bg-secondary px-1 font-mono text-secondary-foreground shadow-borders-base [button,a&]:hover:bg-secondary/90",
+        mono: "bg-secondary px-1.5 text-sm py-0.25 font-mono border-[0.5px] [button,a&]:hover:bg-secondary/90",
       },
     },
   }
