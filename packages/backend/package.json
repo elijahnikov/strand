@@ -9,7 +9,9 @@
       "types": "./convex/_generated/api.d.ts",
       "default": "./convex/_generated/api.js"
     },
-    "./utils": "./convex/utils.ts"
+    "./utils": "./convex/utils.ts",
+    "./instant": "./instant/index.ts",
+    "./instant/schema": "./instant/instant.schema.ts"
   },
   "license": "MIT",
   "scripts": {
@@ -27,8 +29,10 @@
     "@convex-dev/better-auth": "catalog:convex",
     "@convex-dev/presence": "catalog:convex",
     "@convex-dev/prosemirror-sync": "catalog:convex",
+    "@instantdb/core": "catalog:instant",
+    "@instantdb/react": "catalog:instant",
+    "@strand/ai": "workspace:*",
     "convex": "catalog:convex",
-    "convex-helpers": "catalog:convex",
-    "@strand/ai": "workspace:*"
+    "convex-helpers": "catalog:convex"
   }
 }

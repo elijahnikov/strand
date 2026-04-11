@@ -1,22 +1,18 @@
-import type { PresenceState } from "@convex-dev/presence/react";
-import usePresence from "@convex-dev/presence/react";
 import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { instantDb } from "@strand/backend/instant";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useConvex, useQuery } from "convex/react";
 import {
   createContext,
   type ReactNode,
   useContext,
   useEffect,
   useMemo,
-  useRef,
 } from "react";
 
 export { WorkspacePresenceAvatars } from "./workspace-presence-avatars";
 
-const HEARTBEAT_INTERVAL = 10_000;
 const MAX_VISIBLE_USERS = 5;
 
 interface PresenceUser {
@@ -44,91 +40,69 @@ export function WorkspacePresenceProvider({
   const { data } = useSuspenseQuery(
     convexQuery(api.user.queries.currentUser, {})
   );
-  const convex = useConvex();
-  const userId = data.user?._id ?? "";
+  const currentUser = data.user;
+  const userId = currentUser?._id ?? "";
+  const username = currentUser?.username ?? "";
+  const avatar = currentUser?.image ?? "";
 
-  const workspaceIdRef = useRef(workspaceId);
-  const userIdRef = useRef(userId);
+  const room = instantDb.room("workspace", workspaceId);
+
+  const {
+    user: myPresence,
+    peers,
+    publishPresence,
+  } = instantDb.rooms.usePresence(room, {
+    initialPresence: { userId, name: username, avatar },
+  });
+
   useEffect(() => {
-    workspaceIdRef.current = workspaceId;
-    userIdRef.current = userId;
-  }, [workspaceId, userId]);
-
-  useEffect(() => {
-    const handlePageHide = () => {
-      if (!(workspaceIdRef.current && userIdRef.current)) {
-        return;
-      }
-      const siteUrl = convex.url.replace(".cloud", ".site");
-      navigator.sendBeacon(
-        `${siteUrl}/presence/disconnect`,
-        new Blob(
-          [
-            JSON.stringify({
-              roomId: workspaceIdRef.current,
-              userId: userIdRef.current,
-            }),
-          ],
-          { type: "application/json" }
-        )
-      );
-    };
-
-    window.addEventListener("pagehide", handlePageHide);
-    return () => window.removeEventListener("pagehide", handlePageHide);
-  }, [convex.url]);
-
-  const presenceStates = usePresence(
-    api.presence,
-    workspaceId,
-    userId,
-    HEARTBEAT_INTERVAL
-  );
-
-  const visibleStates = useMemo(
-    () => presenceStates?.slice(0, MAX_VISIBLE_USERS) ?? [],
-    [presenceStates]
-  );
-
-  const userIds = useMemo(
-    () =>
-      visibleStates
-        .filter((s): s is PresenceState & { userId: string } =>
-          Boolean(s.userId)
-        )
-        .map((s) => s.userId as Id<"user">),
-    [visibleStates]
-  );
-
-  const userData = useQuery(
-    api.presence.getUsersInRoom,
-    userIds.length > 0 ? { userIds } : "skip"
-  );
+    if (userId) {
+      publishPresence({ userId, name: username, avatar });
+    }
+  }, [userId, username, avatar, publishPresence]);
 
   const users = useMemo(() => {
-    if (!userData) {
-      return [] as PresenceUser[];
+    const all: Array<{ userId: string; name: string; avatar: string }> = [];
+    if (myPresence?.userId) {
+      all.push({
+        userId: myPresence.userId,
+        name: myPresence.name,
+        avatar: myPresence.avatar,
+      });
     }
-    const result: PresenceUser[] = [];
-    for (const state of visibleStates) {
-      const user = userData.find(
-        (u: { _id: string } | null) => u?._id === state.userId
-      );
-      if (user) {
-        result.push({
-          _id: user._id as Id<"user">,
-          username: user.username,
-          image: user.image,
-          online: state.online,
+    for (const peer of Object.values(peers)) {
+      if (peer?.userId) {
+        all.push({
+          userId: peer.userId,
+          name: peer.name,
+          avatar: peer.avatar,
         });
       }
     }
-    return result;
-  }, [visibleStates, userData]);
+
+    const seen = new Set<string>();
+    const deduped: PresenceUser[] = [];
+    for (const p of all) {
+      if (seen.has(p.userId)) {
+        continue;
+      }
+      seen.add(p.userId);
+      deduped.push({
+        _id: p.userId as Id<"user">,
+        username: p.name,
+        image: p.avatar || null,
+        online: true,
+      });
+      if (deduped.length >= MAX_VISIBLE_USERS) {
+        break;
+      }
+    }
+    return deduped;
+  }, [myPresence, peers]);
 
   const value = useMemo(
-    () => ({ users, isLoading: !presenceStates }),
-    [users, presenceStates]
+    () => ({ users, isLoading: !myPresence }),
+    [users, myPresence]
   );
 
   return (
