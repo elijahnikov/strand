@@ -134,7 +134,7 @@ export function ChatArea({
   const isStreaming = status === "streaming" || status === "submitted";
 
   const handleSend = useCallback(
-    async (content: string) => {
+    async (content: string, _mentions: unknown[]) => {
       let currentThreadId = threadId;
       if (!currentThreadId) {
         currentThreadId = await createThread({ workspaceId });
@@ -196,13 +196,33 @@ export function ChatArea({
               </p>
             </div>
           )}
-          {messages.map((message, idx) => (
-            <MessageBubble
-              isStreaming={isStreaming && idx === messages.length - 1}
-              key={message.id}
-              message={message}
-            />
-          ))}
+          {messages.map((message, idx) => {
+            const isLast = idx === messages.length - 1;
+            // Skip rendering an assistant bubble with no text yet (e.g.
+            // while tool calls are in flight). The StreamingIndicator below
+            // covers that state to avoid showing two loaders at once.
+            const hasText = message.parts.some(
+              (p) =>
+                p.type === "text" &&
+                "text" in p &&
+                (p.text as string).length > 0
+            );
+            if (
+              isLast &&
+              isStreaming &&
+              message.role === "assistant" &&
+              !hasText
+            ) {
+              return null;
+            }
+            return (
+              <MessageBubble
+                isStreaming={isStreaming && isLast}
+                key={message.id}
+                message={message}
+              />
+            );
+          })}
           {isStreaming && <StreamingIndicator messages={messages} />}
         </div>
       </div>

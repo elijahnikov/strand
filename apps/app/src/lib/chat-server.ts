@@ -85,13 +85,38 @@ export async function buildRAGContext(
 export function buildSystemPrompt(ragContext: RAGContext): string {
   const basePrompt = `You are a knowledgeable assistant for the user's personal knowledge library in Strand. You help users explore, understand, and connect their saved resources (articles, notes, files).
 
-Rules:
+## Resource Reference Syntax — CRITICAL
+
+Whenever you mention any resource from the user's library, you MUST use this EXACT inline syntax with three pipe-separated fields:
+
+[[resource:RESOURCE_ID|Title|type]]
+
+- RESOURCE_ID is the ID provided in the context or returned by tools (looks like "k57abc123...").
+- Title is the resource's exact title.
+- type is one of: website, note, file.
+
+EXAMPLES — these are ALL correct:
+- "I found a great write-up in [[resource:k57abc|My Article|website]] about this."
+- "Your note [[resource:k57def|Project Plan|note]] mentions the same topic."
+- "This is covered in three places: [[resource:k57aaa|First|website]], [[resource:k57bbb|Second|note]], and [[resource:k57ccc|Third|file]]."
+
+EXAMPLES — these are ALL WRONG, never do these:
+- "Check out 'My Article'" — missing the [[resource:...]] wrapper
+- "[[resource:k57abc|website]]" — missing the Title field
+- "[My Article](resource://k57abc/website)" — wrong syntax, this is a markdown link
+- "**My Article**" — bold instead of resource reference
+- "the article (resource:k57abc)" — wrong format
+
+Every single time you reference a saved resource, replace its title in your prose with the full [[resource:ID|Title|type]] syntax. Never write the title separately. Never use markdown links for library resources. Always include all three fields.
+
+## Other Rules
+
 - Ground your answers in the user's library content whenever possible.
-- When mentioning a resource by name, use this syntax inline in your text: [[resource:RESOURCE_ID|Title|type]] — for example, write "I found relevant info in [[resource:abc123|My Article|website]] about..." instead of "I found relevant info in **My Article** about...". Never bold the title separately or add the reference at the end — always use the inline syntax wherever the title naturally appears in the sentence.
+- When the user references resources in their message using [[resource:ID|Title|type]], treat them as explicit references they want you to focus on. Use the getResourceDetails tool with the provided ID to fetch full details before answering.
 - Use the searchLibrary tool when the user asks about topics not covered in the provided context.
 - Be concise but thorough.
 - When you don't have enough context from the library, say so honestly.
-- Format responses with markdown for readability.`;
+- Format the rest of your response with markdown for readability (headings, lists, code blocks, etc.).`;
 
   const sections: string[] = [basePrompt];
 
@@ -185,11 +210,33 @@ export function createChatTools(workspaceId: string) {
             return { error: "Resource not found" };
           }
 
+          // Extract the actual content based on resource type
+          let content: string | undefined;
+          if (resource.type === "website" && "website" in resource) {
+            const website = resource.website as
+              | { articleContent?: string; ogDescription?: string }
+              | undefined;
+            content = website?.articleContent ?? website?.ogDescription;
+          } else if (resource.type === "note" && "note" in resource) {
+            const note = resource.note as
+              | { plainTextContent?: string }
+              | undefined;
+            content = note?.plainTextContent;
+          } else if (resource.type === "file" && "file" in resource) {
+            const file = resource.file as
+              | { extractedText?: string }
+              | undefined;
+            content = file?.extractedText;
+          }
+
           return {
             title: resource.title,
             type: resource.type,
             summary: resource.resourceAI?.summary,
             tags: resource.resourceAI?.tags,
+            // Cap content at ~8000 chars to keep token usage reasonable
+            content: content?.slice(0, 8000),
+            hasContent: Boolean(content),
           };
         } catch {
           return { error: "Invalid resource ID or resource not found" };

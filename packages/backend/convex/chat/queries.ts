@@ -8,22 +8,70 @@ export const searchResources = workspaceQuery({
     limit: v.number(),
   },
   handler: async (ctx, args) => {
-    const results = await ctx.db
-      .query("resource")
-      .withSearchIndex("search_title", (q) =>
-        q
-          .search("title", args.query)
-          .eq("workspaceId", ctx.workspace._id)
-          .eq("deletedAt", undefined)
-      )
-      .take(args.limit);
+    const normalizedQuery = args.query.toLowerCase().trim();
 
-    return results.map((r) => ({
-      _id: r._id,
-      title: r.title,
-      type: r.type,
-      description: r.description,
-    }));
+    const searchHits = normalizedQuery
+      ? await ctx.db
+          .query("resource")
+          .withSearchIndex("search_title", (q) =>
+            q
+              .search("title", normalizedQuery)
+              .eq("workspaceId", ctx.workspace._id)
+              .eq("deletedAt", undefined)
+          )
+          .take(args.limit * 2)
+      : await ctx.db
+          .query("resource")
+          .withIndex("by_workspace", (q) =>
+            q.eq("workspaceId", ctx.workspace._id).eq("deletedAt", undefined)
+          )
+          .order("desc")
+          .take(args.limit);
+
+    // Client-side substring filter to catch case/prefix matches that the
+    // tokenized search might miss (e.g. "git" should match "GitHub").
+    const filtered = normalizedQuery
+      ? searchHits.filter((r) =>
+          r.title.toLowerCase().includes(normalizedQuery)
+        )
+      : searchHits;
+
+    const results = filtered.slice(0, args.limit);
+
+    // Enrich with preview info (favicon for websites, fileUrl for files)
+    return await Promise.all(
+      results.map(async (r) => {
+        let favicon: string | null = null;
+        let fileUrl: string | null = null;
+        let mimeType: string | null = null;
+
+        if (r.type === "website") {
+          const website = await ctx.db
+            .query("websiteResource")
+            .withIndex("by_resource", (q) => q.eq("resourceId", r._id))
+            .unique();
+          favicon = website?.favicon ?? null;
+        } else if (r.type === "file") {
+          const file = await ctx.db
+            .query("fileResource")
+            .withIndex("by_resource", (q) => q.eq("resourceId", r._id))
+            .unique();
+          mimeType = file?.mimeType ?? null;
+          if (file?.storageId) {
+            fileUrl = await ctx.storage.getUrl(file.storageId);
+          }
+        }
+
+        return {
+          _id: r._id,
+          title: r.title,
+          type: r.type,
+          favicon,
+          fileUrl,
+          mimeType,
+        };
+      })
+    );
   },
 });
 

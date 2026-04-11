@@ -61,7 +61,7 @@ function NoteIcon() {
   );
 }
 
-function ResourceIcon({
+export function ResourceIcon({
   type,
   favicon,
   fileUrl,
