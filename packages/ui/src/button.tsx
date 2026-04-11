@@ -6,7 +6,7 @@ import type * as React from "react";
 
 const buttonVariants = cva(
   [
-    "relative inline-flex group w-fit items-center justify-center rounded-lg outline-none",
+    "group relative inline-flex w-fit items-center justify-center rounded-lg outline-none",
     "disabled:border-ui-border-base disabled:opacity-50 disabled:after:hidden",
     "disabled:pointer-events-none",
     'after:absolute after:inset-0 after:content-[""]',
@@ -21,7 +21,7 @@ const buttonVariants = cva(
           "focus-visible:shadow-buttons-inverted-focus!"
         ),
         strand: cn(
-          "bg-linear-to-t from-blue-500 to-blue-400 text-white after:hidden",
+          "border-[0.5px] border-blue-400 bg-linear-to-t from-blue-500 to-blue-400 text-white after:hidden",
           "hover:from-blue-600 hover:to-blue-500",
           "active:from-blue-700 active:to-blue-600",
           "focus-visible:shadow-buttons-recall-focus disabled:shadow-none"
@@ -55,7 +55,7 @@ const buttonVariants = cva(
           "disabled:bg-transparent! disabled:shadow-none!"
         ),
         destructive: cn(
-          "after:button-danger-gradient bg-ui-button-danger text-ui-fg-on-color shadow-buttons-colored shadow-buttons-danger",
+          "after:button-danger-gradient border-[0.5px] border-destructive/50 bg-ui-button-danger text-ui-fg-on-color",
           "hover:after:button-danger-hover-gradient hover:bg-ui-button-danger-hover",
           "active:after:button-danger-pressed-gradient active:bg-ui-button-danger-pressed",
           "focus-visible:shadow-buttons-danger-focus"

@@ -9,7 +9,9 @@ import {
   buildSystemPrompt,
   createChatTools,
   extractCitations,
+  extractToolPartsFromSteps,
   generateThreadTitle,
+  PERSISTED_TOOL_NAMES,
   saveAssistantMessage,
 } from "~/lib/chat-server";
 
@@ -88,13 +90,18 @@ export const Route = createFileRoute("/api/chat")({
                 .join("") ??
               "",
           })),
-          onFinish: async ({ text }) => {
+          onFinish: async ({ text, steps }) => {
             const citations = extractCitations(ragContext);
+            const toolParts = extractToolPartsFromSteps(
+              steps,
+              PERSISTED_TOOL_NAMES
+            );
             await saveAssistantMessage(
               workspaceId,
               threadId as string,
               text,
-              citations
+              citations,
+              toolParts
             );
 
             const isFirstExchange =

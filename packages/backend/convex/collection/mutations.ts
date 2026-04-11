@@ -160,3 +160,40 @@ export const remove = workspaceMutation({
     await ctx.db.patch(args.collectionId, { deletedAt: now });
   },
 });
+
+export const createWithResources = workspaceMutation({
+  args: {
+    name: v.string(),
+    icon: v.optional(v.string()),
+    resourceIds: v.array(v.id("resource")),
+  },
+  handler: async (ctx, args) => {
+    const trimmed = args.name.trim();
+    const collectionId = await ctx.db.insert("collection", {
+      workspaceId: ctx.workspace._id,
+      name: trimmed.length > 0 ? trimmed : "Untitled collection",
+      icon: args.icon,
+      createdBy: ctx.user._id,
+      updatedAt: Date.now(),
+    });
+
+    let movedCount = 0;
+    for (const resourceId of args.resourceIds) {
+      const resource = await ctx.db.get(resourceId);
+      if (
+        !resource ||
+        resource.workspaceId !== ctx.workspace._id ||
+        resource.deletedAt
+      ) {
+        continue;
+      }
+      await ctx.db.patch(resourceId, {
+        collectionId,
+        updatedAt: Date.now(),
+      });
+      movedCount += 1;
+    }
+
+    return { collectionId, movedCount };
+  },
+});

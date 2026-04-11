@@ -71,7 +71,7 @@ export function LibraryToolbar({
   return (
     <div className="fixed inset-x-0 top-11 z-30 flex w-full items-center gap-x-2 bg-ui-bg-base! p-2 md:sticky md:inset-x-auto md:top-0 md:rounded-t-lg">
       <Input
-        className="w-48 rounded-full bg-ui-bg-base-hover shadow-borders-base"
+        className="w-48 rounded-full bg-ui-bg-base-hover"
         onChange={(e) => setSearch(e.target.value || null)}
         placeholder="Search"
         type="search"
@@ -80,7 +80,7 @@ export function LibraryToolbar({
       <div className="ml-auto flex items-center gap-x-2">
         {onCreateCollection && (
           <Button
-            className="size-8! shrink-0 rounded-full shadow-borders-base"
+            className="size-8! shrink-0 rounded-full border-[0.5px]"
             onClick={onCreateCollection}
             variant="secondary"
           >
@@ -91,7 +91,7 @@ export function LibraryToolbar({
           <DropdownMenuTrigger
             render={
               <Button
-                className="whitespace-nowrap rounded-full shadow-borders-base"
+                className="whitespace-nowrap rounded-full border-[0.5px]"
                 variant="secondary"
               />
             }
@@ -116,13 +116,14 @@ export function LibraryToolbar({
           <DropdownMenuTrigger
             render={
               <Button
-                className="whitespace-nowrap rounded-full shadow-borders-base"
+                className="whitespace-nowrap rounded-full border-[0.5px]"
                 variant="secondary"
               />
             }
           >
             <ArrowUpDownIcon className="h-3 w-3" />
             {activeOrderLabel}
+            <ChevronDownIcon className="h-3 w-3" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {ORDER_OPTIONS.map((option) => (

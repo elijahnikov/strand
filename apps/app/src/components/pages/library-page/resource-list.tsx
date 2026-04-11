@@ -90,13 +90,23 @@ export function ResourceList({
     )
   );
 
+  // Pinned resources are a workspace-level concept — don't show the Pinned
+  // section inside a collection page.
+  const showPinned = !collectionId;
+
   const { data: serverPinned } = useQuery(
-    convexQuery(api.resource.queries.listPinned, { workspaceId })
+    convexQuery(
+      api.resource.queries.listPinned,
+      showPinned ? { workspaceId } : "skip"
+    )
   );
 
-  const pinnedIdSet = useMemo(
-    () => new Set((serverPinned ?? []).map((r) => r._id)),
-    [serverPinned]
+  const pinnedIdSet = useMemo<Set<Id<"resource">>>(
+    () =>
+      showPinned
+        ? new Set((serverPinned ?? []).map((r) => r._id))
+        : new Set<Id<"resource">>(),
+    [serverPinned, showPinned]
   );
 
   const uploadingNameSet = useMemo(
@@ -267,7 +277,7 @@ export function ResourceList({
     );
   }, [unpinnedResults, filteredCollections, order]);
 
-  const hasPinned = serverPinned && serverPinned.length > 0;
+  const hasPinned = showPinned && serverPinned && serverPinned.length > 0;
   const isFirstLoad =
     (status === "LoadingFirstPage" && results.length === 0) ||
     (collectionsLoading && !childCollections);

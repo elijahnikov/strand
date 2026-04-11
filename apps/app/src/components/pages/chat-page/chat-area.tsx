@@ -14,6 +14,7 @@ import { MessageBubble } from "./message-bubble";
 const TOOL_LABELS: Record<string, string> = {
   searchLibrary: "Searching library...",
   getResourceDetails: "Reading resource...",
+  proposeCollection: "Building collection proposal...",
 };
 
 function StreamingIndicator({ messages }: { messages: UIMessage[] }) {
@@ -63,14 +64,26 @@ function convertToUIMessages(
     role: "user" | "assistant";
     content: string;
     createdAt: number;
+    toolParts?: unknown[];
   }>
 ): UIMessage[] {
-  return messages.map((m) => ({
-    id: m._id,
-    role: m.role,
-    parts: [{ type: "text" as const, text: m.content }],
-    createdAt: new Date(m.createdAt),
-  }));
+  return messages.map((m) => {
+    // Persisted tool parts are already shaped like UIMessage tool parts
+    // (`{ type: "tool-${name}", state, toolCallId, input, output }`), so they
+    // can be appended directly with no per-tool synthesis logic.
+    const persistedToolParts = (m.toolParts ?? []) as UIMessage["parts"];
+    const parts: UIMessage["parts"] = [
+      { type: "text" as const, text: m.content },
+      ...persistedToolParts,
+    ];
+
+    return {
+      id: m._id,
+      role: m.role,
+      parts,
+      createdAt: new Date(m.createdAt),
+    };
+  });
 }
 
 export function ChatArea({
@@ -230,6 +243,8 @@ export function ChatArea({
                 isStreaming={isStreaming && isLast}
                 key={message.id}
                 message={message}
+                threadId={threadId}
+                workspaceId={workspaceId}
               />
             );
           })}

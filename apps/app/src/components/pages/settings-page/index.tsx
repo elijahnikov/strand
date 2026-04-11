@@ -72,7 +72,7 @@ export function SettingsPageComponent({
             </Text>
           </TabsTrigger>
         </TabsList>
-        <div className="w-full border-l">
+        <div className="w-full border-l-[0.5px]">
           <TabsContent className="pl-8" value="general">
             <GeneralTab
               isAdminOrOwner={
@@ -302,7 +302,9 @@ function AdvancedTab({
             </LoadingButton>
             <DialogPopup>
               <DialogHeader>
-                <DialogTitle>Delete workspace</DialogTitle>
+                <DialogTitle className="font-medium text-sm">
+                  Delete workspace
+                </DialogTitle>
               </DialogHeader>
               <div className="px-6 py-4">
                 <DialogDescription className="mb-4">
