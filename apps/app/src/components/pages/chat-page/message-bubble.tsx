@@ -1,6 +1,7 @@
 import { convexQuery } from "@convex-dev/react-query";
 import { RiChatSmileAiFill } from "@remixicon/react";
 import { api } from "@strand/backend/_generated/api.js";
+import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { cn } from "@strand/ui";
 import { Button } from "@strand/ui/button";
 import { useQuery } from "@tanstack/react-query";
@@ -10,6 +11,10 @@ import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { Streamdown } from "streamdown";
 import { UserAvatar } from "~/components/common/user-avatar";
 import { formatRelativeTime } from "~/lib/format";
+import {
+  type CollectionProposal,
+  ProposeCollectionCard,
+} from "./propose-collection-card";
 import { ResourceBadge } from "./resource-badge";
 
 const RESOURCE_PATTERN = /\[\[resource:([^|\]]+)(?:\|([^|\]]+))?(?:\|([^\]]+))?\]\]/g;
@@ -177,12 +182,37 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
+type ProposalToolPart = {
+  type: "tool-proposeCollection";
+  state: "output-available";
+  toolCallId: string;
+  output: CollectionProposal;
+};
+
+function isProposalToolPart(part: unknown): part is ProposalToolPart {
+  if (!part || typeof part !== "object") {
+    return false;
+  }
+  const p = part as Record<string, unknown>;
+  return (
+    p.type === "tool-proposeCollection" &&
+    p.state === "output-available" &&
+    typeof p.toolCallId === "string" &&
+    typeof p.output === "object" &&
+    p.output !== null
+  );
+}
+
 export function MessageBubble({
   message,
   isStreaming,
+  workspaceId,
+  threadId,
 }: {
   message: UIMessage;
   isStreaming?: boolean;
+  workspaceId: Id<"workspace">;
+  threadId?: Id<"chatThread">;
 }) {
   const isUser = message.role === "user";
 
@@ -196,6 +226,10 @@ export function MessageBubble({
     )
     .map((part) => part.text)
     .join("");
+
+  const proposals: ProposalToolPart[] = isUser
+    ? []
+    : (message.parts as unknown[]).filter(isProposalToolPart);
 
   const userParts = isUser ? parsePlainTextWithResources(textContent) : null;
   const assistantText = isUser ? "" : preprocessResourceLinks(textContent);
@@ -277,6 +311,19 @@ export function MessageBubble({
             )}
           </div>
         </div>
+        {proposals.length > 0 && (
+          <div className="flex w-full max-w-full flex-col gap-2">
+            {proposals.map((p) => (
+              <ProposeCollectionCard
+                key={p.toolCallId}
+                proposal={p.output}
+                threadId={threadId}
+                toolCallId={p.toolCallId}
+                workspaceId={workspaceId}
+              />
+            ))}
+          </div>
+        )}
         {!isStreaming && textContent.length > 0 && (
           <div
             className={cn(

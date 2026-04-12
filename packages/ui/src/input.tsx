@@ -6,7 +6,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import React from "react";
 
 const inputBaseStyles = cn(
-  "relative w-full appearance-none rounded-lg bg-ui-bg-field-component text-ui-fg-base placeholder-ui-fg-muted caret-ui-fg-base shadow-borders-base outline-none transition-fg hover:bg-ui-bg-field-component-hover",
+  "relative w-full appearance-none rounded-lg border-[0.5px] bg-ui-bg-field-component text-ui-fg-base placeholder-ui-fg-muted caret-ui-fg-base outline-none transition-fg hover:bg-ui-bg-field-component-hover",
   "focus-visible:shadow-borders-interactive-with-active",
   "disabled:cursor-not-allowed disabled:bg-ui-bg-disabled! disabled:text-ui-fg-disabled disabled:placeholder-ui-fg-disabled",
   "invalid:shadow-borders-error! aria-invalid:shadow-borders-error!"

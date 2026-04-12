@@ -1,5 +1,5 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import { RiChat3Line, RiChatAi3Fill } from "@remixicon/react";
+import { RiChatAi3Fill } from "@remixicon/react";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { Badge } from "@strand/ui/badge";
@@ -74,36 +74,36 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
           value={resource.title}
         />
       </div>
-      <div className="ml-auto absolute z-50 right-1 top-1 size-8 shrink-0 flex gap-x-2 items-center">
-      <Button
-        aria-label="Chat about this resource"
-        className="size-8 shrink-0"
-        onClick={() => setChatOpen(true)}
-        size="small"
-        variant="ghost"
-      >
-        <RiChatAi3Fill className="size-4 group-hover:text-ui-fg-base text-ui-fg-subtle shrink-0" />
-      </Button>
-      <Button
-        aria-label="Chat about this resource"
-        className="size-8 shrink-0"
-        onClick={() => setChatOpen(true)}
-        size="small"
-        variant="ghost"
-      >
-        <RiChatAi3Fill className="size-4 group-hover:text-ui-fg-base text-ui-fg-subtle shrink-0" />
-      </Button>
+      <div className="absolute top-1 right-1 z-50 ml-auto flex size-8 shrink-0 items-center gap-x-2">
+        <Button
+          aria-label="Chat about this resource"
+          className="size-8 shrink-0"
+          onClick={() => setChatOpen(true)}
+          size="small"
+          variant="ghost"
+        >
+          <RiChatAi3Fill className="size-4 shrink-0 text-ui-fg-subtle group-hover:text-ui-fg-base" />
+        </Button>
+        <Button
+          aria-label="Chat about this resource"
+          className="size-8 shrink-0"
+          onClick={() => setChatOpen(true)}
+          size="small"
+          variant="ghost"
+        >
+          <RiChatAi3Fill className="size-4 shrink-0 text-ui-fg-subtle group-hover:text-ui-fg-base" />
+        </Button>
       </div>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <TypeBadge resource={resource} />
         {resource.type !== "note" && (
           <Separator className="h-4" orientation="vertical" />
         )}
-        <Badge variant="mono">
+        <Badge className="text-xs" variant="mono">
           {format(new Date(resource._creationTime), "d MMM yyyy HH:mm")}
         </Badge>
         <Separator className="h-4" orientation="vertical" />
-        <Badge variant="mono">
+        <Badge className="text-xs" variant="mono">
           <UserAvatar
             className="size-3.5"
             image={resource.createdBy?.image}
@@ -141,7 +141,10 @@ function TypeBadge({ resource }: { resource: GetResourceData }) {
           rel="noopener"
           target="_blank"
         >
-          <Badge className="max-w-full text-ui-fg-subtle" variant="mono">
+          <Badge
+            className="max-w-full text-ui-fg-subtle text-xs"
+            variant="mono"
+          >
             <img
               alt={website.url}
               className="shrink-0 rounded-[4px]"
@@ -165,7 +168,7 @@ function TypeBadge({ resource }: { resource: GetResourceData }) {
         return null;
       }
       return (
-        <Badge className="max-w-[460px] text-ui-fg-subtle" variant="mono">
+        <Badge className="max-w-[460px] text-xs" variant="mono">
           <FileIcon className="h-3.5 w-3.5 shrink-0" />
           <span className="min-w-0 flex-1">
             <MiddleTruncate text={file.fileName} />

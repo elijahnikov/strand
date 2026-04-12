@@ -122,7 +122,16 @@ Every single time you reference a saved resource, replace its title in your pros
 - Use the searchLibrary tool when the user asks about topics not covered in the provided context.
 - Be concise but thorough.
 - When you don't have enough context from the library, say so honestly.
-- Format the rest of your response with markdown for readability (headings, lists, code blocks, etc.).`;
+- Format the rest of your response with markdown for readability (headings, lists, code blocks, etc.).
+
+## Creating Collections
+
+When the user explicitly asks you to **create**, **build**, **group**, **organize**, or **collect** resources into a collection, do NOT just describe what you would create. Instead:
+1. Call \`searchLibrary\` to find candidate resources for the topic (use a generous limit, e.g. 20).
+2. Call \`proposeCollection\` with a clear, concise name (no quotes, no emojis), the chosen resourceIds (max 25), and a one-sentence reason for the grouping.
+3. After calling \`proposeCollection\`, write ONE short sentence telling the user the proposal is ready below — do NOT re-list the resources in your text (the UI will render them as a confirmation card).
+
+Never call \`proposeCollection\` without first calling \`searchLibrary\` in the same turn. Never invent resourceIds — only pass IDs returned by \`searchLibrary\` or present in the system prompt context. If \`searchLibrary\` returns zero matches, say so plainly and do NOT call \`proposeCollection\`.`;
 
   const sections: string[] = [basePrompt];
 
@@ -192,6 +201,56 @@ export function createChatTools(workspaceId: string) {
             title: r.title,
             type: r.type,
           })),
+        };
+      },
+    }),
+
+    proposeCollection: tool({
+      description:
+        "Propose a new collection containing a set of resources from the user's library. Use this AFTER calling searchLibrary when the user asks you to create, build, group, or organize resources into a collection. This does NOT create the collection — it returns a structured proposal that the user will confirm via a UI card with a Create button. Only pass resourceIds you have seen returned by searchLibrary or present in the system prompt context. Limit resourceIds to at most 25. The name must be plain text — no emojis or icons.",
+      inputSchema: z.object({
+        name: z
+          .string()
+          .describe(
+            "Suggested collection name in plain text — no emojis. e.g. 'React performance articles'"
+          ),
+        resourceIds: z
+          .array(z.string())
+          .describe(
+            "Resource IDs to include in the collection (from searchLibrary results)"
+          ),
+        reason: z
+          .string()
+          .describe(
+            "One short sentence explaining why these resources were chosen"
+          ),
+      }),
+      execute: async ({ name, resourceIds, reason }) => {
+        console.log("[tool:proposeCollection]", {
+          name,
+          count: resourceIds.length,
+        });
+        const resources: Array<{ id: string; title: string; type: string }> =
+          [];
+        for (const id of resourceIds.slice(0, 25)) {
+          try {
+            const r = await fetchAuthQuery(api.resource.queries.get, {
+              workspaceId: workspaceId as Id<"workspace">,
+              resourceId: id as Id<"resource">,
+            });
+            if (r) {
+              resources.push({ id: r._id, title: r.title, type: r.type });
+            }
+          } catch {
+            // skip invalid ids
+          }
+        }
+
+        return {
+          name,
+          reason,
+          resources,
+          resourceIds: resources.map((r) => r.id),
         };
       },
     }),
@@ -294,11 +353,25 @@ export async function generateThreadTitle(
   return text.trim().slice(0, 60);
 }
 
+/**
+ * A persisted tool part shaped to match an AI SDK v6 UIMessage tool part.
+ * Stored opaquely on the chatMessage so adding new tools requires no schema
+ * changes. Tool-specific UI components read their own `output` shape.
+ */
+export interface PersistedToolPart {
+  type: string; // e.g. "tool-proposeCollection"
+  state: "output-available";
+  toolCallId: string;
+  input?: unknown;
+  output: unknown;
+}
+
 export async function saveAssistantMessage(
   workspaceId: string,
   threadId: string,
   content: string,
-  citations: Citation[]
+  citations: Citation[],
+  toolParts?: PersistedToolPart[]
 ) {
   await fetchAuthMutation(api.chat.mutations.saveAssistantMessage, {
     workspaceId: workspaceId as Id<"workspace">,
@@ -311,5 +384,63 @@ export async function saveAssistantMessage(
       snippet: c.snippet,
       chunkIndex: c.chunkIndex,
     })),
+    toolParts: toolParts && toolParts.length > 0 ? toolParts : undefined,
   });
 }
+
+interface MaybeToolResult {
+  toolName?: string;
+  toolCallId?: string;
+  input?: unknown;
+  output?: unknown;
+  result?: unknown;
+}
+
+interface MaybeStep {
+  toolResults?: MaybeToolResult[];
+}
+
+/**
+ * Walk every step's `toolResults` and shape each one as a UIMessage tool part
+ * suitable for persistence. Generic — adds nothing tool-specific. Filtering
+ * (e.g. "only persist these tools") happens via the `toolNames` allowlist.
+ */
+export function extractToolPartsFromSteps(
+  steps: unknown,
+  toolNames?: ReadonlySet<string>
+): PersistedToolPart[] {
+  if (!Array.isArray(steps)) {
+    return [];
+  }
+  const parts: PersistedToolPart[] = [];
+  for (const step of steps as MaybeStep[]) {
+    const toolResults = step?.toolResults;
+    if (!Array.isArray(toolResults)) {
+      continue;
+    }
+    for (const tr of toolResults) {
+      if (typeof tr.toolName !== "string" || typeof tr.toolCallId !== "string") {
+        continue;
+      }
+      if (toolNames && !toolNames.has(tr.toolName)) {
+        continue;
+      }
+      parts.push({
+        type: `tool-${tr.toolName}`,
+        state: "output-available",
+        toolCallId: tr.toolCallId,
+        input: tr.input,
+        output: tr.output ?? tr.result,
+      });
+    }
+  }
+  return parts;
+}
+
+/**
+ * Tools whose results we want to persist & re-render when the user reloads
+ * the chat thread. Add new entries here as new interactive tools are built.
+ */
+export const PERSISTED_TOOL_NAMES: ReadonlySet<string> = new Set([
+  "proposeCollection",
+]);

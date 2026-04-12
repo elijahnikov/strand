@@ -1,20 +1,15 @@
+/** biome-ignore-all lint/performance/useTopLevelRegex: <> */
 import { convexQuery } from "@convex-dev/react-query";
 import { RiCloseLine, RiSendPlaneFill, RiStopFill } from "@remixicon/react";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { cn } from "@strand/ui";
 import { Button } from "@strand/ui/button";
+import { Text } from "@strand/ui/text";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ResourceBadge, ResourceIcon } from "./resource-badge";
-import { Text } from "@strand/ui/text";
 
 export interface Mention {
   resourceId: string;
@@ -70,7 +65,7 @@ export function ChatInput({
 
   useEffect(() => {
     setHighlightIndex(0);
-  }, [mentionState?.query]);
+  }, []);
 
   const closeMentionPicker = useCallback(() => {
     setMentionState(null);
@@ -207,7 +202,7 @@ export function ChatInput({
     <div className="px-4 pt-0 pb-3">
       <div
         className={cn("relative mx-auto max-w-2xl", [
-          "txt-compact-small w-full rounded-md bg-ui-bg-field-component text-ui-fg-base placeholder-ui-fg-muted caret-ui-fg-base shadow-borders-base outline-none transition-fg hover:bg-ui-bg-field-component-hover",
+          "txt-compact-small w-full rounded-md border-[0.5px] bg-ui-bg-field-component text-ui-fg-base placeholder-ui-fg-muted caret-ui-fg-base outline-none transition-fg hover:bg-ui-bg-field-component-hover",
           "focus-visible:shadow-borders-interactive-with-active",
           "disabled:cursor-not-allowed disabled:bg-ui-bg-disabled! disabled:text-ui-fg-disabled disabled:placeholder-ui-fg-disabled",
           "invalid:shadow-borders-error! aria-invalid:shadow-borders-error!",
@@ -226,10 +221,10 @@ export function ChatInput({
                   type={m.type}
                 />
                 <Button
-                  className="flex size-4 relative -top-[2px] rounded-full items-center justify-center"
+                  className="relative -top-[2px] flex size-4 items-center justify-center rounded-full"
                   onClick={() => removeMention(m.resourceId)}
-                  type="button"
                   size="xsmall"
+                  type="button"
                 >
                   <RiCloseLine className="size-3 shrink-0" />
                 </Button>
@@ -247,7 +242,7 @@ export function ChatInput({
           value={value}
         />
         {showPicker && results.length > 0 && (
-          <div className="absolute px-1.5 py-1 bottom-full flex-1 left-0 z-50 mb-2 w-full bg-ui-bg-component rounded-xl border">
+          <div className="absolute bottom-full left-0 z-50 mb-2 w-full flex-1 rounded-xl border bg-ui-bg-component px-1.5 py-1">
             <div className="max-h-64 overflow-y-auto py-1">
               {results.length === 0 ? (
                 <div className="px-3 py-4 text-center text-sm text-ui-fg-muted">
@@ -257,7 +252,7 @@ export function ChatInput({
                 results.map((r, i) => (
                   <button
                     className={cn(
-                      "txt-compact-small gap-x-2 group/menuitem relative w-full text-left flex cursor-pointer select-none items-center rounded-xl bg-ui-bg-component px-2 py-1.5 font-medium text-ui-fg-subtle outline-none transition-colors [&_svg]:mr-2 [&_svg]:size-4 [&_svg]:text-ui-fg-base",
+                      "txt-compact-small group/menuitem relative flex w-full cursor-pointer select-none items-center gap-x-2 rounded-xl bg-ui-bg-component px-2 py-1.5 text-left font-medium text-ui-fg-subtle outline-none transition-colors [&_svg]:mr-2 [&_svg]:size-4 [&_svg]:text-ui-fg-base",
                       "hover:bg-ui-bg-component-hover hover:text-ui-fg-base focus-visible:bg-ui-bg-component-hover [&_svg]:text-ui-fg-subtle focus:[&_svg]:text-ui-fg-base",
                       "active:bg-ui-bg-component-hover",
                       "data-disabled:pointer-events-none data-disabled:text-ui-fg-disabled data-disabled:[&_svg]:text-ui-fg-disabled",
@@ -274,7 +269,10 @@ export function ChatInput({
                       mimeType={r.mimeType}
                       type={r.type}
                     />
-                    <Text className="line-clamp-1 flex-1 font-medium" size="small">
+                    <Text
+                      className="line-clamp-1 flex-1 font-medium"
+                      size="small"
+                    >
                       {r.title}
                     </Text>
                   </button>

@@ -1,9 +1,5 @@
 import { convexQuery } from "@convex-dev/react-query";
-import {
-  RiArrowRightUpLine,
-  RiChat3Line,
-  RiCloseLine,
-} from "@remixicon/react";
+import { RiArrowRightUpLine, RiChat3Line, RiCloseLine } from "@remixicon/react";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { Button } from "@strand/ui/button";
@@ -56,12 +52,12 @@ export function ResourceChatPanel({
       {open && (
         <motion.div
           animate={{ y: 0, opacity: 1 }}
-          className="fixed right-4 bottom-4 z-50 flex h-[600px] max-h-[calc(100vh-2rem)] w-[420px] flex-col overflow-hidden rounded-xl border bg-ui-bg-base shadow-lg"
+          className="fixed right-4 bottom-4 z-50 flex h-[600px] max-h-[calc(100vh-2rem)] w-[420px] flex-col overflow-hidden rounded-xl border-[0.5px] bg-ui-bg-subtle shadow-lg"
           exit={{ y: 700, opacity: 0 }}
           initial={{ y: 700, opacity: 0 }}
           transition={{ type: "spring", stiffness: 400, damping: 35 }}
         >
-          <div className="flex items-center justify-between border-b px-3 py-2">
+          <div className="flex items-center justify-between border-b-[0.5px] px-3 py-2">
             <div className="flex min-w-0 flex-1 items-center gap-2">
               <RiChat3Line className="size-4 shrink-0 text-ui-fg-muted" />
               <Text className="truncate font-medium" size="small">

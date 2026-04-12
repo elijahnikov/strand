@@ -376,6 +376,12 @@ export default defineSchema({
         })
       )
     ),
+    // Persisted AI SDK tool parts (one per tool result the model emitted in
+    // this assistant message). Stored as opaque JSON so adding new tools
+    // doesn't require schema changes — each part is shaped like the live
+    // UIMessage tool part: { type: "tool-${name}", state, toolCallId, input,
+    // output }. Tool-specific UI components read their own output shape.
+    toolParts: v.optional(v.array(v.any())),
     createdAt: v.number(),
   }).index("by_thread", ["threadId", "createdAt"]),
 });

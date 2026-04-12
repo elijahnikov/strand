@@ -41,7 +41,7 @@ function MenuPopup({
       >
         <MenuPrimitive.Popup
           className={cn(
-            "relative flex not-[class*='w-']:min-w-52 origin-(--transform-origin) rounded-2xl border bg-ui-bg-component not-dark:bg-clip-padding outline-none before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] focus:outline-none",
+            "relative flex not-[class*='w-']:min-w-52 origin-(--transform-origin) rounded-2xl border-[0.5px] bg-ui-bg-component not-dark:bg-clip-padding outline-none before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] focus:outline-none",
             className
           )}
           data-slot="menu-popup"
