@@ -359,11 +359,11 @@ export async function generateThreadTitle(
  * changes. Tool-specific UI components read their own `output` shape.
  */
 export interface PersistedToolPart {
-  type: string; // e.g. "tool-proposeCollection"
-  state: "output-available";
-  toolCallId: string;
   input?: unknown;
   output: unknown;
+  state: "output-available";
+  toolCallId: string;
+  type: string; // e.g. "tool-proposeCollection"
 }
 
 export async function saveAssistantMessage(
@@ -389,11 +389,11 @@ export async function saveAssistantMessage(
 }
 
 interface MaybeToolResult {
-  toolName?: string;
-  toolCallId?: string;
   input?: unknown;
   output?: unknown;
   result?: unknown;
+  toolCallId?: string;
+  toolName?: string;
 }
 
 interface MaybeStep {
@@ -419,7 +419,10 @@ export function extractToolPartsFromSteps(
       continue;
     }
     for (const tr of toolResults) {
-      if (typeof tr.toolName !== "string" || typeof tr.toolCallId !== "string") {
+      if (
+        typeof tr.toolName !== "string" ||
+        typeof tr.toolCallId !== "string"
+      ) {
         continue;
       }
       if (toolNames && !toolNames.has(tr.toolName)) {

@@ -324,7 +324,7 @@ const SidebarInset = ({
 }) => (
   <main
     className={cn(
-      "relative flex w-full flex-col self-end overflow-hidden bg-ui-bg-base md:h-[calc(100vh-60px)]",
+      "relative flex w-full flex-col self-end overflow-hidden bg-ui-bg-base md:h-[calc(100vh-44px)]",
       "md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-px md:peer-data-[variant=inset]:rounded-lg",
       className
     )}

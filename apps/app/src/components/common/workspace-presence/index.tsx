@@ -63,13 +63,13 @@ export function WorkspacePresenceProvider({
 
   const users = useMemo(() => {
     const all: Array<{ userId: string; name: string; avatar: string }> = [];
-    if (myPresence?.userId) {
-      all.push({
-        userId: myPresence.userId,
-        name: myPresence.name,
-        avatar: myPresence.avatar,
-      });
-    }
+    // if (myPresence?.userId) {
+    //   all.push({
+    //     userId: myPresence.userId,
+    //     name: myPresence.name,
+    //     avatar: myPresence.avatar,
+    //   });
+    // }
     for (const peer of Object.values(peers)) {
       if (peer?.userId) {
         all.push({
@@ -98,7 +98,7 @@ export function WorkspacePresenceProvider({
       }
     }
     return deduped;
-  }, [myPresence, peers]);
+  }, [peers]);
 
   const value = useMemo(
     () => ({ users, isLoading: !myPresence }),

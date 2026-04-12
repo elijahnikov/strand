@@ -1,9 +1,11 @@
 import { init } from "@instantdb/react";
 import schema from "./instant.schema";
 
-const env = (import.meta as ImportMeta & {
-  env?: Record<string, string | undefined>;
-}).env;
+const env = (
+  import.meta as ImportMeta & {
+    env?: Record<string, string | undefined>;
+  }
+).env;
 
 const appId = env?.VITE_INSTANT_APP_ID ?? "";
 
