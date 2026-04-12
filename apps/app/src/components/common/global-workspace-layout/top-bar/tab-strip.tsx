@@ -82,10 +82,7 @@ export function TabStrip({ workspaceId }: TabStripProps) {
 
   return (
     <div className="relative mb-[3.7px] flex h-10 min-w-0 flex-1" ref={rootRef}>
-      <ScrollArea
-        className="h-11 min-w-0 flex-1 [&_[data-slot=scroll-area-scrollbar]]:hidden"
-        scrollFade
-      >
+      <ScrollArea className="h-11 min-w-0 flex-1 **:data-[slot=scroll-area-scrollbar]:hidden">
         <div className="flex h-11 items-end gap-x-2 pr-4 pl-4">
           {tabs.map((tab) => {
             const isActive = tab.id === activeId;
@@ -101,14 +98,14 @@ export function TabStrip({ workspaceId }: TabStripProps) {
           })}
         </div>
       </ScrollArea>
-      {/* <span
+      <span
         aria-hidden
         className="pointer-events-none absolute top-0 bottom-0 left-0 z-[1] w-6 bg-gradient-to-r from-ui-bg-subtle to-transparent"
       />
       <span
         aria-hidden
         className="pointer-events-none absolute top-0 right-0 bottom-0 z-[1] w-6 bg-gradient-to-l from-ui-bg-subtle to-transparent"
-      /> */}
+      />
       {/* {overlay && (
         <span
           aria-hidden

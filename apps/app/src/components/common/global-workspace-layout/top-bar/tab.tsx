@@ -1,3 +1,4 @@
+import { RiCloseLine } from "@remixicon/react";
 import { cn } from "@strand/ui";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { type MouseEvent, memo, type ReactNode, useCallback } from "react";
@@ -43,15 +44,15 @@ function TabComponent({ tab, isActive, workspaceId, icon }: TabProps) {
     <div
       className={cn(
         "group/tab relative flex shrink-0 items-end",
-        isActive ? "sticky right-2 left-2 z-[2] h-9" : "mb-2 h-8"
+        isActive ? "sticky right-3 left-3 z-[2] h-9" : "mb-2 h-8"
       )}
       data-active={isActive || undefined}
     >
       <Link
         className={cn(
-          "relative flex min-w-[120px] max-w-[220px] items-center gap-1.5 px-3 font-medium text-[13px] outline-none transition-colors",
+          "relative flex min-w-[120px] max-w-[220px] items-center gap-1.5 px-2 font-medium text-[13px] outline-none transition-colors",
           isActive
-            ? "z-[100] h-9.5 rounded-t-lg rounded-b-0 bg-ui-bg-base pb-1 text-ui-fg-base ring-[0.5px] ring-ui-border-base"
+            ? "z-[100] h-9.5 rounded-t-lg rounded-b-0 bg-ui-bg-base pb-[6.5px] text-ui-fg-base ring-[0.5px] ring-ui-border-base"
             : "h-7 rounded-full text-ui-fg-muted hover:bg-ui-bg-component-hover hover:text-ui-fg-base"
         )}
         onMouseDown={handleMouseDown}
@@ -63,13 +64,15 @@ function TabComponent({ tab, isActive, workspaceId, icon }: TabProps) {
           {icon}
         </span>
         <span className="truncate">{tab.title}</span>
+        <button
+          aria-label={`Close ${tab.title}`}
+          className="z-[101] flex size-3 shrink-0 items-center justify-center rounded-full text-ui-fg-muted hover:bg-black/8 hover:text-ui-fg-base dark:hover:bg-white/10"
+          onClick={handleClose}
+          type="button"
+        >
+          <RiCloseLine className="size-3" />
+        </button>
       </Link>
-      {/* {!(isActive || isLast) && (
-        <span
-          aria-hidden
-          className="absolute top-2 right-0 bottom-2 w-px bg-ui-border-base/40 transition-opacity group-hover/tab:opacity-0"
-        />
-      )} */}
       {isActive && <TabCorners />}
     </div>
   );

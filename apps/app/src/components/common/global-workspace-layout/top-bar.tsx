@@ -5,7 +5,6 @@ import {
   RiHome3Fill,
   RiSearch2Fill,
 } from "@remixicon/react";
-import { Separator } from "@strand/ui/separator";
 import { TooltipProvider } from "@strand/ui/tooltip";
 import { useLocation, useParams } from "@tanstack/react-router";
 import { Suspense, useMemo } from "react";
@@ -92,7 +91,6 @@ export function TopBar() {
             ))}
           </TooltipProvider>
         </div>
-        <Separator className={"h-5"} orientation="vertical" />
       </div>
       <TabStrip workspaceId={params.workspaceId} />
       <div className="relative z-[3] flex shrink-0 items-center pb-[3px] pl-2">
