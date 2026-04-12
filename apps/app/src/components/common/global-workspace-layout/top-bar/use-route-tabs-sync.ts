@@ -1,6 +1,6 @@
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { useLocation, useParams } from "@tanstack/react-router";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   useChatThreadTitle,
   useCollectionTitle,
@@ -11,6 +11,8 @@ import {
   useWorkspaceTabs,
   type WorkspaceTab,
 } from "~/lib/workspace-tabs-store";
+
+const EMPTY_TABS: WorkspaceTab[] = [];
 
 interface RouteEntity {
   entityId: string;
@@ -88,17 +90,26 @@ export function useRouteTabsSync() {
     collectionId?: string;
   };
   const pathname = useLocation({ select: (l) => l.pathname });
+  const { workspaceId, resourceId, threadId, tagName, collectionId } = params;
 
   const entity = useMemo(
-    () => detectEntity(params, pathname),
-    [params, pathname]
+    () =>
+      detectEntity(
+        { workspaceId, resourceId, threadId, tagName, collectionId },
+        pathname
+      ),
+    [workspaceId, resourceId, threadId, tagName, collectionId, pathname]
   );
 
   const openOrActivate = useWorkspaceTabs((s) => s.openOrActivate);
   const updateTitle = useWorkspaceTabs((s) => s.updateTitle);
   const clearActive = useWorkspaceTabs((s) => s.clearActive);
+  const tabsForWorkspace = useWorkspaceTabs((s) =>
+    workspaceId ? (s.tabsByWorkspace[workspaceId] ?? EMPTY_TABS) : EMPTY_TABS
+  );
 
-  const workspaceId = params.workspaceId;
+  const prevTabIdsRef = useRef<Set<string>>(new Set());
+
   const resourceKind = entity?.kind === "resource" ? entity : null;
   const chatKind = entity?.kind === "chat" ? entity : null;
   const collectionKind = entity?.kind === "collection" ? entity : null;
@@ -118,12 +129,26 @@ export function useRouteTabsSync() {
 
   // Register / activate tab when entity enters the route.
   useEffect(() => {
+    const currentIds = new Set(tabsForWorkspace.map((t) => t.id));
+
     if (!(workspaceId && entity)) {
       if (workspaceId) {
         clearActive(workspaceId);
       }
+      prevTabIdsRef.current = currentIds;
       return;
     }
+
+    // If this entity was present before and is now absent, the user just
+    // closed it while still on its route (nav hasn't committed). Don't
+    // re-add it — wait for the pathname to change to a different entity.
+    const wasInPrev = prevTabIdsRef.current.has(entity.id);
+    const isInCurrent = currentIds.has(entity.id);
+    if (wasInPrev && !isInCurrent) {
+      prevTabIdsRef.current = currentIds;
+      return;
+    }
+
     const tab: WorkspaceTab = {
       id: entity.id,
       kind: entity.kind,
@@ -132,7 +157,8 @@ export function useRouteTabsSync() {
       title: entity.fallbackTitle,
     };
     openOrActivate(workspaceId, tab);
-  }, [workspaceId, entity, openOrActivate, clearActive]);
+    prevTabIdsRef.current = currentIds;
+  }, [workspaceId, entity, tabsForWorkspace, openOrActivate, clearActive]);
 
   // Keep the tab's title synced with its source of truth.
   useEffect(() => {

@@ -15,10 +15,19 @@ export interface WorkspaceTab {
 interface TabsState {
   activeByWorkspace: Record<string, string | undefined>;
   clearActive: (workspaceId: string) => void;
+  closeAll: (workspaceId: string) => { nextUrl: string };
+  closeOthers: (
+    workspaceId: string,
+    keepId: string
+  ) => { nextUrl: string | null };
   closeTab: (
     workspaceId: string,
     id: string
   ) => { nextUrl: string | null; wasActive: boolean };
+  closeToRight: (
+    workspaceId: string,
+    anchorId: string
+  ) => { nextUrl: string | null };
 
   openOrActivate: (workspaceId: string, tab: WorkspaceTab) => void;
   reorder: (workspaceId: string, fromIdx: number, toIdx: number) => void;
@@ -34,20 +43,34 @@ export const useWorkspaceTabs = create<TabsState>()(
       activeByWorkspace: {},
 
       openOrActivate: (workspaceId, tab) => {
-        const existing = get().tabsByWorkspace[workspaceId] ?? [];
+        const state = get();
+        const existing = state.tabsByWorkspace[workspaceId] ?? [];
         const match = existing.find((t) => t.id === tab.id);
-        const nextTabs = match
-          ? existing.map((t) =>
-              t.id === tab.id ? { ...t, url: tab.url, title: tab.title } : t
-            )
-          : [...existing, tab];
+        const alreadyActive = state.activeByWorkspace[workspaceId] === tab.id;
+
+        // Existing tab: only toggle active; never overwrite title/url
+        // (titles are managed by updateTitle from resolved queries).
+        if (match) {
+          if (alreadyActive) {
+            return;
+          }
+          set({
+            activeByWorkspace: {
+              ...state.activeByWorkspace,
+              [workspaceId]: tab.id,
+            },
+          });
+          return;
+        }
+
+        // New tab: append and activate.
         set({
           tabsByWorkspace: {
-            ...get().tabsByWorkspace,
-            [workspaceId]: nextTabs,
+            ...state.tabsByWorkspace,
+            [workspaceId]: [...existing, tab],
           },
           activeByWorkspace: {
-            ...get().activeByWorkspace,
+            ...state.activeByWorkspace,
             [workspaceId]: tab.id,
           },
         });
@@ -83,10 +106,79 @@ export const useWorkspaceTabs = create<TabsState>()(
         return { nextUrl, wasActive: true };
       },
 
+      closeOthers: (workspaceId, keepId) => {
+        const state = get();
+        const tabs = state.tabsByWorkspace[workspaceId] ?? [];
+        const keep = tabs.find((t) => t.id === keepId);
+        if (!keep || tabs.length <= 1) {
+          return { nextUrl: null };
+        }
+        const wasActive = state.activeByWorkspace[workspaceId] === keepId;
+        set({
+          tabsByWorkspace: {
+            ...state.tabsByWorkspace,
+            [workspaceId]: [keep],
+          },
+          activeByWorkspace: {
+            ...state.activeByWorkspace,
+            [workspaceId]: keepId,
+          },
+        });
+        return { nextUrl: wasActive ? null : keep.url };
+      },
+
+      closeToRight: (workspaceId, anchorId) => {
+        const state = get();
+        const tabs = state.tabsByWorkspace[workspaceId] ?? [];
+        const idx = tabs.findIndex((t) => t.id === anchorId);
+        if (idx === -1 || idx === tabs.length - 1) {
+          return { nextUrl: null };
+        }
+        const kept = tabs.slice(0, idx + 1);
+        const removedIds = new Set(tabs.slice(idx + 1).map((t) => t.id));
+        const currentActive = state.activeByWorkspace[workspaceId];
+        const activeWasRemoved =
+          !!currentActive && removedIds.has(currentActive);
+        const nextActive = activeWasRemoved ? anchorId : currentActive;
+        set({
+          tabsByWorkspace: {
+            ...state.tabsByWorkspace,
+            [workspaceId]: kept,
+          },
+          activeByWorkspace: {
+            ...state.activeByWorkspace,
+            [workspaceId]: nextActive,
+          },
+        });
+        const anchor = kept.at(-1);
+        return {
+          nextUrl: activeWasRemoved && anchor ? anchor.url : null,
+        };
+      },
+
+      closeAll: (workspaceId) => {
+        const state = get();
+        set({
+          tabsByWorkspace: {
+            ...state.tabsByWorkspace,
+            [workspaceId]: [],
+          },
+          activeByWorkspace: {
+            ...state.activeByWorkspace,
+            [workspaceId]: undefined,
+          },
+        });
+        return { nextUrl: `/workspace/${workspaceId}` };
+      },
+
       setActive: (workspaceId, id) => {
+        const state = get();
+        if (state.activeByWorkspace[workspaceId] === id) {
+          return;
+        }
         set({
           activeByWorkspace: {
-            ...get().activeByWorkspace,
+            ...state.activeByWorkspace,
             [workspaceId]: id,
           },
         });
@@ -131,9 +223,13 @@ export const useWorkspaceTabs = create<TabsState>()(
       },
 
       clearActive: (workspaceId) => {
+        const state = get();
+        if (state.activeByWorkspace[workspaceId] === undefined) {
+          return;
+        }
         set({
           activeByWorkspace: {
-            ...get().activeByWorkspace,
+            ...state.activeByWorkspace,
             [workspaceId]: undefined,
           },
         });

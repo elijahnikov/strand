@@ -8,6 +8,7 @@ import {
 import { TooltipProvider } from "@strand/ui/tooltip";
 import { useLocation, useParams } from "@tanstack/react-router";
 import { Suspense, useMemo } from "react";
+import { NavMoreMenu } from "~/components/common/global-workspace-layout/top-bar/nav-more-menu";
 import { TabStrip } from "~/components/common/global-workspace-layout/top-bar/tab-strip";
 import { useRouteTabsSync } from "~/components/common/global-workspace-layout/top-bar/use-route-tabs-sync";
 import {
@@ -72,7 +73,7 @@ export function TopBar() {
   }
 
   return (
-    <div className="absolute top-0 right-0 left-0 z-[60] flex h-11 items-end bg-ui-bg-subtle px-2">
+    <div className="absolute top-0 right-0 left-0 z-[40] flex h-11 items-end bg-ui-bg-subtle px-2">
       <div className="relative z-[3] mb-1.25 flex shrink-0 items-center gap-x-2 pr-3 pb-[3px]">
         <Suspense fallback={<UserMenuSkeleton />}>
           <UserMenu />
@@ -89,6 +90,7 @@ export function TopBar() {
                 url={item.url}
               />
             ))}
+            <NavMoreMenu workspaceId={params.workspaceId} />
           </TooltipProvider>
         </div>
       </div>
