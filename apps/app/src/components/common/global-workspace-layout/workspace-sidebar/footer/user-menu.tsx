@@ -43,8 +43,8 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="flex size-8! w-full items-center gap-2 rounded-full text-left text-sm hover:bg-accent"
-        render={<Avatar className="size-7" />}
+        className="flex size-7! w-full items-center gap-2 rounded-full text-left text-sm hover:bg-accent"
+        render={<Avatar className="size-6" />}
       >
         {user.image && <AvatarImage src={user.image} />}
         <AvatarFallback>
@@ -54,7 +54,7 @@ export function UserMenu() {
       <DropdownMenuContent
         align="start"
         className={"relative"}
-        side="right"
+        side="bottom"
         sideOffset={6}
       >
         <DropdownMenuItem>

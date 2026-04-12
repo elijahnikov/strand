@@ -1,32 +1,89 @@
-import { Separator } from "@strand/ui/separator";
+import {
+  RiBookmarkFill,
+  RiChat1Fill,
+  RiHashtag,
+  RiHome3Fill,
+  RiSearch2Fill,
+} from "@remixicon/react";
+import { TooltipProvider } from "@strand/ui/tooltip";
+import { useLocation, useParams } from "@tanstack/react-router";
+import { Suspense, useMemo } from "react";
+import {
+  UserMenu,
+  UserMenuSkeleton,
+} from "~/components/common/global-workspace-layout/workspace-sidebar/footer/user-menu";
 import { WorkspaceSwitcher } from "~/components/common/global-workspace-layout/workspace-sidebar/header/workspace-switcher";
+import SidebarLinkItem from "~/components/common/global-workspace-layout/workspace-sidebar/sidebar-link-item";
 import { WorkspacePresenceAvatars } from "~/components/common/workspace-presence";
-import { Breadcrumbs } from "./breadcrumbs";
 
 export function TopBar() {
+  const params = useParams({ strict: false }) as {
+    workspaceId?: string;
+  };
+  const pathname = useLocation({ select: (location) => location.pathname });
+
+  const navigationItems = useMemo(() => {
+    if (!params?.workspaceId) {
+      return [];
+    }
+
+    const workspacePath = `/workspace/${params.workspaceId}`;
+
+    return [
+      {
+        icon: RiHome3Fill,
+        title: "Home",
+        url: `/workspace/${params.workspaceId}`,
+        isActive: pathname === workspacePath,
+      },
+      {
+        icon: RiBookmarkFill,
+        title: "Library",
+        url: `/workspace/${params.workspaceId}/library`,
+        isActive: pathname === `${workspacePath}/library`,
+      },
+      {
+        icon: RiSearch2Fill,
+        title: "Search",
+        url: `/workspace/${params.workspaceId}/search`,
+        isActive: pathname === `${workspacePath}/search`,
+      },
+      {
+        icon: RiChat1Fill,
+        title: "Chat",
+        url: `/workspace/${params.workspaceId}/chat`,
+        isActive: pathname.startsWith(`${workspacePath}/chat`),
+      },
+      {
+        icon: RiHashtag,
+        title: "Tags",
+        url: `/workspace/${params.workspaceId}/tags`,
+        isActive:
+          pathname === `${workspacePath}/tags` ||
+          pathname.includes(`${workspacePath}/tags`),
+      },
+    ];
+  }, [pathname, params?.workspaceId]);
   return (
-    <div className="pointer-events-none fixed right-1.75 left-1.75 z-100 flex h-12.5 items-center justify-between bg-ui-bg-base px-1 md:absolute md:bg-transparent">
-      <div className="pointer-events-auto flex items-center">
-        <img
-          alt="Strand"
-          className="hidden rounded-lg dark:block"
-          height={36}
-          src="/STRAND_TRANSPARENT_WHITE.png"
-          width={36}
-        />
-        <img
-          alt="Strand"
-          className="rounded-lg dark:hidden"
-          height={36}
-          src="/STRAND_TRANSPARENT_BLACK.png"
-          width={36}
-        />
-        <Separator
-          className="my-3 mr-3 ml-2 rotate-30"
-          orientation="vertical"
-        />
+    <div className="pointer-events-none fixed right-1.75 left-1.75 z-100 -mb-2 flex h-11 items-center justify-between bg-ui-bg-base px-1 md:absolute md:bg-transparent">
+      <div className="pointer-events-auto flex items-center gap-x-2">
+        <Suspense fallback={<UserMenuSkeleton />}>
+          <UserMenu />
+        </Suspense>
         <WorkspaceSwitcher />
-        <Breadcrumbs />
+        <div className="flex items-center gap-x-1">
+          <TooltipProvider>
+            {navigationItems.map((item) => (
+              <SidebarLinkItem
+                icon={item.icon}
+                isActive={item.isActive}
+                key={item.title}
+                title={item.title}
+                url={item.url}
+              />
+            ))}
+          </TooltipProvider>
+        </div>
       </div>
       <div className="pointer-events-auto">
         <WorkspacePresenceAvatars />

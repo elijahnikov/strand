@@ -1,5 +1,6 @@
 import { cn } from "@strand/ui";
 import { Button } from "@strand/ui/button";
+import { Text } from "@strand/ui/text";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@strand/ui/tooltip";
 import { Link } from "@tanstack/react-router";
 import { memo } from "react";
@@ -22,7 +23,7 @@ function SidebarLinkItem({
   const Icon = icon as React.ComponentType<{ className?: string }>;
 
   const buttonClassName = cn(
-    "group/menu flex h-7 w-7 items-center rounded-full text-left font-sans text-[13px] focus-visible:bg-transparent! focus-visible:shadow-borders-interactive-with-active!",
+    "group/menu flex h-7 items-center rounded-full text-left font-sans text-[13px] focus-visible:bg-transparent! focus-visible:shadow-borders-interactive-with-active!",
     isActive
       ? "pointer-events-none bg-[rgba(0,0,0,0.070)] text-ui-fg-base dark:bg-[rgba(255,255,255,0.070)]"
       : "text-ui-fg-muted/70 transition-colors duration-200 hover:bg-[rgba(0,0,0,0.070)] hover:text-ui-fg-base dark:hover:bg-[rgba(255,255,255,0.070)]"
@@ -54,25 +55,15 @@ function SidebarLinkItem({
   }
 
   return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <Button
-            className={buttonClassName}
-            render={
-              <Link preload="intent" preloadDelay={100} search={{}} to={url} />
-            }
-            size="small"
-            variant={buttonVariant}
-          />
-        }
-      >
-        <Icon className="size-3.5 shrink-0" />
-      </TooltipTrigger>
-      <TooltipContent className={"relative -top-px"} side="right">
-        {title}
-      </TooltipContent>
-    </Tooltip>
+    <Button
+      className={buttonClassName}
+      render={<Link preload="intent" preloadDelay={100} search={{}} to={url} />}
+      size="small"
+      variant={buttonVariant}
+    >
+      <Icon className="size-3.5 shrink-0" />
+      <Text weight="plus">{title}</Text>
+    </Button>
   );
 }
 
