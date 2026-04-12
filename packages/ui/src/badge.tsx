@@ -12,8 +12,7 @@ const badgeVariants = cva(
     },
     variants: {
       size: {
-        default:
-          "text-sm",
+        default: "text-sm",
         lg: "h-6.5 min-w-6.5 px-[calc(--spacing(1.5)-1px)] text-base sm:h-5.5 sm:min-w-5.5 sm:text-sm",
         sm: "h-5 min-w-5 rounded-[calc(var(--radius-sm)-2px)] px-[calc(--spacing(1)-1px)] text-xs sm:h-4 sm:min-w-4 sm:text-[.625rem]",
       },
@@ -31,7 +30,7 @@ const badgeVariants = cva(
           "bg-secondary text-secondary-foreground [button,a&]:hover:bg-secondary/90",
         success: "bg-success/8 text-success-foreground dark:bg-success/16",
         warning: "bg-warning/8 text-warning-foreground dark:bg-warning/16",
-        mono: "bg-secondary px-1.5 text-sm py-0.25 font-mono border-[0.5px] [button,a&]:hover:bg-secondary/90",
+        mono: "border-[0.5px] bg-secondary px-1.5 py-0.25 font-mono text-sm [button,a&]:hover:bg-secondary/90",
       },
     },
   }

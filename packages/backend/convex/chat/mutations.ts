@@ -150,9 +150,9 @@ export const updateToolPartOutput = workspaceMutation({
       if (!message.toolParts) {
         continue;
       }
-      const idx = (message.toolParts as Array<{ toolCallId?: string }>).findIndex(
-        (p) => p?.toolCallId === args.toolCallId
-      );
+      const idx = (
+        message.toolParts as Array<{ toolCallId?: string }>
+      ).findIndex((p) => p?.toolCallId === args.toolCallId);
       if (idx === -1) {
         continue;
       }

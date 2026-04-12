@@ -5,9 +5,12 @@ import {
   RiHome3Fill,
   RiSearch2Fill,
 } from "@remixicon/react";
+import { Separator } from "@strand/ui/separator";
 import { TooltipProvider } from "@strand/ui/tooltip";
 import { useLocation, useParams } from "@tanstack/react-router";
 import { Suspense, useMemo } from "react";
+import { TabStrip } from "~/components/common/global-workspace-layout/top-bar/tab-strip";
+import { useRouteTabsSync } from "~/components/common/global-workspace-layout/top-bar/use-route-tabs-sync";
 import {
   UserMenu,
   UserMenuSkeleton,
@@ -17,6 +20,8 @@ import SidebarLinkItem from "~/components/common/global-workspace-layout/workspa
 import { WorkspacePresenceAvatars } from "~/components/common/workspace-presence";
 
 export function TopBar() {
+  useRouteTabsSync();
+
   const params = useParams({ strict: false }) as {
     workspaceId?: string;
   };
@@ -33,40 +38,43 @@ export function TopBar() {
       {
         icon: RiHome3Fill,
         title: "Home",
-        url: `/workspace/${params.workspaceId}`,
+        url: workspacePath,
         isActive: pathname === workspacePath,
       },
       {
         icon: RiBookmarkFill,
         title: "Library",
-        url: `/workspace/${params.workspaceId}/library`,
+        url: `${workspacePath}/library`,
         isActive: pathname === `${workspacePath}/library`,
       },
       {
         icon: RiSearch2Fill,
         title: "Search",
-        url: `/workspace/${params.workspaceId}/search`,
+        url: `${workspacePath}/search`,
         isActive: pathname === `${workspacePath}/search`,
       },
       {
         icon: RiChat1Fill,
         title: "Chat",
-        url: `/workspace/${params.workspaceId}/chat`,
-        isActive: pathname.startsWith(`${workspacePath}/chat`),
+        url: `${workspacePath}/chat`,
+        isActive: pathname === `${workspacePath}/chat`,
       },
       {
         icon: RiHashtag,
         title: "Tags",
-        url: `/workspace/${params.workspaceId}/tags`,
-        isActive:
-          pathname === `${workspacePath}/tags` ||
-          pathname.includes(`${workspacePath}/tags`),
+        url: `${workspacePath}/tags`,
+        isActive: pathname === `${workspacePath}/tags`,
       },
     ];
   }, [pathname, params?.workspaceId]);
+
+  if (!params.workspaceId) {
+    return null;
+  }
+
   return (
-    <div className="pointer-events-none fixed right-1.75 left-1.75 z-100 -mb-2 flex h-11 items-center justify-between bg-ui-bg-base px-1 md:absolute md:bg-transparent">
-      <div className="pointer-events-auto flex items-center gap-x-2">
+    <div className="absolute top-0 right-0 left-0 z-[60] flex h-11 items-end bg-ui-bg-subtle px-2">
+      <div className="relative z-[3] mb-1.25 flex shrink-0 items-center gap-x-2 pr-3 pb-[3px]">
         <Suspense fallback={<UserMenuSkeleton />}>
           <UserMenu />
         </Suspense>
@@ -84,8 +92,10 @@ export function TopBar() {
             ))}
           </TooltipProvider>
         </div>
+        <Separator className={"h-5"} orientation="vertical" />
       </div>
-      <div className="pointer-events-auto">
+      <TabStrip workspaceId={params.workspaceId} />
+      <div className="relative z-[3] flex shrink-0 items-center pb-[3px] pl-2">
         <WorkspacePresenceAvatars />
       </div>
     </div>

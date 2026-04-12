@@ -12,7 +12,7 @@ export function GlobalLayout({ children }: { children: React.ReactNode }) {
   const content = (
     <FileDropProvider>
       <SidebarProvider
-        className="bg-ui-bg-subtle!"
+        className="relative bg-ui-bg-subtle!"
         defaultOpen={true}
         open={true}
       >

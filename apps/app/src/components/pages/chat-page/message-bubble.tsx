@@ -17,7 +17,8 @@ import {
 } from "./propose-collection-card";
 import { ResourceBadge } from "./resource-badge";
 
-const RESOURCE_PATTERN = /\[\[resource:([^|\]]+)(?:\|([^|\]]+))?(?:\|([^\]]+))?\]\]/g;
+const RESOURCE_PATTERN =
+  /\[\[resource:([^|\]]+)(?:\|([^|\]]+))?(?:\|([^\]]+))?\]\]/g;
 
 const KNOWN_TYPES = new Set(["website", "note", "file"]);
 
@@ -59,12 +60,12 @@ function parsePlainTextWithResources(text: string): ReactNode[] {
 
     parts.push(
       <div className="-mt-5">
-      <ResourceBadge
-        key={`${resourceId}-${index}`}
-        resourceId={resourceId}
-        title={title}
-        type={type}
-      />
+        <ResourceBadge
+          key={`${resourceId}-${index}`}
+          resourceId={resourceId}
+          title={title}
+          type={type}
+        />
       </div>
     );
 
@@ -107,13 +108,7 @@ function preprocessResourceLinks(text: string): string {
 }
 
 const markdownComponents = {
-  a: ({
-    href,
-    children,
-  }: {
-    href?: string;
-    children?: React.ReactNode;
-  }) => {
+  a: ({ href, children }: { href?: string; children?: React.ReactNode }) => {
     if (href?.startsWith("#resource:")) {
       const withoutPrefix = href.slice("#resource:".length);
       const colonIdx = withoutPrefix.indexOf(":");
@@ -255,7 +250,7 @@ export function MessageBubble({
     <div
       className={cn(
         "group flex min-w-0",
-        isUser ? "flex-row-reverse gap-2" : "gap-0 -ml-2"
+        isUser ? "flex-row-reverse gap-2" : "-ml-2 gap-0"
       )}
     >
       {isUser ? (
@@ -266,21 +261,21 @@ export function MessageBubble({
           size={28}
         />
       ) : (
-        <div className="relative top-0 left-3.5 flex size-10  shrink-0 items-center justify-center">
-                 <img
-          alt="Strand"
-          className="hidden rounded-lg dark:block"
-          height={64}
-          src="/STRAND_TRANSPARENT_WHITE.png"
-          width={64}
-        />
-        <img
-          alt="Strand"
-          className="rounded-lg dark:hidden"
-          height={64}
-          src="/STRAND_TRANSPARENT_BLACK.png"
-          width={64}
-        />
+        <div className="relative top-0 left-3.5 flex size-10 shrink-0 items-center justify-center">
+          <img
+            alt="Strand"
+            className="hidden rounded-lg dark:block"
+            height={64}
+            src="/STRAND_TRANSPARENT_WHITE.png"
+            width={64}
+          />
+          <img
+            alt="Strand"
+            className="rounded-lg dark:hidden"
+            height={64}
+            src="/STRAND_TRANSPARENT_BLACK.png"
+            width={64}
+          />
         </div>
       )}
       <div
@@ -333,9 +328,7 @@ export function MessageBubble({
           >
             <CopyButton text={copyText} />
             <Timestamp
-              date={
-                (message as { createdAt?: Date }).createdAt ?? new Date()
-              }
+              date={(message as { createdAt?: Date }).createdAt ?? new Date()}
             />
           </div>
         )}

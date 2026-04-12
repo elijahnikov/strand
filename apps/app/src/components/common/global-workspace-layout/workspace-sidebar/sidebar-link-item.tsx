@@ -62,7 +62,9 @@ function SidebarLinkItem({
       variant={buttonVariant}
     >
       <Icon className="size-3.5 shrink-0" />
-      <Text weight="plus">{title}</Text>
+      <Text size={"small"} weight="plus">
+        {title}
+      </Text>
     </Button>
   );
 }
