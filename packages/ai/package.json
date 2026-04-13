@@ -5,6 +5,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./enrichment": "./src/enrichment/index.ts",
+    "./memory": "./src/memory/index.ts",
     "./extraction": "./src/extraction.ts",
     "./embed-extraction": "./src/embed-extraction.ts",
     "./embeddings": "./src/embeddings.ts",

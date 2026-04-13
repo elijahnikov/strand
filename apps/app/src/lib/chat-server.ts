@@ -33,6 +33,8 @@ export function createOpenAIModel() {
   return openai("gpt-5.1-mini");
 }
 
+const RAG_CHUNK_LIMIT = 6;
+
 export async function buildRAGContext(
   workspaceId: string,
   query: string,
@@ -41,7 +43,7 @@ export async function buildRAGContext(
   const chunks = (await fetchAuthAction(api.chat.actions.searchChunks, {
     workspaceId: workspaceId as Id<"workspace">,
     query,
-    limit: 10,
+    limit: RAG_CHUNK_LIMIT,
   })) as ChunkResult[];
 
   let scopedResource: RAGContext["scopedResource"] = null;
@@ -82,7 +84,10 @@ export async function buildRAGContext(
   return { chunks, scopedResource };
 }
 
-export function buildSystemPrompt(ragContext: RAGContext): string {
+export function buildSystemPrompt(
+  ragContext: RAGContext,
+  memory: string | null
+): string {
   const basePrompt = `You are a knowledgeable assistant for the user's personal knowledge library in Strand. You help users explore, understand, and connect their saved resources (articles, notes, files).
 
 ## Resource Reference Syntax — CRITICAL
@@ -134,6 +139,12 @@ When the user explicitly asks you to **create**, **build**, **group**, **organiz
 Never call \`proposeCollection\` without first calling \`searchLibrary\` in the same turn. Never invent resourceIds — only pass IDs returned by \`searchLibrary\` or present in the system prompt context. If \`searchLibrary\` returns zero matches, say so plainly and do NOT call \`proposeCollection\`.`;
 
   const sections: string[] = [basePrompt];
+
+  if (memory && memory.trim().length > 0) {
+    sections.push(
+      `\n## About This User\nA persistent profile built from prior conversations. Treat it as background context — the user did not re-say it this turn. Do not restate or summarize it unless asked.\n\n${memory.trim()}`
+    );
+  }
 
   if (ragContext.scopedResource) {
     const r = ragContext.scopedResource;

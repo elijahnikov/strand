@@ -3,7 +3,7 @@ import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { createFileRoute } from "@tanstack/react-router";
 import { stepCountIs, streamText } from "ai";
-import { fetchAuthMutation, getToken } from "~/lib/auth-server";
+import { fetchAuthMutation, fetchAuthQuery, getToken } from "~/lib/auth-server";
 import {
   buildRAGContext,
   buildSystemPrompt,
@@ -65,13 +65,17 @@ export const Route = createFileRoute("/api/chat")({
           content: lastUserContent,
         });
 
-        const ragContext = await buildRAGContext(
-          workspaceId,
-          lastUserContent,
-          resourceId
-        );
+        const [ragContext, memoryRow] = await Promise.all([
+          buildRAGContext(workspaceId, lastUserContent, resourceId),
+          fetchAuthQuery(api.userMemory.queries.getMyMemory, {
+            workspaceId: workspaceId as Id<"workspace">,
+          }).catch(() => null),
+        ]);
 
-        const systemPrompt = buildSystemPrompt(ragContext);
+        const systemPrompt = buildSystemPrompt(
+          ragContext,
+          memoryRow?.content ?? null
+        );
 
         const tools = createChatTools(workspaceId);
 
@@ -103,6 +107,13 @@ export const Route = createFileRoute("/api/chat")({
               citations,
               toolParts
             );
+
+            fetchAuthMutation(api.userMemory.mutations.scheduleExtraction, {
+              workspaceId: workspaceId as Id<"workspace">,
+              threadId: threadId as Id<"chatThread">,
+            }).catch((err) => {
+              console.error("[scheduleExtraction] failed:", err);
+            });
 
             const isFirstExchange =
               messages.filter((m) => m.role === "user").length === 1;

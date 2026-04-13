@@ -1,6 +1,7 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import {
   RiBarChartHorizontalFill,
+  RiBrain2Fill,
   RiGroupFill,
   RiSettings3Fill,
   RiShieldKeyholeFill,
@@ -39,6 +40,7 @@ import {
   WorkspaceIconSelector,
 } from "~/components/common/workspace-icon";
 import { MembersTab } from "./members-tab";
+import { MemoryTab } from "./memory-tab";
 
 export function SettingsPageComponent({
   workspaceId,
@@ -72,6 +74,12 @@ export function SettingsPageComponent({
               Members
             </Text>
           </TabsTrigger>
+          <TabsTrigger className="grow-0 pl-3" value="memory">
+            <RiBrain2Fill className="size-4" />
+            <Text className="ml-1 font-medium" size="small">
+              Memory
+            </Text>
+          </TabsTrigger>
           <TabsTrigger className="grow-0 pl-3" value="advanced">
             <RiShieldKeyholeFill className="size-4" />
             <Text className="ml-1 font-medium" size="small">
@@ -94,6 +102,9 @@ export function SettingsPageComponent({
               currentUserRole={data.member?.role}
               workspaceId={workspaceId}
             />
+          </TabsContent>
+          <TabsContent className="pl-8" value="memory">
+            <MemoryTab workspaceId={workspaceId} />
           </TabsContent>
           <TabsContent className="pl-8" value="advanced">
             <AdvancedTab
