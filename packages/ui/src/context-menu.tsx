@@ -108,7 +108,7 @@ function MenuContent({
       <ContextMenuPrimitive.Positioner className="z-50">
         <ContextMenuPrimitive.Popup
           className={cn(
-            "z-30 max-h-[var(--radix-popper-available-height)] min-w-[220px] overflow-hidden rounded-2xl border-[0.5px] bg-ui-bg-component p-1 text-ui-fg-base shadow-md outline-none",
+            "z-30 max-h-[var(--radix-popper-available-height)] min-w-[220px] overflow-hidden rounded-2xl border-[0.5px] bg-ui-bg-component p-1 text-ui-fg-base outline-none",
             "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=open]:animate-in",
             className
           )}
@@ -132,7 +132,7 @@ function MenuItem({
   return (
     <ContextMenuPrimitive.Item
       className={cn(
-        "txt-compact-small relative flex cursor-pointer select-none items-center rounded-xl bg-ui-bg-component px-2 py-1.5 text-ui-fg-subtle outline-none transition-colors [&_svg]:mr-2 [&_svg]:size-4 [&_svg]:text-ui-fg-base",
+        "txt-compact-small relative flex cursor-pointer select-none items-center rounded-xl bg-ui-bg-component px-2 py-1.5 font-medium text-ui-fg-subtle outline-none transition-colors [&_svg]:mr-2 [&_svg]:size-4 [&_svg]:text-ui-fg-base",
         "focus:bg-ui-bg-component-hover focus:text-ui-fg-base focus-visible:bg-ui-bg-component-hover focus:[&_svg]:text-ui-fg-base!",
         "active:bg-ui-bg-component-hover",
         "data-[disabled]:pointer-events-none data-[disabled]:text-ui-fg-disabled",

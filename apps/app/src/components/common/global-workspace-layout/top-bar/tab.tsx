@@ -92,7 +92,7 @@ function TabComponent({ tab, isActive, workspaceId }: TabProps) {
             "relative flex min-w-[120px] max-w-[220px] items-center gap-1.5 px-2 font-medium text-[13px] outline-none transition-colors",
             isActive
               ? "z-[100] h-9.5 rounded-t-lg rounded-b-0 bg-ui-bg-base pb-[6.5px] text-ui-fg-base ring-[0.5px] ring-ui-border-base"
-              : "h-7 rounded-full text-ui-fg-muted hover:bg-ui-bg-component-hover hover:text-ui-fg-base"
+              : "h-7 rounded-full text-ui-fg-muted hover:bg-[rgba(0,0,0,0.070)] hover:text-ui-fg-base dark:hover:bg-[rgba(255,255,255,0.070)]"
           )}
           onMouseDown={handleMouseDown}
           preload="intent"

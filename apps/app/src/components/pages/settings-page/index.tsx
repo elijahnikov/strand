@@ -1,5 +1,6 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import {
+  RiBarChartHorizontalFill,
   RiGroupFill,
   RiSettings3Fill,
   RiShieldKeyholeFill,
@@ -55,19 +56,25 @@ export function SettingsPageComponent({
         <TabsList className="h-full w-44 shrink-0 items-start justify-start self-start">
           <TabsTrigger className="grow-0 pl-3" value="general">
             <RiSettings3Fill className="size-4" />
-            <Text className="ml-1" size="small">
+            <Text className="ml-1 font-medium" size="small">
               General
+            </Text>
+          </TabsTrigger>
+          <TabsTrigger className="grow-0 pl-3" value="usage">
+            <RiBarChartHorizontalFill className="size-4" />
+            <Text className="ml-1 font-medium" size="small">
+              Usage
             </Text>
           </TabsTrigger>
           <TabsTrigger className="grow-0 pl-3" value="members">
             <RiGroupFill className="size-4" />
-            <Text className="ml-1" size="small">
+            <Text className="ml-1 font-medium" size="small">
               Members
             </Text>
           </TabsTrigger>
           <TabsTrigger className="grow-0 pl-3" value="advanced">
             <RiShieldKeyholeFill className="size-4" />
-            <Text className="ml-1" size="small">
+            <Text className="ml-1 font-medium" size="small">
               Advanced
             </Text>
           </TabsTrigger>
