@@ -1,5 +1,38 @@
 import { ConvexError, v } from "convex/values";
 import { internalMutation, internalQuery } from "../_generated/server";
+import { createResource } from "./mutations";
+
+export const createForUser = internalMutation({
+  args: {
+    workspaceId: v.id("workspace"),
+    userId: v.id("user"),
+    type: v.union(v.literal("website"), v.literal("note"), v.literal("file")),
+    title: v.string(),
+    description: v.optional(v.string()),
+    url: v.optional(v.string()),
+    htmlContent: v.optional(v.string()),
+    jsonContent: v.optional(v.string()),
+    plainTextContent: v.optional(v.string()),
+    storageId: v.optional(v.id("_storage")),
+    fileName: v.optional(v.string()),
+    fileSize: v.optional(v.number()),
+    mimeType: v.optional(v.string()),
+    width: v.optional(v.number()),
+    height: v.optional(v.number()),
+    duration: v.optional(v.number()),
+    collectionId: v.optional(v.id("collection")),
+  },
+  handler: async (ctx, args) => {
+    return await createResource(ctx, args);
+  },
+});
+
+export const generateUploadUrlInternal = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.storage.generateUploadUrl();
+  },
+});
 
 export const updateWebsiteMetadata = internalMutation({
   args: {

@@ -1,12 +1,17 @@
 import { RiDiscordFill, RiGoogleFill } from "@remixicon/react";
 import { authClient } from "@strand/auth/client";
 import { Button } from "@strand/ui/button";
+import { useSearch } from "@tanstack/react-router";
+import { safeRedirect } from "~/lib/safe-redirect";
 
 export function SocialLoginButtons() {
+  const { redirect } = useSearch({ from: "/_auth/login" });
+  const target = safeRedirect(redirect);
+
   const handleSocialLogin = async (provider: "discord" | "google") => {
     const res = await authClient.signIn.social({
       provider,
-      callbackURL: "/",
+      callbackURL: target,
     });
 
     if (res.data?.url) {

@@ -1,0 +1,29 @@
+@import "tailwindcss";
+@import "@strand/tailwind-config/theme";
+
+@config "../../../tailwind.config.ts";
+
+@source "../../**/*.{ts,tsx}";
+@source "../../../../../packages/ui/src/*.{ts,tsx}";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-component);
+  width: 280px;
+}
+
+#root {
+  width: 280px;
+}
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}

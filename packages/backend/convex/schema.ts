@@ -373,6 +373,20 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index("by_user_workspace", ["workspaceId", "userId"]),
 
+  // EXTENSION TOKEN (long-lived bearer tokens for the browser extension)
+  extensionToken: defineTable({
+    userId: v.id("user"),
+    defaultWorkspaceId: v.optional(v.id("workspace")),
+    tokenHash: v.string(),
+    label: v.string(),
+    createdAt: v.number(),
+    expiresAt: v.number(),
+    lastUsedAt: v.optional(v.number()),
+    revokedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId", "revokedAt"])
+    .index("by_hash", ["tokenHash"]),
+
   // CHAT MESSAGE
   chatMessage: defineTable({
     threadId: v.id("chatThread"),
