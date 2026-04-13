@@ -1,4 +1,4 @@
-import { RiMoreFill } from "@remixicon/react";
+import { RiMoreFill, RiQuestionFill, RiSettings4Fill } from "@remixicon/react";
 import { Button } from "@strand/ui/button";
 import {
   DropdownMenu,
@@ -40,11 +40,25 @@ export function NavMoreMenu({ workspaceId }: NavMoreMenuProps) {
             <Link
               params={{ workspaceId }}
               preload="intent"
-              to="/workspace/$workspaceId"
+              to="/workspace/$workspaceId/settings"
             />
           }
         >
-          Placeholder
+          <RiSettings4Fill />
+          Settings
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          render={
+            // biome-ignore lint/a11y/useAnchorContent: <>
+            <a
+              href={"https://docs.strand.co"}
+              rel="noopener noreferrer"
+              target="_blank"
+            />
+          }
+        >
+          <RiQuestionFill />
+          Help & Feedback
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
