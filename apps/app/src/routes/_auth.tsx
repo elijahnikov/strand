@@ -1,11 +1,17 @@
 import { Text } from "@strand/ui/text";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { safeRedirect } from "~/lib/safe-redirect";
 
 export const Route = createFileRoute("/_auth")({
   component: AuthLayoutComponent,
-  beforeLoad: ({ context }) => {
+  beforeLoad: ({ context, search }) => {
     if (context.isAuthenticated) {
-      throw redirect({ to: "/" });
+      const target = safeRedirect(
+        typeof (search as { redirect?: unknown }).redirect === "string"
+          ? ((search as { redirect?: string }).redirect ?? undefined)
+          : undefined
+      );
+      throw redirect({ to: target });
     }
   },
 });

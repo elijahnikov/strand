@@ -14,9 +14,13 @@ export const ClientAuthBoundary = ({ children }: PropsWithChildren) => {
       getAuthUserFn={api.auth.getAuthUser}
       isAuthError={isAuthError}
       onUnauth={() => {
-        if (location.pathname !== "/login") {
-          navigate({ to: "/login" });
+        if (
+          location.pathname === "/login" ||
+          location.pathname === "/connect-extension"
+        ) {
+          return;
         }
+        navigate({ to: "/login" });
       }}
     >
       {children}

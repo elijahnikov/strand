@@ -9,8 +9,9 @@ import {
 import { Input } from "@strand/ui/input";
 import { LoadingButton } from "@strand/ui/loading-button";
 import { toastManager } from "@strand/ui/toast";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
+import { safeRedirect } from "~/lib/safe-redirect";
 
 interface LoginFormValues {
   email: string;
@@ -19,6 +20,8 @@ interface LoginFormValues {
 
 export function EmailPasswordForm() {
   const navigate = useNavigate();
+  const { redirect } = useSearch({ from: "/_auth/login" });
+  const target = safeRedirect(redirect);
 
   const form = useForm<LoginFormValues>({
     defaultValues: {
@@ -41,7 +44,7 @@ export function EmailPasswordForm() {
       return;
     }
 
-    navigate({ to: "/" });
+    navigate({ to: target });
   };
 
   return (

@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ConnectExtensionRouteImport } from './routes/connect-extension'
 import { Route as WorkspaceRouteImport } from './routes/_workspace'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as IndexRouteImport } from './routes/index'
@@ -31,6 +32,11 @@ import { Route as WorkspaceWorkspaceWorkspaceIdResourceResourceIdRouteImport } f
 import { Route as WorkspaceWorkspaceWorkspaceIdChatThreadIdRouteImport } from './routes/_workspace/workspace/$workspaceId/chat/$threadId'
 import { Route as WorkspaceWorkspaceWorkspaceIdLibraryCollectionCollectionIdRouteImport } from './routes/_workspace/workspace/$workspaceId/library/collection/$collectionId'
 
+const ConnectExtensionRoute = ConnectExtensionRouteImport.update({
+  id: '/connect-extension',
+  path: '/connect-extension',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WorkspaceRoute = WorkspaceRouteImport.update({
   id: '/_workspace',
   getParentRoute: () => rootRouteImport,
@@ -151,6 +157,7 @@ const WorkspaceWorkspaceWorkspaceIdLibraryCollectionCollectionIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/connect-extension': typeof ConnectExtensionRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/api/chat': typeof ApiChatRoute
@@ -172,6 +179,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/connect-extension': typeof ConnectExtensionRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/api/chat': typeof ApiChatRoute
@@ -192,6 +200,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_auth': typeof AuthRouteWithChildren
   '/_workspace': typeof WorkspaceRouteWithChildren
+  '/connect-extension': typeof ConnectExtensionRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
   '/api/chat': typeof ApiChatRoute
@@ -215,6 +224,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/connect-extension'
     | '/login'
     | '/register'
     | '/api/chat'
@@ -236,6 +246,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/connect-extension'
     | '/login'
     | '/register'
     | '/api/chat'
@@ -255,6 +266,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_auth'
     | '/_workspace'
+    | '/connect-extension'
     | '/_auth/login'
     | '/_auth/register'
     | '/api/chat'
@@ -279,12 +291,20 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
   WorkspaceRoute: typeof WorkspaceRouteWithChildren
+  ConnectExtensionRoute: typeof ConnectExtensionRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/connect-extension': {
+      id: '/connect-extension'
+      path: '/connect-extension'
+      fullPath: '/connect-extension'
+      preLoaderRoute: typeof ConnectExtensionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_workspace': {
       id: '/_workspace'
       path: ''
@@ -551,6 +571,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
   WorkspaceRoute: WorkspaceRouteWithChildren,
+  ConnectExtensionRoute: ConnectExtensionRoute,
   ApiChatRoute: ApiChatRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

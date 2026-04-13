@@ -1,0 +1,35 @@
+{
+  "name": "@strand/extension",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "clean": "git clean -xdf .cache .output .wxt node_modules",
+    "dev": "bun with-env wxt",
+    "build": "bun with-env wxt build",
+    "zip": "bun with-env wxt zip",
+    "typecheck": "wxt prepare && tsc --noEmit",
+    "postinstall": "wxt prepare",
+    "with-env": "dotenv -e ../../.env --"
+  },
+  "dependencies": {
+    "@strand/auth": "*",
+    "@strand/backend": "*",
+    "@strand/ui": "*",
+    "convex": "catalog:convex",
+    "react": "catalog:react",
+    "react-dom": "catalog:react"
+  },
+  "devDependencies": {
+    "@strand/tailwind-config": "*",
+    "@strand/tsconfig": "*",
+    "@tailwindcss/vite": "catalog:tailwind",
+    "@types/chrome": "^0.0.287",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
+    "@wxt-dev/module-react": "^1.1.3",
+    "tailwindcss": "catalog:tailwind",
+    "typescript": "catalog:",
+    "wxt": "^0.19.29"
+  }
+}

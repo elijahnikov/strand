@@ -1,0 +1,18 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".output/**", ".wxt/**", ".cache/tsbuildinfo.json"]
+    },
+    "dev": {
+      "persistent": true,
+      "interactive": true
+    },
+    "zip": {
+      "dependsOn": ["build"],
+      "outputs": [".output/**"]
+    }
+  }
+}

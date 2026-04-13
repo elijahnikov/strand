@@ -5,6 +5,97 @@ import type { MutationCtx } from "../_generated/server";
 import { mutation } from "../_generated/server";
 import { workspaceMutation } from "../utils";
 
+export interface CreateResourceArgs {
+  workspaceId: Id<"workspace">;
+  userId: Id<"user">;
+  type: "website" | "note" | "file";
+  title: string;
+  description?: string;
+  url?: string;
+  htmlContent?: string;
+  jsonContent?: string;
+  plainTextContent?: string;
+  storageId?: Id<"_storage">;
+  fileName?: string;
+  fileSize?: number;
+  mimeType?: string;
+  width?: number;
+  height?: number;
+  duration?: number;
+  collectionId?: Id<"collection">;
+}
+
+export async function createResource(
+  ctx: MutationCtx,
+  args: CreateResourceArgs
+): Promise<Id<"resource">> {
+  const now = Date.now();
+
+  if (args.collectionId) {
+    const collection = await ctx.db.get(args.collectionId);
+    if (
+      !collection ||
+      collection.workspaceId !== args.workspaceId ||
+      collection.deletedAt
+    ) {
+      throw new ConvexError("Collection not found");
+    }
+  }
+
+  const resourceId = await ctx.db.insert("resource", {
+    workspaceId: args.workspaceId,
+    createdBy: args.userId,
+    type: args.type,
+    title: args.title,
+    description: args.description,
+    collectionId: args.collectionId,
+    isFavorite: false,
+    isPinned: false,
+    isArchived: false,
+    updatedAt: now,
+  });
+
+  switch (args.type) {
+    case "website":
+      await insertWebsiteResource(ctx, resourceId, args);
+      break;
+    case "note":
+      await insertNoteResource(ctx, resourceId, args);
+      break;
+    case "file":
+      await insertFileResource(ctx, resourceId, args);
+      break;
+    default:
+      throw new ConvexError(
+        `Could not insert resource on type ${String(args.type)}`
+      );
+  }
+
+  await ctx.db.insert("resourceAI", {
+    resourceId,
+    workspaceId: args.workspaceId,
+    status: "pending",
+  });
+
+  if (args.type === "website") {
+    await ctx.scheduler.runAfter(
+      0,
+      internal.resource.actions.extractWebsiteMetadata,
+      { resourceId }
+    );
+  }
+
+  if (args.type === "note" || args.type === "file") {
+    await ctx.scheduler.runAfter(
+      0,
+      internal.resource.aiActions.processResourceAI,
+      { resourceId }
+    );
+  }
+
+  return resourceId;
+}
+
 export const create = workspaceMutation({
   args: {
     type: v.union(v.literal("website"), v.literal("note"), v.literal("file")),
@@ -28,71 +119,11 @@ export const create = workspaceMutation({
     collectionId: v.optional(v.id("collection")),
   },
   handler: async (ctx, args) => {
-    const now = Date.now();
-
-    if (args.collectionId) {
-      const collection = await ctx.db.get(args.collectionId);
-      if (
-        !collection ||
-        collection.workspaceId !== ctx.workspace._id ||
-        collection.deletedAt
-      ) {
-        throw new ConvexError("Collection not found");
-      }
-    }
-
-    const resourceId = await ctx.db.insert("resource", {
+    return await createResource(ctx, {
+      ...args,
       workspaceId: ctx.workspace._id,
-      createdBy: ctx.user._id,
-      type: args.type,
-      title: args.title,
-      description: args.description,
-      collectionId: args.collectionId,
-      isFavorite: false,
-      isPinned: false,
-      isArchived: false,
-      updatedAt: now,
+      userId: ctx.user._id,
     });
-
-    switch (args.type) {
-      case "website":
-        await insertWebsiteResource(ctx, resourceId, args);
-        break;
-      case "note":
-        await insertNoteResource(ctx, resourceId, args);
-        break;
-      case "file":
-        await insertFileResource(ctx, resourceId, args);
-        break;
-      default:
-        throw new ConvexError(
-          `Could not insert resource on type ${String(args.type)}`
-        );
-    }
-
-    await ctx.db.insert("resourceAI", {
-      resourceId,
-      workspaceId: ctx.workspace._id,
-      status: "pending",
-    });
-
-    if (args.type === "website") {
-      await ctx.scheduler.runAfter(
-        0,
-        internal.resource.actions.extractWebsiteMetadata,
-        { resourceId }
-      );
-    }
-
-    if (args.type === "note" || args.type === "file") {
-      await ctx.scheduler.runAfter(
-        0,
-        internal.resource.aiActions.processResourceAI,
-        { resourceId }
-      );
-    }
-
-    return resourceId;
   },
 });
 
