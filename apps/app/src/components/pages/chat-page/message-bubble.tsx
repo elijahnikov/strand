@@ -1,5 +1,4 @@
 import { convexQuery } from "@convex-dev/react-query";
-import { RiChatSmileAiFill } from "@remixicon/react";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { cn } from "@strand/ui";

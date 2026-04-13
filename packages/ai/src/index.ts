@@ -17,6 +17,14 @@ export {
 } from "./enrichment";
 export { type ArticleContent, extractArticleContent } from "./extraction";
 export {
+  extractMemory,
+  MAX_MEMORY_WORDS,
+  type MemoryExtractionInput,
+  type MemoryExtractionResult,
+  type MemoryMessage,
+  wordJaccardSimilarity,
+} from "./memory";
+export {
   extractPdfText,
   type PdfExtraction,
   type PdfPage,

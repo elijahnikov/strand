@@ -360,6 +360,19 @@ export default defineSchema({
     ])
     .index("by_workspace_resource", ["workspaceId", "resourceId", "deletedAt"]),
 
+  // USER MEMORY (per user + workspace profile used as persistent chat context)
+  userMemory: defineTable({
+    workspaceId: v.id("workspace"),
+    userId: v.id("user"),
+    content: v.string(),
+    status: v.union(v.literal("idle"), v.literal("extracting")),
+    version: v.number(),
+    lastExtractedAt: v.optional(v.number()),
+    lastManualEditAt: v.optional(v.number()),
+    lastErrorAt: v.optional(v.number()),
+    updatedAt: v.number(),
+  }).index("by_user_workspace", ["workspaceId", "userId"]),
+
   // CHAT MESSAGE
   chatMessage: defineTable({
     threadId: v.id("chatThread"),
