@@ -64,8 +64,8 @@ export function MemoryTab({ workspaceId }: { workspaceId: Id<"workspace"> }) {
           </div>
         </div>
       ) : (
-        <div className="rounded-lg border border-dashed p-6">
-          <Text>
+        <div>
+          <Text className="text-ui-fg-muted">
             No memory yet. As you chat, Strand will build a short profile here
             covering your active projects, recurring interests, and preferences.
           </Text>

@@ -1,7 +1,7 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import {
   RiBarChartHorizontalFill,
-  RiBrainFill,
+  RiBrain2Fill,
   RiGroupFill,
   RiSettings3Fill,
   RiShieldKeyholeFill,
@@ -75,7 +75,7 @@ export function SettingsPageComponent({
             </Text>
           </TabsTrigger>
           <TabsTrigger className="grow-0 pl-3" value="memory">
-            <RiBrainFill className="size-4" />
+            <RiBrain2Fill className="size-4" />
             <Text className="ml-1 font-medium" size="small">
               Memory
             </Text>
