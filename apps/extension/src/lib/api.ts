@@ -57,7 +57,9 @@ async function postJson<TBody, TResponse>(
     body: JSON.stringify(body),
   });
   const text = await response.text();
-  const parsed = text ? (JSON.parse(text) as TResponse | { error: string }) : ({} as TResponse);
+  const parsed = text
+    ? (JSON.parse(text) as TResponse | { error: string })
+    : ({} as TResponse);
   if (!response.ok) {
     const message =
       parsed && typeof parsed === "object" && "error" in parsed
@@ -71,7 +73,9 @@ async function postJson<TBody, TResponse>(
 async function getJson<TResponse>(path: string): Promise<TResponse> {
   const response = await authedFetch(path, { method: "GET" });
   const text = await response.text();
-  const parsed = text ? (JSON.parse(text) as TResponse | { error: string }) : ({} as TResponse);
+  const parsed = text
+    ? (JSON.parse(text) as TResponse | { error: string })
+    : ({} as TResponse);
   if (!response.ok) {
     const message =
       parsed && typeof parsed === "object" && "error" in parsed
@@ -83,8 +87,8 @@ async function getJson<TResponse>(path: string): Promise<TResponse> {
 }
 
 export interface MeResponse {
-  userId: string;
   defaultWorkspaceId: string | null;
+  userId: string;
   workspaces: Array<{
     id: string;
     name: string;
@@ -104,16 +108,18 @@ export interface UploadUrlResponse {
 
 export const api = {
   me: () => getJson<MeResponse>("/api/ext/me"),
-  uploadUrl: () => postJson<Record<string, never>, UploadUrlResponse>(
-    "/api/ext/upload-url",
-    {}
-  ),
+  uploadUrl: () =>
+    postJson<Record<string, never>, UploadUrlResponse>(
+      "/api/ext/upload-url",
+      {}
+    ),
   captureWebsite: (body: {
     workspaceId?: string;
     url: string;
     title?: string;
     description?: string;
-  }) => postJson<typeof body, CaptureResponse>("/api/ext/capture/website", body),
+  }) =>
+    postJson<typeof body, CaptureResponse>("/api/ext/capture/website", body),
   captureNote: (body: {
     workspaceId?: string;
     title: string;

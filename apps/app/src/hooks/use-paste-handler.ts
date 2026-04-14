@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
+import { isHttpUrl } from "~/lib/is-http-url";
 
 interface PasteHandlerCallbacks {
   onFiles: (files: File[]) => void;
@@ -47,14 +48,9 @@ export function usePasteHandler(callbacks: PasteHandlerCallbacks) {
       return;
     }
 
-    try {
-      const url = new URL(text);
-      if (url.protocol === "http:" || url.protocol === "https:") {
-        callbacksRef.current.onUrl(text);
-        return;
-      }
-    } catch {
-      // Not a URL
+    if (isHttpUrl(text)) {
+      callbacksRef.current.onUrl(text);
+      return;
     }
 
     callbacksRef.current.onText(text);

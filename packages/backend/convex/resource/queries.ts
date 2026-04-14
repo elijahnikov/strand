@@ -470,6 +470,22 @@ export const list = workspaceQuery({
   },
 });
 
+export const listRecent = workspaceQuery({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 5;
+    const resources = await ctx.db
+      .query("resource")
+      .withIndex("by_workspace", (q) =>
+        q.eq("workspaceId", ctx.workspace._id).eq("deletedAt", undefined)
+      )
+      .order("desc")
+      .take(limit);
+
+    return Promise.all(resources.map((r) => enrichResource(ctx, r)));
+  },
+});
+
 export const listPinned = workspaceQuery({
   args: {},
   handler: async (ctx) => {

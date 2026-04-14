@@ -74,16 +74,7 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
           value={resource.title}
         />
       </div>
-      <div className="absolute top-1 right-1 z-50 ml-auto flex size-8 shrink-0 items-center gap-x-2">
-        <Button
-          aria-label="Chat about this resource"
-          className="size-8 shrink-0"
-          onClick={() => setChatOpen(true)}
-          size="small"
-          variant="ghost"
-        >
-          <RiChatAi3Fill className="size-4 shrink-0 text-ui-fg-subtle group-hover:text-ui-fg-base" />
-        </Button>
+      <div className="absolute top-1.5 right-1.5 z-50 ml-auto flex size-8 shrink-0 items-center gap-x-2">
         <Button
           aria-label="Chat about this resource"
           className="size-8 shrink-0"

@@ -6,23 +6,23 @@ import { mutation } from "../_generated/server";
 import { workspaceMutation } from "../utils";
 
 export interface CreateResourceArgs {
-  workspaceId: Id<"workspace">;
-  userId: Id<"user">;
-  type: "website" | "note" | "file";
-  title: string;
+  collectionId?: Id<"collection">;
   description?: string;
-  url?: string;
-  htmlContent?: string;
-  jsonContent?: string;
-  plainTextContent?: string;
-  storageId?: Id<"_storage">;
+  duration?: number;
   fileName?: string;
   fileSize?: number;
-  mimeType?: string;
-  width?: number;
   height?: number;
-  duration?: number;
-  collectionId?: Id<"collection">;
+  htmlContent?: string;
+  jsonContent?: string;
+  mimeType?: string;
+  plainTextContent?: string;
+  storageId?: Id<"_storage">;
+  title: string;
+  type: "website" | "note" | "file";
+  url?: string;
+  userId: Id<"user">;
+  width?: number;
+  workspaceId: Id<"workspace">;
 }
 
 export async function createResource(

@@ -1,6 +1,6 @@
-import { httpAction } from "../_generated/server";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
+import { httpAction } from "../_generated/server";
 
 const BEARER_PREFIX = "Bearer ";
 
@@ -30,16 +30,16 @@ function errorResponse(err: unknown): Response {
 
 function readBearerToken(request: Request): string {
   const header = request.headers.get("authorization");
-  if (!header || !header.startsWith(BEARER_PREFIX)) {
+  if (!(header && header.startsWith(BEARER_PREFIX))) {
     throw new HttpError(401, "Missing bearer token");
   }
   return header.slice(BEARER_PREFIX.length).trim();
 }
 
 interface ResolvedAuth {
+  defaultWorkspaceId?: Id<"workspace">;
   tokenId: Id<"extensionToken">;
   userId: Id<"user">;
-  defaultWorkspaceId?: Id<"workspace">;
 }
 
 async function resolveAuth(
@@ -120,10 +120,10 @@ export const uploadUrlHandler = httpAction(async (ctx, request) => {
 });
 
 interface CaptureWebsiteBody {
-  workspaceId?: string;
-  url: string;
-  title?: string;
   description?: string;
+  title?: string;
+  url: string;
+  workspaceId?: string;
 }
 
 export const captureWebsiteHandler = httpAction(async (ctx, request) => {
@@ -152,11 +152,11 @@ export const captureWebsiteHandler = httpAction(async (ctx, request) => {
 });
 
 interface CaptureNoteBody {
-  workspaceId?: string;
-  title: string;
-  plainTextContent?: string;
-  jsonContent?: string;
   htmlContent?: string;
+  jsonContent?: string;
+  plainTextContent?: string;
+  title: string;
+  workspaceId?: string;
 }
 
 export const captureNoteHandler = httpAction(async (ctx, request) => {
@@ -186,15 +186,15 @@ export const captureNoteHandler = httpAction(async (ctx, request) => {
 });
 
 interface CaptureFileBody {
-  workspaceId?: string;
-  storageId: string;
-  fileName: string;
-  mimeType: string;
-  fileSize: number;
-  width?: number;
-  height?: number;
   duration?: number;
+  fileName: string;
+  fileSize: number;
+  height?: number;
+  mimeType: string;
+  storageId: string;
   title?: string;
+  width?: number;
+  workspaceId?: string;
 }
 
 export const captureFileHandler = httpAction(async (ctx, request) => {
