@@ -14,10 +14,10 @@
 
 html,
 body {
-  margin: 0;
-  padding: 0;
-  background: var(--bg-component);
   width: 280px;
+  padding: 0;
+  margin: 0;
+  background: var(--bg-component);
 }
 
 #root {

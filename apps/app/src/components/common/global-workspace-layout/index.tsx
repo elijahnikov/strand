@@ -1,5 +1,7 @@
+import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { SidebarInset, SidebarProvider } from "@strand/ui/sidebar";
 import { useParams } from "@tanstack/react-router";
+import { CommandPaletteProvider } from "~/components/common/command-palette/use-command-palette";
 import { TopBar } from "~/components/common/global-workspace-layout/top-bar";
 import { WorkspacePresenceProvider } from "~/components/common/workspace-presence";
 import { FileDropProvider, useFileDrop } from "~/hooks/use-file-drop";
@@ -17,7 +19,6 @@ export function GlobalLayout({ children }: { children: React.ReactNode }) {
         open={true}
       >
         <TopBar />
-        {/* <MainSidebar /> */}
         <DropZoneInset>{children}</DropZoneInset>
       </SidebarProvider>
     </FileDropProvider>
@@ -26,7 +27,9 @@ export function GlobalLayout({ children }: { children: React.ReactNode }) {
   if (workspaceId) {
     return (
       <WorkspacePresenceProvider workspaceId={workspaceId}>
-        {content}
+        <CommandPaletteProvider workspaceId={workspaceId as Id<"workspace">}>
+          {content}
+        </CommandPaletteProvider>
       </WorkspacePresenceProvider>
     );
   }

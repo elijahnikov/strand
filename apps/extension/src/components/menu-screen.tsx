@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   RiCameraLine,
   RiExternalLinkLine,
@@ -7,14 +6,15 @@ import {
   RiLogoutBoxLine,
 } from "@remixicon/react";
 import { cn } from "@strand/ui";
+import { useState } from "react";
 import { captureScreenshot, captureWebsite } from "@/lib/capture";
 
 const NOTE_WINDOW_WIDTH = 480;
 const NOTE_WINDOW_HEIGHT = 600;
 
 interface Status {
-  state: "idle" | "pending" | "error";
   message?: string;
+  state: "idle" | "pending" | "error";
 }
 
 async function getActiveTab(): Promise<chrome.tabs.Tab> {
@@ -142,9 +142,7 @@ export function MenuScreen({ onDisconnect }: { onDisconnect: () => void }) {
         </div>
       ) : null}
       {pending ? (
-        <div className="mt-1 px-2 py-1.5 text-ui-fg-muted text-xs">
-          Saving…
-        </div>
+        <div className="mt-1 px-2 py-1.5 text-ui-fg-muted text-xs">Saving…</div>
       ) : null}
     </div>
   );

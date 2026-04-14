@@ -7,10 +7,9 @@ import { useCallback, useState } from "react";
 import { PageContent } from "~/components/common/page-content";
 import { useFileDropHandler } from "~/hooks/use-file-drop";
 import { usePasteHandler } from "~/hooks/use-paste-handler";
+import { MAX_FILE_SIZE, uploadFile } from "~/lib/upload-file";
 import { LibraryToolbar } from "./library-toolbar";
 import { ResourceList } from "./resource-list";
-
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 export function LibraryPageComponent({
   workspaceId,
@@ -86,24 +85,11 @@ export function LibraryPageComponent({
       await Promise.all(
         validFiles.map(async (file, i) => {
           try {
-            const uploadUrl = await generateUploadUrl({});
-            const response = await fetch(uploadUrl as string, {
-              method: "POST",
-              headers: { "Content-Type": file.type },
-              body: file,
-            });
-            const { storageId } = (await response.json()) as {
-              storageId: Id<"_storage">;
-            };
-
-            createResource({
+            await uploadFile({
+              file,
               workspaceId,
-              type: "file",
-              title: file.name,
-              storageId,
-              fileName: file.name,
-              fileSize: file.size,
-              mimeType: file.type,
+              generateUploadUrl: () => generateUploadUrl({}) as Promise<string>,
+              createResource,
             });
           } catch {
             const entry = entries[i];

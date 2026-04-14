@@ -4,11 +4,7 @@ import { captureScratchpad } from "@/lib/capture";
 const DRAFT_KEY = "strand.scratchpad.draft.v1";
 const TITLE_MAX_LEN = 60;
 
-export function ScratchpadEditor({
-  onSaved,
-}: {
-  onSaved?: () => void;
-} = {}) {
+export function ScratchpadEditor({ onSaved }: { onSaved?: () => void } = {}) {
   const [value, setValue] = useState("");
   const [status, setStatus] = useState<"idle" | "saving" | "success" | "error">(
     "idle"
@@ -101,11 +97,9 @@ function deriveTitle(text: string): string {
 function buildPlainTextDoc(text: string) {
   return {
     type: "doc",
-    content: text
-      .split(/\r?\n/)
-      .map((line) => ({
-        type: "paragraph",
-        content: line ? [{ type: "text", text: line }] : [],
-      })),
+    content: text.split(/\r?\n/).map((line) => ({
+      type: "paragraph",
+      content: line ? [{ type: "text", text: line }] : [],
+    })),
   };
 }

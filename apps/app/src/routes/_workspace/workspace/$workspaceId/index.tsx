@@ -1,6 +1,8 @@
 import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { Button } from "@strand/ui/button";
+import { toastManager } from "@strand/ui/toast";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
@@ -19,6 +21,7 @@ function WorkspacePage() {
   return (
     <div>
       <h1>{data.workspace.name}</h1>
+      <Button onClick={() => toastManager.add({ title: "test" })}>Toast</Button>
     </div>
   );
 }

@@ -17,7 +17,6 @@ import {
 } from "~/components/common/global-workspace-layout/workspace-sidebar/footer/user-menu";
 import { WorkspaceSwitcher } from "~/components/common/global-workspace-layout/workspace-sidebar/header/workspace-switcher";
 import SidebarLinkItem from "~/components/common/global-workspace-layout/workspace-sidebar/sidebar-link-item";
-import { WorkspacePresenceAvatars } from "~/components/common/workspace-presence";
 
 export function TopBar() {
   useRouteTabsSync();
@@ -95,9 +94,26 @@ export function TopBar() {
         </div>
       </div>
       <TabStrip workspaceId={params.workspaceId} />
-      <div className="relative z-[3] flex shrink-0 items-center pb-[3px] pl-2">
+      {/* <div className="relative z-[3] flex shrink-0 items-center gap-x-2 pb-[3px] pl-2">
         <WorkspacePresenceAvatars />
-      </div>
+      </div> */}
     </div>
   );
 }
+
+// function CommandPaletteTrigger() {
+//   const { open } = useCommandPalette();
+//   return (
+//     <button
+//       className="inline-flex h-7 items-center gap-x-1.5 rounded-md border border-border bg-ui-bg-base px-2 text-ui-fg-muted text-xs outline-none transition-colors hover:bg-ui-bg-component-hover hover:text-ui-fg-base"
+//       onClick={open}
+//       title="Open command palette"
+//       type="button"
+//     >
+//       <RiCommandLine className="size-3.5" />
+//       <kbd className="font-medium font-sans text-[10px] tracking-widest">
+//         ⌘K
+//       </kbd>
+//     </button>
+//   );
+// }
