@@ -10,6 +10,7 @@ import { TooltipProvider } from "@strand/ui/tooltip";
 import { useLocation, useParams } from "@tanstack/react-router";
 import { useMemo } from "react";
 import SidebarLinkItem from "~/components/common/global-workspace-layout/workspace-sidebar/sidebar-link-item";
+import { getNavShortcutByTitle } from "~/lib/hotkeys/registry";
 
 export default function WorkspaceSidebarContent() {
   const params = useParams({ strict: false }) as {
@@ -68,6 +69,7 @@ export default function WorkspaceSidebarContent() {
             icon={item.icon}
             isActive={item.isActive}
             key={item.title}
+            shortcut={getNavShortcutByTitle(item.title)}
             title={item.title}
             url={item.url}
           />

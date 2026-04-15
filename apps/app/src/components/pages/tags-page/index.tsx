@@ -1,15 +1,20 @@
 import { useConvexPaginatedQuery } from "@convex-dev/react-query";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { cn } from "@strand/ui";
 import { Badge } from "@strand/ui/badge";
 import { Heading } from "@strand/ui/heading";
 import { Skeleton } from "@strand/ui/skeleton";
 import { Text } from "@strand/ui/text";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef } from "react";
 import { useInView } from "react-intersection-observer";
 import { PageContent } from "~/components/common/page-content";
+import {
+  type ListNavItem,
+  useListNavigation,
+} from "~/lib/hotkeys/use-list-navigation";
 import { TagsToolbar, useTagsFilters } from "./tags-toolbar";
 
 const PAGE_SIZE = 30;
@@ -65,6 +70,21 @@ export function TagsPageComponent({
   const isFirstLoad = status === "LoadingFirstPage" && results.length === 0;
   const isEmpty = sorted.length === 0 && !isFirstLoad;
 
+  const navigate = useNavigate();
+  const navItems = useMemo<ListNavItem[]>(
+    () =>
+      sorted.map((tag) => ({
+        id: `tag-${tag._id}`,
+        open: () =>
+          navigate({
+            to: "/workspace/$workspaceId/tags/$tagName",
+            params: { workspaceId, tagName: tag.name },
+          }),
+      })),
+    [sorted, navigate, workspaceId]
+  );
+  const { activeId } = useListNavigation(navItems);
+
   return (
     <div>
       <TagsToolbar />
@@ -82,36 +102,45 @@ export function TagsPageComponent({
         ) : (
           <div className="flex flex-col">
             <AnimatePresence>
-              {sorted.map((tag, i) => (
-                <motion.div
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, height: 0 }}
-                  initial={
-                    initialLoadDone.current ? false : { opacity: 0, y: 8 }
-                  }
-                  key={tag._id}
-                  transition={{
-                    type: "spring",
-                    stiffness: 500,
-                    damping: 35,
-                    delay: initialLoadDone.current ? 0 : i * 0.03,
-                  }}
-                >
-                  <Link
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-ui-bg-base-hover"
-                    params={{ workspaceId, tagName: tag.name }}
-                    to="/workspace/$workspaceId/tags/$tagName"
+              {sorted.map((tag, i) => {
+                const navId = `tag-${tag._id}`;
+                const isActive = activeId === navId;
+                return (
+                  <motion.div
+                    animate={{ opacity: 1, y: 0 }}
+                    className={cn(
+                      "rounded-lg",
+                      isActive && "ring-2 ring-ui-fg-interactive ring-inset"
+                    )}
+                    data-nav-active={isActive}
+                    exit={{ opacity: 0, height: 0 }}
+                    initial={
+                      initialLoadDone.current ? false : { opacity: 0, y: 8 }
+                    }
+                    key={tag._id}
+                    transition={{
+                      type: "spring",
+                      stiffness: 500,
+                      damping: 35,
+                      delay: initialLoadDone.current ? 0 : i * 0.03,
+                    }}
                   >
-                    <Text className="text-ui-fg-muted">#</Text>
-                    <Text className="flex-1 truncate font-medium text-ui-fg-base">
-                      {tag.name}
-                    </Text>
-                    <Badge size="sm" variant={"mono"}>
-                      {tag.resourceCount}
-                    </Badge>
-                  </Link>
-                </motion.div>
-              ))}
+                    <Link
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-ui-bg-base-hover"
+                      params={{ workspaceId, tagName: tag.name }}
+                      to="/workspace/$workspaceId/tags/$tagName"
+                    >
+                      <Text className="text-ui-fg-muted">#</Text>
+                      <Text className="flex-1 truncate font-medium text-ui-fg-base">
+                        {tag.name}
+                      </Text>
+                      <Badge size="sm" variant={"mono"}>
+                        {tag.resourceCount}
+                      </Badge>
+                    </Link>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
             <div className="h-px" ref={loadMoreRef} />
             {status === "LoadingMore" && <LoadingMoreSkeleton />}

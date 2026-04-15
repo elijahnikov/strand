@@ -27,6 +27,7 @@
     "@strand/ui": "*",
     "@t3-oss/env-core": "^0.13.8",
     "@tanstack/react-form": "catalog:tanstack",
+    "@tanstack/react-hotkeys": "catalog:tanstack",
     "@tanstack/react-query": "catalog:tanstack",
     "@tanstack/react-router": "catalog:tanstack",
     "@tanstack/react-router-devtools": "catalog:tanstack",

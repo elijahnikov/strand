@@ -1,5 +1,8 @@
 import { ScrollArea } from "@strand/ui/scroll-area";
-import { useEffect, useRef } from "react";
+import type { UseHotkeyDefinition } from "@tanstack/react-hotkeys";
+import { useHotkeys } from "@tanstack/react-hotkeys";
+import { useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef } from "react";
 import { Tab } from "~/components/common/global-workspace-layout/top-bar/tab";
 import {
   useWorkspaceTabs,
@@ -12,12 +15,57 @@ interface TabStripProps {
 
 const EMPTY: never[] = [];
 
+const TAB_HOTKEYS = [
+  "Mod+1",
+  "Mod+2",
+  "Mod+3",
+  "Mod+4",
+  "Mod+5",
+  "Mod+6",
+  "Mod+7",
+  "Mod+8",
+  "Mod+9",
+] as const;
+
 export function TabStrip({ workspaceId }: TabStripProps) {
   const hydrated = useWorkspaceTabsHydrated();
   const tabs = useWorkspaceTabs((s) => s.tabsByWorkspace[workspaceId] ?? EMPTY);
   const activeId = useWorkspaceTabs((s) => s.activeByWorkspace[workspaceId]);
 
   const rootRef = useRef<HTMLDivElement | null>(null);
+
+  const navigate = useNavigate();
+  const tabHotkeys = useMemo<UseHotkeyDefinition[]>(() => {
+    const defs: UseHotkeyDefinition[] = [];
+    for (let i = 0; i < TAB_HOTKEYS.length; i++) {
+      const tab = tabs[i];
+      if (!tab) {
+        break;
+      }
+      const hotkey = TAB_HOTKEYS[i];
+      if (!hotkey) {
+        break;
+      }
+      defs.push({
+        hotkey,
+        callback: () => {
+          navigate({ to: tab.url });
+        },
+      });
+    }
+    const last = tabs.at(-1);
+    if (last) {
+      defs.push({
+        hotkey: "Mod+0",
+        callback: () => {
+          navigate({ to: last.url });
+        },
+      });
+    }
+    return defs;
+  }, [tabs, navigate]);
+
+  useHotkeys(tabHotkeys);
 
   useEffect(() => {
     if (!activeId) {

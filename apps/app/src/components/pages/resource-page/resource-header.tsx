@@ -5,6 +5,8 @@ import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { Badge } from "@strand/ui/badge";
 import { Button } from "@strand/ui/button";
 import { Separator } from "@strand/ui/separator";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@strand/ui/tooltip";
+import { useHotkey } from "@tanstack/react-hotkeys";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { format } from "date-fns";
@@ -14,6 +16,7 @@ import { useCallback, useState } from "react";
 import { DotGridLoader } from "~/components/common/dot-grid-loader";
 import { EditableText } from "~/components/common/editable-text";
 import { MiddleTruncate } from "~/components/common/middle-truncate";
+import { ShortcutTooltipBody } from "~/components/common/shortcut-tooltip";
 import { UserAvatar } from "~/components/common/user-avatar";
 import type { GetResourceData } from "~/lib/convex-types";
 import { ResourceChatPanel } from "./resource-chat-panel";
@@ -24,6 +27,10 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
   });
 
   const [chatOpen, setChatOpen] = useState(false);
+
+  useHotkey("Shift+C", () => {
+    setChatOpen((prev) => !prev);
+  });
 
   const aiStatus = resource.resourceAI?.status;
   const isAiProcessing = aiStatus === "pending" || aiStatus === "processing";
@@ -75,15 +82,27 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
         />
       </div>
       <div className="absolute top-1.5 right-1.5 z-50 ml-auto flex size-8 shrink-0 items-center gap-x-2">
-        <Button
-          aria-label="Chat about this resource"
-          className="size-8 shrink-0"
-          onClick={() => setChatOpen(true)}
-          size="small"
-          variant="ghost"
-        >
-          <RiChatAi3Fill className="size-4 shrink-0 text-ui-fg-subtle group-hover:text-ui-fg-base" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                aria-label="Chat about this resource"
+                className="size-8 shrink-0"
+                onClick={() => setChatOpen(true)}
+                size="small"
+                variant="ghost"
+              />
+            }
+          >
+            <RiChatAi3Fill className="size-4 shrink-0 text-ui-fg-subtle group-hover:text-ui-fg-base" />
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            <ShortcutTooltipBody
+              shortcut={["Shift+C"]}
+              title="Chat about resource"
+            />
+          </TooltipContent>
+        </Tooltip>
       </div>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <TypeBadge resource={resource} />
