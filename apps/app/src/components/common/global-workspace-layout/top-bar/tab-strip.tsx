@@ -38,7 +38,10 @@ export function TabStrip({ workspaceId }: TabStripProps) {
   }
 
   return (
-    <div className="relative mb-[3.7px] flex h-10 min-w-0 flex-1" ref={rootRef}>
+    <div
+      className="relative mb-[3.7px] flex h-10 max-w-[calc(64.5vw-100px)] flex-1"
+      ref={rootRef}
+    >
       <ScrollArea className="h-11 min-w-0 flex-1 **:data-[slot=scroll-area-scrollbar]:hidden">
         <div className="flex h-11 items-end gap-x-2 pr-4 pl-4">
           {tabs.map((tab) => (

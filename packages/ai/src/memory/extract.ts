@@ -35,7 +35,8 @@ Rules:
 - Output ONLY the profile text in markdown. No preamble, no commentary.
 - Hard cap: ${MAX_MEMORY_WORDS} words total across all sections. If adding would exceed this, drop the least specific or oldest item from the same section.
 - Only record information directly stated or unambiguously implied by the user. Never infer preferences from a single offhand question.
-- If a section has no content, write "-".
+- If a section has no content, write the single line "_None yet._" directly under the heading — no bullets.
+- Never emit an empty bullet (a line that is just "-" or "- " with no following text). Every bullet must have content.
 - Preserve exact user phrasings for hard preferences as one-line bullets.
 - If the user contradicts an earlier fact, replace it; never keep both.
 - Do not record transient context (e.g. "currently debugging X"). Only recurring patterns, long-lived projects, stable preferences.

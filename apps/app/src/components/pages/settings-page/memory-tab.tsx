@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@strand/ui/dialog";
 import { Heading } from "@strand/ui/heading";
+import { Kbd } from "@strand/ui/kbd";
 import { LoadingButton } from "@strand/ui/loading-button";
 import { Text } from "@strand/ui/text";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -43,9 +44,9 @@ export function MemoryTab({ workspaceId }: { workspaceId: Id<"workspace"> }) {
       </div>
 
       {hasContent ? (
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <Text className="text-ui-fg-muted" size="small">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-end justify-between">
+            <Text className="font-mono text-ui-fg-muted" size="xsmall">
               {data?.lastExtractedAt
                 ? `Last updated ${formatDistanceToNow(data.lastExtractedAt, { addSuffix: true })}`
                 : "Not yet updated"}
@@ -59,8 +60,102 @@ export function MemoryTab({ workspaceId }: { workspaceId: Id<"workspace"> }) {
               Clear memory
             </LoadingButton>
           </div>
-          <div className="prose prose-sm max-w-none rounded-lg border bg-ui-bg-subtle p-4">
-            <Streamdown>{data?.content ?? ""}</Streamdown>
+          <div className="max-w-none rounded-lg border bg-ui-bg-subtle p-4">
+            <Streamdown
+              components={{
+                h1: ({ children }) => (
+                  <Text
+                    as="div"
+                    className="mt-3 mb-1 font-semibold"
+                    size="small"
+                  >
+                    {children}
+                  </Text>
+                ),
+                h2: ({ children }) => (
+                  <Text
+                    as="div"
+                    className="mt-3 mb-1 font-semibold"
+                    size="xsmall"
+                  >
+                    {children}
+                  </Text>
+                ),
+                h3: ({ children }) => (
+                  <Text
+                    as="div"
+                    className="mt-2 mb-1 font-semibold"
+                    size="xsmall"
+                  >
+                    {children}
+                  </Text>
+                ),
+                h4: ({ children }) => (
+                  <Text
+                    as="div"
+                    className="mt-2 mb-1 font-semibold"
+                    size="xsmall"
+                  >
+                    {children}
+                  </Text>
+                ),
+                p: ({ children }) => (
+                  <Text as="p" className="mb-2" size="xsmall">
+                    {children}
+                  </Text>
+                ),
+                ul: ({ children }) => (
+                  <ul className="txt-xsmall mb-2 list-disc space-y-0.5 pl-5">
+                    {children}
+                  </ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="txt-xsmall mb-2 list-decimal space-y-0.5 pl-5">
+                    {children}
+                  </ol>
+                ),
+                li: ({ children }) => {
+                  const isEmpty =
+                    children === undefined ||
+                    children === null ||
+                    children === "" ||
+                    (typeof children === "string" && children.trim() === "");
+                  if (isEmpty) {
+                    return null;
+                  }
+                  return (
+                    <li className="txt-xsmall marker:text-ui-fg-muted">
+                      {children}
+                    </li>
+                  );
+                },
+                strong: ({ children }) => (
+                  <span className="font-semibold">{children}</span>
+                ),
+                em: ({ children }) => (
+                  <span className="italic">{children}</span>
+                ),
+                a: ({ children, href }) => (
+                  <a
+                    className="text-ui-fg-base underline underline-offset-2"
+                    href={href}
+                    rel="noopener"
+                    target="_blank"
+                  >
+                    {children}
+                  </a>
+                ),
+                inlineCode: ({ children }) => <Kbd>{children}</Kbd>,
+                blockquote: ({ children }) => (
+                  <blockquote className="txt-xsmall mb-2 border-ui-border-base border-l-2 pl-3 text-ui-fg-subtle">
+                    {children}
+                  </blockquote>
+                ),
+                hr: () => <hr className="my-3 border-ui-border-base" />,
+              }}
+            >
+              {data?.content ?? ""}
+            </Streamdown>
           </div>
         </div>
       ) : (
