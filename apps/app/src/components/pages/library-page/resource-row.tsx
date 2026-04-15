@@ -138,7 +138,7 @@ function WebsiteRow({
   const handleNavigate = useResourceNavigate(workspaceId, resource._id);
 
   return (
-    <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle">
+    <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-component-hover dark:hover:bg-ui-bg-component">
       <RowLink resourceId={resource._id} workspaceId={workspaceId} />
       <div
         className={cn(
@@ -231,7 +231,7 @@ function NoteRow({
   const handleNavigate = useResourceNavigate(workspaceId, resource._id);
 
   return (
-    <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle">
+    <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-component-hover dark:hover:bg-ui-bg-component">
       <RowLink resourceId={resource._id} workspaceId={workspaceId} />
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-ui-bg-subtle text-ui-fg-muted">
         <NoteIcon />
@@ -271,7 +271,7 @@ function FileRow({
   const handleNavigate = useResourceNavigate(workspaceId, resource._id);
 
   return (
-    <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle">
+    <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-component-hover dark:hover:bg-ui-bg-component">
       <RowLink resourceId={resource._id} workspaceId={workspaceId} />
       <div
         className={cn(

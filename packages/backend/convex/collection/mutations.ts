@@ -1,4 +1,5 @@
 import { ConvexError, v } from "convex/values";
+import type { Id } from "../_generated/dataModel";
 import { workspaceMutation } from "../utils";
 
 export const create = workspaceMutation({
@@ -158,6 +159,131 @@ export const remove = workspaceMutation({
 
     await softDeleteChildren(args.collectionId);
     await ctx.db.patch(args.collectionId, { deletedAt: now });
+  },
+});
+
+export const moveMany = workspaceMutation({
+  args: {
+    collectionIds: v.array(v.id("collection")),
+    newParentId: v.optional(v.id("collection")),
+  },
+  handler: async (ctx, args) => {
+    if (args.newParentId) {
+      const parent = await ctx.db.get(args.newParentId);
+      if (
+        !parent ||
+        parent.workspaceId !== ctx.workspace._id ||
+        parent.deletedAt
+      ) {
+        throw new ConvexError("Parent collection not found");
+      }
+    }
+
+    const now = Date.now();
+    const selectedSet = new Set(args.collectionIds);
+
+    for (const collectionId of args.collectionIds) {
+      const collection = await ctx.db.get(collectionId);
+      if (!collection || collection.workspaceId !== ctx.workspace._id) {
+        continue;
+      }
+      if (args.newParentId === collectionId) {
+        continue;
+      }
+
+      if (args.newParentId) {
+        let circular = false;
+        let current = await ctx.db.get(args.newParentId);
+        while (current) {
+          if (current._id === collectionId) {
+            circular = true;
+            break;
+          }
+          if (selectedSet.has(current._id)) {
+            circular = true;
+            break;
+          }
+          if (!current.parentId) {
+            break;
+          }
+          current = await ctx.db.get(current.parentId);
+        }
+        if (circular) {
+          continue;
+        }
+      }
+
+      await ctx.db.patch(collectionId, {
+        parentId: args.newParentId,
+        updatedAt: now,
+      });
+    }
+  },
+});
+
+export const removeMany = workspaceMutation({
+  args: {
+    collectionIds: v.array(v.id("collection")),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+
+    const softDeleteChildren = async (parentId: Id<"collection">) => {
+      const children = await ctx.db
+        .query("collection")
+        .withIndex("by_workspace_parent", (q) =>
+          q
+            .eq("workspaceId", ctx.workspace._id)
+            .eq("parentId", parentId)
+            .eq("deletedAt", undefined)
+        )
+        .collect();
+
+      for (const child of children) {
+        const childResources = await ctx.db
+          .query("resource")
+          .withIndex("by_workspace_collection", (q) =>
+            q
+              .eq("workspaceId", ctx.workspace._id)
+              .eq("collectionId", child._id)
+              .eq("deletedAt", undefined)
+          )
+          .collect();
+
+        for (const resource of childResources) {
+          await ctx.db.patch(resource._id, { collectionId: undefined });
+        }
+
+        await ctx.db.patch(child._id, { deletedAt: now });
+        await softDeleteChildren(child._id);
+      }
+    };
+
+    for (const collectionId of args.collectionIds) {
+      const collection = await ctx.db.get(collectionId);
+      if (!collection || collection.workspaceId !== ctx.workspace._id) {
+        continue;
+      }
+      if (collection.deletedAt) {
+        continue;
+      }
+
+      const resources = await ctx.db
+        .query("resource")
+        .withIndex("by_workspace_collection", (q) =>
+          q
+            .eq("workspaceId", ctx.workspace._id)
+            .eq("collectionId", collectionId)
+            .eq("deletedAt", undefined)
+        )
+        .collect();
+      for (const resource of resources) {
+        await ctx.db.patch(resource._id, { collectionId: undefined });
+      }
+
+      await softDeleteChildren(collectionId);
+      await ctx.db.patch(collectionId, { deletedAt: now });
+    }
   },
 });
 
