@@ -2,7 +2,9 @@ import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { FolderIcon } from "lucide-react";
 import { EditableText } from "~/components/common/editable-text";
 import { ResourceRowInner } from "./resource-row";
-import type { DragItemData } from "./use-library-dnd";
+import type { ActiveDragItem } from "./use-library-dnd";
+
+const MAX_STACK_LAYERS = 4;
 
 // biome-ignore lint/suspicious/noEmptyBlockStatements: intentional no-op for static overlay
 const noop = () => {};
@@ -11,24 +13,55 @@ export function LibraryDragOverlay({
   item,
   workspaceId,
 }: {
-  item: DragItemData;
+  item: ActiveDragItem;
   workspaceId: Id<"workspace">;
 }) {
+  const { data, batch } = item;
+  const totalCount = batch
+    ? batch.resourceIds.length + batch.collectionIds.length
+    : 1;
+
   return (
-    <div className="rounded-lg border-[0.5px]">
-      {item.type === "collection" ? (
-        <CollectionOverlayRow collection={item.collection} />
-      ) : (
-        <ResourceRowInner
-          isPinned={false}
-          onTogglePin={noop}
-          onUpdateTitle={noop}
-          resource={
-            item.resource as Parameters<typeof ResourceRowInner>[0]["resource"]
-          }
-          workspaceId={workspaceId}
-        />
-      )}
+    <div className="relative">
+      {batch && totalCount > 1 ? (
+        <>
+          <div className="absolute -top-2 -right-2 z-30 flex h-5 min-w-5 items-center justify-center rounded-full bg-ui-fg-interactive px-1.5 font-medium text-[11px] text-white">
+            {totalCount}
+          </div>
+          {Array.from({ length: Math.min(totalCount - 1, MAX_STACK_LAYERS) })
+            .map((_, i) => {
+              const depth = i + 1;
+              return depth;
+            })
+            .reverse()
+            .map((depth) => (
+              <div
+                className="absolute inset-0 rounded-lg border-[0.5px] bg-ui-bg-component"
+                key={`stack-${depth}`}
+                style={{
+                  transform: `translate(${depth * 4}px, ${depth * 4}px) rotate(${depth}deg)`,
+                }}
+              />
+            ))}
+        </>
+      ) : null}
+      <div className="relative rounded-lg border-[0.5px] bg-ui-bg-component">
+        {data.type === "collection" ? (
+          <CollectionOverlayRow collection={data.collection} />
+        ) : (
+          <ResourceRowInner
+            isPinned={false}
+            onTogglePin={noop}
+            onUpdateTitle={noop}
+            resource={
+              data.resource as Parameters<
+                typeof ResourceRowInner
+              >[0]["resource"]
+            }
+            workspaceId={workspaceId}
+          />
+        )}
+      </div>
     </div>
   );
 }

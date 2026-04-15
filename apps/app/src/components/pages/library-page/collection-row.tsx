@@ -81,7 +81,7 @@ export function CollectionRow({
   return (
     <div
       className={cn(
-        "group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-subtle",
+        "group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-component-hover dark:hover:bg-ui-bg-component",
         isDragging && "opacity-50",
         isOver && "bg-ui-bg-subtle-hover ring-2 ring-ui-fg-interactive"
       )}

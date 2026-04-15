@@ -18,14 +18,21 @@ import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { useInView } from "react-intersection-observer";
+import { SelectionDock } from "~/components/common/selection-dock";
 import {
   type ListNavItem,
   useListNavigation,
 } from "~/lib/hotkeys/use-list-navigation";
+import {
+  LibrarySelectionProvider,
+  type SelectionItem,
+  useSelectAllHotkey,
+} from "~/lib/selection/library-selection";
 import { CollectionRow } from "./collection-row";
 import { LibraryDragOverlay } from "./drag-overlay";
 import { useLibraryFilters } from "./library-toolbar";
 import { ResourceRow, UploadingFileRow } from "./resource-row";
+import { SelectableRow } from "./selectable-resource-row";
 import { useLibraryDnd } from "./use-library-dnd";
 
 const PAGE_SIZE = 20;
@@ -45,7 +52,24 @@ type ListItem =
       resource: Parameters<typeof ResourceRow>[0]["resource"];
     };
 
-export function ResourceList({
+interface ResourceListProps {
+  collectionId?: Id<"collection">;
+  onClearBatch: (batchId: string) => void;
+  onClearPendingCollection?: () => void;
+  pendingCollection?: { id: string; name: string } | null;
+  uploadingFiles: { id: string; name: string; batchId: string }[];
+  workspaceId: Id<"workspace">;
+}
+
+export function ResourceList(props: ResourceListProps) {
+  return (
+    <LibrarySelectionProvider>
+      <ResourceListContent {...props} />
+    </LibrarySelectionProvider>
+  );
+}
+
+function ResourceListContent({
   workspaceId,
   uploadingFiles,
   onClearBatch,
@@ -96,8 +120,6 @@ export function ResourceList({
     )
   );
 
-  // Pinned resources are a workspace-level concept — don't show the Pinned
-  // section inside a collection page.
   const showPinned = !collectionId;
 
   const { data: serverPinned } = useQuery(
@@ -331,6 +353,23 @@ export function ResourceList({
 
   const { activeId } = useListNavigation(navItems);
 
+  const orderedItems = useMemo<SelectionItem[]>(() => {
+    const items: SelectionItem[] = [];
+    if (hasPinned) {
+      for (const r of serverPinned) {
+        items.push({ kind: "resource", id: r._id });
+      }
+    }
+    for (const entry of mergedList) {
+      if (entry.kind === "collection") {
+        items.push({ kind: "collection", id: entry.collection._id });
+      } else {
+        items.push({ kind: "resource", id: entry.resource._id });
+      }
+    }
+    return items;
+  }, [hasPinned, serverPinned, mergedList]);
+
   if (isFirstLoad) {
     return <ResourceListSkeleton />;
   }
@@ -359,125 +398,146 @@ export function ResourceList({
   }
 
   return (
-    <DndContext
-      onDragCancel={onDragCancel}
-      onDragEnd={onDragEnd}
-      onDragStart={onDragStart}
-      sensors={sensors}
-    >
-      <div className="flex flex-col">
-        {hasPinned && (
-          <>
-            <div className="ml-4 flex items-center gap-x-1">
-              <RiPushpinFill className="size-4 shrink-0 text-ui-fg-muted" />
-              <Text className="font-medium text-sm text-ui-fg-muted">
-                Pinned
-              </Text>
-            </div>
-            <AnimatePresence>
-              {serverPinned.map((resource) => {
-                const navId = `pinned-${resource._id}`;
-                return (
+    <>
+      <SelectAllRegister items={orderedItems} />
+      <DndContext
+        onDragCancel={onDragCancel}
+        onDragEnd={onDragEnd}
+        onDragStart={onDragStart}
+        sensors={sensors}
+      >
+        <div className="flex flex-col gap-y-1">
+          {hasPinned && (
+            <>
+              <div className="ml-4 flex items-center gap-x-1">
+                <RiPushpinFill className="size-4 shrink-0 text-ui-fg-muted" />
+                <Text className="font-medium text-sm text-ui-fg-muted">
+                  Pinned
+                </Text>
+              </div>
+              <AnimatePresence>
+                {serverPinned.map((resource) => {
+                  const navId = `pinned-${resource._id}`;
+                  return (
+                    <SelectableRow
+                      item={{ kind: "resource", id: resource._id }}
+                      key={resource._id}
+                      orderedItems={orderedItems}
+                    >
+                      <div
+                        className={cn(
+                          "rounded-lg",
+                          activeId === navId &&
+                            "ring-2 ring-ui-fg-interactive ring-inset"
+                        )}
+                        data-nav-active={activeId === navId}
+                      >
+                        <MemoizedResourceItem
+                          handleTogglePin={handleTogglePin}
+                          handleUpdateTitle={handleUpdateTitle}
+                          index={0}
+                          initialLoadDone
+                          isPinned
+                          resource={resource}
+                          workspaceId={workspaceId}
+                        />
+                      </div>
+                    </SelectableRow>
+                  );
+                })}
+              </AnimatePresence>
+              <Separator className="my-1 h-[0.5px]!" />
+            </>
+          )}
+          {pendingCollection && (
+            <CollectionRow
+              autoEdit
+              collection={{
+                _id: pendingCollection.id as Id<"collection">,
+                name: pendingCollection.name,
+                _creationTime: Date.now(),
+              }}
+              workspaceId={workspaceId}
+            />
+          )}
+          {uploadingFiles.map((file) => (
+            <UploadingFileRow fileName={file.name} key={file.id} />
+          ))}
+          <AnimatePresence>
+            {mergedList.map((item, i) => {
+              const navId =
+                item.kind === "collection"
+                  ? `col-${item.collection._id}`
+                  : `res-${item.resource._id}`;
+              const isActive = activeId === navId;
+              return item.kind === "collection" ? (
+                <SelectableRow
+                  item={{ kind: "collection", id: item.collection._id }}
+                  key={`col-${item.collection._id}`}
+                  orderedItems={orderedItems}
+                >
+                  <motion.div
+                    animate={{ opacity: 1, y: 0 }}
+                    className={cn(
+                      "rounded-lg",
+                      isActive && "ring-2 ring-ui-fg-interactive ring-inset"
+                    )}
+                    data-nav-active={isActive}
+                    exit={{ opacity: 0, height: 0 }}
+                    initial={
+                      initialLoadDone.current ? false : { opacity: 0, y: 8 }
+                    }
+                    transition={{
+                      type: "spring",
+                      stiffness: 500,
+                      damping: 35,
+                      delay: initialLoadDone.current ? 0 : i * 0.03,
+                    }}
+                  >
+                    <CollectionRow
+                      collection={item.collection}
+                      workspaceId={workspaceId}
+                    />
+                  </motion.div>
+                </SelectableRow>
+              ) : (
+                <SelectableRow
+                  item={{ kind: "resource", id: item.resource._id }}
+                  key={item.resource._id}
+                  orderedItems={orderedItems}
+                >
                   <div
                     className={cn(
                       "rounded-lg",
-                      activeId === navId &&
-                        "ring-2 ring-ui-fg-interactive ring-inset"
+                      isActive && "ring-2 ring-ui-fg-interactive ring-inset"
                     )}
-                    data-nav-active={activeId === navId}
-                    key={resource._id}
+                    data-nav-active={isActive}
                   >
                     <MemoizedResourceItem
                       handleTogglePin={handleTogglePin}
                       handleUpdateTitle={handleUpdateTitle}
-                      index={0}
-                      initialLoadDone
-                      isPinned
-                      resource={resource}
+                      index={i}
+                      initialLoadDone={initialLoadDone.current}
+                      isPinned={false}
+                      resource={item.resource}
                       workspaceId={workspaceId}
                     />
                   </div>
-                );
-              })}
-            </AnimatePresence>
-            <Separator className="my-1 h-[0.5px]!" />
-          </>
-        )}
-        {pendingCollection && (
-          <CollectionRow
-            autoEdit
-            collection={{
-              _id: pendingCollection.id as Id<"collection">,
-              name: pendingCollection.name,
-              _creationTime: Date.now(),
-            }}
-            workspaceId={workspaceId}
-          />
-        )}
-        {uploadingFiles.map((file) => (
-          <UploadingFileRow fileName={file.name} key={file.id} />
-        ))}
-        <AnimatePresence>
-          {mergedList.map((item, i) => {
-            const navId =
-              item.kind === "collection"
-                ? `col-${item.collection._id}`
-                : `res-${item.resource._id}`;
-            const isActive = activeId === navId;
-            return item.kind === "collection" ? (
-              <motion.div
-                animate={{ opacity: 1, y: 0 }}
-                className={cn(
-                  "rounded-lg",
-                  isActive && "ring-2 ring-ui-fg-interactive ring-inset"
-                )}
-                data-nav-active={isActive}
-                exit={{ opacity: 0, height: 0 }}
-                initial={initialLoadDone.current ? false : { opacity: 0, y: 8 }}
-                key={`col-${item.collection._id}`}
-                transition={{
-                  type: "spring",
-                  stiffness: 500,
-                  damping: 35,
-                  delay: initialLoadDone.current ? 0 : i * 0.03,
-                }}
-              >
-                <CollectionRow
-                  collection={item.collection}
-                  workspaceId={workspaceId}
-                />
-              </motion.div>
-            ) : (
-              <div
-                className={cn(
-                  "rounded-lg",
-                  isActive && "ring-2 ring-ui-fg-interactive ring-inset"
-                )}
-                data-nav-active={isActive}
-                key={item.resource._id}
-              >
-                <MemoizedResourceItem
-                  handleTogglePin={handleTogglePin}
-                  handleUpdateTitle={handleUpdateTitle}
-                  index={i}
-                  initialLoadDone={initialLoadDone.current}
-                  isPinned={false}
-                  resource={item.resource}
-                  workspaceId={workspaceId}
-                />
-              </div>
-            );
-          })}
-        </AnimatePresence>
-        <div className="h-px" ref={loadMoreRef} />
-        {status === "LoadingMore" && <LoadingMoreSkeleton />}
-      </div>
-      <DragOverlay dropAnimation={null}>
-        {activeItem ? (
-          <LibraryDragOverlay item={activeItem} workspaceId={workspaceId} />
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+                </SelectableRow>
+              );
+            })}
+          </AnimatePresence>
+          <div className="h-px" ref={loadMoreRef} />
+          {status === "LoadingMore" && <LoadingMoreSkeleton />}
+        </div>
+        <DragOverlay dropAnimation={null}>
+          {activeItem ? (
+            <LibraryDragOverlay item={activeItem} workspaceId={workspaceId} />
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+      <SelectionDock workspaceId={workspaceId} />
+    </>
   );
 }
 
@@ -529,6 +589,11 @@ function LoadingMoreSkeleton() {
       ))}
     </div>
   );
+}
+
+function SelectAllRegister({ items }: { items: SelectionItem[] }) {
+  useSelectAllHotkey(items);
+  return null;
 }
 
 export function ResourceListSkeleton({ count = 14 }: { count?: number }) {

@@ -465,6 +465,91 @@ export const moveToCollection = workspaceMutation({
   },
 });
 
+export const removeMany = workspaceMutation({
+  args: {
+    resourceIds: v.array(v.id("resource")),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    for (const resourceId of args.resourceIds) {
+      const resource = await ctx.db.get(resourceId);
+      if (!resource || resource.workspaceId !== ctx.workspace._id) {
+        continue;
+      }
+      if (resource.deletedAt) {
+        continue;
+      }
+      await ctx.db.patch(resourceId, { deletedAt: now });
+    }
+  },
+});
+
+export const moveManyToCollection = workspaceMutation({
+  args: {
+    resourceIds: v.array(v.id("resource")),
+    collectionId: v.optional(v.id("collection")),
+  },
+  handler: async (ctx, args) => {
+    if (args.collectionId) {
+      const collection = await ctx.db.get(args.collectionId);
+      if (
+        !collection ||
+        collection.workspaceId !== ctx.workspace._id ||
+        collection.deletedAt
+      ) {
+        throw new ConvexError("Collection not found");
+      }
+    }
+
+    const now = Date.now();
+    for (const resourceId of args.resourceIds) {
+      const resource = await ctx.db.get(resourceId);
+      if (!resource || resource.workspaceId !== ctx.workspace._id) {
+        continue;
+      }
+      await ctx.db.patch(resourceId, {
+        collectionId: args.collectionId,
+        updatedAt: now,
+      });
+    }
+  },
+});
+
+export const togglePinMany = workspaceMutation({
+  args: {
+    resourceIds: v.array(v.id("resource")),
+    pinned: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    for (const resourceId of args.resourceIds) {
+      const resource = await ctx.db.get(resourceId);
+      if (!resource || resource.workspaceId !== ctx.workspace._id) {
+        continue;
+      }
+
+      const existing = await ctx.db
+        .query("userResourcePin")
+        .withIndex("by_user_resource", (q) =>
+          q.eq("userId", ctx.user._id).eq("resourceId", resourceId)
+        )
+        .unique();
+
+      if (args.pinned) {
+        if (!existing) {
+          await ctx.db.insert("userResourcePin", {
+            userId: ctx.user._id,
+            resourceId,
+            workspaceId: ctx.workspace._id,
+            pinnedAt: Date.now(),
+          });
+        }
+      } else if (existing) {
+        await ctx.db.delete(existing._id);
+      }
+    }
+  },
+});
+
 export const removeTag = workspaceMutation({
   args: {
     resourceId: v.id("resource"),
