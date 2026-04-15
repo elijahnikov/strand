@@ -13,6 +13,7 @@ export const instantDb = init({
   appId,
   schema,
   useDateObjects: true,
+  devtool: false,
 });
 
 export type { AppSchema } from "./instant.schema";

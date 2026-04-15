@@ -7,15 +7,21 @@ import { DndContext, DragOverlay } from "@dnd-kit/core";
 import { RiPushpinFill } from "@remixicon/react";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { cn } from "@strand/ui";
 import { Heading } from "@strand/ui/heading";
 import { Kbd } from "@strand/ui/kbd";
 import { Separator } from "@strand/ui/separator";
 import { Skeleton } from "@strand/ui/skeleton";
 import { Text } from "@strand/ui/text";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { useInView } from "react-intersection-observer";
+import {
+  type ListNavItem,
+  useListNavigation,
+} from "~/lib/hotkeys/use-list-navigation";
 import { CollectionRow } from "./collection-row";
 import { LibraryDragOverlay } from "./drag-overlay";
 import { useLibraryFilters } from "./library-toolbar";
@@ -284,6 +290,47 @@ export function ResourceList({
   const isEmpty =
     mergedList.length === 0 && !hasPinned && uploadingFiles.length === 0;
 
+  const navigate = useNavigate();
+  const navItems = useMemo<ListNavItem[]>(() => {
+    const items: ListNavItem[] = [];
+    if (hasPinned) {
+      for (const resource of serverPinned) {
+        items.push({
+          id: `pinned-${resource._id}`,
+          open: () =>
+            navigate({
+              to: "/workspace/$workspaceId/resource/$resourceId",
+              params: { workspaceId, resourceId: resource._id },
+            }),
+        });
+      }
+    }
+    for (const item of mergedList) {
+      if (item.kind === "collection") {
+        items.push({
+          id: `col-${item.collection._id}`,
+          open: () =>
+            navigate({
+              to: "/workspace/$workspaceId/library/collection/$collectionId",
+              params: { workspaceId, collectionId: item.collection._id },
+            }),
+        });
+      } else {
+        items.push({
+          id: `res-${item.resource._id}`,
+          open: () =>
+            navigate({
+              to: "/workspace/$workspaceId/resource/$resourceId",
+              params: { workspaceId, resourceId: item.resource._id },
+            }),
+        });
+      }
+    }
+    return items;
+  }, [hasPinned, serverPinned, mergedList, navigate, workspaceId]);
+
+  const { activeId } = useListNavigation(navItems);
+
   if (isFirstLoad) {
     return <ResourceListSkeleton />;
   }
@@ -328,18 +375,30 @@ export function ResourceList({
               </Text>
             </div>
             <AnimatePresence>
-              {serverPinned.map((resource) => (
-                <MemoizedResourceItem
-                  handleTogglePin={handleTogglePin}
-                  handleUpdateTitle={handleUpdateTitle}
-                  index={0}
-                  initialLoadDone
-                  isPinned
-                  key={resource._id}
-                  resource={resource}
-                  workspaceId={workspaceId}
-                />
-              ))}
+              {serverPinned.map((resource) => {
+                const navId = `pinned-${resource._id}`;
+                return (
+                  <div
+                    className={cn(
+                      "rounded-lg",
+                      activeId === navId &&
+                        "ring-2 ring-ui-fg-interactive ring-inset"
+                    )}
+                    data-nav-active={activeId === navId}
+                    key={resource._id}
+                  >
+                    <MemoizedResourceItem
+                      handleTogglePin={handleTogglePin}
+                      handleUpdateTitle={handleUpdateTitle}
+                      index={0}
+                      initialLoadDone
+                      isPinned
+                      resource={resource}
+                      workspaceId={workspaceId}
+                    />
+                  </div>
+                );
+              })}
             </AnimatePresence>
             <Separator className="my-1 h-[0.5px]!" />
           </>
@@ -359,10 +418,20 @@ export function ResourceList({
           <UploadingFileRow fileName={file.name} key={file.id} />
         ))}
         <AnimatePresence>
-          {mergedList.map((item, i) =>
-            item.kind === "collection" ? (
+          {mergedList.map((item, i) => {
+            const navId =
+              item.kind === "collection"
+                ? `col-${item.collection._id}`
+                : `res-${item.resource._id}`;
+            const isActive = activeId === navId;
+            return item.kind === "collection" ? (
               <motion.div
                 animate={{ opacity: 1, y: 0 }}
+                className={cn(
+                  "rounded-lg",
+                  isActive && "ring-2 ring-ui-fg-interactive ring-inset"
+                )}
+                data-nav-active={isActive}
                 exit={{ opacity: 0, height: 0 }}
                 initial={initialLoadDone.current ? false : { opacity: 0, y: 8 }}
                 key={`col-${item.collection._id}`}
@@ -379,18 +448,26 @@ export function ResourceList({
                 />
               </motion.div>
             ) : (
-              <MemoizedResourceItem
-                handleTogglePin={handleTogglePin}
-                handleUpdateTitle={handleUpdateTitle}
-                index={i}
-                initialLoadDone={initialLoadDone.current}
-                isPinned={false}
+              <div
+                className={cn(
+                  "rounded-lg",
+                  isActive && "ring-2 ring-ui-fg-interactive ring-inset"
+                )}
+                data-nav-active={isActive}
                 key={item.resource._id}
-                resource={item.resource}
-                workspaceId={workspaceId}
-              />
-            )
-          )}
+              >
+                <MemoizedResourceItem
+                  handleTogglePin={handleTogglePin}
+                  handleUpdateTitle={handleUpdateTitle}
+                  index={i}
+                  initialLoadDone={initialLoadDone.current}
+                  isPinned={false}
+                  resource={item.resource}
+                  workspaceId={workspaceId}
+                />
+              </div>
+            );
+          })}
         </AnimatePresence>
         <div className="h-px" ref={loadMoreRef} />
         {status === "LoadingMore" && <LoadingMoreSkeleton />}

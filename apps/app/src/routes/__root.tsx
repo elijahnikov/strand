@@ -5,6 +5,7 @@ import type { ConvexQueryClient } from "@convex-dev/react-query";
 import { authClient } from "@strand/auth/client";
 import { ThemeProvider } from "@strand/ui/theme";
 import { AnchoredToastProvider, ToastProvider } from "@strand/ui/toast";
+import { HotkeysProvider } from "@tanstack/react-hotkeys";
 import type { QueryClient } from "@tanstack/react-query";
 import {
   createRootRouteWithContext,
@@ -13,7 +14,6 @@ import {
   Scripts,
   useRouteContext,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { createServerFn } from "@tanstack/react-start";
 import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 import type * as React from "react";
@@ -91,9 +91,11 @@ function RootComponent() {
           <ThemeProvider>
             <ToastProvider>
               <AnchoredToastProvider>
-                <ClientAuthBoundary>
-                  <Outlet />
-                </ClientAuthBoundary>
+                <HotkeysProvider>
+                  <ClientAuthBoundary>
+                    <Outlet />
+                  </ClientAuthBoundary>
+                </HotkeysProvider>
               </AnchoredToastProvider>
             </ToastProvider>
           </ThemeProvider>
@@ -108,14 +110,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
-        <script
+        {/* <script
           crossOrigin="anonymous"
           src="//unpkg.com/react-scan/dist/auto.global.js"
-        />
+        /> */}
       </head>
       <body className="isolate min-h-screen bg-ui-bg-base font-sans! text-ui-fg-base antialiased">
         {children}
-        <TanStackRouterDevtools position="bottom-right" />
+        {/* <TanStackRouterDevtools position="bottom-right" /> */}
         <Scripts />
       </body>
     </html>

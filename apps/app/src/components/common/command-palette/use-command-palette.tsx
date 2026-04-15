@@ -1,9 +1,17 @@
 import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { CommandPalette } from "./index";
 
 interface CommandPaletteContextValue {
+  close: () => void;
   open: () => void;
+  toggle: () => void;
 }
 
 const CommandPaletteContext = createContext<CommandPaletteContextValue | null>(
@@ -29,24 +37,22 @@ export function CommandPaletteProvider({
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    const handler = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
-        event.preventDefault();
-        setIsOpen((prev) => !prev);
-      }
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, []);
+  const value = useMemo<CommandPaletteContextValue>(
+    () => ({
+      open: () => setIsOpen(true),
+      close: () => setIsOpen(false),
+      toggle: () => setIsOpen((prev) => !prev),
+    }),
+    []
+  );
 
-  const value = useMemo(() => ({ open: () => setIsOpen(true) }), []);
+  const handleOpenChange = useCallback((next: boolean) => setIsOpen(next), []);
 
   return (
     <CommandPaletteContext.Provider value={value}>
       {children}
       <CommandPalette
-        onOpenChange={setIsOpen}
+        onOpenChange={handleOpenChange}
         open={isOpen}
         workspaceId={workspaceId}
       />

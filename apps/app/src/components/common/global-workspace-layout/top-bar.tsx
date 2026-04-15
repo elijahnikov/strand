@@ -17,6 +17,7 @@ import {
 } from "~/components/common/global-workspace-layout/workspace-sidebar/footer/user-menu";
 import { WorkspaceSwitcher } from "~/components/common/global-workspace-layout/workspace-sidebar/header/workspace-switcher";
 import SidebarLinkItem from "~/components/common/global-workspace-layout/workspace-sidebar/sidebar-link-item";
+import { getNavShortcutByTitle } from "~/lib/hotkeys/registry";
 
 export function TopBar() {
   useRouteTabsSync();
@@ -85,6 +86,7 @@ export function TopBar() {
                 icon={item.icon}
                 isActive={item.isActive}
                 key={item.title}
+                shortcut={getNavShortcutByTitle(item.title)}
                 title={item.title}
                 url={item.url}
               />

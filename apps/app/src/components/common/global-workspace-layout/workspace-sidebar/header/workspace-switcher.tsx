@@ -76,7 +76,7 @@ export function WorkspaceSwitcher() {
       <DropdownMenuTrigger
         render={
           <Button
-            className="h-7 gap-x-1 rounded-full bg-[rgba(0,0,0,0.070)] pl-1.5 hover:bg-[rgba(0,0,0,0.090)] dark:bg-[rgba(255,255,255,0.070)] hover:dark:bg-[rgba(255,255,255,0.090)]"
+            className="h-7 gap-x-1 rounded-full border-[0.5px] bg-[rgba(0,0,0,0.070)] pl-1.5 hover:bg-[rgba(0,0,0,0.090)] dark:bg-[rgba(255,255,255,0.070)] hover:dark:bg-[rgba(255,255,255,0.090)]"
             size="small"
             variant="ghost"
           />

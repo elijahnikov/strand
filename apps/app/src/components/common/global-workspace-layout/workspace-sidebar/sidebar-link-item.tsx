@@ -4,11 +4,13 @@ import { Text } from "@strand/ui/text";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@strand/ui/tooltip";
 import { Link } from "@tanstack/react-router";
 import { memo } from "react";
+import { ShortcutTooltipBody } from "~/components/common/shortcut-tooltip";
 
 interface SidebarLinkItemProps {
   external?: boolean;
   icon: React.ElementType;
   isActive?: boolean;
+  shortcut?: string[];
   title: string;
   url: string;
 }
@@ -19,6 +21,7 @@ function SidebarLinkItem({
   icon,
   isActive,
   external,
+  shortcut,
 }: SidebarLinkItemProps) {
   const Icon = icon as React.ComponentType<{ className?: string }>;
 
@@ -49,12 +52,14 @@ function SidebarLinkItem({
         >
           <Icon className="size-3.5 shrink-0" />
         </TooltipTrigger>
-        <TooltipContent side="right">{title}</TooltipContent>
+        <TooltipContent side="right">
+          <ShortcutTooltipBody shortcut={shortcut} title={title} />
+        </TooltipContent>
       </Tooltip>
     );
   }
 
-  return (
+  const button = (
     <Button
       className={buttonClassName}
       render={<Link preload="intent" preloadDelay={100} search={{}} to={url} />}
@@ -66,6 +71,19 @@ function SidebarLinkItem({
         {title}
       </Text>
     </Button>
+  );
+
+  if (!shortcut) {
+    return button;
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger render={button} />
+      <TooltipContent side="bottom">
+        <ShortcutTooltipBody shortcut={shortcut} title={title} />
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
