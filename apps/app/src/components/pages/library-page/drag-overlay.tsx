@@ -15,7 +15,7 @@ export function LibraryDragOverlay({
   workspaceId: Id<"workspace">;
 }) {
   return (
-    <div className="rounded-lg shadow-borders-base">
+    <div className="rounded-lg border-[0.5px]">
       {item.type === "collection" ? (
         <CollectionOverlayRow collection={item.collection} />
       ) : (
