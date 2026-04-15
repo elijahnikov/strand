@@ -34,6 +34,7 @@ export function NoteResource({ resource }: { resource: GetResourceData }) {
           initialContent={jsonContent}
           key={resource._id}
           resourceId={resource._id}
+          workspaceId={resource.workspaceId}
         />
       </Suspense>
     </PageContent>

@@ -1,22 +1,21 @@
 import type { Id } from "../_generated/dataModel";
 import { query } from "../_generated/server";
-import { authComponent } from "../auth";
-import { protectedQuery, workspaceQuery } from "../utils";
+import { getAuthIdentity, protectedQuery, workspaceQuery } from "../utils";
 
 // ── Workspace ────────────────────────────────────────────────────────
 
 export const getFirst = query({
   args: {},
   handler: async (ctx) => {
-    const authUser = await authComponent.safeGetAuthUser(ctx);
-    if (!authUser?.userId) {
+    const identity = await getAuthIdentity(ctx);
+    if (!identity?.userId) {
       return null;
     }
 
     const member = await ctx.db
       .query("workspaceMember")
       .withIndex("by_user", (q) =>
-        q.eq("userId", authUser.userId as Id<"user">)
+        q.eq("userId", identity.userId as Id<"user">)
       )
       .first();
 

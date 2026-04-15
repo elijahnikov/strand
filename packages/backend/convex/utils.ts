@@ -1,3 +1,4 @@
+import type { UserIdentity } from "convex/server";
 import { ConvexError, v } from "convex/values";
 import {
   customCtx,
@@ -6,30 +7,43 @@ import {
 } from "convex-helpers/server/customFunctions";
 import type { Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
-import { authComponent } from "./auth";
+
+export type AuthIdentity = UserIdentity & {
+  userId?: string;
+  sessionId?: string;
+};
+
+export const getAuthIdentity = (ctx: {
+  auth: { getUserIdentity(): Promise<UserIdentity | null> };
+}) => ctx.auth.getUserIdentity() as Promise<AuthIdentity | null>;
 
 export const protectedQuery = customQuery(
   query,
   customCtx(async (ctx) => {
-    const authUser = await authComponent.getAuthUser(ctx);
-    const user = await ctx.db.get(authUser.userId as Id<"user">);
+    const identity = await getAuthIdentity(ctx);
+    if (!identity?.userId) {
+      throw new ConvexError("Not authenticated");
+    }
+    const user = await ctx.db.get(identity.userId as Id<"user">);
     if (!user) {
       throw new ConvexError("User not found");
     }
-    return { user, authUser };
+    return { user, identity };
   })
 );
 
 export const protectedMutation = customMutation(
   mutation,
   customCtx(async (ctx) => {
-    const authUser = await authComponent.getAuthUser(ctx);
-    const user = await ctx.db.get(authUser.userId as Id<"user">);
-
+    const identity = await getAuthIdentity(ctx);
+    if (!identity?.userId) {
+      throw new ConvexError("Not authenticated");
+    }
+    const user = await ctx.db.get(identity.userId as Id<"user">);
     if (!user) {
       throw new ConvexError("User not found");
     }
-    return { user, authUser };
+    return { user, identity };
   })
 );
 
@@ -37,8 +51,11 @@ type WorkspaceRole = "owner" | "admin" | "member";
 export const workspaceQuery = customQuery(query, {
   args: { workspaceId: v.id("workspace") },
   input: async (ctx, args, { role }: { role?: WorkspaceRole[] }) => {
-    const authUser = await authComponent.getAuthUser(ctx);
-    const user = await ctx.db.get(authUser.userId as Id<"user">);
+    const identity = await getAuthIdentity(ctx);
+    if (!identity?.userId) {
+      throw new ConvexError("Not authenticated");
+    }
+    const user = await ctx.db.get(identity.userId as Id<"user">);
     if (!user) {
       throw new ConvexError("User not found");
     }
@@ -56,22 +73,25 @@ export const workspaceQuery = customQuery(query, {
       .unique();
 
     if (workspace.ownerId === user._id) {
-      return { ctx: { user, authUser, workspace, member }, args: {} };
+      return { ctx: { user, identity, workspace, member }, args: {} };
     }
 
     if (!member || (role && !role.includes(member.role))) {
       throw new ConvexError("Not authorized to access this workspace");
     }
 
-    return { ctx: { user, authUser, workspace, member }, args: {} };
+    return { ctx: { user, identity, workspace, member }, args: {} };
   },
 });
 
 export const workspaceMutation = customMutation(mutation, {
   args: { workspaceId: v.id("workspace") },
   input: async (ctx, args, { role }: { role?: WorkspaceRole[] }) => {
-    const authUser = await authComponent.getAuthUser(ctx);
-    const user = await ctx.db.get(authUser.userId as Id<"user">);
+    const identity = await getAuthIdentity(ctx);
+    if (!identity?.userId) {
+      throw new ConvexError("Not authenticated");
+    }
+    const user = await ctx.db.get(identity.userId as Id<"user">);
     if (!user) {
       throw new ConvexError("User not found");
     }
@@ -89,13 +109,13 @@ export const workspaceMutation = customMutation(mutation, {
       .unique();
 
     if (workspace.ownerId === user._id) {
-      return { ctx: { user, authUser, workspace, member }, args: {} };
+      return { ctx: { user, identity, workspace, member }, args: {} };
     }
 
     if (!member || (role && !role.includes(member.role))) {
       throw new ConvexError("Not authorized to access this workspace");
     }
 
-    return { ctx: { user, authUser, workspace, member }, args: {} };
+    return { ctx: { user, identity, workspace, member }, args: {} };
   },
 });

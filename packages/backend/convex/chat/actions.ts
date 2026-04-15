@@ -4,8 +4,9 @@ import { generateEmbedding } from "@strand/ai/embeddings";
 import { createOpenAIProvider } from "@strand/ai/providers";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
+import type { Id } from "../_generated/dataModel";
 import { action } from "../_generated/server";
-import { authComponent } from "../auth";
+import { getAuthIdentity } from "../utils";
 
 export const searchChunks = action({
   args: {
@@ -14,8 +15,8 @@ export const searchChunks = action({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const authUser = await authComponent.getAuthUser(ctx);
-    if (!authUser) {
+    const identity = await getAuthIdentity(ctx);
+    if (!identity?.userId) {
       throw new Error("Unauthorized");
     }
 
@@ -23,7 +24,7 @@ export const searchChunks = action({
       internal.chat.internals.validateMembership,
       {
         workspaceId: args.workspaceId,
-        userId: authUser.userId,
+        userId: identity.userId as Id<"user">,
       }
     );
 

@@ -11,7 +11,7 @@ export const ClientAuthBoundary = ({ children }: PropsWithChildren) => {
   return (
     <AuthBoundary
       authClient={authClient}
-      getAuthUserFn={api.auth.getAuthUser}
+      getAuthUserFn={api.user.queries.currentUser}
       isAuthError={isAuthError}
       onUnauth={() => {
         if (

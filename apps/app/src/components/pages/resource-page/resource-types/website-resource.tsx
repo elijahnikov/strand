@@ -410,6 +410,7 @@ export function WebsiteResource({ resource }: { resource: GetResourceData }) {
           initialContent={content?.jsonContent ?? undefined}
           key={resource._id}
           resourceId={resource._id}
+          workspaceId={resource.workspaceId}
         />
       </Suspense>
     </PageContent>

@@ -1,22 +1,15 @@
 import type { Id } from "../_generated/dataModel";
 import { query } from "../_generated/server";
-import { authComponent } from "../auth";
+import { getAuthIdentity } from "../utils";
 
 export const currentUser = query({
   args: {},
   handler: async (ctx) => {
-    const authUser = await authComponent.safeGetAuthUser(ctx);
-
-    if (!authUser) {
-      return {
-        user: null,
-      };
+    const identity = await getAuthIdentity(ctx);
+    if (!identity?.userId) {
+      return { user: null };
     }
-
-    const user = await ctx.db.get(authUser.userId as Id<"user">);
-
-    return {
-      user,
-    };
+    const user = await ctx.db.get(identity.userId as Id<"user">);
+    return { user };
   },
 });

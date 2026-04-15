@@ -133,6 +133,7 @@ export function FileResource({ resource }: { resource: GetResourceData }) {
           }
           key={resource._id}
           resourceId={resource._id}
+          workspaceId={resource.workspaceId}
         />
       </Suspense>
     </PageContent>

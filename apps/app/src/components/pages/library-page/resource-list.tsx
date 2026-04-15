@@ -341,7 +341,7 @@ export function ResourceList({
                 />
               ))}
             </AnimatePresence>
-            <Separator className="my-1" />
+            <Separator className="my-1 h-[0.5px]!" />
           </>
         )}
         {pendingCollection && (

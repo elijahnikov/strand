@@ -1,21 +1,26 @@
 import {
+  type Block,
   type BlockNoteEditor,
+  BlockNoteEditor as BlockNoteEditorClass,
   BlockNoteSchema,
   createCodeBlockSpec,
   createExtension,
   defaultBlockSpecs,
+  nodeToBlock,
 } from "@blocknote/core";
 import {
   FormattingToolbarController,
   SuggestionMenuController,
+  useCreateBlockNote,
 } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
 import "@blocknote/shadcn/style.css";
 import "./note-editor.css";
-import { useBlockNoteSync } from "@convex-dev/prosemirror-sync/blocknote";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { useTheme } from "@strand/ui/theme";
+import { useMutation } from "convex/react";
+import { useEffect, useMemo } from "react";
 import { strandShadCNComponents } from "./note-editor-components";
 
 const supportedLanguages = {
@@ -79,36 +84,166 @@ const codeBlockTripleBacktick = createExtension({
   ],
 });
 
+const SAVE_DEBOUNCE_MS = 3000;
+const STORAGE_PREFIX = "note-editor-pending:";
+
+const storageKey = (resourceId: string) => `${STORAGE_PREFIX}${resourceId}`;
+
+const readPendingLocal = (resourceId: string): string | null => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  try {
+    return window.localStorage.getItem(storageKey(resourceId));
+  } catch {
+    return null;
+  }
+};
+
+const writePendingLocal = (resourceId: string, json: string) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    window.localStorage.setItem(storageKey(resourceId), json);
+  } catch {
+    // quota / private mode — ignore
+  }
+};
+
+const clearPendingLocalIfMatches = (resourceId: string, json: string) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    if (window.localStorage.getItem(storageKey(resourceId)) === json) {
+      window.localStorage.removeItem(storageKey(resourceId));
+    }
+  } catch {
+    // ignore
+  }
+};
+
+function parseInitialContent(json: string | undefined): Block[] | undefined {
+  if (!json) {
+    return;
+  }
+  try {
+    const parsed = JSON.parse(json);
+    if (Array.isArray(parsed)) {
+      return parsed as Block[];
+    }
+    if (parsed && typeof parsed === "object" && parsed.type === "doc") {
+      const headless = BlockNoteEditorClass.create({
+        schema,
+        _headless: true,
+      });
+      const pmNode = headless.pmSchema.nodeFromJSON(parsed);
+      const blocks: Block[] = [];
+      pmNode.firstChild?.descendants((node) => {
+        blocks.push(nodeToBlock(node, headless.pmSchema));
+        return false;
+      });
+      return blocks.length > 0 ? blocks : undefined;
+    }
+  } catch {
+    // fall through
+  }
+  return;
+}
+
 interface NoteEditorProps {
   initialContent?: string;
   resourceId: Id<"resource">;
+  workspaceId: Id<"workspace">;
 }
 
 export default function NoteEditor({
   resourceId,
+  workspaceId,
   initialContent,
 }: NoteEditorProps) {
   const { resolvedTheme } = useTheme();
+  const updateContent = useMutation(api.resource.mutations.updateContent);
 
-  const sync = useBlockNoteSync<BlockNoteEditor>(api.prosemirror, resourceId, {
-    snapshotDebounceMs: 1500,
-    editorOptions: {
-      schema,
-      extensions: [codeBlockTripleBacktick],
-    },
+  const effectiveInitialContent = useMemo(() => {
+    const pendingLocal = readPendingLocal(resourceId);
+    return pendingLocal ?? initialContent;
+  }, [resourceId, initialContent]);
+
+  const initialBlocks = useMemo(
+    () => parseInitialContent(effectiveInitialContent),
+    [effectiveInitialContent]
+  );
+
+  const editor: BlockNoteEditor = useCreateBlockNote({
+    schema,
+    initialContent: initialBlocks,
+    extensions: [codeBlockTripleBacktick],
   });
 
-  if (sync.isLoading) {
-    return <div className="mt-12" />;
-  }
+  // If we recovered unsaved local content on mount, push it to the server
+  // so the DB catches up. Clear local only after the server accepts it.
+  useEffect(() => {
+    const pendingLocal = readPendingLocal(resourceId);
+    if (!pendingLocal || pendingLocal === initialContent) {
+      return;
+    }
+    void updateContent({
+      resourceId,
+      workspaceId,
+      jsonContent: pendingLocal,
+    }).then(() => {
+      clearPendingLocalIfMatches(resourceId, pendingLocal);
+    });
+  }, [resourceId, workspaceId, initialContent, updateContent]);
 
-  if (!sync.editor) {
-    const initial = initialContent
-      ? JSON.parse(initialContent)
-      : { type: "doc", content: [] };
-    sync.create(initial);
-    return <div className="mt-12" />;
-  }
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let pending: string | null = null;
+
+    const flush = () => {
+      if (pending === null) {
+        return;
+      }
+      const jsonContent = pending;
+      pending = null;
+      timer = null;
+      void updateContent({ workspaceId, resourceId, jsonContent }).then(() => {
+        clearPendingLocalIfMatches(resourceId, jsonContent);
+      });
+    };
+
+    const unsubscribe = editor.onChange(() => {
+      const json = JSON.stringify(editor.prosemirrorState.doc.toJSON());
+      pending = json;
+      writePendingLocal(resourceId, json);
+      if (timer) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(flush, SAVE_DEBOUNCE_MS);
+    });
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        flush();
+      }
+    };
+    const onPageHide = () => flush();
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("pagehide", onPageHide);
+
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("pagehide", onPageHide);
+      if (timer) {
+        clearTimeout(timer);
+      }
+      flush();
+      unsubscribe();
+    };
+  }, [editor, updateContent, resourceId, workspaceId]);
 
   const fixedFloating = {
     useFloatingOptions: { strategy: "fixed" as const },
@@ -117,7 +252,7 @@ export default function NoteEditor({
   return (
     <div className="mt-12">
       <BlockNoteView
-        editor={sync.editor}
+        editor={editor}
         formattingToolbar={false}
         shadCNComponents={strandShadCNComponents}
         slashMenu={false}

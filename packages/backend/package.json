@@ -17,7 +17,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "dev": "bunx convex dev --local",
+    "dev": "bunx convex dev",
     "generate": "cd convex/betterAuth bunx @better-auth/cli generate -y",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
@@ -28,7 +28,6 @@
   "dependencies": {
     "@convex-dev/better-auth": "catalog:convex",
     "@convex-dev/presence": "catalog:convex",
-    "@convex-dev/prosemirror-sync": "catalog:convex",
     "@instantdb/core": "catalog:instant",
     "@instantdb/react": "catalog:instant",
     "@strand/ai": "workspace:*",

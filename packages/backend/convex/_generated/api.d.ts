@@ -15,13 +15,13 @@ import type * as chat_mutations from "../chat/mutations.js";
 import type * as chat_queries from "../chat/queries.js";
 import type * as collection_mutations from "../collection/mutations.js";
 import type * as collection_queries from "../collection/queries.js";
+import type * as crpc from "../crpc.js";
 import type * as extensionAuth_http from "../extensionAuth/http.js";
 import type * as extensionAuth_internals from "../extensionAuth/internals.js";
 import type * as extensionAuth_mutations from "../extensionAuth/mutations.js";
 import type * as extensionAuth_queries from "../extensionAuth/queries.js";
 import type * as extensionAuth_shared from "../extensionAuth/shared.js";
 import type * as http from "../http.js";
-import type * as prosemirror from "../prosemirror.js";
 import type * as resource_actions from "../resource/actions.js";
 import type * as resource_aiActions from "../resource/aiActions.js";
 import type * as resource_aiInternals from "../resource/aiInternals.js";
@@ -55,13 +55,13 @@ declare const fullApi: ApiFromModules<{
   "chat/queries": typeof chat_queries;
   "collection/mutations": typeof collection_mutations;
   "collection/queries": typeof collection_queries;
+  crpc: typeof crpc;
   "extensionAuth/http": typeof extensionAuth_http;
   "extensionAuth/internals": typeof extensionAuth_internals;
   "extensionAuth/mutations": typeof extensionAuth_mutations;
   "extensionAuth/queries": typeof extensionAuth_queries;
   "extensionAuth/shared": typeof extensionAuth_shared;
   http: typeof http;
-  prosemirror: typeof prosemirror;
   "resource/actions": typeof resource_actions;
   "resource/aiActions": typeof resource_aiActions;
   "resource/aiInternals": typeof resource_aiInternals;
@@ -1087,82 +1087,6 @@ export declare const components: {
         "internal",
         { authId: string; userId: string },
         any
-      >;
-    };
-  };
-  prosemirrorSync: {
-    lib: {
-      deleteDocument: FunctionReference<
-        "mutation",
-        "internal",
-        { id: string },
-        null
-      >;
-      deleteSnapshots: FunctionReference<
-        "mutation",
-        "internal",
-        { afterVersion?: number; beforeVersion?: number; id: string },
-        null
-      >;
-      deleteSteps: FunctionReference<
-        "mutation",
-        "internal",
-        {
-          afterVersion?: number;
-          beforeTs: number;
-          deleteNewerThanLatestSnapshot?: boolean;
-          id: string;
-        },
-        null
-      >;
-      getSnapshot: FunctionReference<
-        "query",
-        "internal",
-        { id: string; version?: number },
-        { content: null } | { content: string; version: number }
-      >;
-      getSteps: FunctionReference<
-        "query",
-        "internal",
-        { id: string; version: number },
-        {
-          clientIds: Array<string | number>;
-          steps: Array<string>;
-          version: number;
-        }
-      >;
-      latestVersion: FunctionReference<
-        "query",
-        "internal",
-        { id: string },
-        null | number
-      >;
-      submitSnapshot: FunctionReference<
-        "mutation",
-        "internal",
-        {
-          content: string;
-          id: string;
-          pruneSnapshots?: boolean;
-          version: number;
-        },
-        null
-      >;
-      submitSteps: FunctionReference<
-        "mutation",
-        "internal",
-        {
-          clientId: string | number;
-          id: string;
-          steps: Array<string>;
-          version: number;
-        },
-        | {
-            clientIds: Array<string | number>;
-            status: "needs-rebase";
-            steps: Array<string>;
-          }
-        | { status: "synced" }
       >;
     };
   };

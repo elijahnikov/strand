@@ -205,6 +205,8 @@ async function insertFileResource(
   });
 }
 
+const UPDATED_AT_THROTTLE_MS = 60_000;
+
 export const updateContent = workspaceMutation({
   args: {
     resourceId: v.id("resource"),
@@ -238,7 +240,10 @@ export const updateContent = workspaceMutation({
       });
     }
 
-    await ctx.db.patch(args.resourceId, { updatedAt: Date.now() });
+    const now = Date.now();
+    if (now - resource.updatedAt > UPDATED_AT_THROTTLE_MS) {
+      await ctx.db.patch(args.resourceId, { updatedAt: now });
+    }
   },
 });
 
