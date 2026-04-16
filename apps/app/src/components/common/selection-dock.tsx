@@ -61,7 +61,7 @@ export function SelectionDock({
     <AnimatePresence>
       <motion.div
         animate={{ opacity: 1, y: 0 }}
-        className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-x-1 rounded-full border-[0.5px] bg-ui-bg-component py-1 pr-1 pl-0.25 shadow-lg"
+        className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-x-1 rounded-full border-[0.5px] bg-ui-bg-component py-1 pr-1 pl-0.25 "
         exit={{ opacity: 0, y: 8 }}
         initial={{ opacity: 0, y: 8 }}
         key="dock"

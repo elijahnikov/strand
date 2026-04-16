@@ -59,10 +59,12 @@ export function SelectableRow({
       className={cn(
         "group/selectable relative",
         "[&_.h-8.w-8>*]:transition-opacity",
-        "[&_.h-8.w-8]:transition-colors",
+        "[&_.h-8.w-8]:transition-[background-color,border-color]",
         "hover:[&_.h-8.w-8>*]:opacity-0!",
+        "hover:[&_.h-8.w-8]:border-[0.5px]",
         "hover:[&_.h-8.w-8]:bg-ui-bg-subtle",
         "data-[row-selected=true]:[&_.h-8.w-8>*]:opacity-0!",
+        "data-[row-selected=true]:[&_.h-8.w-8]:border-[0.5px]",
         "data-[row-selected=true]:[&_.h-8.w-8]:bg-ui-bg-subtle"
       )}
       data-row-selected={selected ? "true" : undefined}

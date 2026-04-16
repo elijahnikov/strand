@@ -10,6 +10,7 @@ import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { useQuery } from "@tanstack/react-query";
 import { getFileLabel } from "~/lib/format";
 import type { WorkspaceTab } from "~/lib/workspace-tabs-store";
+import { FolderIcon } from "lucide-react";
 
 interface TabIconProps {
   tab: WorkspaceTab;
@@ -128,5 +129,5 @@ function CollectionTabIcon({
   if (collection?.icon) {
     return <span className="text-[13px] leading-none">{collection.icon}</span>;
   }
-  return <RiFolder3Line className="size-3.5 text-ui-fg-muted" />;
+  return <FolderIcon className="size-3.5 text-ui-fg-muted" />;
 }
