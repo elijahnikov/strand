@@ -41,6 +41,7 @@ interface ResourceRowProps {
   onTogglePin: (resourceId: Id<"resource">) => void;
   onUpdateTitle: (resourceId: Id<"resource">, title: string) => void;
   resource: Resource;
+  snippet?: string;
   variant?: "library" | "trash";
   workspaceId: Id<"workspace">;
 }
@@ -137,6 +138,7 @@ function WebsiteRow({
   onDelete,
   onRestore,
   onPurge,
+  snippet,
 }: ResourceRowProps) {
   const website = "website" in resource ? resource.website : null;
   const isMetadataPending =
@@ -208,6 +210,7 @@ function WebsiteRow({
             </motion.div>
           )}
         </AnimatePresence>
+        {snippet ? <SnippetLine html={snippet} /> : null}
       </div>
       <div className="relative z-20 flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         {website?.url && (
@@ -244,6 +247,7 @@ function NoteRow({
   onDelete,
   onRestore,
   onPurge,
+  snippet,
 }: ResourceRowProps) {
   const handleNavigate = useResourceNavigate(workspaceId, resource._id);
 
@@ -260,6 +264,7 @@ function NoteRow({
           onSave={(title) => onUpdateTitle(resource._id, title)}
           value={resource.title}
         />
+        {snippet ? <SnippetLine html={snippet} /> : null}
       </div>
       <div className="relative z-20 flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         <RowDropdownMenu
@@ -286,6 +291,7 @@ function FileRow({
   onDelete,
   onRestore,
   onPurge,
+  snippet,
 }: ResourceRowProps) {
   const file = "file" in resource ? resource.file : null;
   const fileUrl = "fileUrl" in resource ? resource.fileUrl : null;
@@ -369,6 +375,7 @@ function FileRow({
             </motion.div>
           )}
         </AnimatePresence>
+        {snippet ? <SnippetLine html={snippet} /> : null}
       </div>
       <div className="relative z-20 flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         {fileUrl && (
@@ -500,6 +507,16 @@ function RowDropdownMenu({
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+function SnippetLine({ html }: { html: string }) {
+  return (
+    <div
+      className="mt-0.5 line-clamp-2 text-ui-fg-subtle text-xs leading-relaxed [&_mark]:rounded-sm [&_mark]:bg-ui-tag-orange-bg [&_mark]:px-0.5 [&_mark]:text-ui-tag-orange-text"
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: server-escaped <mark> highlighting
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
   );
 }
 

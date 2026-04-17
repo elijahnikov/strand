@@ -61,7 +61,7 @@ export function SelectionDock({
     <AnimatePresence>
       <motion.div
         animate={{ opacity: 1, y: 0 }}
-        className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-x-1 rounded-full border-[0.5px] bg-ui-bg-component py-1 pr-1 pl-0.25"
+        className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-x-1 rounded-full border-[0.5px] bg-ui-bg-component p-1.5 pl-1"
         exit={{ opacity: 0, y: 8 }}
         initial={{ opacity: 0, y: 8 }}
         key="dock"
@@ -299,7 +299,7 @@ function MoveButton({
                 <Fragment key={group.value}>
                   <CommandGroup className="px-1" items={group.items}>
                     <CommandItem
-                      className="px-3"
+                      className="px-3 text-[13px]!"
                       onClick={() => handleMove(undefined)}
                     >
                       Move to root
@@ -320,7 +320,7 @@ function MoveButton({
                           ) : (
                             <FolderIcon className="size-3.5 shrink-0 text-ui-fg-muted" />
                           )}
-                          <Text className="flex-1 truncate text-sm">
+                          <Text className="flex-1 truncate text-[13px]">
                             {item.name}
                           </Text>
                         </CommandItem>

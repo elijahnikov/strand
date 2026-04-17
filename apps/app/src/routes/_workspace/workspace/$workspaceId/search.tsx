@@ -1,4 +1,6 @@
+import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { createFileRoute } from "@tanstack/react-router";
+import { SearchPageComponent } from "~/components/pages/search-page";
 
 export const Route = createFileRoute(
   "/_workspace/workspace/$workspaceId/search"
@@ -7,5 +9,6 @@ export const Route = createFileRoute(
 });
 
 function SearchPage() {
-  return <div />;
+  const { workspaceId } = Route.useParams();
+  return <SearchPageComponent workspaceId={workspaceId as Id<"workspace">} />;
 }

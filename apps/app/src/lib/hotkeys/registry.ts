@@ -84,4 +84,5 @@ export const PAGE_SHORTCUTS: StaticShortcut[] = [
   { keys: ["Shift+C"], label: "Toggle resource chat", section: "Page" },
   { keys: ["Mod+1…9"], label: "Switch to tab 1–9", section: "Page" },
   { keys: ["Mod+0"], label: "Switch to last tab", section: "Page" },
+  { keys: ["/"], label: "Focus search input", section: "Page" },
 ];
