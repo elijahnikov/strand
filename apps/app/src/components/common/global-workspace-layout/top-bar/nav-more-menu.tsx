@@ -1,5 +1,6 @@
 import {
   RiArrowRightUpLongLine,
+  RiDeleteBin6Line,
   RiMoreFill,
   RiQuestionFill,
   RiSettings4Fill,
@@ -48,6 +49,22 @@ export function NavMoreMenu({ workspaceId }: NavMoreMenuProps) {
         className="z-[105]! w-48"
         sideOffset={6}
       >
+        <DropdownMenuItem
+          className={cn(
+            pathname === `${workspacePath}/trash` &&
+              "pointer-events-none bg-[rgba(0,0,0,0.070)] text-ui-fg-base dark:bg-[rgba(255,255,255,0.070)]"
+          )}
+          render={
+            <Link
+              params={{ workspaceId }}
+              preload="intent"
+              to="/workspace/$workspaceId/trash"
+            />
+          }
+        >
+          <RiDeleteBin6Line />
+          Trash
+        </DropdownMenuItem>
         <DropdownMenuItem
           className={cn(
             pathname === `${workspacePath}/settings` &&

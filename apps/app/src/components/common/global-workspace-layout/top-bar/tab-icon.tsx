@@ -8,9 +8,9 @@ import {
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { useQuery } from "@tanstack/react-query";
+import { FolderIcon } from "lucide-react";
 import { getFileLabel } from "~/lib/format";
 import type { WorkspaceTab } from "~/lib/workspace-tabs-store";
-import { FolderIcon } from "lucide-react";
 
 interface TabIconProps {
   tab: WorkspaceTab;

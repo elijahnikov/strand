@@ -29,17 +29,15 @@ export function LibraryDragOverlay({
             {totalCount}
           </div>
           {Array.from({ length: Math.min(totalCount - 1, MAX_STACK_LAYERS) })
-            .map((_, i) => {
-              const depth = i + 1;
-              return depth;
-            })
+            .map((_, i) => i + 1)
             .reverse()
             .map((depth) => (
               <div
-                className="absolute inset-0 rounded-lg border-[0.5px] bg-ui-bg-component"
+                className="absolute top-0 right-0 left-0 rounded-lg border-[0.5px] bg-ui-bg-component"
                 key={`stack-${depth}`}
                 style={{
-                  transform: `translate(${depth * 4}px, ${depth * 4}px) rotate(${depth}deg)`,
+                  height: `calc(100% - ${depth * 4}px)`,
+                  transform: `translateY(${depth * 10}px) scale(${1 - depth * 0.03})`,
                 }}
               />
             ))}

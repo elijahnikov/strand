@@ -484,6 +484,81 @@ export const removeMany = workspaceMutation({
   },
 });
 
+export const restoreMany = workspaceMutation({
+  args: {
+    resourceIds: v.array(v.id("resource")),
+  },
+  handler: async (ctx, args) => {
+    for (const resourceId of args.resourceIds) {
+      const resource = await ctx.db.get(resourceId);
+      if (!resource || resource.workspaceId !== ctx.workspace._id) {
+        continue;
+      }
+      if (!resource.deletedAt) {
+        continue;
+      }
+      await ctx.db.patch(resourceId, { deletedAt: undefined });
+    }
+  },
+});
+
+async function purgeResource(
+  ctx: MutationCtx,
+  resourceId: Id<"resource">,
+  workspaceId: Id<"workspace">
+) {
+  const resource = await ctx.db.get(resourceId);
+  if (!resource || resource.workspaceId !== workspaceId) {
+    return;
+  }
+  if (!resource.deletedAt) {
+    return;
+  }
+
+  const tagJunctions = await ctx.db
+    .query("resourceTag")
+    .withIndex("by_resource", (q) => q.eq("resourceId", resourceId))
+    .collect();
+  for (const junction of tagJunctions) {
+    await ctx.db.delete(junction._id);
+  }
+
+  const pins = await ctx.db
+    .query("userResourcePin")
+    .filter((q) => q.eq(q.field("resourceId"), resourceId))
+    .collect();
+  for (const pin of pins) {
+    await ctx.db.delete(pin._id);
+  }
+
+  await ctx.db.delete(resourceId);
+}
+
+export const purgeMany = workspaceMutation({
+  args: {
+    resourceIds: v.array(v.id("resource")),
+  },
+  handler: async (ctx, args) => {
+    for (const resourceId of args.resourceIds) {
+      await purgeResource(ctx, resourceId, ctx.workspace._id);
+    }
+  },
+});
+
+export const purgeAllTrashed = workspaceMutation({
+  args: {},
+  handler: async (ctx) => {
+    const trashed = await ctx.db
+      .query("resource")
+      .withIndex("by_workspace", (q) => q.eq("workspaceId", ctx.workspace._id))
+      .filter((q) => q.neq(q.field("deletedAt"), undefined))
+      .collect();
+    for (const resource of trashed) {
+      await purgeResource(ctx, resource._id, ctx.workspace._id);
+    }
+  },
+});
+
 export const moveManyToCollection = workspaceMutation({
   args: {
     resourceIds: v.array(v.id("resource")),

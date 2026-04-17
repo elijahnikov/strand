@@ -486,6 +486,46 @@ export const listRecent = workspaceQuery({
   },
 });
 
+export const listTrashed = workspaceQuery({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    search: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const workspaceId = ctx.workspace._id;
+    const search = args.search?.trim();
+
+    let results: {
+      page: Doc<"resource">[];
+      isDone: boolean;
+      continueCursor: string;
+    };
+
+    if (search) {
+      const query = ctx.db
+        .query("resource")
+        .withSearchIndex("search_title", (q) =>
+          q.search("title", search).eq("workspaceId", workspaceId)
+        )
+        .filter((q) => q.neq(q.field("deletedAt"), undefined));
+      results = await query.paginate(args.paginationOpts);
+    } else {
+      const query = ctx.db
+        .query("resource")
+        .withIndex("by_workspace", (q) => q.eq("workspaceId", workspaceId))
+        .filter((q) => q.neq(q.field("deletedAt"), undefined))
+        .order("desc");
+      results = await query.paginate(args.paginationOpts);
+    }
+
+    const enrichedPage = await Promise.all(
+      results.page.map((resource) => enrichResource(ctx, resource))
+    );
+
+    return { ...results, page: enrichedPage };
+  },
+});
+
 export const listPinned = workspaceQuery({
   args: {},
   handler: async (ctx) => {

@@ -36,10 +36,10 @@ import { Skeleton } from "@strand/ui/skeleton";
 import { Text } from "@strand/ui/text";
 import { toastManager } from "@strand/ui/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { FolderIcon, MoreHorizontalIcon, TrashIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { Fragment, useMemo, useState } from "react";
 import { useLibrarySelection } from "~/lib/selection/library-selection";
-import { FolderIcon, MoreHorizontalIcon, TrashIcon } from "lucide-react";
 
 export function SelectionDock({
   workspaceId,
@@ -61,7 +61,7 @@ export function SelectionDock({
     <AnimatePresence>
       <motion.div
         animate={{ opacity: 1, y: 0 }}
-        className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-x-1 rounded-full border-[0.5px] bg-ui-bg-component py-1 pr-1 pl-0.25 "
+        className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-x-1 rounded-full border-[0.5px] bg-ui-bg-component py-1 pr-1 pl-0.25"
         exit={{ opacity: 0, y: 8 }}
         initial={{ opacity: 0, y: 8 }}
         key="dock"
@@ -270,10 +270,18 @@ function MoveButton({
           </Button>
         }
       />
-      <PopoverContent sideOffset={10} align="center" className="w-72 p-0! bg-ui-bg-component" side="top">
+      <PopoverContent
+        align="center"
+        className="w-72 bg-ui-bg-component p-0!"
+        side="top"
+        sideOffset={10}
+      >
         <Command items={groups} onValueChange={setQuery} value={query}>
           <CommandPanel className="bg-ui-bg-component!">
-            <CommandInput className="text-sm" placeholder="Search or create a collection…" />
+            <CommandInput
+              className="text-sm"
+              placeholder="Search or create a collection…"
+            />
             {collectionsLoading ? (
               <div className="flex flex-col gap-y-1 px-2 py-2">
                 {Array.from({ length: 4 }).map((_, i) => (
@@ -286,21 +294,24 @@ function MoveButton({
             ) : (
               <CommandEmpty>No collections match.</CommandEmpty>
             )}
-            <CommandList className="max-h-64 bg-ui-bg-component overflow-y-auto px-0! pt-1! pb-1!">
+            <CommandList className="max-h-64 overflow-y-auto bg-ui-bg-component px-0! pt-1! pb-1!">
               {(group: CollectionGroup) => (
                 <Fragment key={group.value}>
                   <CommandGroup className="px-1" items={group.items}>
-                    <CommandItem  className="px-3" onClick={() =>
-                            handleMove(undefined)
-                          }>Move to root</CommandItem>
+                    <CommandItem
+                      className="px-3"
+                      onClick={() => handleMove(undefined)}
+                    >
+                      Move to root
+                    </CommandItem>
                     <CommandGroupLabel>{group.value}</CommandGroupLabel>
                     <CommandCollection>
                       {(item: CollectionChoice) => (
                         <CommandItem
-                          className="flex px-2 items-center mx-0.5 gap-x-2"
+                          className="mx-0.5 flex items-center gap-x-2 px-2"
                           key={item._id}
                           onClick={() =>
-                            handleMove( (item._id as Id<"collection">))
+                            handleMove(item._id as Id<"collection">)
                           }
                           value={item._id}
                         >
@@ -485,10 +496,12 @@ function DeleteButton({
         <DialogPopup className="max-w-sm!">
           <DialogHeader>
             <div>
-              <DialogTitle className="text-sm font-medium">Delete items?</DialogTitle>
+              <DialogTitle className="font-medium text-sm">
+                Delete items?
+              </DialogTitle>
             </div>
           </DialogHeader>
-              <Text className="p-3">{describeDeletion()}</Text>
+          <Text className="p-3">{describeDeletion()}</Text>
           <DialogFooter>
             <Button
               disabled={isPending}

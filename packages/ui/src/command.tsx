@@ -158,7 +158,10 @@ function CommandEmpty({
 function CommandPanel({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      className={cn("relative -mx-px rounded-[calc(var(--radius-xl)+5px)] bg-ui-bg-base [clip-path:inset(0_1px)] before:pointer-events-none", className)}
+      className={cn(
+        "relative -mx-px rounded-[calc(var(--radius-xl)+5px)] bg-ui-bg-base [clip-path:inset(0_1px)] before:pointer-events-none",
+        className
+      )}
       {...props}
     />
   );
