@@ -18,6 +18,7 @@ import {
   MoreHorizontalIcon,
   PinIcon,
   PinOffIcon,
+  RotateCcwIcon,
   StarIcon,
   TrashIcon,
 } from "lucide-react";
@@ -34,9 +35,13 @@ type Resource = FunctionReturnType<
 
 interface ResourceRowProps {
   isPinned: boolean;
+  onDelete?: (resourceId: Id<"resource">) => void;
+  onPurge?: (resourceId: Id<"resource">) => void;
+  onRestore?: (resourceId: Id<"resource">) => void;
   onTogglePin: (resourceId: Id<"resource">) => void;
   onUpdateTitle: (resourceId: Id<"resource">, title: string) => void;
   resource: Resource;
+  variant?: "library" | "trash";
   workspaceId: Id<"workspace">;
 }
 
@@ -128,6 +133,10 @@ function WebsiteRow({
   onTogglePin,
   isPinned,
   workspaceId,
+  variant,
+  onDelete,
+  onRestore,
+  onPurge,
 }: ResourceRowProps) {
   const website = "website" in resource ? resource.website : null;
   const isMetadataPending =
@@ -213,8 +222,12 @@ function WebsiteRow({
         )}
         <RowDropdownMenu
           isPinned={isPinned}
+          onDelete={onDelete}
+          onPurge={onPurge}
+          onRestore={onRestore}
           onTogglePin={onTogglePin}
           resource={resource}
+          variant={variant}
         />
       </div>
     </div>
@@ -227,6 +240,10 @@ function NoteRow({
   onTogglePin,
   isPinned,
   workspaceId,
+  variant,
+  onDelete,
+  onRestore,
+  onPurge,
 }: ResourceRowProps) {
   const handleNavigate = useResourceNavigate(workspaceId, resource._id);
 
@@ -247,8 +264,12 @@ function NoteRow({
       <div className="relative z-20 flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         <RowDropdownMenu
           isPinned={isPinned}
+          onDelete={onDelete}
+          onPurge={onPurge}
+          onRestore={onRestore}
           onTogglePin={onTogglePin}
           resource={resource}
+          variant={variant}
         />
       </div>
     </div>
@@ -261,6 +282,10 @@ function FileRow({
   onTogglePin,
   isPinned,
   workspaceId,
+  variant,
+  onDelete,
+  onRestore,
+  onPurge,
 }: ResourceRowProps) {
   const file = "file" in resource ? resource.file : null;
   const fileUrl = "fileUrl" in resource ? resource.fileUrl : null;
@@ -357,8 +382,12 @@ function FileRow({
         )}
         <RowDropdownMenu
           isPinned={isPinned}
+          onDelete={onDelete}
+          onPurge={onPurge}
+          onRestore={onRestore}
           onTogglePin={onTogglePin}
           resource={resource}
+          variant={variant}
         />
       </div>
     </div>
@@ -369,14 +398,46 @@ function RowDropdownMenu({
   resource,
   isPinned,
   onTogglePin,
+  variant = "library",
+  onDelete,
+  onRestore,
+  onPurge,
 }: {
-  resource: Resource;
   isPinned: boolean;
+  onDelete?: (resourceId: Id<"resource">) => void;
+  onPurge?: (resourceId: Id<"resource">) => void;
+  onRestore?: (resourceId: Id<"resource">) => void;
   onTogglePin: (resourceId: Id<"resource">) => void;
+  resource: Resource;
+  variant?: "library" | "trash";
 }) {
   const website = "website" in resource ? resource.website : null;
   const fileUrl = "fileUrl" in resource ? resource.fileUrl : null;
   const file = "file" in resource ? resource.file : null;
+
+  if (variant === "trash") {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger className="flex h-7 w-7 items-center justify-center rounded-md text-ui-fg-muted transition-colors hover:bg-ui-bg-base hover:text-ui-fg-base">
+          <MoreHorizontalIcon className="h-3.5 w-3.5" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" sideOffset={4}>
+          <DropdownMenuItem onClick={() => onRestore?.(resource._id)}>
+            <RotateCcwIcon className="h-4 w-4" />
+            Restore
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="text-ui-fg-error"
+            onClick={() => onPurge?.(resource._id)}
+          >
+            <TrashIcon className="h-4 w-4 text-ui-fg-error! group-hover/menuitem:text-ui-fg-base!" />
+            Delete permanently
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
 
   return (
     <DropdownMenu>
@@ -430,7 +491,10 @@ function RowDropdownMenu({
           </>
         )}
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-ui-fg-error">
+        <DropdownMenuItem
+          className="text-ui-fg-error"
+          onClick={() => onDelete?.(resource._id)}
+        >
           <TrashIcon className="h-4 w-4 text-ui-fg-error! group-hover/menuitem:text-ui-fg-base!" />
           Delete
         </DropdownMenuItem>

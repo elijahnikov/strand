@@ -13,6 +13,7 @@ import { Kbd } from "@strand/ui/kbd";
 import { Separator } from "@strand/ui/separator";
 import { Skeleton } from "@strand/ui/skeleton";
 import { Text } from "@strand/ui/text";
+import { toastManager } from "@strand/ui/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
@@ -205,6 +206,31 @@ function ResourceListContent({
   const { mutate: togglePin } = useMutation({
     mutationFn: useConvexMutation(api.resource.mutations.togglePin),
   });
+
+  const { mutate: removeMany } = useMutation({
+    mutationFn: useConvexMutation(api.resource.mutations.removeMany),
+  });
+
+  const { mutate: restoreMany } = useMutation({
+    mutationFn: useConvexMutation(api.resource.mutations.restoreMany),
+  });
+
+  const handleDelete = useCallback(
+    (resourceId: Id<"resource">) => {
+      removeMany({ workspaceId, resourceIds: [resourceId] });
+      toastManager.add({
+        type: "success",
+        title: "Deleted",
+        actionProps: {
+          children: "Undo",
+          onClick: () => {
+            restoreMany({ workspaceId, resourceIds: [resourceId] });
+          },
+        },
+      });
+    },
+    [removeMany, restoreMany, workspaceId]
+  );
 
   const handleUpdateTitle = useCallback(
     (resourceId: Id<"resource">, title: string) => {
@@ -433,6 +459,7 @@ function ResourceListContent({
                         data-nav-active={activeId === navId}
                       >
                         <MemoizedResourceItem
+                          handleDelete={handleDelete}
                           handleTogglePin={handleTogglePin}
                           handleUpdateTitle={handleUpdateTitle}
                           index={0}
@@ -514,6 +541,7 @@ function ResourceListContent({
                     data-nav-active={isActive}
                   >
                     <MemoizedResourceItem
+                      handleDelete={handleDelete}
                       handleTogglePin={handleTogglePin}
                       handleUpdateTitle={handleUpdateTitle}
                       index={i}
@@ -545,18 +573,20 @@ const MemoizedResourceItem = memo(function ResourceItem({
   resource,
   handleUpdateTitle,
   handleTogglePin,
+  handleDelete,
   workspaceId,
   isPinned,
   initialLoadDone,
   index,
 }: {
-  resource: Parameters<typeof ResourceRow>[0]["resource"];
-  handleUpdateTitle: (resourceId: Id<"resource">, title: string) => void;
+  handleDelete: (resourceId: Id<"resource">) => void;
   handleTogglePin: (resourceId: Id<"resource">) => void;
-  workspaceId: Id<"workspace">;
-  isPinned: boolean;
-  initialLoadDone: boolean;
+  handleUpdateTitle: (resourceId: Id<"resource">, title: string) => void;
   index: number;
+  initialLoadDone: boolean;
+  isPinned: boolean;
+  resource: Parameters<typeof ResourceRow>[0]["resource"];
+  workspaceId: Id<"workspace">;
 }) {
   return (
     <motion.div
@@ -572,6 +602,7 @@ const MemoizedResourceItem = memo(function ResourceItem({
     >
       <ResourceRow
         isPinned={isPinned}
+        onDelete={handleDelete}
         onTogglePin={handleTogglePin}
         onUpdateTitle={handleUpdateTitle}
         resource={resource}

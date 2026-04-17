@@ -19,6 +19,7 @@ import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as WorkspaceWorkspaceWorkspaceIdRouteRouteImport } from './routes/_workspace/workspace/$workspaceId/route'
 import { Route as WorkspaceWorkspaceWorkspaceIdIndexRouteImport } from './routes/_workspace/workspace/$workspaceId/index'
+import { Route as WorkspaceWorkspaceWorkspaceIdTrashRouteImport } from './routes/_workspace/workspace/$workspaceId/trash'
 import { Route as WorkspaceWorkspaceWorkspaceIdTagsRouteImport } from './routes/_workspace/workspace/$workspaceId/tags'
 import { Route as WorkspaceWorkspaceWorkspaceIdSettingsRouteImport } from './routes/_workspace/workspace/$workspaceId/settings'
 import { Route as WorkspaceWorkspaceWorkspaceIdSearchRouteImport } from './routes/_workspace/workspace/$workspaceId/search'
@@ -80,6 +81,12 @@ const WorkspaceWorkspaceWorkspaceIdIndexRoute =
   WorkspaceWorkspaceWorkspaceIdIndexRouteImport.update({
     id: '/',
     path: '/',
+    getParentRoute: () => WorkspaceWorkspaceWorkspaceIdRouteRoute,
+  } as any)
+const WorkspaceWorkspaceWorkspaceIdTrashRoute =
+  WorkspaceWorkspaceWorkspaceIdTrashRouteImport.update({
+    id: '/trash',
+    path: '/trash',
     getParentRoute: () => WorkspaceWorkspaceWorkspaceIdRouteRoute,
   } as any)
 const WorkspaceWorkspaceWorkspaceIdTagsRoute =
@@ -168,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/workspace/$workspaceId/search': typeof WorkspaceWorkspaceWorkspaceIdSearchRoute
   '/workspace/$workspaceId/settings': typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   '/workspace/$workspaceId/tags': typeof WorkspaceWorkspaceWorkspaceIdTagsRouteWithChildren
+  '/workspace/$workspaceId/trash': typeof WorkspaceWorkspaceWorkspaceIdTrashRoute
   '/workspace/$workspaceId/': typeof WorkspaceWorkspaceWorkspaceIdIndexRoute
   '/workspace/$workspaceId/chat/$threadId': typeof WorkspaceWorkspaceWorkspaceIdChatThreadIdRoute
   '/workspace/$workspaceId/resource/$resourceId': typeof WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute
@@ -186,6 +194,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/workspace/$workspaceId/search': typeof WorkspaceWorkspaceWorkspaceIdSearchRoute
   '/workspace/$workspaceId/settings': typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
+  '/workspace/$workspaceId/trash': typeof WorkspaceWorkspaceWorkspaceIdTrashRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceWorkspaceIdIndexRoute
   '/workspace/$workspaceId/chat/$threadId': typeof WorkspaceWorkspaceWorkspaceIdChatThreadIdRoute
   '/workspace/$workspaceId/resource/$resourceId': typeof WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute
@@ -211,6 +220,7 @@ export interface FileRoutesById {
   '/_workspace/workspace/$workspaceId/search': typeof WorkspaceWorkspaceWorkspaceIdSearchRoute
   '/_workspace/workspace/$workspaceId/settings': typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   '/_workspace/workspace/$workspaceId/tags': typeof WorkspaceWorkspaceWorkspaceIdTagsRouteWithChildren
+  '/_workspace/workspace/$workspaceId/trash': typeof WorkspaceWorkspaceWorkspaceIdTrashRoute
   '/_workspace/workspace/$workspaceId/': typeof WorkspaceWorkspaceWorkspaceIdIndexRoute
   '/_workspace/workspace/$workspaceId/chat/$threadId': typeof WorkspaceWorkspaceWorkspaceIdChatThreadIdRoute
   '/_workspace/workspace/$workspaceId/resource/$resourceId': typeof WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute
@@ -235,6 +245,7 @@ export interface FileRouteTypes {
     | '/workspace/$workspaceId/search'
     | '/workspace/$workspaceId/settings'
     | '/workspace/$workspaceId/tags'
+    | '/workspace/$workspaceId/trash'
     | '/workspace/$workspaceId/'
     | '/workspace/$workspaceId/chat/$threadId'
     | '/workspace/$workspaceId/resource/$resourceId'
@@ -253,6 +264,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/workspace/$workspaceId/search'
     | '/workspace/$workspaceId/settings'
+    | '/workspace/$workspaceId/trash'
     | '/workspace/$workspaceId'
     | '/workspace/$workspaceId/chat/$threadId'
     | '/workspace/$workspaceId/resource/$resourceId'
@@ -277,6 +289,7 @@ export interface FileRouteTypes {
     | '/_workspace/workspace/$workspaceId/search'
     | '/_workspace/workspace/$workspaceId/settings'
     | '/_workspace/workspace/$workspaceId/tags'
+    | '/_workspace/workspace/$workspaceId/trash'
     | '/_workspace/workspace/$workspaceId/'
     | '/_workspace/workspace/$workspaceId/chat/$threadId'
     | '/_workspace/workspace/$workspaceId/resource/$resourceId'
@@ -366,6 +379,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/workspace/$workspaceId/'
       preLoaderRoute: typeof WorkspaceWorkspaceWorkspaceIdIndexRouteImport
+      parentRoute: typeof WorkspaceWorkspaceWorkspaceIdRouteRoute
+    }
+    '/_workspace/workspace/$workspaceId/trash': {
+      id: '/_workspace/workspace/$workspaceId/trash'
+      path: '/trash'
+      fullPath: '/workspace/$workspaceId/trash'
+      preLoaderRoute: typeof WorkspaceWorkspaceWorkspaceIdTrashRouteImport
       parentRoute: typeof WorkspaceWorkspaceWorkspaceIdRouteRoute
     }
     '/_workspace/workspace/$workspaceId/tags': {
@@ -527,6 +547,7 @@ interface WorkspaceWorkspaceWorkspaceIdRouteRouteChildren {
   WorkspaceWorkspaceWorkspaceIdSearchRoute: typeof WorkspaceWorkspaceWorkspaceIdSearchRoute
   WorkspaceWorkspaceWorkspaceIdSettingsRoute: typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
   WorkspaceWorkspaceWorkspaceIdTagsRoute: typeof WorkspaceWorkspaceWorkspaceIdTagsRouteWithChildren
+  WorkspaceWorkspaceWorkspaceIdTrashRoute: typeof WorkspaceWorkspaceWorkspaceIdTrashRoute
   WorkspaceWorkspaceWorkspaceIdIndexRoute: typeof WorkspaceWorkspaceWorkspaceIdIndexRoute
   WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute: typeof WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute
 }
@@ -543,6 +564,8 @@ const WorkspaceWorkspaceWorkspaceIdRouteRouteChildren: WorkspaceWorkspaceWorkspa
       WorkspaceWorkspaceWorkspaceIdSettingsRoute,
     WorkspaceWorkspaceWorkspaceIdTagsRoute:
       WorkspaceWorkspaceWorkspaceIdTagsRouteWithChildren,
+    WorkspaceWorkspaceWorkspaceIdTrashRoute:
+      WorkspaceWorkspaceWorkspaceIdTrashRoute,
     WorkspaceWorkspaceWorkspaceIdIndexRoute:
       WorkspaceWorkspaceWorkspaceIdIndexRoute,
     WorkspaceWorkspaceWorkspaceIdResourceResourceIdRoute:

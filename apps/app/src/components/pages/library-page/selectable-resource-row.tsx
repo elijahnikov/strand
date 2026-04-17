@@ -20,6 +20,12 @@ export function SelectableRow({
   const selected = isSelected(item);
   const anySelected = count > 0;
 
+  const handleMouseDown = (event: MouseEvent<HTMLDivElement>) => {
+    if (event.shiftKey) {
+      event.preventDefault();
+    }
+  };
+
   const handleCapturedClick = (event: MouseEvent<HTMLDivElement>) => {
     if (event.shiftKey) {
       event.preventDefault();
@@ -69,6 +75,7 @@ export function SelectableRow({
       )}
       data-row-selected={selected ? "true" : undefined}
       onClickCapture={handleCapturedClick}
+      onMouseDownCapture={handleMouseDown}
     >
       {children}
       <div
