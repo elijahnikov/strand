@@ -133,7 +133,13 @@ export default defineSchema({
         v.literal("reddit"),
         v.literal("spotify"),
         v.literal("github_gist"),
-        v.literal("codepen")
+        v.literal("codepen"),
+        v.literal("vimeo"),
+        v.literal("loom"),
+        v.literal("figma"),
+        v.literal("codesandbox"),
+        v.literal("bluesky"),
+        v.literal("soundcloud")
       )
     ),
     embedId: v.optional(v.string()),

@@ -22,17 +22,28 @@ type EmbedType =
   | "reddit"
   | "spotify"
   | "github_gist"
-  | "codepen";
+  | "codepen"
+  | "vimeo"
+  | "loom"
+  | "figma"
+  | "codesandbox"
+  | "bluesky"
+  | "soundcloud";
 
 type EmbedExtractor = (
   ctx: ExtractorContext
 ) => Promise<EmbedContent | null> | EmbedContent | null;
 
 const extractors: Partial<Record<EmbedType, EmbedExtractor>> = {
+  bluesky: extractBlueskyContent,
+  figma: extractFigmaContent,
   github_gist: extractGistContent,
+  loom: extractLoomContent,
   reddit: extractRedditContent,
+  soundcloud: extractSoundcloudContent,
   spotify: extractSpotifyContent,
   tweet: extractTweetContent,
+  vimeo: extractVimeoContent,
   youtube: extractYoutubeContent,
 };
 
@@ -340,5 +351,228 @@ async function extractGistContent(
     textContent: parts.join("\n\n"),
     title,
     author: data.owner?.login,
+  };
+}
+
+interface VimeoOembedResponse {
+  author_name?: string;
+  description?: string;
+  thumbnail_url?: string;
+  title?: string;
+  upload_date?: string;
+}
+
+async function extractVimeoContent(
+  ctx: ExtractorContext
+): Promise<EmbedContent | null> {
+  if (!ctx.url) {
+    return null;
+  }
+  const response = await fetch(
+    `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(ctx.url)}`
+  );
+  if (!response.ok) {
+    return null;
+  }
+  const data = (await response.json()) as VimeoOembedResponse;
+  if (!data.title) {
+    return null;
+  }
+
+  const parts: string[] = [];
+  if (data.author_name) {
+    parts.push(`"${data.title}" by ${data.author_name}`);
+  } else {
+    parts.push(data.title);
+  }
+  if (data.description) {
+    parts.push(data.description);
+  }
+
+  return {
+    textContent: parts.join("\n\n"),
+    title: data.title,
+    author: data.author_name,
+    thumbnailUrl: data.thumbnail_url,
+    createdAt: data.upload_date,
+  };
+}
+
+interface LoomOembedResponse {
+  author_name?: string;
+  description?: string;
+  thumbnail_url?: string;
+  title?: string;
+}
+
+async function extractLoomContent(
+  ctx: ExtractorContext
+): Promise<EmbedContent | null> {
+  if (!ctx.url) {
+    return null;
+  }
+  const response = await fetch(
+    `https://www.loom.com/v1/oembed?url=${encodeURIComponent(ctx.url)}&format=json`
+  );
+  if (!response.ok) {
+    return null;
+  }
+  const data = (await response.json()) as LoomOembedResponse;
+  if (!data.title) {
+    return null;
+  }
+
+  const parts: string[] = [];
+  if (data.author_name) {
+    parts.push(`"${data.title}" by ${data.author_name}`);
+  } else {
+    parts.push(data.title);
+  }
+  if (data.description) {
+    parts.push(data.description);
+  }
+
+  return {
+    textContent: parts.join("\n\n"),
+    title: data.title,
+    author: data.author_name,
+    thumbnailUrl: data.thumbnail_url,
+  };
+}
+
+interface FigmaOembedResponse {
+  author_name?: string;
+  thumbnail_url?: string;
+  title?: string;
+}
+
+async function extractFigmaContent(
+  ctx: ExtractorContext
+): Promise<EmbedContent | null> {
+  if (!ctx.url) {
+    return null;
+  }
+  const response = await fetch(
+    `https://www.figma.com/api/oembed?url=${encodeURIComponent(ctx.url)}`
+  );
+  if (!response.ok) {
+    return null;
+  }
+  const data = (await response.json()) as FigmaOembedResponse;
+  if (!data.title) {
+    return null;
+  }
+
+  return {
+    textContent: data.author_name
+      ? `Figma: "${data.title}" by ${data.author_name}`
+      : `Figma: ${data.title}`,
+    title: data.title,
+    author: data.author_name,
+    thumbnailUrl: data.thumbnail_url,
+  };
+}
+
+interface SoundcloudOembedResponse {
+  author_name?: string;
+  description?: string;
+  thumbnail_url?: string;
+  title?: string;
+}
+
+async function extractSoundcloudContent(
+  ctx: ExtractorContext
+): Promise<EmbedContent | null> {
+  if (!ctx.url) {
+    return null;
+  }
+  const response = await fetch(
+    `https://soundcloud.com/oembed?url=${encodeURIComponent(ctx.url)}&format=json`
+  );
+  if (!response.ok) {
+    return null;
+  }
+  const data = (await response.json()) as SoundcloudOembedResponse;
+  if (!data.title) {
+    return null;
+  }
+
+  const parts: string[] = [];
+  if (data.author_name) {
+    parts.push(`"${data.title}" by ${data.author_name}`);
+  } else {
+    parts.push(data.title);
+  }
+  if (data.description) {
+    parts.push(data.description);
+  }
+
+  return {
+    textContent: parts.join("\n\n"),
+    title: data.title,
+    author: data.author_name,
+    thumbnailUrl: data.thumbnail_url,
+  };
+}
+
+interface BlueskyResolveHandleResponse {
+  did?: string;
+}
+
+interface BlueskyPostThreadResponse {
+  thread?: {
+    post?: {
+      author?: { avatar?: string; displayName?: string; handle?: string };
+      record?: { createdAt?: string; text?: string };
+    };
+  };
+}
+
+async function extractBlueskyContent(
+  ctx: ExtractorContext
+): Promise<EmbedContent | null> {
+  const [handle, rkey] = ctx.id.split("/");
+  if (!(handle && rkey)) {
+    return null;
+  }
+
+  const resolveResp = await fetch(
+    `https://public.api.bsky.app/xrpc/com.atproto.identity.resolveHandle?handle=${encodeURIComponent(handle)}`
+  );
+  if (!resolveResp.ok) {
+    return null;
+  }
+  const { did } = (await resolveResp.json()) as BlueskyResolveHandleResponse;
+  if (!did) {
+    return null;
+  }
+
+  const uri = `at://${did}/app.bsky.feed.post/${rkey}`;
+  const threadResp = await fetch(
+    `https://public.api.bsky.app/xrpc/app.bsky.feed.getPostThread?uri=${encodeURIComponent(uri)}&depth=0`
+  );
+  if (!threadResp.ok) {
+    return null;
+  }
+  const data = (await threadResp.json()) as BlueskyPostThreadResponse;
+  const post = data.thread?.post;
+  const text = post?.record?.text;
+  if (!text) {
+    return null;
+  }
+
+  const author = post?.author?.displayName ?? post?.author?.handle;
+  const parts: string[] = [];
+  if (author) {
+    parts.push(`Bluesky post by ${author}`);
+  }
+  parts.push(text);
+
+  return {
+    textContent: parts.join("\n\n"),
+    title: text.slice(0, 80),
+    author,
+    thumbnailUrl: post?.author?.avatar,
+    createdAt: post?.record?.createdAt,
   };
 }
