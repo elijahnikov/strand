@@ -240,7 +240,10 @@ function MenuSubTrigger({
   return (
     <MenuPrimitive.SubmenuTrigger
       className={cn(
-        "flex min-h-8 items-center gap-2 rounded-sm px-2 py-1 text-base outline-none data-disabled:pointer-events-none data-highlighted:bg-accent data-popup-open:bg-accent data-inset:ps-8 data-highlighted:text-accent-foreground data-popup-open:text-accent-foreground data-disabled:opacity-64 sm:min-h-7 sm:text-sm [&_svg:not([class*='size-'])]:size-4.5 sm:[&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none",
+        "txt-compact-small group/menuitem relative flex cursor-pointer select-none items-center rounded-xl bg-ui-bg-component py-1.5 pl-2 font-medium text-ui-fg-subtle outline-none transition-colors [&_svg]:mr-2 [&_svg]:size-4 [&_svg]:text-ui-fg-base",
+        "focus:text-ui-fg-base focus-visible:bg-ui-bg-component-hover data-highlighted:bg-ui-bg-component-hover data-popup-open:bg-ui-bg-component-hover data-popup-open:text-ui-fg-base [&_svg]:text-ui-fg-subtle focus:[&_svg]:text-ui-fg-base",
+        "active:bg-ui-bg-component-hover",
+        "data-disabled:pointer-events-none data-disabled:text-ui-fg-disabled data-disabled:[&_svg]:text-ui-fg-disabled",
         className
       )}
       data-inset={inset}
@@ -248,7 +251,7 @@ function MenuSubTrigger({
       {...props}
     >
       {children}
-      <ChevronRightIcon className="ms-auto -me-0.5 opacity-80" />
+      <ChevronRightIcon className="ml-auto opacity-80" />
     </MenuPrimitive.SubmenuTrigger>
   );
 }

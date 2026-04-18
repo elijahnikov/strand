@@ -51,6 +51,12 @@ export const NAV_SHORTCUTS: NavShortcut[] = [
     path: (id) => `${workspaceBase(id)}/tags`,
   },
   {
+    keys: ["G", "D"],
+    label: "Go to Trash",
+    section: "Navigation",
+    path: (id) => `${workspaceBase(id)}/trash`,
+  },
+  {
     keys: ["G", ","],
     label: "Go to Settings",
     section: "Navigation",
@@ -64,6 +70,7 @@ const NAV_SHORTCUT_BY_TITLE: Record<string, string[]> = {
   Search: ["G", "S"],
   Chat: ["G", "C"],
   Tags: ["G", "T"],
+  Trash: ["G", "D"],
   Settings: ["G", ","],
 };
 
@@ -84,4 +91,5 @@ export const PAGE_SHORTCUTS: StaticShortcut[] = [
   { keys: ["Shift+C"], label: "Toggle resource chat", section: "Page" },
   { keys: ["Mod+1…9"], label: "Switch to tab 1–9", section: "Page" },
   { keys: ["Mod+0"], label: "Switch to last tab", section: "Page" },
+  { keys: ["/"], label: "Focus search input", section: "Page" },
 ];

@@ -1,6 +1,6 @@
 import {
   RiArrowRightUpLongLine,
-  RiDeleteBin6Line,
+  RiDeleteBin2Fill,
   RiMoreFill,
   RiQuestionFill,
   RiSettings4Fill,
@@ -62,8 +62,18 @@ export function NavMoreMenu({ workspaceId }: NavMoreMenuProps) {
             />
           }
         >
-          <RiDeleteBin6Line />
+          <RiDeleteBin2Fill />
           Trash
+          <KbdGroup className="mr-1 ml-auto">
+            <span className="flex items-center gap-1">
+              <Kbd className="h-4! min-w-4 border-[0.5px] font-mono text-[10px] text-ui-fg-base">
+                G
+              </Kbd>
+              <Kbd className="h-4! min-w-4 border-[0.5px] font-mono text-[10px] text-ui-fg-base">
+                D
+              </Kbd>
+            </span>
+          </KbdGroup>
         </DropdownMenuItem>
         <DropdownMenuItem
           className={cn(
@@ -85,7 +95,6 @@ export function NavMoreMenu({ workspaceId }: NavMoreMenuProps) {
               <Kbd className="h-4! min-w-4 border-[0.5px] font-mono text-[10px] text-ui-fg-base">
                 G
               </Kbd>
-
               <Kbd className="h-4! min-w-4 border-[0.5px] font-mono text-[10px] text-ui-fg-base">
                 ,
               </Kbd>
