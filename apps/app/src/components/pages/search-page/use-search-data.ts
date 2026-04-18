@@ -7,6 +7,7 @@ import {
   type DateOperator,
   type ListOperator,
   NO_COLLECTION_SENTINEL,
+  type SearchEmbedType,
   type SearchSort,
   type SearchType,
 } from "./use-search-filters";
@@ -35,6 +36,8 @@ export interface SearchDataArgs {
   dateFrom: number | null;
   dateOp: DateOperator | null;
   dateTo: number | null;
+  embedTypeOp: ListOperator | null;
+  embedTypes: SearchEmbedType[] | null;
   enabled: boolean;
   isFavorite: boolean | null;
   isPinned: boolean | null;
@@ -56,6 +59,10 @@ export function useSearchData(args: SearchDataArgs) {
   const filters = {
     types: args.types?.length ? args.types : undefined,
     typesOp: args.types?.length ? (args.typeOp ?? undefined) : undefined,
+    embedTypes: args.embedTypes?.length ? args.embedTypes : undefined,
+    embedTypesOp: args.embedTypes?.length
+      ? (args.embedTypeOp ?? undefined)
+      : undefined,
     conceptIds: args.conceptIds.length > 0 ? args.conceptIds : undefined,
     conceptIdsOp:
       args.conceptIds.length > 0 ? (args.conceptOp ?? undefined) : undefined,

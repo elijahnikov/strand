@@ -192,6 +192,42 @@ function WebsiteEmbed({
       );
     case "bluesky":
       return <BlueskyEmbed embedId={embedId} url={url} />;
+    case "google_docs":
+      return (
+        <FramedEmbed
+          accentColor="#1a73e8"
+          fixedHeight={600}
+          src={`https://docs.google.com/document/d/${embedId}/preview`}
+          title="Google Doc"
+        />
+      );
+    case "google_sheets":
+      return (
+        <FramedEmbed
+          accentColor="#0f9d58"
+          fixedHeight={600}
+          src={`https://docs.google.com/spreadsheets/d/${embedId}/preview`}
+          title="Google Sheet"
+        />
+      );
+    case "google_slides":
+      return (
+        <FramedEmbed
+          accentColor="#f4b400"
+          aspect="video"
+          src={`https://docs.google.com/presentation/d/${embedId}/embed`}
+          title="Google Slides"
+        />
+      );
+    case "notion":
+      return (
+        <FramedEmbed
+          accentColor="#191919"
+          fixedHeight={600}
+          src={url}
+          title="Notion page"
+        />
+      );
     default:
       return null;
   }
@@ -559,11 +595,12 @@ function BlueskyEmbed({ embedId, url }: { embedId: string; url: string }) {
     >
       <div className="flex items-center gap-2">
         {post.author.avatar ? (
-          // biome-ignore lint/performance/noImgElement: external avatar
           <img
             alt=""
             className="h-8 w-8 rounded-full"
+            height={32}
             src={post.author.avatar}
+            width={32}
           />
         ) : (
           <div className="h-8 w-8 rounded-full bg-ui-bg-subtle" />

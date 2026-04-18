@@ -19,7 +19,11 @@ const EMBED_PATTERNS: Array<{
     | "figma"
     | "codesandbox"
     | "bluesky"
-    | "soundcloud";
+    | "soundcloud"
+    | "google_docs"
+    | "google_sheets"
+    | "google_slides"
+    | "notion";
   pattern: RegExp;
   extractId: (match: RegExpMatchArray) => string;
 }> = [
@@ -84,6 +88,27 @@ const EMBED_PATTERNS: Array<{
     type: "soundcloud",
     pattern: /soundcloud\.com\/([^/]+)\/(?:sets\/)?([^/?#]+)/,
     extractId: (m) => `${m[1]}/${m[2]}`,
+  },
+  {
+    type: "google_docs",
+    pattern: /docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/,
+    extractId: (m) => m[1] as string,
+  },
+  {
+    type: "google_sheets",
+    pattern: /docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/,
+    extractId: (m) => m[1] as string,
+  },
+  {
+    type: "google_slides",
+    pattern: /docs\.google\.com\/presentation\/d\/([a-zA-Z0-9_-]+)/,
+    extractId: (m) => m[1] as string,
+  },
+  {
+    type: "notion",
+    pattern:
+      /(?:(?:[\w-]+\.)?notion\.(?:so|site))\/(?:[^/]+\/)?(?:[^/?#]*-)?([a-f0-9]{32}|[a-zA-Z0-9-]{22,})/,
+    extractId: (m) => m[1] as string,
   },
 ];
 

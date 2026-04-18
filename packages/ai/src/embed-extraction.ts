@@ -28,7 +28,11 @@ type EmbedType =
   | "figma"
   | "codesandbox"
   | "bluesky"
-  | "soundcloud";
+  | "soundcloud"
+  | "google_docs"
+  | "google_sheets"
+  | "google_slides"
+  | "notion";
 
 type EmbedExtractor = (
   ctx: ExtractorContext

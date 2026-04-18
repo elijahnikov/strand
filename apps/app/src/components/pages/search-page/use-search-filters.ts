@@ -11,6 +11,26 @@ import {
 export const TYPE_VALUES = ["website", "note", "file"] as const;
 export type SearchType = (typeof TYPE_VALUES)[number];
 
+export const EMBED_TYPE_VALUES = [
+  "youtube",
+  "tweet",
+  "reddit",
+  "spotify",
+  "github_gist",
+  "codepen",
+  "vimeo",
+  "loom",
+  "figma",
+  "codesandbox",
+  "bluesky",
+  "soundcloud",
+  "google_docs",
+  "google_sheets",
+  "google_slides",
+  "notion",
+] as const;
+export type SearchEmbedType = (typeof EMBED_TYPE_VALUES)[number];
+
 export const SORT_VALUES = [
   "relevance",
   "newest",
@@ -30,6 +50,7 @@ export type DateOperator = (typeof DATE_OPERATORS)[number];
 export const NO_COLLECTION_SENTINEL = "__none__";
 
 const typeParser = parseAsArrayOf(parseAsStringLiteral(TYPE_VALUES));
+const embedTypeParser = parseAsArrayOf(parseAsStringLiteral(EMBED_TYPE_VALUES));
 const idParser = parseAsArrayOf(parseAsString);
 const listOpParser = parseAsStringLiteral(LIST_OPERATORS);
 const dateOpParser = parseAsStringLiteral(DATE_OPERATORS);
@@ -45,6 +66,14 @@ export function useSearchFilters() {
   );
   const [typeOp, setTypeOp] = useQueryState(
     "typeOp",
+    listOpParser.withOptions({ shallow: false })
+  );
+  const [embedTypes, setEmbedTypes] = useQueryState(
+    "embed",
+    embedTypeParser.withOptions({ shallow: false })
+  );
+  const [embedTypeOp, setEmbedTypeOp] = useQueryState(
+    "embedOp",
     listOpParser.withOptions({ shallow: false })
   );
   const [conceptIds, setConceptIds] = useQueryState(
@@ -123,6 +152,7 @@ export function useSearchFilters() {
 
   const hasActiveFilters =
     (types?.length ?? 0) > 0 ||
+    (embedTypes?.length ?? 0) > 0 ||
     typedConceptIds.length > 0 ||
     typedTagIds.length > 0 ||
     typedCreatedByIds.length > 0 ||
@@ -141,6 +171,10 @@ export function useSearchFilters() {
     setTypes,
     typeOp,
     setTypeOp,
+    embedTypes,
+    setEmbedTypes,
+    embedTypeOp,
+    setEmbedTypeOp,
     conceptIds: typedConceptIds,
     setConceptIds,
     conceptOp,
@@ -180,6 +214,8 @@ export function useSearchFilters() {
 export function clearAllFilters(handlers: {
   setTypes: (v: null) => void;
   setTypeOp: (v: null) => void;
+  setEmbedTypes: (v: null) => void;
+  setEmbedTypeOp: (v: null) => void;
   setConceptIds: (v: null) => void;
   setConceptOp: (v: null) => void;
   setTagIds: (v: null) => void;
@@ -199,6 +235,8 @@ export function clearAllFilters(handlers: {
 }) {
   handlers.setTypes(null);
   handlers.setTypeOp(null);
+  handlers.setEmbedTypes(null);
+  handlers.setEmbedTypeOp(null);
   handlers.setConceptIds(null);
   handlers.setConceptOp(null);
   handlers.setTagIds(null);
