@@ -84,6 +84,7 @@ interface EnrichedResource {
     ogDescription?: string;
     articleContent?: string;
     metadataStatus?: "pending" | "processing" | "completed" | "failed";
+    embedType?: string;
   } | null;
   workspaceId: Id<"workspace">;
 }
@@ -126,6 +127,8 @@ interface FiltersArg {
   dateFrom?: number;
   dateOp?: DateOp;
   dateTo?: number;
+  embedTypes?: string[];
+  embedTypesOp?: ListOp;
   hasAI?: boolean;
   isArchived?: boolean;
   isFavorite?: boolean;
@@ -150,6 +153,8 @@ const filtersValidator = v.object({
     v.array(v.union(v.literal("website"), v.literal("note"), v.literal("file")))
   ),
   typesOp: v.optional(listOpValidator),
+  embedTypes: v.optional(v.array(v.string())),
+  embedTypesOp: v.optional(listOpValidator),
   conceptIds: v.optional(v.array(v.id("concept"))),
   conceptIdsOp: v.optional(listOpValidator),
   tagIds: v.optional(v.array(v.id("tag"))),
@@ -213,6 +218,7 @@ export const hybridSearch = action({
       (filters.conceptIds?.length ?? 0) > 0 ||
       (filters.tagIds?.length ?? 0) > 0 ||
       (filters.types?.length ?? 0) > 0 ||
+      (filters.embedTypes?.length ?? 0) > 0 ||
       (filters.createdBy?.length ?? 0) > 0 ||
       filters.collectionId !== undefined ||
       filters.isPinned !== undefined ||
@@ -802,6 +808,17 @@ function passesFilters(
       return false;
     }
     if (typeOp === "isNot" && matches) {
+      return false;
+    }
+  }
+  if (filters.embedTypes && filters.embedTypes.length > 0) {
+    const embedTypeOp: ListOp = filters.embedTypesOp ?? "is";
+    const embedType = resource.website?.embedType;
+    const matches = embedType ? filters.embedTypes.includes(embedType) : false;
+    if (embedTypeOp === "is" && !matches) {
+      return false;
+    }
+    if (embedTypeOp === "isNot" && matches) {
       return false;
     }
   }

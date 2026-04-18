@@ -1,4 +1,14 @@
 import { useDraggable } from "@dnd-kit/core";
+import {
+  RiCodeSSlashFill,
+  RiFileExcelFill,
+  RiFileFill,
+  RiFileMusicFill,
+  RiFilePdf2Fill,
+  RiFileVideoFill,
+  RiImageFill,
+  RiMarkdownFill,
+} from "@remixicon/react";
 import type { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { cn } from "@strand/ui";
@@ -26,7 +36,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { DotGridLoader } from "~/components/common/dot-grid-loader";
 import { EditableText } from "~/components/common/editable-text";
 import { TextShimmer } from "~/components/common/text-shimmer";
-import { getFileLabel } from "~/lib/format";
+import { type FilePreviewKind, getFilePreviewKind } from "~/lib/format";
 import type { DragItemData } from "./use-library-dnd";
 
 type Resource = FunctionReturnType<
@@ -338,9 +348,10 @@ function FileRow({
                   width={32}
                 />
               ) : (
-                <span className="font-semibold text-[10px] text-ui-fg-muted">
-                  {getFileLabel(file?.mimeType)}
-                </span>
+                <FileKindIcon
+                  fileName={file?.fileName}
+                  mimeType={file?.mimeType}
+                />
               )}
             </motion.div>
           )}
@@ -533,6 +544,29 @@ function WebsiteIcon({ favicon }: { favicon?: string | null }) {
     );
   }
   return <GlobeIcon />;
+}
+
+const FILE_KIND_ICONS: Record<FilePreviewKind, typeof RiFileFill> = {
+  image: RiImageFill,
+  pdf: RiFilePdf2Fill,
+  audio: RiFileMusicFill,
+  video: RiFileVideoFill,
+  markdown: RiMarkdownFill,
+  code: RiCodeSSlashFill,
+  csv: RiFileExcelFill,
+  unsupported: RiFileFill,
+};
+
+function FileKindIcon({
+  mimeType,
+  fileName,
+}: {
+  mimeType?: string | null;
+  fileName?: string | null;
+}) {
+  const kind = getFilePreviewKind(mimeType ?? undefined, fileName ?? undefined);
+  const Icon = FILE_KIND_ICONS[kind];
+  return <Icon className="h-4 w-4 text-ui-fg-muted" />;
 }
 
 function GlobeIcon() {

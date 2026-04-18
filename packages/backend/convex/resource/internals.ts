@@ -50,7 +50,17 @@ export const updateWebsiteMetadata = internalMutation({
         v.literal("reddit"),
         v.literal("spotify"),
         v.literal("github_gist"),
-        v.literal("codepen")
+        v.literal("codepen"),
+        v.literal("vimeo"),
+        v.literal("loom"),
+        v.literal("figma"),
+        v.literal("codesandbox"),
+        v.literal("bluesky"),
+        v.literal("soundcloud"),
+        v.literal("google_docs"),
+        v.literal("google_sheets"),
+        v.literal("google_slides"),
+        v.literal("notion")
       )
     ),
     embedId: v.optional(v.string()),

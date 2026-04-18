@@ -7,7 +7,23 @@ import { internal } from "../_generated/api";
 import { internalAction } from "../_generated/server";
 
 const EMBED_PATTERNS: Array<{
-  type: "youtube" | "tweet" | "reddit" | "spotify" | "github_gist" | "codepen";
+  type:
+    | "youtube"
+    | "tweet"
+    | "reddit"
+    | "spotify"
+    | "github_gist"
+    | "codepen"
+    | "vimeo"
+    | "loom"
+    | "figma"
+    | "codesandbox"
+    | "bluesky"
+    | "soundcloud"
+    | "google_docs"
+    | "google_sheets"
+    | "google_slides"
+    | "notion";
   pattern: RegExp;
   extractId: (match: RegExpMatchArray) => string;
 }> = [
@@ -41,6 +57,58 @@ const EMBED_PATTERNS: Array<{
     type: "codepen",
     pattern: /codepen\.io\/(\w+)\/pen\/(\w+)/,
     extractId: (m) => `${m[1]}/${m[2]}`,
+  },
+  {
+    type: "vimeo",
+    pattern:
+      /(?:vimeo\.com\/(?:video\/|channels\/[^/]+\/|groups\/[^/]+\/videos\/)?|player\.vimeo\.com\/video\/)(\d+)/,
+    extractId: (m) => m[1] as string,
+  },
+  {
+    type: "loom",
+    pattern: /loom\.com\/(?:share|embed)\/([a-f0-9]{24,})/,
+    extractId: (m) => m[1] as string,
+  },
+  {
+    type: "figma",
+    pattern: /figma\.com\/(?:file|design|proto|board)\/([a-zA-Z0-9]+)/,
+    extractId: (m) => m[1] as string,
+  },
+  {
+    type: "codesandbox",
+    pattern: /codesandbox\.io\/(?:s|embed|p\/sandbox)\/([a-zA-Z0-9-]+)/,
+    extractId: (m) => m[1] as string,
+  },
+  {
+    type: "bluesky",
+    pattern: /bsky\.app\/profile\/([^/]+)\/post\/([a-zA-Z0-9]+)/,
+    extractId: (m) => `${m[1]}/${m[2]}`,
+  },
+  {
+    type: "soundcloud",
+    pattern: /soundcloud\.com\/([^/]+)\/(?:sets\/)?([^/?#]+)/,
+    extractId: (m) => `${m[1]}/${m[2]}`,
+  },
+  {
+    type: "google_docs",
+    pattern: /docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/,
+    extractId: (m) => m[1] as string,
+  },
+  {
+    type: "google_sheets",
+    pattern: /docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/,
+    extractId: (m) => m[1] as string,
+  },
+  {
+    type: "google_slides",
+    pattern: /docs\.google\.com\/presentation\/d\/([a-zA-Z0-9_-]+)/,
+    extractId: (m) => m[1] as string,
+  },
+  {
+    type: "notion",
+    pattern:
+      /(?:(?:[\w-]+\.)?notion\.(?:so|site))\/(?:[^/]+\/)?(?:[^/?#]*-)?([a-f0-9]{32}|[a-zA-Z0-9-]{22,})/,
+    extractId: (m) => m[1] as string,
   },
 ];
 

@@ -8,13 +8,18 @@ import { PageContent } from "~/components/common/page-content";
 const NoteEditor = lazy(() => import("./note-editor"));
 
 import type { GetResourceData } from "~/lib/convex-types";
-import { getFileLabel } from "~/lib/format";
+import { getFileLabel, getFilePreviewKind } from "~/lib/format";
 import { RelatedResources } from "../related-resources";
 import { ResourceHeader } from "../resource-header";
 import { ResourceSummary } from "../resource-summary";
 import { ResourceTags } from "../resource-tags";
+import { AudioPreview } from "./audio-preview";
+import { CodePreview } from "./code-preview";
+import { CsvPreview } from "./csv-preview";
 import { ImagePreviewDialog, PdfPreviewDialog } from "./file-preview-dialog";
+import { MarkdownPreview } from "./markdown-preview";
 import { PdfPreview } from "./pdf-preview";
+import { VideoPreview } from "./video-preview";
 
 function FileImage({ alt, src }: { alt: string; src: string }) {
   const [loaded, setLoaded] = useState(false);
@@ -86,31 +91,81 @@ function FilePreviewEmpty({ mimeType }: { mimeType?: string }) {
   );
 }
 
+function FilePreview({
+  kind,
+  fileUrl,
+  file,
+  title,
+}: {
+  kind: ReturnType<typeof getFilePreviewKind>;
+  fileUrl: string | null;
+  file: { fileName: string; fileSize: number; mimeType: string } | null;
+  title: string;
+}) {
+  if (!fileUrl) {
+    return <FilePreviewEmpty mimeType={file?.mimeType} />;
+  }
+
+  const fileName = file?.fileName ?? undefined;
+  const fileSize = file?.fileSize;
+
+  switch (kind) {
+    case "image":
+      return (
+        <ImagePreviewDialog
+          alt={fileName ?? title}
+          fileName={fileName}
+          src={fileUrl}
+        >
+          <FileImage alt={fileName ?? title} src={fileUrl} />
+        </ImagePreviewDialog>
+      );
+    case "pdf":
+      return (
+        <PdfPreviewDialog fileName={fileName} url={fileUrl}>
+          <PdfPreview url={fileUrl} />
+        </PdfPreviewDialog>
+      );
+    case "audio":
+      return <AudioPreview url={fileUrl} />;
+    case "video":
+      return <VideoPreview url={fileUrl} />;
+    case "markdown":
+      return (
+        <MarkdownPreview
+          fileName={fileName}
+          fileSize={fileSize}
+          url={fileUrl}
+        />
+      );
+    case "code":
+      return (
+        <CodePreview fileName={fileName} fileSize={fileSize} url={fileUrl} />
+      );
+    case "csv":
+      return (
+        <CsvPreview fileName={fileName} fileSize={fileSize} url={fileUrl} />
+      );
+    default:
+      return <FilePreviewEmpty mimeType={file?.mimeType} />;
+  }
+}
+
 export function FileResource({ resource }: { resource: GetResourceData }) {
   const file = "file" in resource ? resource.file : null;
   const fileUrl =
     "fileUrl" in resource ? (resource.fileUrl as string | null) : null;
-  const isImage = file?.mimeType?.startsWith("image/");
-  const isPdf = file?.mimeType === "application/pdf";
+  const kind = getFilePreviewKind(file?.mimeType, file?.fileName);
 
   return (
     <PageContent className="mt-2">
       <ResourceHeader resource={resource} />
-      {isImage && fileUrl ? (
-        <ImagePreviewDialog
-          alt={file?.fileName ?? resource.title}
-          fileName={file?.fileName ?? undefined}
-          src={fileUrl}
-        >
-          <FileImage alt={file?.fileName ?? resource.title} src={fileUrl} />
-        </ImagePreviewDialog>
-      ) : isPdf && fileUrl ? (
-        <PdfPreviewDialog fileName={file?.fileName ?? undefined} url={fileUrl}>
-          <PdfPreview url={fileUrl} />
-        </PdfPreviewDialog>
-      ) : (
-        <FilePreviewEmpty mimeType={file?.mimeType ?? undefined} />
-      )}
+      <FilePreview
+        file={file}
+        fileUrl={fileUrl}
+        kind={kind}
+        title={resource.title}
+      />
 
       <ResourceTags
         aiStatus={resource.resourceAI?.status}

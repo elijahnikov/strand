@@ -1,16 +1,18 @@
 import { convexQuery } from "@convex-dev/react-query";
+import {
+  type RemixiconComponentType,
+  RiBardFill,
+  RiBookmarkFill,
+  RiFolder5Fill,
+  RiHashtag,
+  RiLinksFill,
+  RiStackFill,
+  RiStarFill,
+  RiUserFill,
+} from "@remixicon/react";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { useQuery } from "@tanstack/react-query";
-import {
-  BookmarkIcon,
-  FileStackIcon,
-  FolderIcon,
-  HashIcon,
-  SparklesIcon,
-  StarIcon,
-  UserIcon,
-} from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 import {
   LIST_OPERATORS,
@@ -22,11 +24,15 @@ import { BooleanPicker } from "./pickers/boolean-picker";
 import { CollectionPicker } from "./pickers/collection-picker";
 import { ConceptPicker } from "./pickers/concept-picker";
 import { CreatedByPicker } from "./pickers/created-by-picker";
+import {
+  EMBED_TYPE_LABELS,
+  EmbedTypePicker,
+} from "./pickers/embed-type-picker";
 import { TagPicker } from "./pickers/tag-picker";
 import { TypePicker } from "./pickers/type-picker";
-import {RemixiconComponentType, RiBardFill, RiBookmarkFill, RiFolder5Fill, RiHashtag, RiStackFill, RiStarFill, RiUserFill } from "@remixicon/react"
 export type FilterId =
   | "type"
+  | "embedType"
   | "concept"
   | "tag"
   | "createdBy"
@@ -104,6 +110,29 @@ export const FILTER_CONFIGS: FilterConfig[] = [
         clear: () => {
           setTypes(null);
           setTypeOp(null);
+        },
+      };
+    },
+  },
+  {
+    id: "embedType",
+    name: "Embed",
+    Icon: RiLinksFill,
+    Picker: EmbedTypePicker,
+    useIsActive: () => (useSearchFilters().embedTypes?.length ?? 0) > 0,
+    useChipContent: () => {
+      const { embedTypes, setEmbedTypes, embedTypeOp, setEmbedTypeOp } =
+        useSearchFilters();
+      const labels = (embedTypes ?? []).map((t) => EMBED_TYPE_LABELS[t] ?? t);
+      return {
+        valueLabel: summarizeList(labels, labels.length),
+        operator: embedTypeOp ?? "is",
+        operators: LIST_OPERATORS,
+        operatorLabels: LIST_OP_LABELS,
+        setOperator: (v) => setEmbedTypeOp(v as ListOperator | null),
+        clear: () => {
+          setEmbedTypes(null);
+          setEmbedTypeOp(null);
         },
       };
     },

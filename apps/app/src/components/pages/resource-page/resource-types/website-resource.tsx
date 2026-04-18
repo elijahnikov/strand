@@ -145,9 +145,142 @@ function WebsiteEmbed({
       return <RedditEmbed url={url} />;
     case "github_gist":
       return <GistEmbed id={embedId} />;
+    case "vimeo":
+      return (
+        <FramedEmbed
+          accentColor="#1ab7ea"
+          aspect="video"
+          src={`https://player.vimeo.com/video/${embedId}`}
+          title="Vimeo video"
+        />
+      );
+    case "loom":
+      return (
+        <FramedEmbed
+          accentColor="#625df5"
+          aspect="video"
+          src={`https://www.loom.com/embed/${embedId}`}
+          title="Loom video"
+        />
+      );
+    case "figma":
+      return (
+        <FramedEmbed
+          accentColor="#a259ff"
+          aspect="video"
+          src={`https://www.figma.com/embed?embed_host=strand&url=${encodeURIComponent(url)}`}
+          title="Figma file"
+        />
+      );
+    case "codesandbox":
+      return (
+        <FramedEmbed
+          accentColor="#151515"
+          fixedHeight={500}
+          src={`https://codesandbox.io/embed/${embedId}?view=editor+preview&theme=dark`}
+          title="CodeSandbox embed"
+        />
+      );
+    case "soundcloud":
+      return (
+        <FramedEmbed
+          accentColor="#ff5500"
+          fixedHeight={166}
+          src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23ff5500&auto_play=false`}
+          title="SoundCloud player"
+        />
+      );
+    case "bluesky":
+      return <BlueskyEmbed embedId={embedId} url={url} />;
+    case "google_docs":
+      return (
+        <FramedEmbed
+          accentColor="#1a73e8"
+          fixedHeight={600}
+          src={`https://docs.google.com/document/d/${embedId}/preview`}
+          title="Google Doc"
+        />
+      );
+    case "google_sheets":
+      return (
+        <FramedEmbed
+          accentColor="#0f9d58"
+          fixedHeight={600}
+          src={`https://docs.google.com/spreadsheets/d/${embedId}/preview`}
+          title="Google Sheet"
+        />
+      );
+    case "google_slides":
+      return (
+        <FramedEmbed
+          accentColor="#f4b400"
+          aspect="video"
+          src={`https://docs.google.com/presentation/d/${embedId}/embed`}
+          title="Google Slides"
+        />
+      );
+    case "notion":
+      return (
+        <FramedEmbed
+          accentColor="#191919"
+          fixedHeight={600}
+          src={url}
+          title="Notion page"
+        />
+      );
     default:
       return null;
   }
+}
+
+function FramedEmbed({
+  accentColor,
+  aspect,
+  fixedHeight,
+  src,
+  title,
+}: {
+  accentColor: string;
+  aspect?: "video";
+  fixedHeight?: number;
+  src: string;
+  title: string;
+}) {
+  const [loaded, setLoaded] = useState(false);
+  const wrapperClass = aspect
+    ? "relative mt-4 aspect-video w-full overflow-hidden rounded-xl"
+    : "relative mt-4 w-full overflow-hidden rounded-xl";
+  const wrapperStyle = fixedHeight ? { height: fixedHeight } : undefined;
+
+  return (
+    <div className={wrapperClass} style={wrapperStyle}>
+      {!loaded && (
+        <Card className="absolute inset-0 z-0 p-2 pb-0">
+          <div className="relative h-full w-full overflow-hidden rounded-lg">
+            <FlickeringGrid
+              className="absolute inset-0 z-0 size-full"
+              color={accentColor}
+              flickerChance={0.1}
+              gridGap={6}
+              height={800}
+              maxOpacity={0.5}
+              squareSize={4}
+              width={800}
+            />
+          </div>
+        </Card>
+      )}
+      {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: iframe load detection */}
+      <iframe
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture"
+        allowFullScreen
+        className={`relative z-10 h-full w-full transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}
+        onLoad={() => setLoaded(true)}
+        src={src}
+        title={title}
+      />
+    </div>
+  );
 }
 
 function SpotifyEmbed({ embedId }: { embedId: string }) {
@@ -356,6 +489,145 @@ function GistEmbed({ id }: { id: string }) {
         </div>
       ))}
     </div>
+  );
+}
+
+interface BlueskyPostData {
+  author: { avatar?: string; displayName?: string; handle?: string };
+  createdAt?: string;
+  text: string;
+}
+
+function BlueskyEmbed({ embedId, url }: { embedId: string; url: string }) {
+  const [post, setPost] = useState<BlueskyPostData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const [handle, rkey] = embedId.split("/");
+    if (!(handle && rkey)) {
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const resolveResp = await fetch(
+          `https://public.api.bsky.app/xrpc/com.atproto.identity.resolveHandle?handle=${encodeURIComponent(handle)}`
+        );
+        if (!resolveResp.ok) {
+          return;
+        }
+        const { did } = (await resolveResp.json()) as { did?: string };
+        if (!did) {
+          return;
+        }
+        const uri = `at://${did}/app.bsky.feed.post/${rkey}`;
+        const threadResp = await fetch(
+          `https://public.api.bsky.app/xrpc/app.bsky.feed.getPostThread?uri=${encodeURIComponent(uri)}&depth=0`
+        );
+        if (!threadResp.ok) {
+          return;
+        }
+        const data = (await threadResp.json()) as {
+          thread?: {
+            post?: {
+              author?: {
+                avatar?: string;
+                displayName?: string;
+                handle?: string;
+              };
+              record?: { createdAt?: string; text?: string };
+            };
+          };
+        };
+        const p = data.thread?.post;
+        const text = p?.record?.text;
+        if (!(text && p?.author) || cancelled) {
+          return;
+        }
+        setPost({
+          text,
+          author: p.author,
+          createdAt: p.record?.createdAt,
+        });
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [embedId]);
+
+  if (loading) {
+    return (
+      <Card className="mt-4 p-2 pb-0">
+        <div className="relative h-[180px] w-full overflow-hidden rounded-lg">
+          <FlickeringGrid
+            className="absolute inset-0 z-0 size-full"
+            color="#1185fe"
+            flickerChance={0.1}
+            gridGap={6}
+            height={800}
+            maxOpacity={0.5}
+            squareSize={4}
+            width={800}
+          />
+        </div>
+      </Card>
+    );
+  }
+
+  if (!post) {
+    return null;
+  }
+
+  const handle = post.author.handle ? `@${post.author.handle}` : null;
+
+  return (
+    <a
+      className="mt-4 block rounded-xl border border-ui-border-base p-4 transition-colors hover:bg-ui-bg-subtle"
+      href={url}
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      <div className="flex items-center gap-2">
+        {post.author.avatar ? (
+          <img
+            alt=""
+            className="h-8 w-8 rounded-full"
+            height={32}
+            src={post.author.avatar}
+            width={32}
+          />
+        ) : (
+          <div className="h-8 w-8 rounded-full bg-ui-bg-subtle" />
+        )}
+        <div className="flex min-w-0 flex-col">
+          {post.author.displayName && (
+            <span className="truncate font-medium text-sm text-ui-fg-base">
+              {post.author.displayName}
+            </span>
+          )}
+          {handle && (
+            <span className="truncate text-ui-fg-muted text-xs">{handle}</span>
+          )}
+        </div>
+        <span className="ml-auto font-bold text-[#1185fe] text-xs">
+          Bluesky
+        </span>
+      </div>
+      <p className="mt-3 whitespace-pre-wrap text-sm text-ui-fg-base">
+        {post.text}
+      </p>
+      {post.createdAt && (
+        <span className="mt-2 block text-ui-fg-muted text-xs">
+          {new Date(post.createdAt).toLocaleString()}
+        </span>
+      )}
+    </a>
   );
 }
 
