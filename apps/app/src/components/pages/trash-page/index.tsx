@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@strand/ui/dialog";
 import { Heading } from "@strand/ui/heading";
+import { Text } from "@strand/ui/text";
 import { toastManager } from "@strand/ui/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -96,13 +97,15 @@ function DeleteAllButton({
         <DialogPopup className="max-w-sm!">
           <DialogHeader>
             <div>
-              <DialogTitle>Empty trash?</DialogTitle>
-              <DialogDescription>
-                Every item in the trash will be removed forever. This cannot be
-                undone.
-              </DialogDescription>
+              <DialogTitle className="font-medium text-sm">
+                Empty trash?
+              </DialogTitle>
             </div>
           </DialogHeader>
+          <Text className="p-3">
+            Every item in the trash will be removed forever. This cannot be
+            undone.
+          </Text>
           <DialogFooter>
             <Button
               disabled={isPending}

@@ -141,9 +141,12 @@ export function SearchResults({
 
   if (showSkeleton) {
     return (
-      <div className="flex flex-col gap-y-2 pt-2">
-        {Array.from({ length: 14 }).map((_, i) => (
-          <Skeleton className="h-11 w-full" key={i.toString()} />
+      <div className="flex flex-col gap-y-1 pt-2">
+        <div className="px-1 pb-1">
+          <Skeleton className="h-3 w-20" />
+        </div>
+        {Array.from({ length: 11 }).map((_, i) => (
+          <Skeleton className="h-13 w-full" key={i.toString()} />
         ))}
       </div>
     );

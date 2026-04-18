@@ -361,3 +361,110 @@ export const getResourceIdsForEmbeddings = internalQuery({
     return docs.map((doc) => doc?.resourceId ?? null);
   },
 });
+
+const listOpValidator = v.union(v.literal("is"), v.literal("isNot"));
+const dateOpValidator = v.union(
+  v.literal("before"),
+  v.literal("after"),
+  v.literal("between")
+);
+
+export const listFilteredResourceIds = internalQuery({
+  args: {
+    workspaceId: v.id("workspace"),
+    types: v.optional(
+      v.array(
+        v.union(v.literal("website"), v.literal("note"), v.literal("file"))
+      )
+    ),
+    typesOp: v.optional(listOpValidator),
+    createdBy: v.optional(v.array(v.id("user"))),
+    createdByOp: v.optional(listOpValidator),
+    collectionId: v.optional(v.union(v.id("collection"), v.null())),
+    collectionIdOp: v.optional(listOpValidator),
+    isPinned: v.optional(v.boolean()),
+    isFavorite: v.optional(v.boolean()),
+    isArchived: v.optional(v.boolean()),
+    dateFrom: v.optional(v.number()),
+    dateTo: v.optional(v.number()),
+    dateOp: v.optional(dateOpValidator),
+    limit: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const all = await ctx.db
+      .query("resource")
+      .withIndex("by_workspace", (q) =>
+        q.eq("workspaceId", args.workspaceId).eq("deletedAt", undefined)
+      )
+      .collect();
+
+    const typesOp = args.typesOp ?? "is";
+    const createdByOp = args.createdByOp ?? "is";
+    const collectionOp = args.collectionIdOp ?? "is";
+    const dateOp = args.dateOp ?? "between";
+
+    const filtered = all.filter((r) => {
+      if (args.types && args.types.length > 0) {
+        const matches = args.types.includes(r.type);
+        if (typesOp === "is" && !matches) {
+          return false;
+        }
+        if (typesOp === "isNot" && matches) {
+          return false;
+        }
+      }
+      if (args.createdBy && args.createdBy.length > 0) {
+        const matches = args.createdBy.includes(r.createdBy);
+        if (createdByOp === "is" && !matches) {
+          return false;
+        }
+        if (createdByOp === "isNot" && matches) {
+          return false;
+        }
+      }
+      if (args.isPinned !== undefined && r.isPinned !== args.isPinned) {
+        return false;
+      }
+      if (args.isFavorite !== undefined && r.isFavorite !== args.isFavorite) {
+        return false;
+      }
+      if (args.isArchived !== undefined) {
+        if (r.isArchived !== args.isArchived) {
+          return false;
+        }
+      } else if (r.isArchived) {
+        return false;
+      }
+      if (args.collectionId !== undefined) {
+        const matches =
+          args.collectionId === null
+            ? !r.collectionId
+            : r.collectionId === args.collectionId;
+        if (collectionOp === "is" && !matches) {
+          return false;
+        }
+        if (collectionOp === "isNot" && matches) {
+          return false;
+        }
+      }
+      if (
+        (dateOp === "after" || dateOp === "between") &&
+        args.dateFrom !== undefined &&
+        r._creationTime < args.dateFrom
+      ) {
+        return false;
+      }
+      if (
+        (dateOp === "before" || dateOp === "between") &&
+        args.dateTo !== undefined &&
+        r._creationTime > args.dateTo
+      ) {
+        return false;
+      }
+      return true;
+    });
+
+    filtered.sort((a, b) => b._creationTime - a._creationTime);
+    return filtered.slice(0, args.limit).map((r) => r._id);
+  },
+});

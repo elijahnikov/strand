@@ -7,12 +7,11 @@ import {
   FileStackIcon,
   FolderIcon,
   HashIcon,
-  type LucideIcon,
   SparklesIcon,
   StarIcon,
   UserIcon,
 } from "lucide-react";
-import type { ComponentType } from "react";
+import type { ComponentType, SVGProps } from "react";
 import {
   LIST_OPERATORS,
   type ListOperator,
@@ -25,7 +24,7 @@ import { ConceptPicker } from "./pickers/concept-picker";
 import { CreatedByPicker } from "./pickers/created-by-picker";
 import { TagPicker } from "./pickers/tag-picker";
 import { TypePicker } from "./pickers/type-picker";
-
+import {RemixiconComponentType, RiBardFill, RiBookmarkFill, RiFolder5Fill, RiHashtag, RiStackFill, RiStarFill, RiUserFill } from "@remixicon/react"
 export type FilterId =
   | "type"
   | "concept"
@@ -49,14 +48,14 @@ export interface ChipContent {
   valueLabel: string;
 }
 
+export type FilterIcon = ComponentType<SVGProps<SVGSVGElement>>;
+
 export interface FilterConfig {
-  Icon: LucideIcon;
+  Icon: RemixiconComponentType;
   id: FilterId;
   name: string;
   Picker: ComponentType<PickerProps>;
-  /** Called by FilterChip to render its segments. */
   useChipContent: (workspaceId: Id<"workspace">) => ChipContent;
-  /** Called by FilterBar to decide whether this filter's chip is rendered. */
   useIsActive: () => boolean;
 }
 
@@ -91,7 +90,7 @@ export const FILTER_CONFIGS: FilterConfig[] = [
   {
     id: "type",
     name: "Type",
-    Icon: FileStackIcon,
+    Icon: RiStackFill,
     Picker: TypePicker,
     useIsActive: () => (useSearchFilters().types?.length ?? 0) > 0,
     useChipContent: () => {
@@ -112,7 +111,7 @@ export const FILTER_CONFIGS: FilterConfig[] = [
   {
     id: "concept",
     name: "Concept",
-    Icon: SparklesIcon,
+    Icon: RiBardFill,
     Picker: ConceptPicker,
     useIsActive: () => useSearchFilters().conceptIds.length > 0,
     useChipContent: (workspaceId) => {
@@ -143,7 +142,7 @@ export const FILTER_CONFIGS: FilterConfig[] = [
   {
     id: "tag",
     name: "Tag",
-    Icon: HashIcon,
+    Icon: RiHashtag,
     Picker: TagPicker,
     useIsActive: () => useSearchFilters().tagIds.length > 0,
     useChipContent: (workspaceId) => {
@@ -171,7 +170,7 @@ export const FILTER_CONFIGS: FilterConfig[] = [
   {
     id: "createdBy",
     name: "Created by",
-    Icon: UserIcon,
+    Icon: RiUserFill,
     Picker: CreatedByPicker,
     useIsActive: () => useSearchFilters().createdByIds.length > 0,
     useChipContent: (workspaceId) => {
@@ -199,7 +198,7 @@ export const FILTER_CONFIGS: FilterConfig[] = [
   {
     id: "collection",
     name: "Collection",
-    Icon: FolderIcon,
+    Icon: RiFolder5Fill,
     Picker: CollectionPicker,
     useIsActive: () => useSearchFilters().collectionId !== null,
     useChipContent: (workspaceId) => {
@@ -228,7 +227,7 @@ export const FILTER_CONFIGS: FilterConfig[] = [
   {
     id: "pinned",
     name: "Pinned",
-    Icon: BookmarkIcon,
+    Icon: RiBookmarkFill,
     Picker: (props) => (
       <BooleanPicker
         falseLabel="Not pinned"
@@ -255,7 +254,7 @@ export const FILTER_CONFIGS: FilterConfig[] = [
   {
     id: "favorite",
     name: "Favorite",
-    Icon: StarIcon,
+    Icon: RiStarFill,
     Picker: (props) => (
       <BooleanPicker
         falseLabel="Not favorited"

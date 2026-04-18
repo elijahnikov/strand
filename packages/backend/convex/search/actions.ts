@@ -209,11 +209,22 @@ export const hybridSearch = action({
     const queryTokens = extractQueryTokens(rawQuery);
 
     const hasFreeText = rawQuery.length > 0;
-    const hasHardFilters =
+    const hasAnyFilter =
       (filters.conceptIds?.length ?? 0) > 0 ||
-      (filters.tagIds?.length ?? 0) > 0;
+      (filters.tagIds?.length ?? 0) > 0 ||
+      (filters.types?.length ?? 0) > 0 ||
+      (filters.createdBy?.length ?? 0) > 0 ||
+      filters.collectionId !== undefined ||
+      filters.isPinned !== undefined ||
+      filters.isFavorite !== undefined ||
+      filters.isArchived !== undefined ||
+      filters.hasAI !== undefined ||
+      filters.dateFrom !== undefined ||
+      filters.dateTo !== undefined ||
+      Boolean(filters.sentiment) ||
+      Boolean(filters.language);
 
-    if (!(hasFreeText || hasHardFilters)) {
+    if (!(hasFreeText || hasAnyFilter)) {
       return {
         results: [],
         stats: {
@@ -489,6 +500,52 @@ export const hybridSearch = action({
             candidates.delete(id);
           }
         }
+      }
+    }
+
+    const hasOtherFilter =
+      (filters.types?.length ?? 0) > 0 ||
+      (filters.createdBy?.length ?? 0) > 0 ||
+      filters.collectionId !== undefined ||
+      filters.isPinned !== undefined ||
+      filters.isFavorite !== undefined ||
+      filters.isArchived !== undefined ||
+      filters.hasAI !== undefined ||
+      filters.dateFrom !== undefined ||
+      filters.dateTo !== undefined ||
+      Boolean(filters.sentiment) ||
+      Boolean(filters.language);
+    const hasConceptOrTagFilter =
+      (filters.conceptIds?.length ?? 0) > 0 ||
+      (filters.tagIds?.length ?? 0) > 0;
+
+    if (
+      !hasFreeText &&
+      hasOtherFilter &&
+      !hasConceptOrTagFilter &&
+      candidates.size === 0
+    ) {
+      const filteredIds = (await ctx.runQuery(
+        internal.search.internals.listFilteredResourceIds,
+        {
+          workspaceId: args.workspaceId,
+          types: filters.types,
+          typesOp: filters.typesOp,
+          createdBy: filters.createdBy,
+          createdByOp: filters.createdByOp,
+          collectionId: filters.collectionId,
+          collectionIdOp: filters.collectionIdOp,
+          isPinned: filters.isPinned,
+          isFavorite: filters.isFavorite,
+          isArchived: filters.isArchived,
+          dateFrom: filters.dateFrom,
+          dateTo: filters.dateTo,
+          dateOp: filters.dateOp,
+          limit: Math.max(limit * 2, MAX_LIMIT),
+        }
+      )) as Id<"resource">[];
+      for (const id of filteredIds) {
+        candidates.add(id);
       }
     }
 
