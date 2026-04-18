@@ -6,6 +6,7 @@ interface EditableTextProps {
   autoEdit?: boolean;
   className?: string;
   inputClassName?: string;
+  onCancel?: () => void;
   onClick?: () => void;
   onSave: (value: string) => void;
   value: string;
@@ -14,6 +15,7 @@ interface EditableTextProps {
 export function EditableText({
   value,
   onSave,
+  onCancel,
   onClick,
   className,
   inputClassName,
@@ -49,9 +51,10 @@ export function EditableText({
       setJustSaved(true);
     } else {
       setEditValue(value);
+      onCancel?.();
     }
     setIsEditing(false);
-  }, [editValue, value, onSave]);
+  }, [editValue, value, onSave, onCancel]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -62,9 +65,10 @@ export function EditableText({
         e.preventDefault();
         setEditValue(value);
         setIsEditing(false);
+        onCancel?.();
       }
     },
-    [handleSave, value]
+    [handleSave, value, onCancel]
   );
 
   const handleClick = useCallback(() => {

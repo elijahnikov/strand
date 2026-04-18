@@ -179,6 +179,7 @@ function ThreadItem({
               <EditableText
                 autoEdit
                 className="font-medium text-[13px] text-ui-fg-base"
+                onCancel={() => setIsRenaming(false)}
                 onSave={(title) => {
                   onUpdateTitle(thread._id, title);
                   setIsRenaming(false);
