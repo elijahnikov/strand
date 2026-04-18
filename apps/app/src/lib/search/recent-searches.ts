@@ -35,11 +35,8 @@ function safeStorage(): Storage | null {
   }
 }
 
-function filtersKey(filters: RecentSearchFilterSummary): string {
-  const entries = Object.entries(filters)
-    .filter(([, value]) => value !== undefined && value !== null)
-    .sort(([a], [b]) => a.localeCompare(b));
-  return JSON.stringify(entries);
+function dedupeKey(q: string): string {
+  return q.trim().toLowerCase();
 }
 
 export function loadRecent(workspaceId: string): RecentSearch[] {
@@ -56,7 +53,7 @@ export function loadRecent(workspaceId: string): RecentSearch[] {
     if (!Array.isArray(parsed)) {
       return [];
     }
-    return parsed.filter(
+    const valid = parsed.filter(
       (item): item is RecentSearch =>
         typeof item === "object" &&
         item !== null &&
@@ -64,6 +61,17 @@ export function loadRecent(workspaceId: string): RecentSearch[] {
         typeof item.at === "number" &&
         typeof item.filters === "object"
     );
+    const seen = new Set<string>();
+    const deduped: RecentSearch[] = [];
+    for (const item of valid) {
+      const key = dedupeKey(item.q);
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      deduped.push(item);
+    }
+    return deduped;
   } catch {
     return [];
   }
@@ -83,10 +91,8 @@ export function recordSearch(
     return;
   }
   const current = loadRecent(workspaceId);
-  const key = filtersKey(filters);
-  const deduped = current.filter(
-    (item) => !(item.q === trimmed && filtersKey(item.filters) === key)
-  );
+  const key = dedupeKey(trimmed);
+  const deduped = current.filter((item) => dedupeKey(item.q) !== key);
   const next: RecentSearch[] = [
     { q: trimmed, filters, at: Date.now() },
     ...deduped,

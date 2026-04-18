@@ -113,10 +113,18 @@ export interface HybridSearchResponse {
   usedFallback: boolean;
 }
 
+type ListOp = "is" | "isNot";
+type DateOp = "before" | "after" | "between";
+
 interface FiltersArg {
   collectionId?: Id<"collection"> | null;
+  collectionIdOp?: ListOp;
   conceptIds?: Id<"concept">[];
+  conceptIdsOp?: ListOp;
+  createdBy?: Id<"user">[];
+  createdByOp?: ListOp;
   dateFrom?: number;
+  dateOp?: DateOp;
   dateTo?: number;
   hasAI?: boolean;
   isArchived?: boolean;
@@ -125,16 +133,31 @@ interface FiltersArg {
   language?: string;
   sentiment?: string;
   tagIds?: Id<"tag">[];
+  tagIdsOp?: ListOp;
   types?: Array<"website" | "note" | "file">;
+  typesOp?: ListOp;
 }
+
+const listOpValidator = v.union(v.literal("is"), v.literal("isNot"));
+const dateOpValidator = v.union(
+  v.literal("before"),
+  v.literal("after"),
+  v.literal("between")
+);
 
 const filtersValidator = v.object({
   types: v.optional(
     v.array(v.union(v.literal("website"), v.literal("note"), v.literal("file")))
   ),
+  typesOp: v.optional(listOpValidator),
   conceptIds: v.optional(v.array(v.id("concept"))),
+  conceptIdsOp: v.optional(listOpValidator),
   tagIds: v.optional(v.array(v.id("tag"))),
+  tagIdsOp: v.optional(listOpValidator),
+  createdBy: v.optional(v.array(v.id("user"))),
+  createdByOp: v.optional(listOpValidator),
   collectionId: v.optional(v.union(v.id("collection"), v.null())),
+  collectionIdOp: v.optional(listOpValidator),
   isPinned: v.optional(v.boolean()),
   isFavorite: v.optional(v.boolean()),
   isArchived: v.optional(v.boolean()),
@@ -143,6 +166,7 @@ const filtersValidator = v.object({
   language: v.optional(v.string()),
   dateFrom: v.optional(v.number()),
   dateTo: v.optional(v.number()),
+  dateOp: v.optional(dateOpValidator),
 });
 
 const sortValidator = v.union(
@@ -446,17 +470,22 @@ export const hybridSearch = action({
         internal.search.internals.listResourcesForConcepts,
         { conceptIds: filters.conceptIds ?? [] }
       );
-      const allowed = new Set<Id<"resource">>();
+      const matched = new Set<Id<"resource">>();
       for (const hit of extra) {
-        allowed.add(hit.resourceId);
+        matched.add(hit.resourceId);
       }
-      if (candidates.size === 0 && !hasFreeText) {
-        for (const id of allowed) {
+      const conceptOp: ListOp = filters.conceptIdsOp ?? "is";
+      if (conceptOp === "isNot") {
+        for (const id of matched) {
+          candidates.delete(id);
+        }
+      } else if (candidates.size === 0 && !hasFreeText) {
+        for (const id of matched) {
           candidates.add(id);
         }
       } else {
         for (const id of Array.from(candidates)) {
-          if (!allowed.has(id)) {
+          if (!matched.has(id)) {
             candidates.delete(id);
           }
         }
@@ -471,25 +500,38 @@ export const hybridSearch = action({
           tagIds: filters.tagIds ?? [],
         }
       )) as Set<Id<"resource">>[];
-      const intersection = new Set<Id<"resource">>();
-      if (tagSets.length > 0) {
-        const [first, ...rest] = tagSets;
-        if (first) {
-          for (const id of first) {
-            if (rest.every((s) => s.has(id))) {
-              intersection.add(id);
+      const tagOp: ListOp = filters.tagIdsOp ?? "is";
+      if (tagOp === "isNot") {
+        const union = new Set<Id<"resource">>();
+        for (const set of tagSets) {
+          for (const id of set) {
+            union.add(id);
+          }
+        }
+        for (const id of union) {
+          candidates.delete(id);
+        }
+      } else {
+        const intersection = new Set<Id<"resource">>();
+        if (tagSets.length > 0) {
+          const [first, ...rest] = tagSets;
+          if (first) {
+            for (const id of first) {
+              if (rest.every((s) => s.has(id))) {
+                intersection.add(id);
+              }
             }
           }
         }
-      }
-      if (candidates.size === 0 && !hasFreeText) {
-        for (const id of intersection) {
-          candidates.add(id);
-        }
-      } else {
-        for (const id of Array.from(candidates)) {
-          if (!intersection.has(id)) {
-            candidates.delete(id);
+        if (candidates.size === 0 && !hasFreeText) {
+          for (const id of intersection) {
+            candidates.add(id);
+          }
+        } else {
+          for (const id of Array.from(candidates)) {
+            if (!intersection.has(id)) {
+              candidates.delete(id);
+            }
           }
         }
       }
@@ -696,12 +738,25 @@ function passesFilters(
   if (resource.deletedAt) {
     return false;
   }
-  if (
-    filters.types &&
-    filters.types.length > 0 &&
-    !filters.types.includes(resource.type)
-  ) {
-    return false;
+  if (filters.types && filters.types.length > 0) {
+    const typeOp: ListOp = filters.typesOp ?? "is";
+    const matches = filters.types.includes(resource.type);
+    if (typeOp === "is" && !matches) {
+      return false;
+    }
+    if (typeOp === "isNot" && matches) {
+      return false;
+    }
+  }
+  if (filters.createdBy && filters.createdBy.length > 0) {
+    const createdByOp: ListOp = filters.createdByOp ?? "is";
+    const matches = filters.createdBy.includes(resource.createdBy);
+    if (createdByOp === "is" && !matches) {
+      return false;
+    }
+    if (createdByOp === "isNot" && matches) {
+      return false;
+    }
   }
   if (
     filters.isPinned !== undefined &&
@@ -723,21 +778,31 @@ function passesFilters(
     return false;
   }
   if (filters.collectionId !== undefined) {
-    if (filters.collectionId === null) {
-      if (resource.collectionId) {
-        return false;
-      }
-    } else if (resource.collectionId !== filters.collectionId) {
+    const collectionOp: ListOp = filters.collectionIdOp ?? "is";
+    const matches =
+      filters.collectionId === null
+        ? !resource.collectionId
+        : resource.collectionId === filters.collectionId;
+    if (collectionOp === "is" && !matches) {
+      return false;
+    }
+    if (collectionOp === "isNot" && matches) {
       return false;
     }
   }
+  const dateOp: DateOp = filters.dateOp ?? "between";
   if (
+    (dateOp === "after" || dateOp === "between") &&
     filters.dateFrom !== undefined &&
     resource._creationTime < filters.dateFrom
   ) {
     return false;
   }
-  if (filters.dateTo !== undefined && resource._creationTime > filters.dateTo) {
+  if (
+    (dateOp === "before" || dateOp === "between") &&
+    filters.dateTo !== undefined &&
+    resource._creationTime > filters.dateTo
+  ) {
     return false;
   }
   if (filters.hasAI !== undefined) {

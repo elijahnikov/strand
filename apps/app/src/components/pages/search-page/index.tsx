@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { PageContent } from "~/components/common/page-content";
 import { recordSearch } from "~/lib/search/recent-searches";
 import { LibrarySelectionProvider } from "~/lib/selection/library-selection";
-import { SearchActiveChips, SearchFilterControls } from "./search-filters";
+import { FilterBar } from "./filters/filter-bar";
 import { SearchInput } from "./search-input";
 import { SearchResults } from "./search-results";
 import { SearchSuggestions } from "./search-suggestions";
@@ -21,12 +21,24 @@ export function SearchPageComponent({
     setQ,
     types,
     setTypes,
+    typeOp,
+    setTypeOp,
     conceptIds,
     setConceptIds,
+    conceptOp,
+    setConceptOp,
     tagIds,
     setTagIds,
+    tagOp,
+    setTagOp,
+    createdByIds,
+    setCreatedByIds,
+    createdByOp,
+    setCreatedByOp,
     collectionId,
     setCollectionId,
+    collectionOp,
+    setCollectionOp,
     sort,
     setSort,
     isPinned,
@@ -41,6 +53,8 @@ export function SearchPageComponent({
     setDateFrom,
     dateTo,
     setDateTo,
+    dateOp,
+    setDateOp,
     hasActiveFilters,
   } = filters;
 
@@ -51,9 +65,15 @@ export function SearchPageComponent({
     workspaceId,
     q,
     types,
+    typeOp,
     conceptIds,
+    conceptOp,
     tagIds,
+    tagOp,
+    createdByIds,
+    createdByOp,
     collectionId,
+    collectionOp,
     sort,
     isPinned,
     isFavorite,
@@ -61,6 +81,7 @@ export function SearchPageComponent({
     language,
     dateFrom,
     dateTo,
+    dateOp,
     enabled,
   });
 
@@ -127,9 +148,15 @@ export function SearchPageComponent({
   const handleReset = () => {
     clearAllFilters({
       setTypes,
+      setTypeOp,
       setConceptIds,
+      setConceptOp,
       setTagIds,
+      setTagOp,
+      setCreatedByIds,
+      setCreatedByOp,
       setCollectionId,
+      setCollectionOp,
       setSort,
       setIsPinned,
       setIsFavorite,
@@ -137,6 +164,7 @@ export function SearchPageComponent({
       setLanguage,
       setDateFrom,
       setDateTo,
+      setDateOp,
     });
   };
 
@@ -156,25 +184,14 @@ export function SearchPageComponent({
           value={q}
         />
         <div className="ml-auto flex items-center gap-x-2 overflow-x-auto">
-          <SearchFilterControls
+          <FilterBar
             hasActiveFilters={hasActiveFilters}
             onReset={handleReset}
-            setSort={setSort}
-            setTypes={setTypes}
-            sort={sort}
-            types={types}
+            workspaceId={workspaceId}
           />
         </div>
       </div>
       <PageContent className="pt-14 pb-24 md:pt-2" width="xl:w-3/5">
-        <SearchActiveChips
-          conceptIds={conceptIds}
-          setConceptIds={setConceptIds}
-          setTagIds={setTagIds}
-          tagIds={tagIds}
-          workspaceId={workspaceId}
-        />
-
         {enabled ? (
           <SearchResults
             hasActiveFilters={hasActiveFilters}

@@ -133,12 +133,17 @@ export function SearchSuggestions({
           <div className="mt-3 flex flex-wrap gap-1.5">
             {recent.map((item) => (
               <button
-                className="group flex h-7 items-center gap-x-1.5 rounded-full border-[0.5px] bg-ui-bg-base-hover px-3 text-xs transition-colors hover:bg-ui-bg-component"
+                className="group"
                 key={`${item.q}-${item.at}`}
                 onClick={() => onPickRecent(item)}
                 type="button"
               >
-                <span className="truncate">{item.q}</span>
+                <Badge
+                  className="h-7 cursor-pointer rounded-full px-3 text-xs transition-colors hover:bg-ui-bg-component"
+                  variant="mono"
+                >
+                  {item.q}
+                </Badge>
               </button>
             ))}
           </div>
