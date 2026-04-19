@@ -121,6 +121,7 @@ function InviteForm({ workspaceId }: { workspaceId: Id<"workspace"> }) {
     onError: (err) => {
       setError(getErrorMessage(err));
     },
+    meta: { customErrorToast: true },
   });
 
   const handleSubmit = (e: React.FormEvent) => {

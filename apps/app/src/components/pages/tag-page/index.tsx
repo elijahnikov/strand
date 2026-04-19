@@ -14,6 +14,7 @@ import { useParams } from "@tanstack/react-router";
 import { useAction } from "convex/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { NotFoundState } from "~/components/common/not-found-state";
 import { PageContent } from "~/components/common/page-content";
 import { SelectionDock } from "~/components/common/selection-dock";
 import { ResourceRow } from "~/components/pages/library-page/resource-row";
@@ -154,13 +155,7 @@ export function TagPageComponent() {
   }, [allResources]);
 
   if (!tag) {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <Heading className="font-medium text-sm text-ui-fg-subtle">
-          Tag not found.
-        </Heading>
-      </div>
-    );
+    return <NotFoundState />;
   }
 
   return (

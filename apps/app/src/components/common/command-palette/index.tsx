@@ -137,6 +137,7 @@ export function CommandPalette({
   const { mutate: createResourceMutate, mutateAsync: createResourceAsync } =
     useMutation({
       mutationFn: useConvexMutation(api.resource.mutations.create),
+      meta: { customErrorToast: true },
     });
 
   const { mutateAsync: generateUploadUrl } = useMutation({

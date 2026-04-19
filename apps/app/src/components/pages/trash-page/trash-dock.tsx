@@ -87,6 +87,7 @@ function RestoreButton({
 }) {
   const { mutate, isPending } = useMutation({
     mutationFn: useConvexMutation(api.resource.mutations.restoreMany),
+    meta: { customErrorToast: true },
   });
 
   const handleClick = () => {
@@ -140,6 +141,7 @@ function PurgeButton({
   const [open, setOpen] = useState(false);
   const { mutate, isPending } = useMutation({
     mutationFn: useConvexMutation(api.resource.mutations.purgeMany),
+    meta: { customErrorToast: true },
   });
 
   const handleConfirm = () => {

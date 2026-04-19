@@ -141,7 +141,7 @@ export function SearchResults({
 
   if (showSkeleton) {
     return (
-      <div className="flex flex-col gap-y-1 pt-2">
+      <div className="flex flex-col gap-y-2 pt-2">
         <div className="px-1 pb-1">
           <Skeleton className="h-3 w-20" />
         </div>

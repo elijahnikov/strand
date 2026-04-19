@@ -4,11 +4,11 @@ import {
   useConvexPaginatedQuery,
 } from "@convex-dev/react-query";
 import { DndContext, DragOverlay } from "@dnd-kit/core";
-import { RiPushpinFill } from "@remixicon/react";
+import { RiPushpinFill, RiStackFill } from "@remixicon/react";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { cn } from "@strand/ui";
-import { Heading } from "@strand/ui/heading";
+import { Badge } from "@strand/ui/badge";
 import { Kbd } from "@strand/ui/kbd";
 import { Separator } from "@strand/ui/separator";
 import { Skeleton } from "@strand/ui/skeleton";
@@ -19,6 +19,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { useInView } from "react-intersection-observer";
+import { EmptyState } from "~/components/common/empty-state";
 import { SelectionDock } from "~/components/common/selection-dock";
 import {
   type ListNavItem,
@@ -261,6 +262,12 @@ function ResourceListContent({
     }
   }, [inView, status, loadMore]);
 
+  useEffect(() => {
+    if (status === "CanLoadMore" && unpinnedResults.length < PAGE_SIZE) {
+      loadMore(PAGE_SIZE);
+    }
+  }, [status, unpinnedResults.length, loadMore]);
+
   const filteredCollections = useMemo(() => {
     const collections = childCollections ?? [];
     return collections.filter((c) => {
@@ -403,23 +410,32 @@ function ResourceListContent({
   if (isEmpty) {
     if (search || type) {
       return (
-        <div className="flex flex-col items-center justify-center py-24 text-center">
-          <Heading className="font-medium text-sm text-ui-fg-subtle">
-            No results found.
-          </Heading>
-        </div>
+        <EmptyState
+          description="Try a different search or clear your filter."
+          Icon={RiStackFill}
+          title="No results found"
+        />
       );
     }
 
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <Heading className="font-medium text-sm text-ui-fg-subtle">
-          No resources yet. Paste a URL, text, or file to get started.
-        </Heading>
-        <p className="mt-1 text-ui-fg-muted text-xs">
-          Press <Kbd>Ctrl+V</Kbd> or <Kbd>⌘V</Kbd> anywhere on this page.
-        </p>
-      </div>
+      <EmptyState
+        description={
+          <>
+            Paste a URL, text, or file to get started. Press{" "}
+            <Badge size={"sm"} variant={"mono"}>
+              Ctrl+V
+            </Badge>{" "}
+            or{" "}
+            <Badge size={"sm"} variant={"mono"}>
+              ⌘V
+            </Badge>{" "}
+            anywhere on this page.
+          </>
+        }
+        Icon={RiStackFill}
+        title="No resources yet"
+      />
     );
   }
 

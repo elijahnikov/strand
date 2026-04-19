@@ -2,14 +2,15 @@ import {
   useConvexMutation,
   useConvexPaginatedQuery,
 } from "@convex-dev/react-query";
+import { RiDeleteBinLine } from "@remixicon/react";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { Heading } from "@strand/ui/heading";
 import { Skeleton } from "@strand/ui/skeleton";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useInView } from "react-intersection-observer";
+import { EmptyState } from "~/components/common/empty-state";
 import { ResourceRow } from "~/components/pages/library-page/resource-row";
 import { SelectableRow } from "~/components/pages/library-page/selectable-resource-row";
 import {
@@ -81,11 +82,11 @@ export function TrashList({ workspaceId }: { workspaceId: Id<"workspace"> }) {
 
   if (isEmpty) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <Heading className="font-medium text-sm text-ui-fg-subtle">
-          Trash is empty.
-        </Heading>
-      </div>
+      <EmptyState
+        description="Deleted resources appear here and are permanently removed after 30 days."
+        Icon={RiDeleteBinLine}
+        title="Trash is empty"
+      />
     );
   }
 

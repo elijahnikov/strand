@@ -1,4 +1,5 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
+import { RiChatSmile2Fill } from "@remixicon/react";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { Skeleton } from "@strand/ui/skeleton";
@@ -6,6 +7,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import type { UIMessage } from "ai";
 import { useCallback, useEffect, useRef } from "react";
 import { DotGridLoader } from "~/components/common/dot-grid-loader";
+import { EmptyState } from "~/components/common/empty-state";
+import { NotFoundState } from "~/components/common/not-found-state";
 import { TextShimmer } from "~/components/common/text-shimmer";
 import { useLibraryChat } from "~/hooks/use-library-chat";
 import { ChatInput } from "./chat-input";
@@ -168,6 +171,10 @@ export function ChatArea({
     ]
   );
 
+  if (threadId && !isLoadingThread && !thread) {
+    return <NotFoundState />;
+  }
+
   if (threadId && isLoadingThread) {
     return (
       <div className="flex flex-1 flex-col">
@@ -212,12 +219,11 @@ export function ChatArea({
       <div className="min-h-0 flex-1 overflow-y-auto" ref={scrollRef}>
         <div className="mx-auto flex w-full min-w-0 max-w-2xl flex-col gap-4 px-4 py-8">
           {messages.length === 0 && (
-            <div className="flex flex-1 flex-col items-center justify-center gap-2 py-20">
-              <p className="font-medium text-lg">Ask your library</p>
-              <p className="text-muted-foreground text-sm">
-                Ask questions about your saved resources
-              </p>
-            </div>
+            <EmptyState
+              description="Ask questions about your saved resources."
+              Icon={RiChatSmile2Fill}
+              title="Ask your library"
+            />
           )}
           {messages.map((message, idx) => {
             const isLast = idx === messages.length - 1;

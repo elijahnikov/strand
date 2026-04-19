@@ -1,5 +1,5 @@
 import { convexBetterAuthReactStart } from "@convex-dev/better-auth/react-start";
-import { isAuthError } from "@strand/backend/shared.js";
+import { isUnauthenticatedError } from "@strand/backend/shared.js";
 
 export const {
   handler,
@@ -12,6 +12,6 @@ export const {
   convexSiteUrl: import.meta.env.VITE_CONVEX_SITE_URL,
   jwtCache: {
     enabled: true,
-    isAuthError,
+    isAuthError: isUnauthenticatedError,
   },
 });

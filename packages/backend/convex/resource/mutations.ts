@@ -484,6 +484,35 @@ export const removeMany = workspaceMutation({
   },
 });
 
+async function deleteDerivedArtifacts(
+  ctx: MutationCtx,
+  resourceId: Id<"resource">
+) {
+  const embeddings = await ctx.db
+    .query("resourceEmbedding")
+    .withIndex("by_resource", (q) => q.eq("resourceId", resourceId))
+    .collect();
+  for (const embedding of embeddings) {
+    await ctx.db.delete(embedding._id);
+  }
+
+  const chunks = await ctx.db
+    .query("resourceChunk")
+    .withIndex("by_resource", (q) => q.eq("resourceId", resourceId))
+    .collect();
+  for (const chunk of chunks) {
+    await ctx.db.delete(chunk._id);
+  }
+
+  const conceptLinks = await ctx.db
+    .query("resourceConcept")
+    .withIndex("by_resource", (q) => q.eq("resourceId", resourceId))
+    .collect();
+  for (const link of conceptLinks) {
+    await ctx.db.delete(link._id);
+  }
+}
+
 export const restoreMany = workspaceMutation({
   args: {
     resourceIds: v.array(v.id("resource")),
@@ -530,6 +559,8 @@ async function purgeResource(
   for (const pin of pins) {
     await ctx.db.delete(pin._id);
   }
+
+  await deleteDerivedArtifacts(ctx, resourceId);
 
   await ctx.db.delete(resourceId);
 }

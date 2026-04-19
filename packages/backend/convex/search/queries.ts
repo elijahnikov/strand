@@ -56,6 +56,10 @@ export const listTopConcepts = workspaceQuery({
 
     const counts = new Map<Id<"concept">, { count: number; weight: number }>();
     for (const link of links) {
+      const resource = await ctx.db.get(link.resourceId);
+      if (!resource || resource.deletedAt) {
+        continue;
+      }
       const current = counts.get(link.conceptId) ?? { count: 0, weight: 0 };
       counts.set(link.conceptId, {
         count: current.count + 1,
@@ -117,14 +121,21 @@ export const listTopTags = workspaceQuery({
           q.eq("workspaceId", ctx.workspace._id).eq("tagId", tag._id)
         )
         .collect();
-      if (links.length === 0) {
+      let liveCount = 0;
+      for (const link of links) {
+        const resource = await ctx.db.get(link.resourceId);
+        if (resource && !resource.deletedAt) {
+          liveCount++;
+        }
+      }
+      if (liveCount === 0) {
         continue;
       }
       out.push({
         _id: tag._id,
         name: tag.name,
         color: tag.color,
-        count: links.length,
+        count: liveCount,
       });
     }
 

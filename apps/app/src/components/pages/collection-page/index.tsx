@@ -3,6 +3,7 @@ import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
+import { NotFoundState } from "~/components/common/not-found-state";
 import { useFileDropHandler } from "~/hooks/use-file-drop";
 import { usePasteHandler } from "~/hooks/use-paste-handler";
 import { LibraryToolbar } from "../../pages/library-page/library-toolbar";
@@ -134,7 +135,7 @@ export function CollectionPageComponent({
   useFileDropHandler(handleFiles);
 
   if (!collection) {
-    return null;
+    return <NotFoundState />;
   }
 
   return (

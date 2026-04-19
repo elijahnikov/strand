@@ -2,7 +2,7 @@ import {
   useConvexMutation,
   useConvexPaginatedQuery,
 } from "@convex-dev/react-query";
-import { RiAddLine } from "@remixicon/react";
+import { RiAddLine, RiChatSmile2Fill } from "@remixicon/react";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { cn } from "@strand/ui";
@@ -23,6 +23,7 @@ import { MoreHorizontalIcon, PencilIcon, TrashIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { EditableText } from "~/components/common/editable-text";
+import { EmptyState } from "~/components/common/empty-state";
 import { TextShimmer } from "~/components/common/text-shimmer";
 
 function ThreadListSkeleton() {
@@ -118,9 +119,12 @@ export function ThreadList({
               ))}
             </AnimatePresence>
             {threads.length === 0 && (
-              <div className="px-3 py-6 text-center text-muted-foreground text-sm">
-                No conversations yet
-              </div>
+              <EmptyState
+                className="px-3 py-8"
+                description="Start a new chat to see it here."
+                Icon={RiChatSmile2Fill}
+                title="No conversations yet"
+              />
             )}
           </div>
         )}
