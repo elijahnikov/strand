@@ -3,6 +3,7 @@ import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
+import { NotFoundState } from "~/components/common/not-found-state";
 import { FileResource } from "./resource-types/file-resource";
 import { NoteResource } from "./resource-types/note-resource";
 import { WebsiteResource } from "./resource-types/website-resource";
@@ -20,11 +21,7 @@ export default function Resource() {
   );
 
   if (!resource) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <p className="text-sm text-ui-fg-muted">Resource not found</p>
-      </div>
-    );
+    return <NotFoundState />;
   }
 
   switch (resource.type) {

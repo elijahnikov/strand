@@ -52,6 +52,7 @@ export function ProposeCollectionCard({
 
   const { mutateAsync: createWithResources } = useMutation({
     mutationFn: useConvexMutation(api.collection.mutations.createWithResources),
+    meta: { customErrorToast: true },
   });
 
   const { mutateAsync: updateToolPartOutput } = useMutation({

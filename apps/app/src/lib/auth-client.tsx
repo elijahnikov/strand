@@ -1,7 +1,7 @@
 import { AuthBoundary } from "@convex-dev/better-auth/react";
 import { authClient } from "@strand/auth/client";
 import { api } from "@strand/backend/_generated/api.js";
-import { isAuthError } from "@strand/backend/shared.js";
+import { isUnauthenticatedError } from "@strand/backend/shared.js";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import type { PropsWithChildren } from "react";
 
@@ -12,7 +12,7 @@ export const ClientAuthBoundary = ({ children }: PropsWithChildren) => {
     <AuthBoundary
       authClient={authClient}
       getAuthUserFn={api.user.queries.currentUser}
-      isAuthError={isAuthError}
+      isAuthError={isUnauthenticatedError}
       onUnauth={() => {
         if (
           location.pathname === "/login" ||

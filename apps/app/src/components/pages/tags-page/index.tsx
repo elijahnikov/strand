@@ -1,15 +1,16 @@
 import { useConvexPaginatedQuery } from "@convex-dev/react-query";
+import { RiHashtag } from "@remixicon/react";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { cn } from "@strand/ui";
 import { Badge } from "@strand/ui/badge";
-import { Heading } from "@strand/ui/heading";
 import { Skeleton } from "@strand/ui/skeleton";
 import { Text } from "@strand/ui/text";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef } from "react";
 import { useInView } from "react-intersection-observer";
+import { EmptyState } from "~/components/common/empty-state";
 import { PageContent } from "~/components/common/page-content";
 import {
   type ListNavItem,
@@ -92,13 +93,15 @@ export function TagsPageComponent({
         {isFirstLoad ? (
           <TagsListSkeleton />
         ) : isEmpty ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <Heading className="font-medium text-sm text-ui-fg-subtle">
-              {search
-                ? "No tags found."
-                : "No tags yet. Tags are created when you add them to resources."}
-            </Heading>
-          </div>
+          <EmptyState
+            description={
+              search
+                ? "Try a different search."
+                : "Tags are created when you add them to resources."
+            }
+            Icon={RiHashtag}
+            title={search ? "No tags found" : "No tags yet"}
+          />
         ) : (
           <div className="flex flex-col">
             <AnimatePresence>

@@ -1,8 +1,13 @@
 import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { isAuthError } from "@strand/backend/shared.js";
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { isUnauthenticatedError } from "@strand/backend/shared.js";
+import {
+  createFileRoute,
+  isRedirect,
+  Outlet,
+  redirect,
+} from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_workspace/workspace/$workspaceId")({
   loader: async ({ context, params }) => {
@@ -13,10 +18,13 @@ export const Route = createFileRoute("/_workspace/workspace/$workspaceId")({
         })
       );
     } catch (error) {
-      if (isAuthError(error)) {
+      if (isRedirect(error)) {
+        throw error;
+      }
+      if (isUnauthenticatedError(error)) {
         throw redirect({ to: "/login" });
       }
-      throw redirect({ to: "/" });
+      throw redirect({ to: "/404" });
     }
   },
   component: WorkspaceLayout,

@@ -5,7 +5,6 @@ import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { Button } from "@strand/ui/button";
 import {
   Dialog,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogPopup,
@@ -58,6 +57,7 @@ function DeleteAllButton({
   const [open, setOpen] = useState(false);
   const { mutate, isPending } = useMutation({
     mutationFn: useConvexMutation(api.resource.mutations.purgeAllTrashed),
+    meta: { customErrorToast: true },
   });
 
   const handleConfirm = () => {

@@ -24,7 +24,6 @@ import {
 } from "@strand/ui/command";
 import {
   Dialog,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogPopup,
@@ -36,7 +35,7 @@ import { Skeleton } from "@strand/ui/skeleton";
 import { Text } from "@strand/ui/text";
 import { toastManager } from "@strand/ui/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { FolderIcon, MoreHorizontalIcon, TrashIcon } from "lucide-react";
+import { FolderIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { Fragment, useMemo, useState } from "react";
 import { useLibrarySelection } from "~/lib/selection/library-selection";
@@ -142,16 +141,19 @@ function MoveButton({
       mutationFn: useConvexMutation(
         api.resource.mutations.moveManyToCollection
       ),
+      meta: { customErrorToast: true },
     });
   const {
     mutateAsync: moveCollectionsAsync,
     isPending: moveCollectionsPending,
   } = useMutation({
     mutationFn: useConvexMutation(api.collection.mutations.moveMany),
+    meta: { customErrorToast: true },
   });
   const { mutateAsync: createCollectionAsync, isPending: createIsPending } =
     useMutation({
       mutationFn: useConvexMutation(api.collection.mutations.create),
+      meta: { customErrorToast: true },
     });
 
   const trimmedQuery = query.trim();
@@ -374,6 +376,7 @@ function PinButton({
 
   const { mutate, isPending } = useMutation({
     mutationFn: useConvexMutation(api.resource.mutations.togglePinMany),
+    meta: { customErrorToast: true },
   });
 
   const handleClick = () => {
@@ -430,12 +433,14 @@ function DeleteButton({
     isPending: removeResourcesPending,
   } = useMutation({
     mutationFn: useConvexMutation(api.resource.mutations.removeMany),
+    meta: { customErrorToast: true },
   });
   const {
     mutateAsync: removeCollectionsAsync,
     isPending: removeCollectionsPending,
   } = useMutation({
     mutationFn: useConvexMutation(api.collection.mutations.removeMany),
+    meta: { customErrorToast: true },
   });
 
   const totalCount = resourceIds.length + collectionIds.length;
