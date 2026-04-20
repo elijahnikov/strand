@@ -521,7 +521,7 @@ function SnippetLine({ html }: { html: string }) {
   );
 }
 
-function WebsiteIcon({ favicon }: { favicon?: string | null }) {
+export function WebsiteIcon({ favicon }: { favicon?: string | null }) {
   if (favicon) {
     return (
       <img
@@ -560,7 +560,7 @@ function GlobeIcon() {
   );
 }
 
-function NoteIcon() {
+export function NoteIcon() {
   return (
     <svg
       aria-hidden="true"

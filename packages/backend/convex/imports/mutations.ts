@@ -26,6 +26,7 @@ const OPTIONS = v.object({
 export const startImport = workspaceMutation({
   args: {
     source: SOURCE_UNION,
+    uiSourceId: v.optional(v.string()),
     storageId: v.optional(v.id("_storage")),
     connectionId: v.optional(v.id("connection")),
     options: v.optional(OPTIONS),
@@ -39,6 +40,7 @@ export const startImport = workspaceMutation({
       workspaceId: ctx.workspace._id,
       userId: ctx.user._id,
       source: args.source,
+      uiSourceId: args.uiSourceId,
       status: "queued",
       storageId: args.storageId,
       connectionId: args.connectionId,

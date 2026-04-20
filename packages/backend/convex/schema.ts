@@ -436,6 +436,7 @@ export default defineSchema({
       v.literal("notion_oauth"),
       v.literal("raindrop_oauth")
     ),
+    uiSourceId: v.optional(v.string()),
     status: v.union(
       v.literal("uploading"),
       v.literal("queued"),

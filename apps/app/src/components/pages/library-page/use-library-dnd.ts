@@ -35,7 +35,7 @@ export interface ActiveDragItem {
 }
 
 export interface DropTargetData {
-  collectionId: Id<"collection">;
+  collectionId?: Id<"collection">;
 }
 
 export function useLibraryDnd(workspaceId: Id<"workspace">) {
@@ -124,7 +124,7 @@ export function useLibraryDnd(workspaceId: Id<"workspace">) {
 
       if (batch) {
         // Multi-drag: block dropping a collection into itself
-        if (batch.collectionIds.includes(targetId)) {
+        if (targetId && batch.collectionIds.includes(targetId)) {
           return;
         }
         const ids: string[] = [...batch.resourceIds, ...batch.collectionIds];

@@ -3,7 +3,12 @@ import {
   useConvexMutation,
   useConvexPaginatedQuery,
 } from "@convex-dev/react-query";
-import { DndContext, DragOverlay } from "@dnd-kit/core";
+import {
+  DndContext,
+  DragOverlay,
+  type Modifier,
+  pointerWithin,
+} from "@dnd-kit/core";
 import { RiPushpinFill, RiStackFill } from "@remixicon/react";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
@@ -16,7 +21,14 @@ import { toastManager } from "@strand/ui/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  memo,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import { useInView } from "react-intersection-observer";
 import { EmptyState } from "~/components/common/empty-state";
 import { SelectionDock } from "~/components/common/selection-dock";
@@ -39,6 +51,26 @@ import { useLibraryDnd } from "./use-library-dnd";
 
 const PAGE_SIZE = 20;
 
+const snapCenterToCursor: Modifier = ({
+  activatorEvent,
+  draggingNodeRect,
+  transform,
+}) => {
+  if (!(draggingNodeRect && activatorEvent)) {
+    return transform;
+  }
+  const pointer = activatorEvent as PointerEvent;
+  const offsetX =
+    pointer.clientX - draggingNodeRect.left - draggingNodeRect.width / 2;
+  const offsetY =
+    pointer.clientY - draggingNodeRect.top - draggingNodeRect.height / 2;
+  return {
+    ...transform,
+    x: transform.x + offsetX,
+    y: transform.y + offsetY,
+  };
+};
+
 type ListItem =
   | {
       kind: "collection";
@@ -56,6 +88,7 @@ type ListItem =
 
 interface ResourceListProps {
   collectionId?: Id<"collection">;
+  header?: ReactNode;
   onClearBatch: (batchId: string) => void;
   onClearPendingCollection?: () => void;
   pendingCollection?: { id: string; name: string } | null;
@@ -78,6 +111,7 @@ function ResourceListContent({
   collectionId,
   pendingCollection,
   onClearPendingCollection,
+  header,
 }: {
   uploadingFiles: { id: string; name: string; batchId: string }[];
   onClearBatch: (batchId: string) => void;
@@ -85,6 +119,7 @@ function ResourceListContent({
   collectionId?: Id<"collection">;
   pendingCollection?: { id: string; name: string } | null;
   onClearPendingCollection?: () => void;
+  header?: ReactNode;
 }) {
   const {
     sensors,
@@ -408,184 +443,194 @@ function ResourceListContent({
     return items;
   }, [hasPinned, serverPinned, mergedList]);
 
-  if (isFirstLoad) {
-    return <ResourceListSkeleton />;
-  }
+  const renderBody = () => {
+    if (isFirstLoad) {
+      return <ResourceListSkeleton />;
+    }
 
-  if (isEmpty) {
-    if (search || type) {
+    if (isEmpty) {
+      if (search || type) {
+        return (
+          <EmptyState
+            description="Try a different search or clear your filter."
+            Icon={RiStackFill}
+            title="No results found"
+          />
+        );
+      }
+
       return (
         <EmptyState
-          description="Try a different search or clear your filter."
+          description={
+            <>
+              Paste a URL, text, or file to get started. Press{" "}
+              <Badge size={"sm"} variant={"mono"}>
+                Ctrl+V
+              </Badge>{" "}
+              or{" "}
+              <Badge size={"sm"} variant={"mono"}>
+                ⌘V
+              </Badge>{" "}
+              anywhere on this page.
+            </>
+          }
           Icon={RiStackFill}
-          title="No results found"
+          title="No resources yet"
         />
       );
     }
 
-    return (
-      <EmptyState
-        description={
-          <>
-            Paste a URL, text, or file to get started. Press{" "}
-            <Badge size={"sm"} variant={"mono"}>
-              Ctrl+V
-            </Badge>{" "}
-            or{" "}
-            <Badge size={"sm"} variant={"mono"}>
-              ⌘V
-            </Badge>{" "}
-            anywhere on this page.
-          </>
-        }
-        Icon={RiStackFill}
-        title="No resources yet"
-      />
-    );
-  }
+    return null;
+  };
+
+  const bodyOverride = renderBody();
 
   return (
     <>
-      <SelectAllRegister items={orderedItems} />
+      {bodyOverride === null && <SelectAllRegister items={orderedItems} />}
       <DndContext
+        collisionDetection={pointerWithin}
         onDragCancel={onDragCancel}
         onDragEnd={onDragEnd}
         onDragStart={onDragStart}
         sensors={sensors}
       >
-        <div className="flex flex-col gap-y-1">
-          {hasPinned && (
-            <>
-              <div className="ml-4 flex items-center gap-x-1">
-                <RiPushpinFill className="size-4 shrink-0 text-ui-fg-muted" />
-                <Text className="font-medium text-sm text-ui-fg-muted">
-                  Pinned
-                </Text>
-              </div>
-              <AnimatePresence>
-                {serverPinned.map((resource) => {
-                  const navId = `pinned-${resource._id}`;
-                  return (
-                    <SelectableRow
-                      item={{ kind: "resource", id: resource._id }}
-                      key={resource._id}
-                      orderedItems={orderedItems}
-                    >
-                      <div
-                        className={cn(
-                          "rounded-lg",
-                          activeId === navId &&
-                            "ring-2 ring-ui-fg-interactive ring-inset"
-                        )}
-                        data-nav-active={activeId === navId}
+        {header}
+        {bodyOverride ?? (
+          <div className="flex flex-col gap-y-1">
+            {hasPinned && (
+              <>
+                <div className="ml-4 flex items-center gap-x-1">
+                  <RiPushpinFill className="size-4 shrink-0 text-ui-fg-muted" />
+                  <Text className="font-medium text-sm text-ui-fg-muted">
+                    Pinned
+                  </Text>
+                </div>
+                <AnimatePresence>
+                  {serverPinned.map((resource) => {
+                    const navId = `pinned-${resource._id}`;
+                    return (
+                      <SelectableRow
+                        item={{ kind: "resource", id: resource._id }}
+                        key={resource._id}
+                        orderedItems={orderedItems}
                       >
-                        <MemoizedResourceItem
-                          handleDelete={handleDelete}
-                          handleTogglePin={handleTogglePin}
-                          handleUpdateTitle={handleUpdateTitle}
-                          index={0}
-                          initialLoadDone
-                          isPinned
-                          resource={resource}
-                          workspaceId={workspaceId}
-                        />
-                      </div>
-                    </SelectableRow>
-                  );
-                })}
-              </AnimatePresence>
-              <Separator className="my-1 h-[0.5px]!" />
-            </>
-          )}
-          {pendingCollection && (
-            <CollectionRow
-              autoEdit
-              collection={{
-                _id: pendingCollection.id as Id<"collection">,
-                name: pendingCollection.name,
-                _creationTime: Date.now(),
-              }}
-              workspaceId={workspaceId}
-            />
-          )}
-          {uploadingFiles.map((file) => (
-            <UploadingFileRow fileName={file.name} key={file.id} />
-          ))}
-          <AnimatePresence>
-            {mergedList.map((item, i) => {
-              const navId =
-                item.kind === "collection"
-                  ? `col-${item.collection._id}`
-                  : `res-${item.resource._id}`;
-              const isActive = activeId === navId;
-              return item.kind === "collection" ? (
-                <SelectableRow
-                  item={{ kind: "collection", id: item.collection._id }}
-                  key={`col-${item.collection._id}`}
-                  orderedItems={orderedItems}
-                >
-                  <motion.div
-                    animate={{ opacity: 1, y: 0 }}
-                    className={cn(
-                      "rounded-lg",
-                      isActive && "ring-2 ring-ui-fg-interactive ring-inset"
-                    )}
-                    data-nav-active={isActive}
-                    exit={{ opacity: 0, height: 0 }}
-                    initial={
-                      initialLoadDone.current ? false : { opacity: 0, y: 8 }
-                    }
-                    transition={{
-                      type: "spring",
-                      stiffness: 500,
-                      damping: 35,
-                      delay: initialLoadDone.current ? 0 : i * 0.03,
-                    }}
+                        <div
+                          className={cn(
+                            "rounded-lg",
+                            activeId === navId &&
+                              "ring-2 ring-ui-fg-interactive ring-inset"
+                          )}
+                          data-nav-active={activeId === navId}
+                        >
+                          <MemoizedResourceItem
+                            handleDelete={handleDelete}
+                            handleTogglePin={handleTogglePin}
+                            handleUpdateTitle={handleUpdateTitle}
+                            index={0}
+                            initialLoadDone
+                            isPinned
+                            resource={resource}
+                            workspaceId={workspaceId}
+                          />
+                        </div>
+                      </SelectableRow>
+                    );
+                  })}
+                </AnimatePresence>
+                <Separator className="my-1 h-[0.5px]!" />
+              </>
+            )}
+            {pendingCollection && (
+              <CollectionRow
+                autoEdit
+                collection={{
+                  _id: pendingCollection.id as Id<"collection">,
+                  name: pendingCollection.name,
+                  _creationTime: Date.now(),
+                }}
+                workspaceId={workspaceId}
+              />
+            )}
+            {uploadingFiles.map((file) => (
+              <UploadingFileRow fileName={file.name} key={file.id} />
+            ))}
+            <AnimatePresence>
+              {mergedList.map((item, i) => {
+                const navId =
+                  item.kind === "collection"
+                    ? `col-${item.collection._id}`
+                    : `res-${item.resource._id}`;
+                const isActive = activeId === navId;
+                return item.kind === "collection" ? (
+                  <SelectableRow
+                    item={{ kind: "collection", id: item.collection._id }}
+                    key={`col-${item.collection._id}`}
+                    orderedItems={orderedItems}
                   >
-                    <CollectionRow
-                      collection={item.collection}
-                      workspaceId={workspaceId}
-                    />
-                  </motion.div>
-                </SelectableRow>
-              ) : (
-                <SelectableRow
-                  item={{ kind: "resource", id: item.resource._id }}
-                  key={item.resource._id}
-                  orderedItems={orderedItems}
-                >
-                  <div
-                    className={cn(
-                      "rounded-lg",
-                      isActive && "ring-2 ring-ui-fg-interactive ring-inset"
-                    )}
-                    data-nav-active={isActive}
+                    <motion.div
+                      animate={{ opacity: 1, y: 0 }}
+                      className={cn(
+                        "rounded-lg",
+                        isActive && "ring-2 ring-ui-fg-interactive ring-inset"
+                      )}
+                      data-nav-active={isActive}
+                      exit={{ opacity: 0, height: 0 }}
+                      initial={
+                        initialLoadDone.current ? false : { opacity: 0, y: 8 }
+                      }
+                      transition={{
+                        type: "spring",
+                        stiffness: 500,
+                        damping: 35,
+                        delay: initialLoadDone.current ? 0 : i * 0.03,
+                      }}
+                    >
+                      <CollectionRow
+                        collection={item.collection}
+                        workspaceId={workspaceId}
+                      />
+                    </motion.div>
+                  </SelectableRow>
+                ) : (
+                  <SelectableRow
+                    item={{ kind: "resource", id: item.resource._id }}
+                    key={item.resource._id}
+                    orderedItems={orderedItems}
                   >
-                    <MemoizedResourceItem
-                      handleDelete={handleDelete}
-                      handleTogglePin={handleTogglePin}
-                      handleUpdateTitle={handleUpdateTitle}
-                      index={i}
-                      initialLoadDone={initialLoadDone.current}
-                      isPinned={false}
-                      resource={item.resource}
-                      workspaceId={workspaceId}
-                    />
-                  </div>
-                </SelectableRow>
-              );
-            })}
-          </AnimatePresence>
-          <div className="h-px" ref={loadMoreRef} />
-          {status === "LoadingMore" && <LoadingMoreSkeleton />}
-        </div>
-        <DragOverlay dropAnimation={null}>
+                    <div
+                      className={cn(
+                        "rounded-lg",
+                        isActive && "ring-2 ring-ui-fg-interactive ring-inset"
+                      )}
+                      data-nav-active={isActive}
+                    >
+                      <MemoizedResourceItem
+                        handleDelete={handleDelete}
+                        handleTogglePin={handleTogglePin}
+                        handleUpdateTitle={handleUpdateTitle}
+                        index={i}
+                        initialLoadDone={initialLoadDone.current}
+                        isPinned={false}
+                        resource={item.resource}
+                        workspaceId={workspaceId}
+                      />
+                    </div>
+                  </SelectableRow>
+                );
+              })}
+            </AnimatePresence>
+            <div className="h-px" ref={loadMoreRef} />
+            {status === "LoadingMore" && <LoadingMoreSkeleton />}
+          </div>
+        )}
+        <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
           {activeItem ? (
             <LibraryDragOverlay item={activeItem} workspaceId={workspaceId} />
           ) : null}
         </DragOverlay>
       </DndContext>
-      <SelectionDock workspaceId={workspaceId} />
+      {bodyOverride === null && <SelectionDock workspaceId={workspaceId} />}
     </>
   );
 }

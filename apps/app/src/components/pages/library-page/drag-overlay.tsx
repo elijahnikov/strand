@@ -1,17 +1,22 @@
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { FolderIcon } from "lucide-react";
-import { EditableText } from "~/components/common/editable-text";
-import { ResourceRowInner } from "./resource-row";
+import { motion } from "motion/react";
+import { FileKindIcon } from "~/components/common/file-kind-icon";
+import { NoteIcon, WebsiteIcon } from "./resource-row";
 import type { ActiveDragItem } from "./use-library-dnd";
 
-const MAX_STACK_LAYERS = 4;
+const MAX_STACK_LAYERS = 3;
 
-// biome-ignore lint/suspicious/noEmptyBlockStatements: intentional no-op for static overlay
-const noop = () => {};
+type ResourceLike = {
+  type?: "website" | "note" | "file";
+  website?: { favicon?: string | null } | null;
+  file?: { fileName?: string; mimeType?: string } | null;
+  fileUrl?: string | null;
+};
 
 export function LibraryDragOverlay({
   item,
-  workspaceId,
+  workspaceId: _workspaceId,
 }: {
   item: ActiveDragItem;
   workspaceId: Id<"workspace">;
@@ -20,75 +25,80 @@ export function LibraryDragOverlay({
   const totalCount = batch
     ? batch.resourceIds.length + batch.collectionIds.length
     : 1;
+  const stackDepth = batch ? Math.min(totalCount - 1, MAX_STACK_LAYERS) : 0;
 
   return (
-    <div className="relative">
-      {batch && totalCount > 1 ? (
-        <>
-          <div className="absolute -top-2 -right-2 z-30 flex h-5 min-w-5 items-center justify-center rounded-full bg-ui-fg-interactive px-1.5 font-medium text-[11px] text-white">
-            {totalCount}
-          </div>
-          {Array.from({ length: Math.min(totalCount - 1, MAX_STACK_LAYERS) })
-            .map((_, i) => i + 1)
-            .reverse()
-            .map((depth) => (
-              <div
-                className="absolute top-0 right-0 left-0 rounded-lg border-[0.5px] bg-ui-bg-component"
-                key={`stack-${depth}`}
-                style={{
-                  height: `calc(100% - ${depth * 4}px)`,
-                  transform: `translateY(${depth * 10}px) scale(${1 - depth * 0.03})`,
-                }}
-              />
-            ))}
-        </>
-      ) : null}
-      <div className="relative rounded-lg border-[0.5px] bg-ui-bg-component">
-        {data.type === "collection" ? (
-          <CollectionOverlayRow collection={data.collection} />
-        ) : (
-          <ResourceRowInner
-            isPinned={false}
-            onTogglePin={noop}
-            onUpdateTitle={noop}
-            resource={
-              data.resource as Parameters<
-                typeof ResourceRowInner
-              >[0]["resource"]
-            }
-            workspaceId={workspaceId}
+    <motion.div
+      animate={{ opacity: 1, scale: 1 }}
+      className="pointer-events-none relative h-10 w-10"
+      initial={{ opacity: 0, scale: 0.4 }}
+      transition={{ type: "spring", duration: 0.3, bounce: 0 }}
+    >
+      {Array.from({ length: stackDepth })
+        .map((_, i) => stackDepth - i)
+        .map((depth) => (
+          <div
+            className="absolute inset-0 rounded-lg border-[0.5px] bg-ui-bg-component shadow-sm"
+            key={`stack-${depth}`}
+            style={{
+              transform: `translate(${depth * 3}px, ${depth * 3}px) scale(${1 - depth * 0.04})`,
+              opacity: 1 - depth * 0.2,
+            }}
           />
-        )}
+        ))}
+      <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-lg border-[0.5px] bg-ui-bg-component text-ui-fg-base shadow-sm">
+        <OverlayIcon data={data} />
       </div>
-    </div>
+      {batch && totalCount > 1 ? (
+        <div className="-top-1.5 -right-1.5 absolute z-30 flex h-5 min-w-5 items-center justify-center rounded-full bg-ui-fg-interactive px-1.5 font-medium text-[11px] text-white shadow-sm">
+          {totalCount}
+        </div>
+      ) : null}
+    </motion.div>
   );
 }
 
-function CollectionOverlayRow({
-  collection,
-}: {
-  collection: {
-    name: string;
-    icon?: string | null;
-  };
-}) {
-  return (
-    <div className="group relative flex items-center gap-3 rounded-lg bg-ui-bg-base px-3 py-2">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-ui-bg-subtle text-ui-fg-muted">
-        {collection.icon ? (
-          <span className="text-sm">{collection.icon}</span>
-        ) : (
-          <FolderIcon className="h-4 w-4" />
-        )}
-      </div>
-      <div className="flex min-w-0 flex-1 flex-col">
-        <EditableText
-          className="font-medium text-sm text-ui-fg-base"
-          onClick={noop}
-          onSave={noop}
-          value={collection.name}
+function OverlayIcon({ data }: { data: ActiveDragItem["data"] }) {
+  if (data.type === "collection") {
+    if (data.collection.icon) {
+      return (
+        <span className="text-lg leading-none">{data.collection.icon}</span>
+      );
+    }
+    return <FolderIcon className="h-4 w-4 text-ui-fg-muted" />;
+  }
+
+  const resource = data.resource as ResourceLike;
+
+  if (resource.type === "website") {
+    return <WebsiteIcon favicon={resource.website?.favicon} />;
+  }
+  if (resource.type === "note") {
+    return (
+      <span className="text-ui-fg-muted">
+        <NoteIcon />
+      </span>
+    );
+  }
+  if (resource.type === "file") {
+    const isImage = resource.file?.mimeType?.startsWith("image/");
+    if (isImage && resource.fileUrl) {
+      return (
+        <img
+          alt=""
+          className="h-full w-full object-cover"
+          height={40}
+          src={resource.fileUrl}
+          width={40}
         />
-      </div>
-    </div>
-  );
+      );
+    }
+    return (
+      <FileKindIcon
+        fileName={resource.file?.fileName}
+        mimeType={resource.file?.mimeType}
+      />
+    );
+  }
+  return <FolderIcon className="h-4 w-4 text-ui-fg-muted" />;
 }
