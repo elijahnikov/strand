@@ -9,7 +9,7 @@ import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { useQuery } from "@tanstack/react-query";
 import { FolderIcon } from "lucide-react";
-import { getFileLabel } from "~/lib/format";
+import { FileKindIcon } from "~/components/common/file-kind-icon";
 import type { WorkspaceTab } from "~/lib/workspace-tabs-store";
 
 interface TabIconProps {
@@ -107,9 +107,11 @@ function ResourceTabIcon({
       );
     }
     return (
-      <span className="flex h-3.5 shrink-0 items-center rounded-[2px] bg-ui-bg-subtle px-0.5 font-semibold text-[8px] text-ui-fg-muted leading-none">
-        {getFileLabel(resource.file?.mimeType ?? undefined)}
-      </span>
+      <FileKindIcon
+        className="size-3.5 shrink-0"
+        fileName={resource.file?.fileName}
+        mimeType={resource.file?.mimeType}
+      />
     );
   }
 

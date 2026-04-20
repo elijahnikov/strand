@@ -19,6 +19,7 @@ import {
   type SelectionItem,
   useSelectAllHotkey,
 } from "~/lib/selection/library-selection";
+import { closeResourceTabs } from "~/lib/workspace-tabs-store";
 import { ResourceRow } from "../library-page/resource-row";
 import { SelectableRow } from "../library-page/selectable-resource-row";
 import { SearchEmpty } from "./search-empty";
@@ -92,9 +93,15 @@ export function SearchResults({
     },
     [togglePin, workspaceId]
   );
+  const navigate = useNavigate();
+
   const handleDelete = useCallback(
     (resourceId: Id<"resource">) => {
       removeMany({ workspaceId, resourceIds: [resourceId] });
+      const { nextUrl } = closeResourceTabs(workspaceId, [resourceId]);
+      if (nextUrl) {
+        navigate({ to: nextUrl });
+      }
       toastManager.add({
         type: "success",
         title: "Deleted",
@@ -106,7 +113,7 @@ export function SearchResults({
         },
       });
     },
-    [removeMany, restoreMany, workspaceId]
+    [removeMany, restoreMany, workspaceId, navigate]
   );
 
   const orderedItems = useMemo<SelectionItem[]>(
@@ -118,7 +125,6 @@ export function SearchResults({
     [results]
   );
 
-  const navigate = useNavigate();
   const navItems = useMemo<ListNavItem[]>(
     () =>
       (results ?? []).map((r) => ({

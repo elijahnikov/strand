@@ -6,6 +6,7 @@ import { Heading } from "@strand/ui/heading";
 import { Text } from "@strand/ui/text";
 import { toastManager } from "@strand/ui/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { SparklesIcon, XIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CollapsibleSection } from "~/components/common/collapsible-section";
@@ -15,6 +16,7 @@ import {
   loadRecent,
   type RecentSearch,
 } from "~/lib/search/recent-searches";
+import { closeResourceTabs } from "~/lib/workspace-tabs-store";
 
 export function SearchSuggestions({
   workspaceId,
@@ -82,9 +84,15 @@ export function SearchSuggestions({
     },
     [togglePin, workspaceId]
   );
+  const navigate = useNavigate();
+
   const handleDelete = useCallback(
     (resourceId: Id<"resource">) => {
       removeMany({ workspaceId, resourceIds: [resourceId] });
+      const { nextUrl } = closeResourceTabs(workspaceId, [resourceId]);
+      if (nextUrl) {
+        navigate({ to: nextUrl });
+      }
       toastManager.add({
         type: "success",
         title: "Deleted",
@@ -96,7 +104,7 @@ export function SearchSuggestions({
         },
       });
     },
-    [removeMany, restoreMany, workspaceId]
+    [removeMany, restoreMany, workspaceId, navigate]
   );
 
   const showFallbackBanner =

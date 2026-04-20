@@ -10,11 +10,11 @@ import { useHotkey } from "@tanstack/react-hotkeys";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { format } from "date-fns";
-import { FileIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useState } from "react";
 import { DotGridLoader } from "~/components/common/dot-grid-loader";
 import { EditableText } from "~/components/common/editable-text";
+import { FileKindIcon } from "~/components/common/file-kind-icon";
 import { MiddleTruncate } from "~/components/common/middle-truncate";
 import { ShortcutTooltipBody } from "~/components/common/shortcut-tooltip";
 import { UserAvatar } from "~/components/common/user-avatar";
@@ -179,7 +179,11 @@ function TypeBadge({ resource }: { resource: GetResourceData }) {
       }
       return (
         <Badge className="max-w-[460px] text-xs" variant="mono">
-          <FileIcon className="h-3.5 w-3.5 shrink-0" />
+          <FileKindIcon
+            className="h-3.5 w-3.5 shrink-0"
+            fileName={file.fileName}
+            mimeType={file.mimeType}
+          />
           <span className="min-w-0 flex-1">
             <MiddleTruncate text={file.fileName} />
           </span>

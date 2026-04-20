@@ -15,7 +15,7 @@ export interface WorkspaceTab {
 interface TabsState {
   activeByWorkspace: Record<string, string | undefined>;
   clearActive: (workspaceId: string) => void;
-  closeAll: (workspaceId: string) => { nextUrl: string };
+  closeAll: (workspaceId: string) => { nextUrl: string | null };
   closeOthers: (
     workspaceId: string,
     keepId: string
@@ -158,6 +158,7 @@ export const useWorkspaceTabs = create<TabsState>()(
 
       closeAll: (workspaceId) => {
         const state = get();
+        const hadActive = state.activeByWorkspace[workspaceId] !== undefined;
         set({
           tabsByWorkspace: {
             ...state.tabsByWorkspace,
@@ -168,7 +169,7 @@ export const useWorkspaceTabs = create<TabsState>()(
             [workspaceId]: undefined,
           },
         });
-        return { nextUrl: `/workspace/${workspaceId}` };
+        return { nextUrl: hadActive ? `/workspace/${workspaceId}` : null };
       },
 
       setActive: (workspaceId, id) => {
@@ -241,6 +242,21 @@ export const useWorkspaceTabs = create<TabsState>()(
     }
   )
 );
+
+export function closeResourceTabs(
+  workspaceId: string,
+  resourceIds: string[]
+): { nextUrl: string | null } {
+  const { closeTab } = useWorkspaceTabs.getState();
+  let nextUrl: string | null = null;
+  for (const resourceId of resourceIds) {
+    const result = closeTab(workspaceId, `resource:${resourceId}`);
+    if (result.wasActive) {
+      nextUrl = result.nextUrl;
+    }
+  }
+  return { nextUrl };
+}
 
 export function useWorkspaceTabsHydrated() {
   const [hydrated, setHydrated] = useState(false);

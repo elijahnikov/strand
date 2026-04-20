@@ -7,6 +7,7 @@ import {
   DialogPortal,
   DialogTrigger,
 } from "@strand/ui/dialog";
+import { FlickeringGrid } from "@strand/ui/flickering-grid";
 import { DownloadIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
@@ -107,8 +108,26 @@ export function PdfPreviewDialog({
             </DialogPrimitive.Close>
           </div>
           <div className="pointer-events-none relative z-10 flex-1 overflow-y-auto">
+            {numPages === 0 && (
+              <div className="pointer-events-none absolute inset-0 flex items-start justify-center pt-4 pb-8">
+                <div
+                  className="relative w-full max-w-[680px] overflow-hidden rounded-xl"
+                  style={{ aspectRatio: "8.5 / 11" }}
+                >
+                  <FlickeringGrid
+                    className="absolute inset-0 z-0 size-full"
+                    color="#6B7280"
+                    flickerChance={0.1}
+                    gridGap={6}
+                    maxOpacity={0.5}
+                    squareSize={4}
+                  />
+                </div>
+              </div>
+            )}
             <Document
               file={url}
+              loading={null}
               onLoadSuccess={({ numPages: n }) => setNumPages(n)}
             >
               <div className="flex flex-col items-center gap-2 pb-8">
@@ -118,6 +137,7 @@ export function PdfPreviewDialog({
                     key={`page-${i + 1}`}
                   >
                     <Page
+                      loading={null}
                       pageNumber={i + 1}
                       width={Math.min(680, window.innerWidth - 64)}
                     />

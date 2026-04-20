@@ -1,3 +1,4 @@
+import { RiMosaicLine } from "@remixicon/react";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { cn } from "@strand/ui";
 import { Button } from "@strand/ui/button";
@@ -52,6 +53,13 @@ export function FilterBar({
           workspaceId={workspaceId}
         />
       ))}
+      <Button
+        className="size-8! h-8 gap-x-1.5 whitespace-nowrap rounded-full border-[0.5px] px-3 text-xs"
+        size="small"
+        variant="strand"
+      >
+        <RiMosaicLine className="size-4.5 shrink-0" />
+      </Button>
       <AddFilterMenu workspaceId={workspaceId} />
       <DropdownMenu>
         <DropdownMenuTrigger

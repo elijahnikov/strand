@@ -122,7 +122,7 @@ function JobRow({
           </Text>
           <Badge
             className="px-1 font-mono"
-            size="default"
+            size="sm"
             variant={STATUS_VARIANT[job.status]}
           >
             {capitalize(job.status)}
@@ -152,17 +152,17 @@ function JobRow({
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
         {job.counts.imported > 0 && (
-          <Badge className="px-1 font-mono" size="default" variant="success">
+          <Badge className="px-1 font-mono" size="sm" variant="success">
             {job.counts.imported} imported
           </Badge>
         )}
         {job.counts.skipped > 0 && (
-          <Badge className="px-1 font-mono" size="default" variant="warning">
+          <Badge className="px-1 font-mono" size="sm" variant="warning">
             {job.counts.skipped} skipped
           </Badge>
         )}
         {job.counts.failed > 0 && (
-          <Badge className="px-1 font-mono" size="default" variant="error">
+          <Badge className="px-1 font-mono" size="sm" variant="error">
             {job.counts.failed} failed
           </Badge>
         )}
