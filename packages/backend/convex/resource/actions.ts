@@ -189,6 +189,7 @@ async function resolveValidFavicon(
 export const extractWebsiteMetadata = internalAction({
   args: {
     resourceId: v.id("resource"),
+    skipAI: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     await ctx.runMutation(
@@ -288,11 +289,13 @@ export const extractWebsiteMetadata = internalAction({
         metadataStatus: "completed",
       });
 
-      await ctx.scheduler.runAfter(
-        0,
-        internal.resource.aiActions.processResourceAI,
-        { resourceId: args.resourceId }
-      );
+      if (!args.skipAI) {
+        await ctx.scheduler.runAfter(
+          0,
+          internal.resource.aiActions.processResourceAI,
+          { resourceId: args.resourceId }
+        );
+      }
     } catch (error) {
       await ctx.runMutation(
         internal.resource.internals.setWebsiteMetadataStatus,

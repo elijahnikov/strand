@@ -4,6 +4,7 @@ import { useParams } from "@tanstack/react-router";
 import { CommandPaletteProvider } from "~/components/common/command-palette/use-command-palette";
 import { TopBar } from "~/components/common/global-workspace-layout/top-bar";
 import { useGlobalHotkeys } from "~/components/common/global-workspace-layout/use-global-hotkeys";
+import { ImportProgressToast } from "~/components/common/import-progress-toast";
 import { ShortcutsHelpProvider } from "~/components/common/shortcuts-help";
 import { WorkspacePresenceProvider } from "~/components/common/workspace-presence";
 import { FileDropProvider, useFileDrop } from "~/hooks/use-file-drop";
@@ -33,6 +34,7 @@ export function GlobalLayout({ children }: { children: React.ReactNode }) {
           <ShortcutsHelpProvider>
             <GlobalHotkeys workspaceId={workspaceId as Id<"workspace">} />
             {content}
+            <ImportProgressToast workspaceId={workspaceId as Id<"workspace">} />
           </ShortcutsHelpProvider>
         </CommandPaletteProvider>
       </WorkspacePresenceProvider>

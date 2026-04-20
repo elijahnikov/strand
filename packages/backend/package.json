@@ -32,6 +32,8 @@
     "@instantdb/react": "catalog:instant",
     "@strand/ai": "workspace:*",
     "convex": "catalog:convex",
-    "convex-helpers": "catalog:convex"
+    "convex-helpers": "catalog:convex",
+    "fflate": "^0.8.2",
+    "marked": "^14.1.3"
   }
 }

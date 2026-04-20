@@ -2,6 +2,7 @@ import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import {
   RiBarChartHorizontalFill,
   RiBrain2Fill,
+  RiDownload2Fill,
   RiGroupFill,
   RiSettings3Fill,
   RiShieldKeyholeFill,
@@ -39,13 +40,26 @@ import {
   WorkspaceIcon,
   WorkspaceIconSelector,
 } from "~/components/common/workspace-icon";
+import { ImportTab } from "./import-tab";
 import { MembersTab } from "./members-tab";
 import { MemoryTab } from "./memory-tab";
 
+export type SettingsTab =
+  | "general"
+  | "usage"
+  | "members"
+  | "memory"
+  | "import"
+  | "advanced";
+
 export function SettingsPageComponent({
   workspaceId,
+  tab,
+  onTabChange,
 }: {
   workspaceId: Id<"workspace">;
+  tab: SettingsTab;
+  onTabChange: (next: SettingsTab) => void;
 }) {
   const { data } = useSuspenseQuery(
     convexQuery(api.workspace.queries.getById, { workspaceId })
@@ -53,7 +67,12 @@ export function SettingsPageComponent({
 
   return (
     <PageContent className="mt-8 h-[calc(95vh-80px)] py-8" width="xl:w-2/3">
-      <Tabs className="h-full" defaultValue="general" orientation="vertical">
+      <Tabs
+        className="h-full"
+        onValueChange={(next) => onTabChange(next as SettingsTab)}
+        orientation="vertical"
+        value={tab}
+      >
         <TabsList className="fixed h-full w-44 shrink-0 items-start justify-start self-start pr-4">
           <TabsTrigger className="grow-0 pl-3" value="general">
             <RiSettings3Fill className="size-4" />
@@ -77,6 +96,12 @@ export function SettingsPageComponent({
             <RiBrain2Fill className="size-4" />
             <Text className="ml-1 font-medium" size="small">
               Memory
+            </Text>
+          </TabsTrigger>
+          <TabsTrigger className="grow-0 pl-3" value="import">
+            <RiDownload2Fill className="size-4" />
+            <Text className="ml-1 font-medium" size="small">
+              Import
             </Text>
           </TabsTrigger>
           <TabsTrigger className="grow-0 pl-3" value="advanced">
@@ -104,6 +129,9 @@ export function SettingsPageComponent({
           </TabsContent>
           <TabsContent className="pl-8" value="memory">
             <MemoryTab workspaceId={workspaceId} />
+          </TabsContent>
+          <TabsContent className="pl-8" value="import">
+            <ImportTab workspaceId={workspaceId} />
           </TabsContent>
           <TabsContent className="pl-8" value="advanced">
             <AdvancedTab

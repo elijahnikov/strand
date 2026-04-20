@@ -96,6 +96,69 @@ export async function createResource(
   return resourceId;
 }
 
+export interface CreateResourceForImportArgs extends CreateResourceArgs {
+  createdAt?: number;
+  importedFrom: string;
+  isArchived?: boolean;
+  isFavorite?: boolean;
+}
+
+export async function createResourceForImport(
+  ctx: MutationCtx,
+  args: CreateResourceForImportArgs
+): Promise<Id<"resource">> {
+  if (args.collectionId) {
+    const collection = await ctx.db.get(args.collectionId);
+    if (
+      !collection ||
+      collection.workspaceId !== args.workspaceId ||
+      collection.deletedAt
+    ) {
+      throw new ConvexError("Collection not found");
+    }
+  }
+
+  const now = args.createdAt ?? Date.now();
+
+  const resourceId = await ctx.db.insert("resource", {
+    workspaceId: args.workspaceId,
+    createdBy: args.userId,
+    type: args.type,
+    title: args.title,
+    description: args.description,
+    collectionId: args.collectionId,
+    isFavorite: args.isFavorite ?? false,
+    isPinned: false,
+    isArchived: args.isArchived ?? false,
+    updatedAt: now,
+    importedFrom: args.importedFrom,
+  });
+
+  switch (args.type) {
+    case "website":
+      await insertWebsiteResource(ctx, resourceId, args);
+      break;
+    case "note":
+      await insertNoteResource(ctx, resourceId, args);
+      break;
+    case "file":
+      await insertFileResource(ctx, resourceId, args);
+      break;
+    default:
+      throw new ConvexError(
+        `Could not insert resource on type ${String(args.type)}`
+      );
+  }
+
+  await ctx.db.insert("resourceAI", {
+    resourceId,
+    workspaceId: args.workspaceId,
+    status: "skipped",
+  });
+
+  return resourceId;
+}
+
 export const create = workspaceMutation({
   args: {
     type: v.union(v.literal("website"), v.literal("note"), v.literal("file")),

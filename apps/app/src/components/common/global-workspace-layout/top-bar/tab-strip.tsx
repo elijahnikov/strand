@@ -87,7 +87,7 @@ export function TabStrip({ workspaceId }: TabStripProps) {
 
   return (
     <div
-      className="relative mb-[3.7px] flex h-10 max-w-[calc(64.5vw-100px)] flex-1"
+      className="relative mr-4 mb-[3.7px] flex h-10 min-w-0 flex-1"
       ref={rootRef}
     >
       <ScrollArea className="h-11 min-w-0 flex-1 **:data-[slot=scroll-area-scrollbar]:hidden">
@@ -108,7 +108,7 @@ export function TabStrip({ workspaceId }: TabStripProps) {
       />
       <span
         aria-hidden
-        className="pointer-events-none absolute top-0 right-0 bottom-0 z-[1] w-6 bg-gradient-to-l from-ui-bg-subtle to-transparent"
+        className="pointer-events-none absolute top-0 right-0 bottom-0 z-[1] w-12 bg-gradient-to-l from-50% from-ui-bg-subtle to-transparent"
       />
     </div>
   );
