@@ -153,6 +153,8 @@ function parseInitialContent(json: string | undefined): Block[] | undefined {
 }
 
 interface NoteEditorProps {
+  fallbackHtml?: string;
+  fallbackMarkdown?: string;
   initialContent?: string;
   resourceId: Id<"resource">;
   workspaceId: Id<"workspace">;
@@ -162,6 +164,8 @@ export default function NoteEditor({
   resourceId,
   workspaceId,
   initialContent,
+  fallbackMarkdown,
+  fallbackHtml,
 }: NoteEditorProps) {
   const { resolvedTheme } = useTheme();
   const updateContent = useMutation(api.resource.mutations.updateContent);
@@ -171,16 +175,55 @@ export default function NoteEditor({
     return pendingLocal ?? initialContent;
   }, [resourceId, initialContent]);
 
-  const initialBlocks = useMemo(
+  const savedBlocks = useMemo(
     () => parseInitialContent(effectiveInitialContent),
     [effectiveInitialContent]
   );
+
+  const [fallbackBlocks, fallbackBlocksAreFromImport] = useMemo<
+    [Block[] | undefined, boolean]
+  >(() => {
+    if (savedBlocks && savedBlocks.length > 0) {
+      return [undefined, false];
+    }
+    if (!(fallbackHtml || fallbackMarkdown)) {
+      return [undefined, false];
+    }
+    try {
+      const headless = BlockNoteEditorClass.create({
+        schema,
+        _headless: true,
+      });
+      const blocks = fallbackHtml
+        ? headless.tryParseHTMLToBlocks(fallbackHtml)
+        : headless.tryParseMarkdownToBlocks(fallbackMarkdown ?? "");
+      return [blocks.length > 0 ? (blocks as Block[]) : undefined, true];
+    } catch {
+      return [undefined, false];
+    }
+  }, [savedBlocks, fallbackMarkdown, fallbackHtml]);
+
+  const initialBlocks = savedBlocks ?? fallbackBlocks;
 
   const editor: BlockNoteEditor = useCreateBlockNote({
     schema,
     initialContent: initialBlocks,
     extensions: [codeBlockTripleBacktick],
   });
+
+  useEffect(() => {
+    if (!fallbackBlocksAreFromImport) {
+      return;
+    }
+    const json = JSON.stringify(editor.prosemirrorState.doc.toJSON());
+    void updateContent({ workspaceId, resourceId, jsonContent: json });
+  }, [
+    editor,
+    fallbackBlocksAreFromImport,
+    resourceId,
+    workspaceId,
+    updateContent,
+  ]);
 
   // If we recovered unsaved local content on mount, push it to the server
   // so the DB catches up. Clear local only after the server accepts it.

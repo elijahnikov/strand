@@ -70,8 +70,10 @@ export default defineSchema({
     deletedAt: v.optional(v.number()),
     updatedAt: v.number(),
     collectionId: v.optional(v.id("collection")),
+    importedFrom: v.optional(v.string()),
   })
     .index("by_workspace", ["workspaceId", "deletedAt"])
+    .index("by_workspace_imported_from", ["workspaceId", "importedFrom"])
     .index("by_workspace_collection", [
       "workspaceId",
       "collectionId",
@@ -206,7 +208,8 @@ export default defineSchema({
       v.literal("pending"),
       v.literal("processing"),
       v.literal("completed"),
-      v.literal("failed")
+      v.literal("failed"),
+      v.literal("skipped")
     ),
     error: v.optional(v.string()),
     processedAt: v.optional(v.number()),
@@ -382,6 +385,95 @@ export default defineSchema({
     lastErrorAt: v.optional(v.number()),
     updatedAt: v.number(),
   }).index("by_user_workspace", ["workspaceId", "userId"]),
+
+  // CONNECTION (per-user third-party account: OAuth or API token)
+  connection: defineTable({
+    userId: v.id("user"),
+    provider: v.union(
+      v.literal("notion"),
+      v.literal("raindrop"),
+      v.literal("google_drive"),
+      v.literal("readwise")
+    ),
+    authType: v.union(v.literal("oauth2"), v.literal("api_token")),
+    status: v.union(
+      v.literal("active"),
+      v.literal("expired"),
+      v.literal("revoked"),
+      v.literal("error")
+    ),
+    accessToken: v.string(),
+    refreshToken: v.optional(v.string()),
+    expiresAt: v.optional(v.number()),
+    scope: v.optional(v.string()),
+    providerAccountId: v.optional(v.string()),
+    providerAccountLabel: v.optional(v.string()),
+    syncEnabled: v.optional(v.boolean()),
+    syncCursor: v.optional(v.string()),
+    lastSyncedAt: v.optional(v.number()),
+    webhookSubscriptionId: v.optional(v.string()),
+    lastError: v.optional(v.string()),
+    lastErrorAt: v.optional(v.number()),
+    createdAt: v.number(),
+    disconnectedAt: v.optional(v.number()),
+  })
+    .index("by_user_provider", ["userId", "provider", "status"])
+    .index("by_status_syncEnabled", ["status", "syncEnabled"]),
+
+  // IMPORT JOB (per-workspace data migration job from a third-party source)
+  importJob: defineTable({
+    workspaceId: v.id("workspace"),
+    userId: v.id("user"),
+    source: v.union(
+      v.literal("markdown_zip"),
+      v.literal("notion_zip"),
+      v.literal("evernote_enex"),
+      v.literal("readwise_api"),
+      v.literal("url_csv"),
+      v.literal("bookmark_html"),
+      v.literal("fabric"),
+      v.literal("mymind"),
+      v.literal("notion_oauth"),
+      v.literal("raindrop_oauth")
+    ),
+    status: v.union(
+      v.literal("uploading"),
+      v.literal("queued"),
+      v.literal("parsing"),
+      v.literal("importing"),
+      v.literal("completed"),
+      v.literal("failed"),
+      v.literal("cancelled")
+    ),
+    storageId: v.optional(v.id("_storage")),
+    connectionId: v.optional(v.id("connection")),
+    rootCollectionId: v.optional(v.id("collection")),
+    options: v.optional(
+      v.object({
+        createRootCollection: v.boolean(),
+        rootCollectionName: v.optional(v.string()),
+        rehydrateUrls: v.boolean(),
+        dedupe: v.boolean(),
+        cherryPickPaths: v.optional(v.array(v.string())),
+      })
+    ),
+    cursor: v.optional(v.string()),
+    counts: v.object({
+      total: v.number(),
+      parsed: v.number(),
+      imported: v.number(),
+      skipped: v.number(),
+      failed: v.number(),
+    }),
+    startedAt: v.number(),
+    completedAt: v.optional(v.number()),
+    errorSummary: v.optional(v.string()),
+    errorSamples: v.optional(
+      v.array(v.object({ item: v.string(), error: v.string() }))
+    ),
+  })
+    .index("by_workspace", ["workspaceId", "startedAt"])
+    .index("by_user", ["userId", "startedAt"]),
 
   // EXTENSION TOKEN (long-lived bearer tokens for the browser extension)
   extensionToken: defineTable({

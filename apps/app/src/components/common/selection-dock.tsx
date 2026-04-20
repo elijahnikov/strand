@@ -24,7 +24,6 @@ import {
 } from "@strand/ui/command";
 import {
   Dialog,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogPopup,
@@ -36,7 +35,7 @@ import { Skeleton } from "@strand/ui/skeleton";
 import { Text } from "@strand/ui/text";
 import { toastManager } from "@strand/ui/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { FolderIcon, MoreHorizontalIcon, TrashIcon } from "lucide-react";
+import { FolderIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { Fragment, useMemo, useState } from "react";
 import { useLibrarySelection } from "~/lib/selection/library-selection";

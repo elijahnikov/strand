@@ -140,7 +140,7 @@ export function CollectionPageComponent({
   return (
     <div>
       <LibraryToolbar onCreateCollection={handleCreateCollection} />
-      <div className="mx-auto w-2/3 px-6 pt-4 pb-4">
+      <div className="mx-auto w-2/3 max-w-[1000px] px-6 pt-4 pb-4">
         <CollectionHeader collection={collection} workspaceId={workspaceId} />
         <ResourceList
           collectionId={collectionId}

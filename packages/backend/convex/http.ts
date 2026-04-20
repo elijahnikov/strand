@@ -1,5 +1,6 @@
 import { httpRouter } from "convex/server";
 import { authComponent, createAuth } from "./auth";
+import { oauthCallbackHandler } from "./connections/oauth/httpRoutes";
 import {
   captureFileHandler,
   captureNoteHandler,
@@ -11,6 +12,14 @@ import {
 const http = httpRouter();
 
 authComponent.registerRoutes(http, createAuth);
+
+for (const provider of ["notion", "raindrop", "google_drive"] as const) {
+  http.route({
+    path: `/api/oauth/${provider}/callback`,
+    method: "GET",
+    handler: oauthCallbackHandler,
+  });
+}
 
 http.route({
   path: "/api/ext/me",

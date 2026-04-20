@@ -12,6 +12,12 @@ export function NoteResource({ resource }: { resource: GetResourceData }) {
   const content = "content" in resource ? resource.content : null;
   const note = "note" in resource ? resource.note : null;
   const jsonContent = content?.jsonContent ?? note?.jsonContent ?? undefined;
+  const fallbackMarkdown = jsonContent
+    ? undefined
+    : (note?.plainTextContent ?? undefined);
+  const fallbackHtml = jsonContent
+    ? undefined
+    : (note?.htmlContent ?? undefined);
 
   return (
     <PageContent className="mt-2">
@@ -31,6 +37,8 @@ export function NoteResource({ resource }: { resource: GetResourceData }) {
       )}
       <Suspense fallback={<div className="mt-6 min-h-[100px]" />}>
         <NoteEditor
+          fallbackHtml={fallbackHtml}
+          fallbackMarkdown={fallbackMarkdown}
           initialContent={jsonContent}
           key={resource._id}
           resourceId={resource._id}

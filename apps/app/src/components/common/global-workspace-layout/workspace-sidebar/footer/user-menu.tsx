@@ -57,7 +57,7 @@ export function UserMenu() {
         side="bottom"
         sideOffset={6}
       >
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.navigate({ to: "/account" })}>
           <SettingsIcon />
           Settings
         </DropdownMenuItem>

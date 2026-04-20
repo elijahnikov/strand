@@ -18,7 +18,7 @@ export function PageContent({
   return (
     <div
       className={cn(
-        "mx-auto w-full px-4 pt-8 md:w-[75%] md:px-0 md:pt-0 lg:w-[60%]",
+        "mx-auto w-full max-w-[1000px] px-4 pt-8 md:w-[75%] md:px-0 md:pt-0 lg:w-[60%]",
         width,
         className
       )}

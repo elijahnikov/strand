@@ -1,3 +1,4 @@
+import { RiFilter3Fill } from "@remixicon/react";
 import { Button } from "@strand/ui/button";
 import {
   DropdownMenu,
@@ -9,7 +10,6 @@ import { Input } from "@strand/ui/input";
 import {
   ArrowDownAZIcon,
   ArrowUpDownIcon,
-  ChevronDownIcon,
   ClockIcon,
   FileIcon,
   FolderPlusIcon,
@@ -63,9 +63,9 @@ export function LibraryToolbar({
   const { search, setSearch, type, setType, order, setOrder } =
     useLibraryFilters();
 
-  const activeTypeLabel =
+  const _activeTypeLabel =
     TYPE_OPTIONS.find((o) => o.value === type)?.label ?? "All types";
-  const activeOrderLabel =
+  const _activeOrderLabel =
     ORDER_OPTIONS.find((o) => o.value === order)?.label ?? "Newest";
 
   return (
@@ -91,13 +91,12 @@ export function LibraryToolbar({
           <DropdownMenuTrigger
             render={
               <Button
-                className="whitespace-nowrap rounded-full border-[0.5px]"
+                className="size-8 h-8 gap-x-1.5 rounded-full border-[0.5px] px-3 text-xs"
                 variant="secondary"
               />
             }
           >
-            {activeTypeLabel}
-            <ChevronDownIcon className="h-3 w-3" />
+            <RiFilter3Fill className="size-3.5 shrink-0" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {TYPE_OPTIONS.map((option) => (
@@ -116,14 +115,12 @@ export function LibraryToolbar({
           <DropdownMenuTrigger
             render={
               <Button
-                className="whitespace-nowrap rounded-full border-[0.5px]"
+                className="size-8! h-8 gap-x-1.5 whitespace-nowrap rounded-full border-[0.5px] px-3 text-xs"
                 variant="secondary"
               />
             }
           >
-            <ArrowUpDownIcon className="h-3 w-3" />
-            {activeOrderLabel}
-            <ChevronDownIcon className="h-3 w-3" />
+            <ArrowUpDownIcon className="size-3.5 shrink-0" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {ORDER_OPTIONS.map((option) => (
