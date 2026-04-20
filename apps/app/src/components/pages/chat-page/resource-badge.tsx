@@ -5,7 +5,7 @@ import { Badge } from "@strand/ui/badge";
 import { Skeleton } from "@strand/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
-import { getFileLabel } from "~/lib/format";
+import { FileKindIcon } from "~/components/common/file-kind-icon";
 
 function WebsiteIcon({ favicon }: { favicon?: string | null }) {
   if (favicon) {
@@ -89,11 +89,7 @@ export function ResourceIcon({
           />
         );
       }
-      return (
-        <span className="flex h-3.5 shrink-0 items-center rounded-[2px] bg-background px-0.5 font-semibold text-[8px] text-muted-foreground leading-none">
-          {getFileLabel(mimeType ?? undefined)}
-        </span>
-      );
+      return <FileKindIcon className="size-3.5 shrink-0" mimeType={mimeType} />;
     default:
       return <WebsiteIcon favicon={null} />;
   }

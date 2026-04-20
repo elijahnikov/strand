@@ -48,7 +48,7 @@ export function useTagsFilters() {
 export function TagsToolbar() {
   const { search, setSearch, order, setOrder } = useTagsFilters();
 
-  const activeOrderLabel =
+  const _activeOrderLabel =
     ORDER_OPTIONS.find((o) => o.value === order)?.label ?? "Alphabetical";
 
   return (
@@ -65,13 +65,12 @@ export function TagsToolbar() {
           <DropdownMenuTrigger
             render={
               <Button
-                className="whitespace-nowrap rounded-full border-[0.5px]"
+                className="size-8! h-8 gap-x-1.5 whitespace-nowrap rounded-full border-[0.5px] px-3 text-xs"
                 variant="secondary"
               />
             }
           >
-            <ArrowUpDownIcon className="h-3 w-3" />
-            {activeOrderLabel}
+            <ArrowUpDownIcon className="size-3.5 shrink-0" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {ORDER_OPTIONS.map((option) => (

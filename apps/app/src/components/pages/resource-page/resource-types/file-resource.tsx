@@ -1,8 +1,8 @@
 import { Card } from "@strand/ui/card";
 import { FlickeringGrid } from "@strand/ui/flickering-grid";
-import { FileIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { lazy, Suspense, useState } from "react";
+import { FileKindIcon } from "~/components/common/file-kind-icon";
 import { PageContent } from "~/components/common/page-content";
 
 const NoteEditor = lazy(() => import("./note-editor"));
@@ -80,11 +80,21 @@ function FileImage({ alt, src }: { alt: string; src: string }) {
   );
 }
 
-function FilePreviewEmpty({ mimeType }: { mimeType?: string }) {
+function FilePreviewEmpty({
+  fileName,
+  mimeType,
+}: {
+  fileName?: string;
+  mimeType?: string;
+}) {
   return (
     <div className="mt-4 flex h-[200px] w-full items-center justify-center rounded-xl border border-ui-border-base bg-ui-bg-subtle">
       <div className="flex flex-col items-center gap-2 text-ui-fg-muted">
-        <FileIcon className="h-8 w-8" />
+        <FileKindIcon
+          className="h-8 w-8"
+          fileName={fileName}
+          mimeType={mimeType}
+        />
         <span className="font-mono text-xs">{getFileLabel(mimeType)}</span>
       </div>
     </div>
@@ -103,7 +113,9 @@ function FilePreview({
   title: string;
 }) {
   if (!fileUrl) {
-    return <FilePreviewEmpty mimeType={file?.mimeType} />;
+    return (
+      <FilePreviewEmpty fileName={file?.fileName} mimeType={file?.mimeType} />
+    );
   }
 
   const fileName = file?.fileName ?? undefined;
@@ -147,7 +159,9 @@ function FilePreview({
         <CsvPreview fileName={fileName} fileSize={fileSize} url={fileUrl} />
       );
     default:
-      return <FilePreviewEmpty mimeType={file?.mimeType} />;
+      return (
+        <FilePreviewEmpty fileName={file?.fileName} mimeType={file?.mimeType} />
+      );
   }
 }
 

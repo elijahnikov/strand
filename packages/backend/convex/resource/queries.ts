@@ -312,6 +312,36 @@ export const listWorkspaceTags = workspaceQuery({
     const workspaceId = ctx.workspace._id;
     const search = args.search?.trim();
 
+    const enrichTag = async (tag: Doc<"tag">) => {
+      const resourceTags = await ctx.db
+        .query("resourceTag")
+        .withIndex("by_workspace_tag", (q) =>
+          q.eq("workspaceId", workspaceId).eq("tagId", tag._id)
+        )
+        .collect();
+      return {
+        _id: tag._id,
+        _creationTime: tag._creationTime,
+        name: tag.name,
+        color: tag.color,
+        resourceCount: resourceTags.length,
+      };
+    };
+
+    if (!search && args.order === "most_resources") {
+      const allTags = await ctx.db
+        .query("tag")
+        .withIndex("by_workspace", (q) => q.eq("workspaceId", workspaceId))
+        .collect();
+      const enriched = await Promise.all(allTags.map(enrichTag));
+      enriched.sort((a, b) => b.resourceCount - a.resourceCount);
+      return {
+        page: enriched,
+        isDone: true,
+        continueCursor: "",
+      };
+    }
+
     let results: PaginationResult<Doc<"tag">>;
 
     if (search) {
@@ -328,23 +358,7 @@ export const listWorkspaceTags = workspaceQuery({
         .paginate(args.paginationOpts);
     }
 
-    const enrichedPage = await Promise.all(
-      results.page.map(async (tag) => {
-        const resourceTags = await ctx.db
-          .query("resourceTag")
-          .withIndex("by_workspace_tag", (q) =>
-            q.eq("workspaceId", workspaceId).eq("tagId", tag._id)
-          )
-          .collect();
-        return {
-          _id: tag._id,
-          _creationTime: tag._creationTime,
-          name: tag.name,
-          color: tag.color,
-          resourceCount: resourceTags.length,
-        };
-      })
-    );
+    const enrichedPage = await Promise.all(results.page.map(enrichTag));
 
     return { ...results, page: enrichedPage };
   },

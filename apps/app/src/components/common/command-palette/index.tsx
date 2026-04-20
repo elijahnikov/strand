@@ -40,7 +40,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { getFileLabel } from "~/lib/format";
+import { FileKindIcon } from "~/components/common/file-kind-icon";
 import { isHttpUrl } from "~/lib/is-http-url";
 import { MAX_FILE_SIZE, uploadFile } from "~/lib/upload-file";
 
@@ -566,11 +566,7 @@ function CommandResourceIcon({
         />
       );
     }
-    return (
-      <span className="flex h-4 shrink-0 items-center rounded-[2px] bg-ui-bg-subtle px-0.5 font-semibold text-[9px] text-ui-fg-muted leading-none">
-        {getFileLabel(mimeType ?? undefined)}
-      </span>
-    );
+    return <FileKindIcon className="size-4 shrink-0" mimeType={mimeType} />;
   }
   return <RiBookmark2Fill className="size-4 shrink-0 text-ui-fg-muted" />;
 }

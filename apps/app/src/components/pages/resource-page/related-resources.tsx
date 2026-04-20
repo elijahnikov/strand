@@ -5,7 +5,7 @@ import { Link, useParams } from "@tanstack/react-router";
 import { FileIcon, GlobeIcon, PinIcon, StickyNoteIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import { getFileLabel } from "~/lib/format";
+import { FileKindIcon } from "~/components/common/file-kind-icon";
 import { CollapsibleSection } from "./collapsible-section";
 
 interface PreviewData {
@@ -76,11 +76,12 @@ function FilePreview({ preview }: { preview: PreviewData }) {
     );
   }
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-ui-bg-subtle">
-      <FileIcon className="h-5 w-5 text-ui-fg-muted" />
-      <span className="font-semibold text-[10px] text-ui-fg-muted">
-        {getFileLabel(preview.mimeType ?? undefined)}
-      </span>
+    <div className="flex h-full w-full items-center justify-center bg-ui-bg-subtle">
+      <FileKindIcon
+        className="h-6 w-6"
+        fileName={preview.fileName}
+        mimeType={preview.mimeType}
+      />
     </div>
   );
 }

@@ -18,7 +18,7 @@ import {
 } from "@tanstack/react-router";
 import { EllipsisIcon } from "lucide-react";
 import { Fragment } from "react";
-import { getFileLabel } from "~/lib/format";
+import { FileKindIcon } from "~/components/common/file-kind-icon";
 
 const PAGE_LABELS: Record<string, string> = {
   library: "Library",
@@ -212,7 +212,7 @@ function ResourceIcon({
   resource: {
     type: string;
     website?: { favicon?: string | null } | null;
-    file?: { mimeType?: string | null } | null;
+    file?: { fileName?: string | null; mimeType?: string | null } | null;
     fileUrl?: string | null;
   };
 }) {
@@ -233,7 +233,13 @@ function ResourceIcon({
           />
         );
       }
-      return <FileLabel mimeType={resource.file?.mimeType} />;
+      return (
+        <FileKindIcon
+          className="size-3.5 shrink-0"
+          fileName={resource.file?.fileName}
+          mimeType={resource.file?.mimeType}
+        />
+      );
     default:
       return null;
   }
@@ -290,14 +296,6 @@ function NoteIcon() {
         strokeLinejoin="round"
       />
     </svg>
-  );
-}
-
-function FileLabel({ mimeType }: { mimeType?: string | null }) {
-  return (
-    <span className="flex h-3.5 shrink-0 items-center rounded-[2px] bg-ui-bg-subtle px-0.5 font-semibold text-[8px] text-ui-fg-muted leading-none">
-      {getFileLabel(mimeType ?? undefined)}
-    </span>
   );
 }
 

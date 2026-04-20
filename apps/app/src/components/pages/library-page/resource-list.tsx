@@ -9,7 +9,6 @@ import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { cn } from "@strand/ui";
 import { Badge } from "@strand/ui/badge";
-import { Kbd } from "@strand/ui/kbd";
 import { Separator } from "@strand/ui/separator";
 import { Skeleton } from "@strand/ui/skeleton";
 import { Text } from "@strand/ui/text";
@@ -30,6 +29,7 @@ import {
   type SelectionItem,
   useSelectAllHotkey,
 } from "~/lib/selection/library-selection";
+import { closeResourceTabs } from "~/lib/workspace-tabs-store";
 import { CollectionRow } from "./collection-row";
 import { LibraryDragOverlay } from "./drag-overlay";
 import { useLibraryFilters } from "./library-toolbar";
@@ -216,9 +216,15 @@ function ResourceListContent({
     mutationFn: useConvexMutation(api.resource.mutations.restoreMany),
   });
 
+  const navigate = useNavigate();
+
   const handleDelete = useCallback(
     (resourceId: Id<"resource">) => {
       removeMany({ workspaceId, resourceIds: [resourceId] });
+      const { nextUrl } = closeResourceTabs(workspaceId, [resourceId]);
+      if (nextUrl) {
+        navigate({ to: nextUrl });
+      }
       toastManager.add({
         type: "success",
         title: "Deleted",
@@ -230,7 +236,7 @@ function ResourceListContent({
         },
       });
     },
-    [removeMany, restoreMany, workspaceId]
+    [removeMany, restoreMany, workspaceId, navigate]
   );
 
   const handleUpdateTitle = useCallback(
@@ -345,7 +351,6 @@ function ResourceListContent({
   const isEmpty =
     mergedList.length === 0 && !hasPinned && uploadingFiles.length === 0;
 
-  const navigate = useNavigate();
   const navItems = useMemo<ListNavItem[]>(() => {
     const items: ListNavItem[] = [];
     if (hasPinned) {

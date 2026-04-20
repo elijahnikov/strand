@@ -36,7 +36,7 @@ export function TrashDock({ workspaceId }: { workspaceId: Id<"workspace"> }) {
     <AnimatePresence>
       <motion.div
         animate={{ opacity: 1, y: 0 }}
-        className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-x-1 rounded-md border-[0.5px] bg-ui-bg-component py-1 pr-1 pl-0.25 shadow-lg"
+        className="fixed bottom-24 left-1/2 z-50 flex h-10 -translate-x-1/2 items-center gap-x-1 rounded-lg border-[0.5px] bg-ui-bg-component p-1.5 pl-1"
         exit={{ opacity: 0, y: 8 }}
         initial={{ opacity: 0, y: 8 }}
         key="trash-dock"
@@ -117,7 +117,7 @@ function RestoreButton({
 
   return (
     <Button
-      className="h-6 gap-x-1.5 rounded-md px-2 text-xs"
+      className="h-7 gap-x-1.5 rounded-md px-2 text-xs"
       disabled={isPending}
       onClick={handleClick}
       size="small"
@@ -173,7 +173,7 @@ function PurgeButton({
   return (
     <>
       <Button
-        className="h-6 gap-x-1.5 rounded-md px-2 text-ui-fg-error text-xs hover:text-ui-fg-error"
+        className="h-7 gap-x-1.5 rounded-md px-2 text-ui-fg-error text-xs hover:text-ui-fg-error"
         onClick={() => setOpen(true)}
         size="small"
         variant="ghost"

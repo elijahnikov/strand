@@ -1,6 +1,6 @@
 import { FlickeringGrid } from "@strand/ui/flickering-grid";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -10,44 +10,55 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url
 ).toString();
 
+const PREVIEW_HEIGHT = 420;
+
 export function PdfPreview({ url }: { url: string }) {
   return <PdfPreviewInner key={url} url={url} />;
 }
 
 function PdfPreviewInner({ url }: { url: string }) {
   const [loaded, setLoaded] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [pageWidth, setPageWidth] = useState<number | undefined>();
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) {
+      return;
+    }
+    const update = () => {
+      setPageWidth(el.clientWidth);
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className="relative mt-4">
+    <div
+      className="relative mt-4 w-full cursor-zoom-in overflow-hidden rounded-xl border border-ui-border-base"
+      ref={containerRef}
+      style={{ height: PREVIEW_HEIGHT }}
+    >
       {!loaded && (
-        <div
-          className="relative w-full overflow-hidden rounded-xl border border-ui-border-base"
-          style={{ aspectRatio: "8.5 / 11" }}
-        >
-          <FlickeringGrid
-            className="absolute inset-0 z-0 size-full"
-            color="#6B7280"
-            flickerChance={0.1}
-            gridGap={6}
-            height={1200}
-            maxOpacity={0.5}
-            squareSize={4}
-            width={800}
-          />
-        </div>
+        <FlickeringGrid
+          className="absolute inset-0 z-0 size-full"
+          color="#6B7280"
+          flickerChance={0.1}
+          gridGap={6}
+          maxOpacity={0.5}
+          squareSize={4}
+        />
       )}
       <motion.div
         animate={{ opacity: loaded ? 1 : 0 }}
-        className={
-          loaded
-            ? "overflow-hidden rounded-xl border border-ui-border-base"
-            : "absolute top-0 left-0 h-0 overflow-hidden"
-        }
+        className="absolute inset-x-0 top-0"
         initial={false}
         transition={{ duration: 0.2 }}
       >
         <Document file={url} onLoadSuccess={() => setLoaded(true)}>
-          <Page pageNumber={1} width={700} />
+          {pageWidth ? <Page pageNumber={1} width={pageWidth} /> : null}
         </Document>
       </motion.div>
     </div>

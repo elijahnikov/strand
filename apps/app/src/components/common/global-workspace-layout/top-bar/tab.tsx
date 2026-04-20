@@ -71,7 +71,9 @@ function TabComponent({ tab, isActive, workspaceId }: TabProps) {
 
   const handleCloseAll = useCallback(() => {
     const { nextUrl } = closeAll(workspaceId);
-    navigate({ to: nextUrl });
+    if (nextUrl) {
+      navigate({ to: nextUrl });
+    }
   }, [closeAll, navigate, workspaceId]);
 
   return (

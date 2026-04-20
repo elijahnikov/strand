@@ -35,10 +35,12 @@ import { Skeleton } from "@strand/ui/skeleton";
 import { Text } from "@strand/ui/text";
 import { toastManager } from "@strand/ui/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { FolderIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { Fragment, useMemo, useState } from "react";
 import { useLibrarySelection } from "~/lib/selection/library-selection";
+import { closeResourceTabs } from "~/lib/workspace-tabs-store";
 
 export function SelectionDock({
   workspaceId,
@@ -60,7 +62,7 @@ export function SelectionDock({
     <AnimatePresence>
       <motion.div
         animate={{ opacity: 1, y: 0 }}
-        className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-x-1 rounded-full border-[0.5px] bg-ui-bg-component p-1.5 pl-1"
+        className="fixed bottom-24 left-1/2 z-50 flex h-10 -translate-x-1/2 items-center gap-x-1 rounded-lg border-[0.5px] bg-ui-bg-component p-1.5 pl-1"
         exit={{ opacity: 0, y: 8 }}
         initial={{ opacity: 0, y: 8 }}
         key="dock"
@@ -262,7 +264,7 @@ function MoveButton({
       <PopoverTrigger
         render={
           <Button
-            className="h-6 gap-x-1.5 rounded-md px-2 text-xs"
+            className="h-7 gap-x-1.5 rounded-md px-2 text-xs"
             disabled={isBusy}
             size="small"
             variant="ghost"
@@ -400,7 +402,7 @@ function PinButton({
 
   return (
     <Button
-      className="h-6 gap-x-1.5 rounded-md px-2 text-xs"
+      className="h-7 gap-x-1.5 rounded-md px-2 text-xs"
       disabled={isPending}
       onClick={handleClick}
       size="small"
@@ -445,6 +447,7 @@ function DeleteButton({
 
   const totalCount = resourceIds.length + collectionIds.length;
   const isPending = removeResourcesPending || removeCollectionsPending;
+  const navigate = useNavigate();
 
   const handleConfirm = async () => {
     const ops: Promise<unknown>[] = [];
@@ -456,6 +459,12 @@ function DeleteButton({
     }
     try {
       await Promise.all(ops);
+      if (resourceIds.length > 0) {
+        const { nextUrl } = closeResourceTabs(workspaceId, resourceIds);
+        if (nextUrl) {
+          navigate({ to: nextUrl });
+        }
+      }
       toastManager.add({
         type: "success",
         title:
@@ -489,7 +498,7 @@ function DeleteButton({
   return (
     <>
       <Button
-        className="h-6 gap-x-1.5 rounded-md px-2 text-ui-fg-error text-xs hover:text-ui-fg-error"
+        className="h-7 gap-x-1.5 rounded-md px-2 text-ui-fg-error text-xs hover:text-ui-fg-error"
         onClick={() => setOpen(true)}
         size="small"
         variant="ghost"
