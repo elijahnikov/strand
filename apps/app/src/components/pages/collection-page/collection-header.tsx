@@ -1,6 +1,9 @@
 import { useConvexMutation } from "@convex-dev/react-query";
+import { useDroppable } from "@dnd-kit/core";
 import { api } from "@strand/backend/_generated/api.js";
 import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { cn } from "@strand/ui";
+import { Badge } from "@strand/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,8 +14,9 @@ import { Separator } from "@strand/ui/separator";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { EllipsisIcon, FolderIcon } from "lucide-react";
-import { Fragment } from "react";
+import { Fragment, type ReactNode } from "react";
 import { EditableText } from "~/components/common/editable-text";
+import type { DropTargetData } from "../library-page/use-library-dnd";
 
 interface CollectionHeaderProps {
   collection: {
@@ -59,7 +63,7 @@ export function CollectionHeader({
           preload="intent"
           to="/workspace/$workspaceId/library"
         >
-          Library
+          <DroppableBadge dropId="breadcrumb-root">Library</DroppableBadge>
         </Link>
         <HeaderBreadcrumbs
           crumbs={collection.breadcrumbs}
@@ -106,7 +110,12 @@ function HeaderBreadcrumbs({
               preload="intent"
               to="/workspace/$workspaceId/library/collection/$collectionId"
             >
-              {crumb.name}
+              <DroppableBadge
+                collectionId={crumb._id}
+                dropId={`breadcrumb-${crumb._id}`}
+              >
+                {crumb.name}
+              </DroppableBadge>
             </Link>
           </Fragment>
         ))}
@@ -127,7 +136,12 @@ function HeaderBreadcrumbs({
         preload="intent"
         to="/workspace/$workspaceId/library/collection/$collectionId"
       >
-        {first.name}
+        <DroppableBadge
+          collectionId={first._id}
+          dropId={`breadcrumb-${first._id}`}
+        >
+          {first.name}
+        </DroppableBadge>
       </Link>
       <Separator className="mx-2 h-3 rotate-30" orientation="vertical" />
       <DropdownMenu>
@@ -157,8 +171,41 @@ function HeaderBreadcrumbs({
         preload="intent"
         to="/workspace/$workspaceId/library/collection/$collectionId"
       >
-        {last.name}
+        <DroppableBadge
+          collectionId={last._id}
+          dropId={`breadcrumb-${last._id}`}
+        >
+          {last.name}
+        </DroppableBadge>
       </Link>
     </>
+  );
+}
+
+function DroppableBadge({
+  children,
+  collectionId,
+  dropId,
+}: {
+  children: ReactNode;
+  collectionId?: Id<"collection">;
+  dropId: string;
+}) {
+  const data: DropTargetData = { collectionId };
+  const { setNodeRef, isOver } = useDroppable({ id: dropId, data });
+
+  return (
+    <Badge
+      className={cn(
+        "h-5.5! min-h-5.5! py-0.5! text-[12px]! text-ui-fg-base transition-[box-shadow,background-color] duration-150",
+        isOver &&
+          "bg-ui-bg-subtle-hover ring-2 ring-ui-fg-interactive ring-offset-1 ring-offset-ui-bg-base"
+      )}
+      ref={setNodeRef}
+      size="sm"
+      variant={"mono"}
+    >
+      {children}
+    </Badge>
   );
 }

@@ -111,6 +111,7 @@ function FileSourceDialog({
       await startImport({
         workspaceId,
         source: source.source,
+        uiSourceId: source.id,
         storageId,
         options: {
           createRootCollection: createRoot,
@@ -264,6 +265,7 @@ function ConnectionSourceDialog({
       await startImport({
         workspaceId,
         source: source.source,
+        uiSourceId: source.id,
         connectionId: activeConnection._id,
         options: {
           createRootCollection: createRoot,

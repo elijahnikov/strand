@@ -20,8 +20,7 @@ import {
   TrashIcon,
   XIcon,
 } from "lucide-react";
-import { INTEGRATION_LOGO } from "./integration-logos";
-import { JOB_SOURCE_LOGO_ID, SOURCE_LABELS } from "./source-meta";
+import { resolveJobDisplay } from "./source-meta";
 
 type ImportJob = Doc<"importJob">;
 
@@ -103,8 +102,7 @@ function JobRow({
         )
       : 0;
 
-  const logoId = JOB_SOURCE_LOGO_ID[job.source];
-  const Logo = logoId ? INTEGRATION_LOGO[logoId] : undefined;
+  const { label: sourceLabel, Logo } = resolveJobDisplay(job);
 
   return (
     <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-component-hover dark:hover:bg-ui-bg-component">
@@ -118,7 +116,7 @@ function JobRow({
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <div className="flex min-w-0 items-center gap-2">
           <Text className="truncate font-medium text-md text-ui-fg-base">
-            {SOURCE_LABELS[job.source]}
+            {sourceLabel}
           </Text>
           <Badge
             className="px-1 font-mono"
