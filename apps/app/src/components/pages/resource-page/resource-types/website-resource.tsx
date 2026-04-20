@@ -62,10 +62,8 @@ function LoadingPreview() {
           color="#6B7280"
           flickerChance={0.1}
           gridGap={6}
-          height={800}
           maxOpacity={0.5}
           squareSize={4}
-          width={800}
         />
       </div>
     </Card>
@@ -262,10 +260,8 @@ function FramedEmbed({
               color={accentColor}
               flickerChance={0.1}
               gridGap={6}
-              height={800}
               maxOpacity={0.5}
               squareSize={4}
-              width={800}
             />
           </div>
         </Card>
@@ -297,10 +293,8 @@ function SpotifyEmbed({ embedId }: { embedId: string }) {
               color="#1DB954"
               flickerChance={0.1}
               gridGap={6}
-              height={800}
               maxOpacity={0.5}
               squareSize={4}
-              width={800}
             />
           </div>
         </Card>
@@ -353,10 +347,8 @@ function RedditEmbed({ url }: { url: string }) {
               color="#FF4500"
               flickerChance={0.1}
               gridGap={6}
-              height={800}
               maxOpacity={0.5}
               squareSize={4}
-              width={800}
             />
           </div>
         </Card>
@@ -448,10 +440,8 @@ function GistEmbed({ id }: { id: string }) {
             color="#6B7280"
             flickerChance={0.1}
             gridGap={6}
-            height={800}
             maxOpacity={0.5}
             squareSize={4}
-            width={800}
           />
         </div>
       </Card>
@@ -570,10 +560,8 @@ function BlueskyEmbed({ embedId, url }: { embedId: string; url: string }) {
             color="#1185fe"
             flickerChance={0.1}
             gridGap={6}
-            height={800}
             maxOpacity={0.5}
             squareSize={4}
-            width={800}
           />
         </div>
       </Card>

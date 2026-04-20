@@ -15,10 +15,8 @@ export function VideoPreview({ url }: { url: string }) {
             color="#6B7280"
             flickerChance={0.1}
             gridGap={6}
-            height={600}
             maxOpacity={0.5}
             squareSize={4}
-            width={800}
           />
         </Card>
       )}
