@@ -35,7 +35,7 @@ function FileImage({ alt, src }: { alt: string; src: string }) {
         <motion.img
           alt={alt}
           animate={{ opacity: 1, y: 0 }}
-          className="mx-auto mt-4 h-[300px] w-full rounded-xl object-cover"
+          className="mx-auto mt-4 h-[300px] w-full rounded-xl object-cover ring-1 ring-black/10 dark:ring-white/10"
           height="auto"
           initial={{ opacity: 0, y: 4 }}
           key="image"
@@ -49,7 +49,7 @@ function FileImage({ alt, src }: { alt: string; src: string }) {
           key="loading"
           transition={{ duration: 0.15 }}
         >
-          <Card className="mt-4 p-2 pb-0">
+          <Card className="mt-4 rounded-2xl p-2 pb-0">
             <div className="relative h-[300px] w-full overflow-hidden rounded-lg">
               <FlickeringGrid
                 className="absolute inset-0 z-0 size-full"

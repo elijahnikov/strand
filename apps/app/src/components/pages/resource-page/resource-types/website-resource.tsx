@@ -33,7 +33,7 @@ function OgImage({ alt, src }: { alt: string; src: string }) {
     // biome-ignore lint/a11y/noNoninteractiveElementInteractions: image error fallback
     <img
       alt={alt}
-      className="mx-auto mt-4 aspect-auto h-[400px] w-full rounded-xl object-cover"
+      className="mx-auto mt-4 aspect-auto h-[400px] w-full rounded-xl object-cover ring-1 ring-black/10 dark:ring-white/10"
       height="auto"
       onError={() => setError(true)}
       src={src}
@@ -55,7 +55,7 @@ function OgImageEmpty() {
 
 function LoadingPreview() {
   return (
-    <Card className="mt-4 p-2 pb-0">
+    <Card className="mt-4 rounded-2xl p-2 pb-0">
       <div className="relative h-[300px] w-full overflow-hidden rounded-lg">
         <FlickeringGrid
           className="absolute inset-0 z-0 size-full"
@@ -253,7 +253,7 @@ function FramedEmbed({
   return (
     <div className={wrapperClass} style={wrapperStyle}>
       {!loaded && (
-        <Card className="absolute inset-0 z-0 p-2 pb-0">
+        <Card className="absolute inset-0 z-0 rounded-2xl p-2 pb-0">
           <div className="relative h-full w-full overflow-hidden rounded-lg">
             <FlickeringGrid
               className="absolute inset-0 z-0 size-full"
@@ -286,7 +286,7 @@ function SpotifyEmbed({ embedId }: { embedId: string }) {
   return (
     <div className="relative mt-4" style={{ height }}>
       {!loaded && (
-        <Card className="absolute inset-0 z-0 p-2 pb-0">
+        <Card className="absolute inset-0 z-0 rounded-2xl p-2 pb-0">
           <div className="relative h-full w-full overflow-hidden rounded-lg">
             <FlickeringGrid
               className="absolute inset-0 z-0 size-full"
@@ -340,7 +340,7 @@ function RedditEmbed({ url }: { url: string }) {
   return (
     <div className="relative mt-4 overflow-hidden" style={{ height }}>
       {!loaded && (
-        <Card className="absolute inset-0 z-0 p-2 pb-0">
+        <Card className="absolute inset-0 z-0 rounded-2xl p-2 pb-0">
           <div className="relative h-full w-full overflow-hidden rounded-lg">
             <FlickeringGrid
               className="absolute inset-0 z-0 size-full"
@@ -433,7 +433,7 @@ function GistEmbed({ id }: { id: string }) {
 
   if (loading) {
     return (
-      <Card className="mt-4 p-2 pb-0">
+      <Card className="mt-4 rounded-2xl p-2 pb-0">
         <div className="relative h-[300px] w-full overflow-hidden rounded-lg">
           <FlickeringGrid
             className="absolute inset-0 z-0 size-full"
@@ -553,7 +553,7 @@ function BlueskyEmbed({ embedId, url }: { embedId: string; url: string }) {
 
   if (loading) {
     return (
-      <Card className="mt-4 p-2 pb-0">
+      <Card className="mt-4 rounded-2xl p-2 pb-0">
         <div className="relative h-[180px] w-full overflow-hidden rounded-lg">
           <FlickeringGrid
             className="absolute inset-0 z-0 size-full"
@@ -585,7 +585,7 @@ function BlueskyEmbed({ embedId, url }: { embedId: string; url: string }) {
         {post.author.avatar ? (
           <img
             alt=""
-            className="h-8 w-8 rounded-full"
+            className="h-8 w-8 rounded-full ring-1 ring-black/10 dark:ring-white/10"
             height={32}
             src={post.author.avatar}
             width={32}
