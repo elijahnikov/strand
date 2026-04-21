@@ -5,6 +5,7 @@ import { type BetterAuthOptions, betterAuth } from "better-auth/minimal";
 import { username } from "better-auth/plugins";
 import { components, internal } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
+import { internalAction } from "./_generated/server";
 import authConfig from "./auth.config";
 import authSchema from "./betterAuth/schema";
 
@@ -71,11 +72,11 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
 
 export const { onCreate, onUpdate, onDelete } = authComponent.triggersApi();
 
-// export const getLatestJwks = internalAction({
-//   args: {},
-//   handler: async (ctx) => {
-//     const auth = createAuth(ctx);
-//     const jwks = await auth.api.getLatestJwks();
-//     return jwks;
-//   },
-// });
+export const getLatestJwks = internalAction({
+  args: {},
+  handler: async (ctx) => {
+    const auth = createAuth(ctx);
+    const jwks = await auth.api.getLatestJwks();
+    return jwks;
+  },
+});

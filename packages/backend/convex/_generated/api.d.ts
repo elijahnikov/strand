@@ -29,7 +29,6 @@ import type * as connections_providers_readwise from "../connections/providers/r
 import type * as connections_providers_registry from "../connections/providers/registry.js";
 import type * as connections_providers_types from "../connections/providers/types.js";
 import type * as connections_queries from "../connections/queries.js";
-import type * as crpc from "../crpc.js";
 import type * as extensionAuth_http from "../extensionAuth/http.js";
 import type * as extensionAuth_internals from "../extensionAuth/internals.js";
 import type * as extensionAuth_mutations from "../extensionAuth/mutations.js";
@@ -106,7 +105,6 @@ declare const fullApi: ApiFromModules<{
   "connections/providers/registry": typeof connections_providers_registry;
   "connections/providers/types": typeof connections_providers_types;
   "connections/queries": typeof connections_queries;
-  crpc: typeof crpc;
   "extensionAuth/http": typeof extensionAuth_http;
   "extensionAuth/internals": typeof extensionAuth_internals;
   "extensionAuth/mutations": typeof extensionAuth_mutations;
