@@ -1,14 +1,14 @@
 import { ConvexError } from "convex/values";
 import { describe, expect, it } from "vitest";
-import { api, internal } from "./_generated/api";
-import type { Id } from "./_generated/dataModel";
 import {
   asUser,
   createHarness,
   seedMember,
   seedUser,
   seedWorkspace,
-} from "./_test/harness";
+} from "../test/harness";
+import { api, internal } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
 
 const notAuthenticatedRegex = /Not authenticated/;
 const userNotFoundRegex = /User not found/;

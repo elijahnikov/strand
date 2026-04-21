@@ -6,7 +6,7 @@ import {
   seedResource,
   seedUser,
   seedWorkspace,
-} from "../_test/harness";
+} from "../../test/harness";
 
 // Workspace isolation regression guard. This is the single most important
 // security invariant in search: a user in workspace A must never see resources
@@ -20,11 +20,11 @@ const unauthorizedRegex = /Unauthorized/;
 const notAuthorizedRegex = /Not authorized/;
 
 vi.mock("@omi/ai/providers", async () => {
-  const { mockProvidersModule } = await import("../_test/mockAi");
+  const { mockProvidersModule } = await import("../../test/mockAi");
   return mockProvidersModule();
 });
 vi.mock("@omi/ai/embeddings", async () => {
-  const { mockEmbeddingsModule } = await import("../_test/mockAi");
+  const { mockEmbeddingsModule } = await import("../../test/mockAi");
   return mockEmbeddingsModule();
 });
 

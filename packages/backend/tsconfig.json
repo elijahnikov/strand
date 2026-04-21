@@ -1,6 +1,6 @@
 {
   "extends": "@omi/tsconfig/base.json",
   "compilerOptions": {},
-  "include": ["*.ts", "src", "convex"],
+  "include": ["*.ts", "src", "convex", "test"],
   "exclude": ["node_modules"]
 }

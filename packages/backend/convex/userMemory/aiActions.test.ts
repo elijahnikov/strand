@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
-import { createHarness, seedUser, seedWorkspace } from "../_test/harness";
+import { createHarness, seedUser, seedWorkspace } from "../../test/harness";
 
 // The user memory extractor has three subtle correctness properties that
 // don't show up in types and would silently rot if broken:
@@ -14,7 +14,7 @@ import { createHarness, seedUser, seedWorkspace } from "../_test/harness";
 // tests can re-mock via `vi.doMock` before importing, but for these four tests
 // we set the content once per test via `vi.doMock` and then import the action.
 vi.mock("@omi/ai/providers", async () => {
-  const { mockProvidersModule } = await import("../_test/mockAi");
+  const { mockProvidersModule } = await import("../../test/mockAi");
   return mockProvidersModule();
 });
 
@@ -74,7 +74,7 @@ beforeEach(() => {
 describe("extractUserMemory", () => {
   it("no-ops when fewer than MIN_NEW_MESSAGES new messages exist", async () => {
     vi.doMock("@omi/ai/memory", async () => {
-      const { mockMemoryModule } = await import("../_test/mockAi");
+      const { mockMemoryModule } = await import("../../test/mockAi");
       return mockMemoryModule("NEW extracted content that replaces everything");
     });
     const t = createHarness();
@@ -97,7 +97,7 @@ describe("extractUserMemory", () => {
 
   it("happy path: writes new content, bumps version, returns status to idle", async () => {
     vi.doMock("@omi/ai/memory", async () => {
-      const { mockMemoryModule } = await import("../_test/mockAi");
+      const { mockMemoryModule } = await import("../../test/mockAi");
       return mockMemoryModule("user is building a PKMS with vector search");
     });
     const t = createHarness();
@@ -122,7 +122,7 @@ describe("extractUserMemory", () => {
 
   it("drift guard: rejects a low-similarity update when message count is below DRIFT_GUARD_MIN_MESSAGES", async () => {
     vi.doMock("@omi/ai/memory", async () => {
-      const { mockMemoryModule } = await import("../_test/mockAi");
+      const { mockMemoryModule } = await import("../../test/mockAi");
       // Totally unrelated content — Jaccard ~0 vs the existing one.
       return mockMemoryModule("apples bananas cherries dragonfruit");
     });
@@ -153,7 +153,7 @@ describe("extractUserMemory", () => {
 
   it("drift guard is bypassed once the thread is long enough (>=DRIFT_GUARD_MIN_MESSAGES)", async () => {
     vi.doMock("@omi/ai/memory", async () => {
-      const { mockMemoryModule } = await import("../_test/mockAi");
+      const { mockMemoryModule } = await import("../../test/mockAi");
       return mockMemoryModule("apples bananas cherries dragonfruit");
     });
     const t = createHarness();

@@ -5,29 +5,29 @@ import {
   seedResource,
   seedUser,
   seedWorkspace,
-} from "../_test/harness";
+} from "../../test/harness";
 import {
   defaultEnrichmentResult,
   fakeEmbedding,
   mockEmbeddingsModule,
   mockEnrichmentModule,
   mockProvidersModule,
-} from "../_test/mockAi";
+} from "../../test/mockAi";
 
 // Mock the AI package so `processResourceAI` never calls OpenAI.
 // Factories must be self-contained (vi.mock hoists and can't close over module
 // scope), so each factory re-declares what it needs.
 vi.mock("@omi/ai/providers", async () => {
-  const { mockProvidersModule: m } = await import("../_test/mockAi");
+  const { mockProvidersModule: m } = await import("../../test/mockAi");
   return m();
 });
 vi.mock("@omi/ai/embeddings", async () => {
-  const { mockEmbeddingsModule: m } = await import("../_test/mockAi");
+  const { mockEmbeddingsModule: m } = await import("../../test/mockAi");
   return m();
 });
 vi.mock("@omi/ai/enrichment", async () => {
   const { mockEnrichmentModule: m, defaultEnrichmentResult: d } = await import(
-    "../_test/mockAi"
+    "../../test/mockAi"
   );
   return m(d());
 });

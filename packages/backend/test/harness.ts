@@ -1,8 +1,8 @@
 /// <reference types="vite/client" />
 import { convexTest, type TestConvex } from "convex-test";
-import { internal } from "../_generated/api";
-import type { Doc, Id } from "../_generated/dataModel";
-import schema from "../schema";
+import { internal } from "../convex/_generated/api";
+import type { Doc, Id } from "../convex/_generated/dataModel";
+import schema from "../convex/schema";
 
 type SchemaDef = typeof schema;
 type TestHarness = TestConvex<SchemaDef>;
@@ -10,7 +10,7 @@ type TestHarness = TestConvex<SchemaDef>;
 // `import.meta.glob` is provided by Vite at test time. convex-test uses the
 // resulting modules map to wire up Convex function references.
 export function createHarness(): TestHarness {
-  const modules = import.meta.glob("../**/*.ts");
+  const modules = import.meta.glob("../convex/**/*.ts");
   return convexTest(schema, modules);
 }
 
