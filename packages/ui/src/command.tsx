@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog as CommandDialogPrimitive } from "@base-ui/react/dialog";
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 import {
   Autocomplete,
   AutocompleteCollection,
@@ -12,7 +12,7 @@ import {
   AutocompleteItem,
   AutocompleteList,
   AutocompleteSeparator,
-} from "@strand/ui/autocomplete";
+} from "@omi/ui/autocomplete";
 import { SearchIcon } from "lucide-react";
 import type * as React from "react";
 

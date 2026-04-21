@@ -1,8 +1,8 @@
 import { convexQuery } from "@convex-dev/react-query";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { cn } from "@strand/ui";
-import { Button } from "@strand/ui/button";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { cn } from "@omi/ui";
+import { Button } from "@omi/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import type { UIMessage } from "ai";
 import { CheckIcon, CopyIcon } from "lucide-react";
@@ -262,14 +262,14 @@ export function MessageBubble({
       ) : (
         <div className="relative top-0 left-3.5 flex size-10 shrink-0 items-center justify-center">
           <img
-            alt="Strand"
+            alt="omi"
             className="hidden rounded-lg dark:block"
             height={64}
             src="/STRAND_TRANSPARENT_WHITE.png"
             width={64}
           />
           <img
-            alt="Strand"
+            alt="omi"
             className="rounded-lg dark:hidden"
             height={64}
             src="/STRAND_TRANSPARENT_BLACK.png"

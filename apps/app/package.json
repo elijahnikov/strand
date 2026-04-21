@@ -1,5 +1,5 @@
 {
-  "name": "@strand/app",
+  "name": "@omi/app",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -22,9 +22,9 @@
     "@fontsource-variable/geist": "^5.2.8",
     "@fontsource-variable/geist-mono": "^5.2.7",
     "@pierre/diffs": "^1.1.10",
-    "@strand/auth": "*",
-    "@strand/backend": "*",
-    "@strand/ui": "*",
+    "@omi/auth": "*",
+    "@omi/backend": "*",
+    "@omi/ui": "*",
     "@t3-oss/env-core": "^0.13.8",
     "@tanstack/react-form": "catalog:tanstack",
     "@tanstack/react-hotkeys": "catalog:tanstack",
@@ -54,8 +54,8 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
-    "@strand/tailwind-config": "*",
-    "@strand/tsconfig": "*",
+    "@omi/tailwind-config": "*",
+    "@omi/tsconfig": "*",
     "@tailwindcss/vite": "catalog:tailwind",
     "@types/node": "catalog:",
     "@types/react": "catalog:react",

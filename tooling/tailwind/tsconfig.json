@@ -1,5 +1,5 @@
 {
-  "extends": "@strand/tsconfig/base.json",
+  "extends": "@omi/tsconfig/base.json",
   "include": ["."],
   "exclude": ["node_modules"],
   "compilerOptions": {

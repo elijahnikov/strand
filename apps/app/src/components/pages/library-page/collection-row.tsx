@@ -1,14 +1,14 @@
 import { useConvexMutation } from "@convex-dev/react-query";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { cn } from "@strand/ui";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { cn } from "@omi/ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@strand/ui/dropdown-menu";
+} from "@omi/ui/dropdown-menu";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { FolderIcon, MoreHorizontalIcon, TrashIcon } from "lucide-react";

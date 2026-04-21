@@ -1,4 +1,4 @@
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 import { CheckIcon } from "lucide-react";
 import { useSearchFilters } from "../../use-search-filters";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 import * as React from "react";
 import * as RechartsPrimitive from "recharts";
 

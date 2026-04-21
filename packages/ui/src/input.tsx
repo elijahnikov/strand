@@ -1,7 +1,7 @@
 "use client";
 
 import { RiEyeLine, RiEyeOffLine, RiSearchLine } from "@remixicon/react";
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 import { cva, type VariantProps } from "class-variance-authority";
 import React from "react";
 

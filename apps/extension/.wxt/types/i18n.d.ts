@@ -9,7 +9,7 @@ declare module "wxt/browser" {
     /**
      * See https://developer.chrome.com/docs/extensions/reference/i18n/#method-getMessage
      */
-    escapeLt?: boolean;
+    escapeLt?: boolean
   }
 
   export interface WxtI18n extends I18n.Static {
@@ -22,7 +22,7 @@ declare module "wxt/browser" {
     getMessage(
       messageName: "@@extension_id",
       substitutions?: string | string[],
-      options?: GetMessageOptions
+      options?: GetMessageOptions,
     ): string;
     /**
      * "<browser.i18n.getUiLocale()>"
@@ -30,7 +30,7 @@ declare module "wxt/browser" {
     getMessage(
       messageName: "@@ui_locale",
       substitutions?: string | string[],
-      options?: GetMessageOptions
+      options?: GetMessageOptions,
     ): string;
     /**
      * The text direction for the current locale, either "ltr" for left-to-right languages such as English or "rtl" for right-to-left languages such as Japanese.
@@ -40,7 +40,7 @@ declare module "wxt/browser" {
     getMessage(
       messageName: "@@bidi_dir",
       substitutions?: string | string[],
-      options?: GetMessageOptions
+      options?: GetMessageOptions,
     ): string;
     /**
      * If the @@bidi_dir is "ltr", then this is "rtl"; otherwise, it's "ltr".
@@ -50,7 +50,7 @@ declare module "wxt/browser" {
     getMessage(
       messageName: "@@bidi_reversed_dir",
       substitutions?: string | string[],
-      options?: GetMessageOptions
+      options?: GetMessageOptions,
     ): string;
     /**
      * If the @@bidi_dir is "ltr", then this is "left"; otherwise, it's "right".
@@ -60,7 +60,7 @@ declare module "wxt/browser" {
     getMessage(
       messageName: "@@bidi_start_edge",
       substitutions?: string | string[],
-      options?: GetMessageOptions
+      options?: GetMessageOptions,
     ): string;
     /**
      * If the @@bidi_dir is "ltr", then this is "right"; otherwise, it's "left".
@@ -70,18 +70,12 @@ declare module "wxt/browser" {
     getMessage(
       messageName: "@@bidi_end_edge",
       substitutions?: string | string[],
-      options?: GetMessageOptions
+      options?: GetMessageOptions,
     ): string;
     getMessage(
-      messageName:
-        | "@@extension_id"
-        | "@@ui_locale"
-        | "@@bidi_dir"
-        | "@@bidi_reversed_dir"
-        | "@@bidi_start_edge"
-        | "@@bidi_end_edge",
+      messageName: "@@extension_id" | "@@ui_locale" | "@@bidi_dir" | "@@bidi_reversed_dir" | "@@bidi_start_edge" | "@@bidi_end_edge",
       substitutions?: string | string[],
-      options?: GetMessageOptions
+      options?: GetMessageOptions,
     ): string;
   }
 }

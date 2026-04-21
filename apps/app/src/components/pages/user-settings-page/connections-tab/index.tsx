@@ -1,9 +1,9 @@
 import { convexQuery } from "@convex-dev/react-query";
-import { api } from "@strand/backend/_generated/api.js";
-import { Heading } from "@strand/ui/heading";
-import { Input } from "@strand/ui/input";
-import { Text } from "@strand/ui/text";
-import { toastManager } from "@strand/ui/toast";
+import { api } from "@omi/backend/_generated/api.js";
+import { Heading } from "@omi/ui/heading";
+import { Input } from "@omi/ui/input";
+import { Text } from "@omi/ui/text";
+import { toastManager } from "@omi/ui/toast";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { ConnectDialog } from "./connect-dialog";

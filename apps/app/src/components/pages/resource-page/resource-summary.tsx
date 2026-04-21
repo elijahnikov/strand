@@ -1,4 +1,4 @@
-import { Skeleton } from "@strand/ui/skeleton";
+import { Skeleton } from "@omi/ui/skeleton";
 import { AnimatePresence, motion } from "motion/react";
 import type { GetResourceData } from "~/lib/convex-types";
 import { CollapsibleSection } from "./collapsible-section";

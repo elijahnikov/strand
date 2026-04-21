@@ -1,6 +1,6 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { NotFoundState } from "~/components/common/not-found-state";

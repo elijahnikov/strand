@@ -1,5 +1,5 @@
-import { Separator } from "@strand/ui/separator";
-import { Text } from "@strand/ui/text";
+import { Separator } from "@omi/ui/separator";
+import { Text } from "@omi/ui/text";
 import { Link } from "@tanstack/react-router";
 import { SocialLoginButtons } from "../login-page/social-login-buttons";
 import { EmailPasswordRegisterForm } from "./email-password-form";
@@ -10,7 +10,7 @@ export default function RegisterPageComponent() {
       <div className="mx-auto flex flex-col justify-center text-center">
         <h1 className="font-semibold text-xl">Create an account</h1>
         <Text className="font-medium text-ui-fg-muted" size="small">
-          Get started with Strand
+          Get started with omi
         </Text>
       </div>
       <EmailPasswordRegisterForm />

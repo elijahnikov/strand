@@ -1,6 +1,6 @@
 import { RiQuestionFill, RiSettings4Fill } from "@remixicon/react";
-import { SidebarFooter } from "@strand/ui/sidebar";
-import { TooltipProvider } from "@strand/ui/tooltip";
+import { SidebarFooter } from "@omi/ui/sidebar";
+import { TooltipProvider } from "@omi/ui/tooltip";
 import { useParams } from "@tanstack/react-router";
 import { Suspense } from "react";
 import {
@@ -30,7 +30,7 @@ export default function WorkspaceSidebarFooter() {
             external
             icon={RiQuestionFill}
             title="Help & Feedback"
-            url="https://github.com/your-repo/strand/issues"
+            url="https://github.com/your-repo/omi/issues"
           />
         </div>
         <Suspense>

@@ -1,8 +1,8 @@
 import { useConvexMutation } from "@convex-dev/react-query";
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import { useLibrarySelection } from "~/lib/selection/library-selection";

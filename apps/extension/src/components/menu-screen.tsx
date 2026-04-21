@@ -5,7 +5,7 @@ import {
   RiGlobalLine,
   RiLogoutBoxLine,
 } from "@remixicon/react";
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 import { useState } from "react";
 import { captureScreenshot, captureWebsite } from "@/lib/capture";
 
@@ -35,7 +35,7 @@ function safeDomain(url: string): string {
 
 function getWebAppUrl(): string {
   const fromEnv = import.meta.env.VITE_SITE_URL as string | undefined;
-  return (fromEnv ?? "https://app.strand.com").replace(/\/$/, "");
+  return (fromEnv ?? "https://app.omi.com").replace(/\/$/, "");
 }
 
 export function MenuScreen({ onDisconnect }: { onDisconnect: () => void }) {
@@ -97,7 +97,7 @@ export function MenuScreen({ onDisconnect }: { onDisconnect: () => void }) {
     <div className="relative flex flex-col bg-ui-bg-component p-1 outline-none">
       <div className="px-2 pt-1 pb-1">
         <span className="font-medium text-ui-fg-muted text-xs uppercase tracking-wider">
-          Strand
+          omi
         </span>
       </div>
 
@@ -125,7 +125,7 @@ export function MenuScreen({ onDisconnect }: { onDisconnect: () => void }) {
         <Separator />
         <MenuItem
           icon={<RiExternalLinkLine />}
-          label="Open Strand"
+          label="Open omi"
           onClick={handleOpenStrand}
         />
         <MenuItem

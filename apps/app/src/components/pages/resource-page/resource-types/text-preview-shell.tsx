@@ -1,5 +1,5 @@
-import { Card } from "@strand/ui/card";
-import { FlickeringGrid } from "@strand/ui/flickering-grid";
+import { Card } from "@omi/ui/card";
+import { FlickeringGrid } from "@omi/ui/flickering-grid";
 import { FileIcon } from "lucide-react";
 import { formatFileSize } from "~/lib/format";
 

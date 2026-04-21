@@ -2,7 +2,7 @@
  * Custom shadcn-compatible components for BlockNote.
  *
  * These use Radix UI primitives (required for BlockNote API compatibility)
- * styled with Strand design tokens. No portals — BlockNote manages its own
+ * styled with omi design tokens. No portals — BlockNote manages its own
  * positioning layer.
  */
 
@@ -14,7 +14,7 @@ import { Slot } from "@radix-ui/react-slot";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import * as TogglePrimitive from "@radix-ui/react-toggle";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 import { cva, type VariantProps } from "class-variance-authority";
 import { CheckIcon, ChevronDownIcon, ChevronRightIcon } from "lucide-react";
 import type * as React from "react";

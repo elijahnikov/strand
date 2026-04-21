@@ -5,7 +5,7 @@ import {
   RiArrowLeftSLine,
   RiArrowRightSLine,
 } from "@remixicon/react";
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 import * as React from "react";
 import {
   type DayButton,

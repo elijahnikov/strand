@@ -1,5 +1,5 @@
 {
-  "name": "@strand/ui",
+  "name": "@omi/ui",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -30,7 +30,7 @@
     "three": "^0.167.1"
   },
   "devDependencies": {
-    "@strand/tsconfig": "*",
+    "@omi/tsconfig": "*",
     "@types/react": "catalog:react",
     "react": "catalog:react",
     "typescript": "catalog:",

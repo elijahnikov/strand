@@ -234,7 +234,7 @@ async function extractRedditContent(
   // Reddit's .json endpoint returns post data without auth
   const jsonUrl = ctx.url.replace(TRAILING_SLASH_RE, ".json");
   const response = await fetch(jsonUrl, {
-    headers: { "User-Agent": "strand-pkms/1.0" },
+    headers: { "User-Agent": "omi-pkms/1.0" },
   });
 
   if (!response.ok) {

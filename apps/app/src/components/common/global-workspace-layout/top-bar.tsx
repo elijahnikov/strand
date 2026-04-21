@@ -5,7 +5,7 @@ import {
   RiHome3Fill,
   RiSearch2Fill,
 } from "@remixicon/react";
-import { TooltipProvider } from "@strand/ui/tooltip";
+import { TooltipProvider } from "@omi/ui/tooltip";
 import { useLocation, useParams } from "@tanstack/react-router";
 import { Suspense, useMemo } from "react";
 import { NavMoreMenu } from "~/components/common/global-workspace-layout/top-bar/nav-more-menu";

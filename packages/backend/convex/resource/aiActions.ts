@@ -1,12 +1,12 @@
 "use node";
 
 import { createHash } from "node:crypto";
-import { chunkPdfPages, chunkText } from "@strand/ai/chunking";
-import { normalizeConceptName } from "@strand/ai/concepts";
-import { generateEmbedding, generateEmbeddings } from "@strand/ai/embeddings";
-import { createEnricher, type EnricherInput } from "@strand/ai/enrichment";
-import { extractPdfText } from "@strand/ai/pdf";
-import { createOpenAIProvider } from "@strand/ai/providers";
+import { chunkPdfPages, chunkText } from "@omi/ai/chunking";
+import { normalizeConceptName } from "@omi/ai/concepts";
+import { generateEmbedding, generateEmbeddings } from "@omi/ai/embeddings";
+import { createEnricher, type EnricherInput } from "@omi/ai/enrichment";
+import { extractPdfText } from "@omi/ai/pdf";
+import { createOpenAIProvider } from "@omi/ai/providers";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";

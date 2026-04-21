@@ -23,7 +23,7 @@ export const useResourceSections = create<ResourceSectionsState>()(
         })),
     }),
     {
-      name: "strand-resource-sections",
+      name: "omi-resource-sections",
     }
   )
 );

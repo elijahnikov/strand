@@ -1,7 +1,7 @@
-import { cn } from "@strand/ui";
-import { Popover, PopoverContent, PopoverTrigger } from "@strand/ui/popover";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@strand/ui/tabs";
-import { Text } from "@strand/ui/text";
+import { cn } from "@omi/ui";
+import { Popover, PopoverContent, PopoverTrigger } from "@omi/ui/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omi/ui/tabs";
+import { Text } from "@omi/ui/text";
 import { EmojiPicker } from "frimousse";
 import { useState } from "react";
 import { workspaceIcons } from "~/lib/workspace-icons";

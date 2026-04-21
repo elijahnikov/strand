@@ -1,11 +1,11 @@
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { Badge } from "@strand/ui/badge";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { Badge } from "@omi/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@strand/ui/dropdown-menu";
+} from "@omi/ui/dropdown-menu";
 import { CheckIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import {

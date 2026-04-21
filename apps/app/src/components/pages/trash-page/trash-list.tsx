@@ -3,9 +3,9 @@ import {
   useConvexPaginatedQuery,
 } from "@convex-dev/react-query";
 import { RiDeleteBinLine } from "@remixicon/react";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { Skeleton } from "@strand/ui/skeleton";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { Skeleton } from "@omi/ui/skeleton";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef } from "react";

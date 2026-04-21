@@ -1,4 +1,4 @@
-import { Badge } from "@strand/ui/badge";
+import { Badge } from "@omi/ui/badge";
 import {
   Command,
   CommandCollection,
@@ -7,7 +7,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@strand/ui/command";
+} from "@omi/ui/command";
 import { CheckIcon } from "lucide-react";
 import { type ReactNode, useMemo, useState } from "react";
 

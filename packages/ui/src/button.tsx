@@ -1,6 +1,6 @@
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
 
@@ -20,7 +20,7 @@ const buttonVariants = cva(
           "active:bg-ui-button-inverted-pressed",
           "focus-visible:shadow-buttons-inverted-focus!"
         ),
-        strand: cn(
+        omi: cn(
           "border-[0.5px] border-blue-400 bg-linear-to-t from-blue-500 to-blue-400 text-white after:hidden",
           "hover:from-blue-600 hover:to-blue-500",
           "active:from-blue-700 active:to-blue-600",

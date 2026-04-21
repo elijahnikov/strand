@@ -3,7 +3,7 @@
   "extends": ["config:base"],
   "packageRules": [
     {
-      "matchPackagePatterns": ["^@strand/"],
+      "matchPackagePatterns": ["^@omi/"],
       "enabled": false
     }
   ],

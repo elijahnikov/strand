@@ -1,1 +1,1 @@
-export { default } from "@strand/tailwind-config/postcss-config";
+export { default } from "@omi/tailwind-config/postcss-config";

@@ -1,24 +1,24 @@
 "use client";
 
-import { cn } from "@strand/ui";
-import { Button } from "@strand/ui/button";
-import { useIsMobile } from "@strand/ui/hooks/use-mobile";
-import { Input } from "@strand/ui/input";
-import { Separator } from "@strand/ui/separator";
+import { cn } from "@omi/ui";
+import { Button } from "@omi/ui/button";
+import { useIsMobile } from "@omi/ui/hooks/use-mobile";
+import { Input } from "@omi/ui/input";
+import { Separator } from "@omi/ui/separator";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@strand/ui/sheet";
-import { Skeleton } from "@strand/ui/skeleton";
+} from "@omi/ui/sheet";
+import { Skeleton } from "@omi/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@strand/ui/tooltip";
+} from "@omi/ui/tooltip";
 import { cva, type VariantProps } from "class-variance-authority";
 import { PanelLeft } from "lucide-react";
 import React, { useCallback, useMemo } from "react";

@@ -1,5 +1,5 @@
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { SidebarInset, SidebarProvider } from "@strand/ui/sidebar";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { SidebarInset, SidebarProvider } from "@omi/ui/sidebar";
 import { useParams } from "@tanstack/react-router";
 import { CommandPaletteProvider } from "~/components/common/command-palette/use-command-palette";
 import { TopBar } from "~/components/common/global-workspace-layout/top-bar";

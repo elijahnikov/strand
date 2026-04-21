@@ -1,5 +1,5 @@
 import { convexQuery } from "@convex-dev/react-query";
-import { api } from "@strand/backend/_generated/api.js";
+import { api } from "@omi/backend/_generated/api.js";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { Authenticated } from "convex/react";
 import { GlobalLayout } from "~/components/common/global-workspace-layout";

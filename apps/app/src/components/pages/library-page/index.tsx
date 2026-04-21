@@ -1,7 +1,7 @@
 import { useConvexMutation } from "@convex-dev/react-query";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { toastManager } from "@strand/ui/toast";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { toastManager } from "@omi/ui/toast";
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { PageContent } from "~/components/common/page-content";

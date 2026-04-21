@@ -6,20 +6,20 @@ import {
   captureWebsite,
 } from "@/lib/capture";
 
-const CONTEXT_MENU_SAVE_SELECTION = "strand-save-selection";
-const CONTEXT_MENU_SAVE_IMAGE = "strand-save-image";
+const CONTEXT_MENU_SAVE_SELECTION = "omi-save-selection";
+const CONTEXT_MENU_SAVE_IMAGE = "omi-save-image";
 
 export default defineBackground(() => {
   chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.removeAll(() => {
       chrome.contextMenus.create({
         id: CONTEXT_MENU_SAVE_SELECTION,
-        title: "Save selection to Strand",
+        title: "Save selection to omi",
         contexts: ["selection"],
       });
       chrome.contextMenus.create({
         id: CONTEXT_MENU_SAVE_IMAGE,
-        title: "Save image to Strand",
+        title: "Save image to omi",
         contexts: ["image"],
       });
     });
@@ -84,7 +84,7 @@ async function runCapture(
 ): Promise<void> {
   try {
     await promise;
-    notify(`${label} saved`, "Open Strand to view the resource.");
+    notify(`${label} saved`, "Open omi to view the resource.");
   } catch (err) {
     notify(`${label} failed`, err instanceof Error ? err.message : String(err));
   }

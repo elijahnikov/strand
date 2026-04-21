@@ -1,4 +1,4 @@
-const TOKEN_KEY = "strand.auth.v1";
+const TOKEN_KEY = "omi.auth.v1";
 
 export interface StoredAuth {
   defaultWorkspaceId?: string;

@@ -1,5 +1,5 @@
 {
-  "name": "@strand/ai",
+  "name": "@omi/ai",
   "private": true,
   "type": "module",
   "exports": {
@@ -20,6 +20,8 @@
     "build": "tsc",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "dev": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
@@ -31,8 +33,9 @@
     "unpdf": "^1.4.0"
   },
   "devDependencies": {
-    "@strand/tsconfig": "workspace:*",
+    "@omi/tsconfig": "workspace:*",
     "@types/node": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "^3"
   }
 }

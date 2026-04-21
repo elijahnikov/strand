@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@strand/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@omi/ui/avatar";
 import BoringAvatar from "boring-avatars";
 
 interface UserAvatarProps {

@@ -1,5 +1,5 @@
-import { Card } from "@strand/ui/card";
-import { FlickeringGrid } from "@strand/ui/flickering-grid";
+import { Card } from "@omi/ui/card";
+import { FlickeringGrid } from "@omi/ui/flickering-grid";
 import { AnimatePresence, motion } from "motion/react";
 import { lazy, Suspense, useState } from "react";
 import { FileKindIcon } from "~/components/common/file-kind-icon";

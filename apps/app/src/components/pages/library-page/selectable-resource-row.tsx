@@ -1,5 +1,5 @@
-import { cn } from "@strand/ui";
-import { Checkbox } from "@strand/ui/checkbox";
+import { cn } from "@omi/ui";
+import { Checkbox } from "@omi/ui/checkbox";
 import type { MouseEvent, ReactNode } from "react";
 import {
   type SelectionItem,

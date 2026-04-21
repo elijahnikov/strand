@@ -5,7 +5,7 @@ import {
   RiArrowUpSFill,
   RiCheckFill,
 } from "@remixicon/react";
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 
 const Select = SelectPrimitive.Root;
 

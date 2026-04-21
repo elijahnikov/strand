@@ -1,4 +1,4 @@
-import { ScrollArea } from "@strand/ui/scroll-area";
+import { ScrollArea } from "@omi/ui/scroll-area";
 import type { UseHotkeyDefinition } from "@tanstack/react-hotkeys";
 import { useHotkeys } from "@tanstack/react-hotkeys";
 import { useNavigate } from "@tanstack/react-router";

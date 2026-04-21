@@ -1,4 +1,4 @@
-import { Kbd, KbdGroup } from "@strand/ui/kbd";
+import { Kbd, KbdGroup } from "@omi/ui/kbd";
 
 export function ShortcutTooltipBody({
   title,

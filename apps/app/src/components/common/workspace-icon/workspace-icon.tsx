@@ -1,4 +1,4 @@
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 import { BoxIcon } from "lucide-react";
 import { getWorkspaceIcon } from "~/lib/workspace-icons";
 

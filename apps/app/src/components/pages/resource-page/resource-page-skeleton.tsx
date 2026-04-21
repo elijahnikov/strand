@@ -1,4 +1,4 @@
-import { Skeleton } from "@strand/ui/skeleton";
+import { Skeleton } from "@omi/ui/skeleton";
 import { PageContent } from "~/components/common/page-content";
 
 export function ResourcePageSkeleton() {

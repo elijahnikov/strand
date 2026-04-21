@@ -1,9 +1,9 @@
 "use client";
 
 import { RiCheckFill, RiFileCopyLine } from "@remixicon/react";
-import { cn } from "@strand/ui";
-import { Button } from "@strand/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@strand/ui/tooltip";
+import { cn } from "@omi/ui";
+import { Button } from "@omi/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@omi/ui/tooltip";
 import { useState } from "react";
 
 export default function CopyButton({

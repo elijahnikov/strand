@@ -1,5 +1,5 @@
 {
-  "name": "@strand/extension",
+  "name": "@omi/extension",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -13,16 +13,16 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@strand/auth": "*",
-    "@strand/backend": "*",
-    "@strand/ui": "*",
+    "@omi/auth": "*",
+    "@omi/backend": "*",
+    "@omi/ui": "*",
     "convex": "catalog:convex",
     "react": "catalog:react",
     "react-dom": "catalog:react"
   },
   "devDependencies": {
-    "@strand/tailwind-config": "*",
-    "@strand/tsconfig": "*",
+    "@omi/tailwind-config": "*",
+    "@omi/tsconfig": "*",
     "@tailwindcss/vite": "catalog:tailwind",
     "@types/chrome": "^0.0.287",
     "@types/react": "catalog:react",

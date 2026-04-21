@@ -1,4 +1,4 @@
-import type { Id } from "@strand/backend/_generated/dataModel.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { useLocation, useParams } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef } from "react";
 import {

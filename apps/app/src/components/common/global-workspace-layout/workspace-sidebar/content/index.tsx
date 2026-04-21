@@ -5,8 +5,8 @@ import {
   RiHome3Fill,
   RiSearch2Fill,
 } from "@remixicon/react";
-import { SidebarContent } from "@strand/ui/sidebar";
-import { TooltipProvider } from "@strand/ui/tooltip";
+import { SidebarContent } from "@omi/ui/sidebar";
+import { TooltipProvider } from "@omi/ui/tooltip";
 import { useLocation, useParams } from "@tanstack/react-router";
 import { useMemo } from "react";
 import SidebarLinkItem from "~/components/common/global-workspace-layout/workspace-sidebar/sidebar-link-item";

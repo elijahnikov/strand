@@ -2,9 +2,9 @@
 
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
 import type { ConvexQueryClient } from "@convex-dev/react-query";
-import { authClient } from "@strand/auth/client";
-import { ThemeProvider } from "@strand/ui/theme";
-import { AnchoredToastProvider, ToastProvider } from "@strand/ui/toast";
+import { authClient } from "@omi/auth/client";
+import { ThemeProvider } from "@omi/ui/theme";
+import { AnchoredToastProvider, ToastProvider } from "@omi/ui/toast";
 import { HotkeysProvider } from "@tanstack/react-hotkeys";
 import type { QueryClient } from "@tanstack/react-query";
 import {

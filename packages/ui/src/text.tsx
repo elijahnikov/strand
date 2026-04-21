@@ -1,4 +1,4 @@
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 
 import { cva, type VariantProps } from "class-variance-authority";
 import type React from "react";

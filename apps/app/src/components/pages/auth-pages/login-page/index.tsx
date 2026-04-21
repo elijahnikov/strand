@@ -1,5 +1,5 @@
-import { Separator } from "@strand/ui/separator";
-import { Text } from "@strand/ui/text";
+import { Separator } from "@omi/ui/separator";
+import { Text } from "@omi/ui/text";
 import { Link } from "@tanstack/react-router";
 import { EmailPasswordForm } from "./email-password-form";
 import { SocialLoginButtons } from "./social-login-buttons";

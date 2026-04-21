@@ -1,6 +1,6 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
 import {
   Dialog,
   DialogClose,
@@ -9,11 +9,11 @@ import {
   DialogHeader,
   DialogPopup,
   DialogTitle,
-} from "@strand/ui/dialog";
-import { Heading } from "@strand/ui/heading";
-import { Kbd } from "@strand/ui/kbd";
-import { LoadingButton } from "@strand/ui/loading-button";
-import { Text } from "@strand/ui/text";
+} from "@omi/ui/dialog";
+import { Heading } from "@omi/ui/heading";
+import { Kbd } from "@omi/ui/kbd";
+import { LoadingButton } from "@omi/ui/loading-button";
+import { Text } from "@omi/ui/text";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
@@ -161,7 +161,7 @@ export function MemoryTab({ workspaceId }: { workspaceId: Id<"workspace"> }) {
       ) : (
         <div>
           <Text className="text-ui-fg-muted">
-            No memory yet. As you chat, Strand will build a short profile here
+            No memory yet. As you chat, omi will build a short profile here
             covering your active projects, recurring interests, and preferences.
           </Text>
         </div>

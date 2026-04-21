@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { captureScratchpad } from "@/lib/capture";
 
-const DRAFT_KEY = "strand.scratchpad.draft.v1";
+const DRAFT_KEY = "omi.scratchpad.draft.v1";
 const TITLE_MAX_LEN = 60;
 
 export function ScratchpadEditor({ onSaved }: { onSaved?: () => void } = {}) {
@@ -43,7 +43,7 @@ export function ScratchpadEditor({ onSaved }: { onSaved?: () => void } = {}) {
         jsonContent,
       });
       setStatus("success");
-      setMessage("Saved to Strand");
+      setMessage("Saved to omi");
       setValue("");
       await chrome.storage.local.remove(DRAFT_KEY);
       onSaved?.();
@@ -79,7 +79,7 @@ export function ScratchpadEditor({ onSaved }: { onSaved?: () => void } = {}) {
           onClick={() => void save()}
           type="button"
         >
-          {status === "saving" ? "Saving…" : "Save to Strand"}
+          {status === "saving" ? "Saving…" : "Save to omi"}
         </button>
       </div>
     </div>

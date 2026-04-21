@@ -8,7 +8,7 @@ import {
   RiImageFill,
   RiMarkdownFill,
 } from "@remixicon/react";
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 import { type FilePreviewKind, getFilePreviewKind } from "~/lib/format";
 
 export const FILE_KIND_ICONS: Record<FilePreviewKind, typeof RiFileFill> = {

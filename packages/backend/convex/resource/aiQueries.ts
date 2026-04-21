@@ -1,7 +1,7 @@
 "use node";
 
-import { generateEmbedding } from "@strand/ai/embeddings";
-import { createOpenAIProvider } from "@strand/ai/providers";
+import { generateEmbedding } from "@omi/ai/embeddings";
+import { createOpenAIProvider } from "@omi/ai/providers";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { internalAction } from "../_generated/server";

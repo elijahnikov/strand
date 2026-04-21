@@ -11,8 +11,8 @@ import {
   RiStickyNoteLine,
   RiUploadCloud2Line,
 } from "@remixicon/react";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
 import {
   Command,
   CommandCollection,
@@ -26,9 +26,9 @@ import {
   CommandList,
   CommandPanel,
   CommandSeparator,
-} from "@strand/ui/command";
-import { Skeleton } from "@strand/ui/skeleton";
-import { toastManager } from "@strand/ui/toast";
+} from "@omi/ui/command";
+import { Skeleton } from "@omi/ui/skeleton";
+import { toastManager } from "@omi/ui/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import {

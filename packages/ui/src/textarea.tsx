@@ -1,6 +1,6 @@
 import { Field as FieldPrimitive } from "@base-ui/react/field";
 import { mergeProps } from "@base-ui/react/merge-props";
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 import type * as React from "react";
 
 type TextareaProps = React.ComponentProps<"textarea"> & {

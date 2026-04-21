@@ -1,8 +1,8 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { RiChatSmile2Fill } from "@remixicon/react";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { Skeleton } from "@strand/ui/skeleton";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { Skeleton } from "@omi/ui/skeleton";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { UIMessage } from "ai";
 import { useCallback, useEffect, useRef } from "react";

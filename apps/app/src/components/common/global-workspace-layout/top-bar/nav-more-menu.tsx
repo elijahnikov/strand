@@ -5,15 +5,15 @@ import {
   RiQuestionFill,
   RiSettings4Fill,
 } from "@remixicon/react";
-import { cn } from "@strand/ui";
-import { Button } from "@strand/ui/button";
+import { cn } from "@omi/ui";
+import { Button } from "@omi/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@strand/ui/dropdown-menu";
-import { Kbd, KbdGroup } from "@strand/ui/kbd";
+} from "@omi/ui/dropdown-menu";
+import { Kbd, KbdGroup } from "@omi/ui/kbd";
 import { Link, useLocation, useParams } from "@tanstack/react-router";
 
 interface NavMoreMenuProps {
@@ -105,7 +105,7 @@ export function NavMoreMenu({ workspaceId }: NavMoreMenuProps) {
           render={
             // biome-ignore lint/a11y/useAnchorContent: <>
             <a
-              href={"https://docs.strand.co"}
+              href={"https://docs.omi.co"}
               rel="noopener noreferrer"
               target="_blank"
             />

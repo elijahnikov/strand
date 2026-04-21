@@ -1,5 +1,5 @@
-import { Sidebar } from "@strand/ui/sidebar";
-import { TooltipProvider } from "@strand/ui/tooltip";
+import { Sidebar } from "@omi/ui/sidebar";
+import { TooltipProvider } from "@omi/ui/tooltip";
 import WorkspaceSidebarContent from "~/components/common/global-workspace-layout/workspace-sidebar/content";
 import WorkspaceSidebarFooter from "~/components/common/global-workspace-layout/workspace-sidebar/footer";
 import WorkspaceSidebarHeader from "~/components/common/global-workspace-layout/workspace-sidebar/header";

@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 import type React from "react";
 import { Button, type ButtonProps } from "./button";
 import Loader from "./loader";

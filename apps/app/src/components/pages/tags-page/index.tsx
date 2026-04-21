@@ -1,11 +1,11 @@
 import { useConvexPaginatedQuery } from "@convex-dev/react-query";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { cn } from "@omi/ui";
+import { Badge } from "@omi/ui/badge";
+import { Skeleton } from "@omi/ui/skeleton";
+import { Text } from "@omi/ui/text";
 import { RiHashtag } from "@remixicon/react";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { cn } from "@strand/ui";
-import { Badge } from "@strand/ui/badge";
-import { Skeleton } from "@strand/ui/skeleton";
-import { Text } from "@strand/ui/text";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef } from "react";

@@ -1,4 +1,4 @@
-import type { Id } from "@strand/backend/_generated/dataModel.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { createFileRoute } from "@tanstack/react-router";
 import { LibraryPageComponent } from "~/components/pages/library-page";
 

@@ -5,7 +5,7 @@ const CONVEX_URL = import.meta.env.VITE_CONVEX_URL as string | undefined;
 
 export class MissingAuthError extends Error {
   constructor() {
-    super("Extension is not connected to a Strand account.");
+    super("Extension is not connected to a omi account.");
     this.name = "MissingAuthError";
   }
 }

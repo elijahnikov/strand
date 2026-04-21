@@ -1,4 +1,4 @@
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 

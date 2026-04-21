@@ -1,8 +1,8 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { Button } from "@strand/ui/button";
-import { Checkbox } from "@strand/ui/checkbox";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { Button } from "@omi/ui/button";
+import { Checkbox } from "@omi/ui/checkbox";
 import {
   Dialog,
   DialogClose,
@@ -11,12 +11,12 @@ import {
   DialogHeader,
   DialogPopup,
   DialogTitle,
-} from "@strand/ui/dialog";
-import { Input } from "@strand/ui/input";
-import { Label } from "@strand/ui/label";
-import { LoadingButton } from "@strand/ui/loading-button";
-import { Text } from "@strand/ui/text";
-import { toastManager } from "@strand/ui/toast";
+} from "@omi/ui/dialog";
+import { Input } from "@omi/ui/input";
+import { Label } from "@omi/ui/label";
+import { LoadingButton } from "@omi/ui/loading-button";
+import { Text } from "@omi/ui/text";
+import { toastManager } from "@omi/ui/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { useState } from "react";
@@ -218,7 +218,7 @@ function FileSourceDialog({
             disabled={!file}
             loading={uploading}
             onClick={handleStart}
-            variant="strand"
+            variant="omi"
           >
             Start import
           </LoadingButton>
@@ -359,7 +359,7 @@ function ConnectionSourceDialog({
             <LoadingButton
               loading={starting}
               onClick={handleStart}
-              variant="strand"
+              variant="omi"
             >
               Start import
             </LoadingButton>
@@ -369,7 +369,7 @@ function ConnectionSourceDialog({
                 onOpenChange(false);
                 router.navigate({ to: "/account" });
               }}
-              variant="strand"
+              variant="omi"
             >
               Open connections
             </Button>

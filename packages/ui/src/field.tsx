@@ -1,6 +1,6 @@
 import { Field as FieldPrimitive } from "@base-ui/react/field";
 
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 
 function Field({ className, ...props }: FieldPrimitive.Root.Props) {
   return (

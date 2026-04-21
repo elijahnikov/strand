@@ -1,7 +1,7 @@
 "use node";
 
-import { extractEmbedContent } from "@strand/ai/embed-extraction";
-import { extractArticleContent } from "@strand/ai/extraction";
+import { extractEmbedContent } from "@omi/ai/embed-extraction";
+import { extractArticleContent } from "@omi/ai/extraction";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { internalAction } from "../_generated/server";

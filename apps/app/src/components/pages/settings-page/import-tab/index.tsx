@@ -1,7 +1,7 @@
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { Heading } from "@strand/ui/heading";
-import { Input } from "@strand/ui/input";
-import { Text } from "@strand/ui/text";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { Heading } from "@omi/ui/heading";
+import { Input } from "@omi/ui/input";
+import { Text } from "@omi/ui/text";
 import { useMemo, useState } from "react";
 import { INTEGRATION_LOGO } from "./integration-logos";
 import { JobList } from "./job-list";

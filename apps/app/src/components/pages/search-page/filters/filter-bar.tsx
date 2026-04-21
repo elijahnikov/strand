@@ -1,13 +1,13 @@
 import { RiMosaicLine } from "@remixicon/react";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { cn } from "@strand/ui";
-import { Button } from "@strand/ui/button";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { cn } from "@omi/ui";
+import { Button } from "@omi/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@strand/ui/dropdown-menu";
+} from "@omi/ui/dropdown-menu";
 import { ArrowUpDownIcon } from "lucide-react";
 import { useState } from "react";
 import {
@@ -56,7 +56,7 @@ export function FilterBar({
       <Button
         className="size-8! h-8 gap-x-1.5 whitespace-nowrap rounded-full border-[0.5px] px-3 text-xs"
         size="small"
-        variant="strand"
+        variant="omi"
       >
         <RiMosaicLine className="size-4.5 shrink-0" />
       </Button>

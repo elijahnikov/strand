@@ -5,8 +5,8 @@ import {
   RiHashtag,
   RiStickyNoteLine,
 } from "@remixicon/react";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { useQuery } from "@tanstack/react-query";
 import { FolderIcon } from "lucide-react";
 import { FileKindIcon } from "~/components/common/file-kind-icon";

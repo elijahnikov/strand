@@ -1,11 +1,11 @@
-import { Button } from "@strand/ui/button";
+import { Button } from "@omi/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@strand/ui/dropdown-menu";
-import { Input } from "@strand/ui/input";
+} from "@omi/ui/dropdown-menu";
+import { Input } from "@omi/ui/input";
 import {
   ArrowDownAZIcon,
   ArrowUpDownIcon,

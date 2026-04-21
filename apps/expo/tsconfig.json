@@ -1,5 +1,5 @@
 {
-  "extends": ["@strand/tsconfig/base.json"],
+  "extends": ["@omi/tsconfig/base.json"],
   "compilerOptions": {
     "jsx": "react-native",
     "checkJs": false,

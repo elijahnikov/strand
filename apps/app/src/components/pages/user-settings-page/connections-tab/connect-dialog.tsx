@@ -1,6 +1,6 @@
 import { useConvexAction } from "@convex-dev/react-query";
-import { api } from "@strand/backend/_generated/api.js";
-import { Button } from "@strand/ui/button";
+import { api } from "@omi/backend/_generated/api.js";
+import { Button } from "@omi/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -9,11 +9,11 @@ import {
   DialogHeader,
   DialogPopup,
   DialogTitle,
-} from "@strand/ui/dialog";
-import { Input } from "@strand/ui/input";
-import { LoadingButton } from "@strand/ui/loading-button";
-import { Text } from "@strand/ui/text";
-import { toastManager } from "@strand/ui/toast";
+} from "@omi/ui/dialog";
+import { Input } from "@omi/ui/input";
+import { LoadingButton } from "@omi/ui/loading-button";
+import { Text } from "@omi/ui/text";
+import { toastManager } from "@omi/ui/toast";
 import { useMutation } from "@tanstack/react-query";
 import { ConvexError } from "convex/values";
 import { useState } from "react";
@@ -91,7 +91,7 @@ function OAuthDialog({
         </DialogHeader>
         <div className="px-6 py-4">
           <DialogDescription>
-            You'll be redirected to {provider.label} to authorize Strand. After
+            You'll be redirected to {provider.label} to authorize omi. After
             approving, you'll land back here.
           </DialogDescription>
         </div>
@@ -102,7 +102,7 @@ function OAuthDialog({
           <LoadingButton
             loading={isPending}
             onClick={handleRedirect}
-            variant="strand"
+            variant="omi"
           >
             Continue to {provider.label}
           </LoadingButton>
@@ -206,7 +206,7 @@ function TokenDialog({
             disabled={token.trim().length === 0}
             loading={isPending}
             onClick={handleSubmit}
-            variant="strand"
+            variant="omi"
           >
             Connect
           </LoadingButton>
