@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { internal } from "../_generated/api";
 import {
   createHarness,
   seedResource,
@@ -13,6 +12,7 @@ import {
   mockEnrichmentModule,
   mockProvidersModule,
 } from "../../test/mockAi";
+import { internal } from "../_generated/api";
 
 // Mock the AI package so `processResourceAI` never calls OpenAI.
 // Factories must be self-contained (vi.mock hoists and can't close over module

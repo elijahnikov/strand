@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { internal } from "../_generated/api";
 import {
   createHarness,
   seedResource,
@@ -7,6 +6,7 @@ import {
   seedWorkspace,
 } from "../../test/harness";
 import { fakeEmbedding } from "../../test/mockAi";
+import { internal } from "../_generated/api";
 
 // Exercises the DB layer for the RAG pipeline without any OpenAI calls.
 // These mutations back the highest-traffic write paths (embeddings + chunks

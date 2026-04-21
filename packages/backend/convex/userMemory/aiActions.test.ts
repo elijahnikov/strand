@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createHarness, seedUser, seedWorkspace } from "../../test/harness";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
-import { createHarness, seedUser, seedWorkspace } from "../../test/harness";
 
 // The user memory extractor has three subtle correctness properties that
 // don't show up in types and would silently rot if broken:

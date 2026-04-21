@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest";
-import { api } from "../_generated/api";
 import {
   asUser,
   createHarness,
@@ -7,6 +6,7 @@ import {
   seedUser,
   seedWorkspace,
 } from "../../test/harness";
+import { api } from "../_generated/api";
 
 // Workspace isolation regression guard. This is the single most important
 // security invariant in search: a user in workspace A must never see resources
