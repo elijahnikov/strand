@@ -1,12 +1,7 @@
 import { convexQuery } from "@convex-dev/react-query";
-import {
-  RiChat1Line,
-  RiFolder3Line,
-  RiHashtag,
-  RiStickyNoteLine,
-} from "@remixicon/react";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { RiChat1Line, RiHashtag, RiStickyNoteLine } from "@remixicon/react";
 import { useQuery } from "@tanstack/react-query";
 import { FolderIcon } from "lucide-react";
 import { FileKindIcon } from "~/components/common/file-kind-icon";

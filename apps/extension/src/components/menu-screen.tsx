@@ -1,3 +1,4 @@
+import { cn } from "@omi/ui";
 import {
   RiCameraLine,
   RiExternalLinkLine,
@@ -5,12 +6,13 @@ import {
   RiGlobalLine,
   RiLogoutBoxLine,
 } from "@remixicon/react";
-import { cn } from "@omi/ui";
 import { useState } from "react";
 import { captureScreenshot, captureWebsite } from "@/lib/capture";
 
 const NOTE_WINDOW_WIDTH = 480;
 const NOTE_WINDOW_HEIGHT = 600;
+const TRAILING_SLASH_RE = /\/$/;
+const NON_HOSTNAME_CHAR_RE = /[^a-z0-9.-]/gi;
 
 interface Status {
   message?: string;
@@ -27,7 +29,7 @@ async function getActiveTab(): Promise<chrome.tabs.Tab> {
 
 function safeDomain(url: string): string {
   try {
-    return new URL(url).hostname.replace(/[^a-z0-9.-]/gi, "");
+    return new URL(url).hostname.replace(NON_HOSTNAME_CHAR_RE, "");
   } catch {
     return "screenshot";
   }
@@ -35,7 +37,7 @@ function safeDomain(url: string): string {
 
 function getWebAppUrl(): string {
   const fromEnv = import.meta.env.VITE_SITE_URL as string | undefined;
-  return (fromEnv ?? "https://app.omi.com").replace(/\/$/, "");
+  return (fromEnv ?? "https://app.omi.com").replace(TRAILING_SLASH_RE, "");
 }
 
 export function MenuScreen({ onDisconnect }: { onDisconnect: () => void }) {

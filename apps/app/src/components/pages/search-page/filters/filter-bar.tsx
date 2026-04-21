@@ -1,4 +1,3 @@
-import { RiMosaicLine } from "@remixicon/react";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { cn } from "@omi/ui";
 import { Button } from "@omi/ui/button";
@@ -8,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@omi/ui/dropdown-menu";
+import { RiMosaicLine } from "@remixicon/react";
 import { ArrowUpDownIcon } from "lucide-react";
 import { useState } from "react";
 import {

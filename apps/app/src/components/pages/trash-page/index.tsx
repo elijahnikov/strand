@@ -1,5 +1,4 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import { RiDeleteBin6Line } from "@remixicon/react";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { Button } from "@omi/ui/button";
@@ -13,6 +12,7 @@ import {
 import { Heading } from "@omi/ui/heading";
 import { Text } from "@omi/ui/text";
 import { toastManager } from "@omi/ui/toast";
+import { RiDeleteBin6Line } from "@remixicon/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { PageContent } from "~/components/common/page-content";

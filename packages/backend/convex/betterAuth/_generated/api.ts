@@ -8,16 +8,15 @@
  * @module
  */
 
-import type * as adapter from "../adapter.js";
-import type * as auth from "../auth.js";
-import type * as mutations from "../mutations.js";
-
 import type {
   ApiFromModules,
   FilterApi,
   FunctionReference,
 } from "convex/server";
 import { anyApi, componentsGeneric } from "convex/server";
+import type * as adapter from "../adapter.js";
+import type * as auth from "../auth.js";
+import type * as mutations from "../mutations.js";
 
 const fullApi: ApiFromModules<{
   adapter: typeof adapter;

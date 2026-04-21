@@ -7,6 +7,7 @@
  */
 
 import type { ShadCNComponents } from "@blocknote/shadcn";
+import { cn } from "@omi/ui";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 import * as SelectPrimitive from "@radix-ui/react-select";
@@ -14,7 +15,6 @@ import { Slot } from "@radix-ui/react-slot";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import * as TogglePrimitive from "@radix-ui/react-toggle";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-import { cn } from "@omi/ui";
 import { cva, type VariantProps } from "class-variance-authority";
 import { CheckIcon, ChevronDownIcon, ChevronRightIcon } from "lucide-react";
 import type * as React from "react";

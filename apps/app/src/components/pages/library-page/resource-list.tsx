@@ -9,7 +9,6 @@ import {
   type Modifier,
   pointerWithin,
 } from "@dnd-kit/core";
-import { RiPushpinFill, RiStackFill } from "@remixicon/react";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { cn } from "@omi/ui";
@@ -18,6 +17,7 @@ import { Separator } from "@omi/ui/separator";
 import { Skeleton } from "@omi/ui/skeleton";
 import { Text } from "@omi/ui/text";
 import { toastManager } from "@omi/ui/toast";
+import { RiPushpinFill, RiStackFill } from "@remixicon/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";

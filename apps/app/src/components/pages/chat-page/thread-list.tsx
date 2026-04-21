@@ -2,7 +2,6 @@ import {
   useConvexMutation,
   useConvexPaginatedQuery,
 } from "@convex-dev/react-query";
-import { RiAddLine, RiChatSmile2Fill } from "@remixicon/react";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { cn } from "@omi/ui";
@@ -17,6 +16,7 @@ import {
 import { ScrollArea } from "@omi/ui/scroll-area";
 import { Skeleton } from "@omi/ui/skeleton";
 import { Text } from "@omi/ui/text";
+import { RiAddLine, RiChatSmile2Fill } from "@remixicon/react";
 import { useMutation } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { MoreHorizontalIcon, PencilIcon, TrashIcon } from "lucide-react";

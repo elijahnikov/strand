@@ -1,5 +1,5 @@
-import { RiCompassFill } from "@remixicon/react";
 import { Button } from "@omi/ui/button";
+import { RiCompassFill } from "@remixicon/react";
 import { Link } from "@tanstack/react-router";
 import { EmptyState } from "./empty-state";
 

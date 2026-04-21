@@ -5,6 +5,8 @@ export interface CaptureResult {
 }
 
 const SELECTION_TITLE_MAX_LEN = 60;
+const LINE_SPLIT_RE = /\r?\n+/;
+const FILE_EXT_RE = /\.[a-z0-9]{2,5}$/i;
 
 export async function captureWebsite(input: {
   url: string;
@@ -51,7 +53,7 @@ function buildSelectionDoc(
       {
         type: "blockquote",
         content: selection
-          .split(/\r?\n+/)
+          .split(LINE_SPLIT_RE)
           .filter((line) => line.length > 0)
           .map((line) => ({
             type: "paragraph",
@@ -154,7 +156,7 @@ function deriveImageFileName(srcUrl: string, mimeType: string): string {
   try {
     const url = new URL(srcUrl);
     const last = url.pathname.split("/").filter(Boolean).pop();
-    if (last && /\.[a-z0-9]{2,5}$/i.test(last)) {
+    if (last && FILE_EXT_RE.test(last)) {
       return last;
     }
   } catch {

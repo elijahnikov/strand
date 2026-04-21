@@ -1,7 +1,7 @@
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
-import { RiArrowRightSLine, RiMenuFill } from "@remixicon/react";
 import { cn } from "@omi/ui";
+import { RiArrowRightSLine, RiMenuFill } from "@remixicon/react";
 import type * as React from "react";
 
 function Breadcrumb({ ...props }: React.ComponentProps<"nav">) {

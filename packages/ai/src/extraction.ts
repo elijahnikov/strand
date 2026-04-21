@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import { Readability } from "@mozilla/readability";
 import { parseHTML } from "linkedom";
 

@@ -1,16 +1,4 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import {
-  RiBookmark2Fill,
-  RiChat1Fill,
-  RiFileTextLine,
-  RiGlobalLine,
-  RiHashtag,
-  RiHome2Fill,
-  RiSearch2Fill,
-  RiSettings5Fill,
-  RiStickyNoteLine,
-  RiUploadCloud2Line,
-} from "@remixicon/react";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import {
@@ -29,6 +17,18 @@ import {
 } from "@omi/ui/command";
 import { Skeleton } from "@omi/ui/skeleton";
 import { toastManager } from "@omi/ui/toast";
+import {
+  RiBookmark2Fill,
+  RiChat1Fill,
+  RiFileTextLine,
+  RiGlobalLine,
+  RiHashtag,
+  RiHome2Fill,
+  RiSearch2Fill,
+  RiSettings5Fill,
+  RiStickyNoteLine,
+  RiUploadCloud2Line,
+} from "@remixicon/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import {

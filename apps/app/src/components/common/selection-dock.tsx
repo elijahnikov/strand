@@ -1,12 +1,4 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import {
-  RiAddLine,
-  RiCloseFill,
-  RiDeleteBin6Line,
-  RiFolderLine,
-  RiPushpinFill,
-  RiPushpinLine,
-} from "@remixicon/react";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { Badge } from "@omi/ui/badge";
@@ -34,6 +26,14 @@ import { Separator } from "@omi/ui/separator";
 import { Skeleton } from "@omi/ui/skeleton";
 import { Text } from "@omi/ui/text";
 import { toastManager } from "@omi/ui/toast";
+import {
+  RiAddLine,
+  RiCloseFill,
+  RiDeleteBin6Line,
+  RiFolderLine,
+  RiPushpinFill,
+  RiPushpinLine,
+} from "@remixicon/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { FolderIcon } from "lucide-react";

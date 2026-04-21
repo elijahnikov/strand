@@ -1,7 +1,7 @@
-import type { RemixiconComponentType } from "@remixicon/react";
 import { cn } from "@omi/ui";
 import { Heading } from "@omi/ui/heading";
 import { Text } from "@omi/ui/text";
+import type { RemixiconComponentType } from "@remixicon/react";
 import type { ReactNode } from "react";
 
 export function EmptyState({

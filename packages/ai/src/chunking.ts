@@ -16,6 +16,7 @@ const DEFAULT_CHUNK_OVERLAP = 200;
 const DEFAULT_MIN_CHUNK_SIZE = 100;
 
 const SENTENCE_TERMINATORS = /(?<=[.!?])\s+|\n/;
+const PARAGRAPH_SPLIT_RE = /\n\n+/;
 
 function splitIntoSentences(text: string): string[] {
   return text.split(SENTENCE_TERMINATORS).filter((s) => s.length > 0);
@@ -46,14 +47,13 @@ export function chunkText(text: string, options?: ChunkOptions): Chunk[] {
   const chunkOverlap = options?.chunkOverlap ?? DEFAULT_CHUNK_OVERLAP;
   const minChunkSize = options?.minChunkSize ?? DEFAULT_MIN_CHUNK_SIZE;
 
-  const paragraphs = text.split(/\n\n+/);
+  const paragraphs = text.split(PARAGRAPH_SPLIT_RE);
   const chunks: Chunk[] = [];
   let currentContent = "";
   let currentStart = 0;
   let textOffset = 0;
 
-  for (let i = 0; i < paragraphs.length; i++) {
-    const paragraph = paragraphs[i] as string;
+  for (const paragraph of paragraphs) {
     const paragraphStart = text.indexOf(paragraph, textOffset);
     textOffset = paragraphStart + paragraph.length;
 
@@ -98,13 +98,13 @@ export function chunkText(text: string, options?: ChunkOptions): Chunk[] {
       // Start next chunk with overlap
       const overlapStart = Math.max(0, currentContent.length - chunkOverlap);
       const overlapText = currentContent.slice(overlapStart);
-      currentContent = overlapText + "\n\n" + paragraph;
-      currentStart = currentStart + overlapStart;
+      currentContent = `${overlapText}\n\n${paragraph}`;
+      currentStart += overlapStart;
     } else if (currentContent.length === 0) {
       currentStart = paragraphStart;
       currentContent = paragraph;
     } else {
-      currentContent += "\n\n" + paragraph;
+      currentContent += `\n\n${paragraph}`;
     }
   }
 
@@ -140,7 +140,7 @@ export function chunkPdfPages(
   let globalOffset = 0;
 
   for (const page of pages) {
-    const paragraphs = page.text.split(/\n\n+/);
+    const paragraphs = page.text.split(PARAGRAPH_SPLIT_RE);
 
     for (const paragraph of paragraphs) {
       if (paragraph.trim().length === 0) {
@@ -161,15 +161,15 @@ export function chunkPdfPages(
 
         const overlapStart = Math.max(0, currentContent.length - chunkOverlap);
         const overlapText = currentContent.slice(overlapStart);
-        currentContent = overlapText + "\n\n" + paragraph;
-        currentStart = currentStart + overlapStart;
+        currentContent = `${overlapText}\n\n${paragraph}`;
+        currentStart += overlapStart;
         currentPageNumber = page.pageNumber;
       } else if (currentContent.length === 0) {
         currentStart = globalOffset;
         currentPageNumber = page.pageNumber;
         currentContent = paragraph;
       } else {
-        currentContent += "\n\n" + paragraph;
+        currentContent += `\n\n${paragraph}`;
       }
 
       globalOffset += paragraph.length + 2;

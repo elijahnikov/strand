@@ -1,6 +1,6 @@
-import { File as PierreFile } from "@pierre/diffs/react";
 import { Card } from "@omi/ui/card";
 import { FlickeringGrid } from "@omi/ui/flickering-grid";
+import { File as PierreFile } from "@pierre/diffs/react";
 import { FileCodeIcon, GlobeIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import {

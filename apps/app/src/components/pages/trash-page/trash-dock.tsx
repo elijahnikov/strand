@@ -1,5 +1,4 @@
 import { useConvexMutation } from "@convex-dev/react-query";
-import { RiCloseFill, RiDeleteBin6Line } from "@remixicon/react";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { Badge } from "@omi/ui/badge";
@@ -15,6 +14,7 @@ import {
 import { Separator } from "@omi/ui/separator";
 import { Text } from "@omi/ui/text";
 import { toastManager } from "@omi/ui/toast";
+import { RiCloseFill, RiDeleteBin6Line } from "@remixicon/react";
 import { useMutation } from "@tanstack/react-query";
 import { RotateCcwIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";

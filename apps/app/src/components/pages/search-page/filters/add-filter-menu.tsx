@@ -1,4 +1,3 @@
-import { RiFilter3Fill } from "@remixicon/react";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { Button } from "@omi/ui/button";
 import {
@@ -9,6 +8,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@omi/ui/dropdown-menu";
+import { RiFilter3Fill } from "@remixicon/react";
 import { useState } from "react";
 import { FILTER_CONFIGS } from "./filter-registry";
 

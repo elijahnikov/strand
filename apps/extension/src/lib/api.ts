@@ -1,14 +1,15 @@
 import { clearToken, getToken } from "@/lib/auth";
 
 const SITE_URL = import.meta.env.VITE_CONVEX_SITE_URL as string | undefined;
+const TRAILING_SLASH_RE = /\/$/;
 
 export class ExtensionApiError extends Error {
-  constructor(
-    readonly status: number,
-    message: string
-  ) {
+  readonly status: number;
+
+  constructor(status: number, message: string) {
     super(message);
     this.name = "ExtensionApiError";
+    this.status = status;
   }
 }
 
@@ -19,7 +20,7 @@ function siteUrl(): string {
       "VITE_CONVEX_SITE_URL is not set in the extension build"
     );
   }
-  return SITE_URL.replace(/\/$/, "");
+  return SITE_URL.replace(TRAILING_SLASH_RE, "");
 }
 
 async function authedFetch(

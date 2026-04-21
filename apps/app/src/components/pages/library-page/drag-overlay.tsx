@@ -8,10 +8,10 @@ import type { ActiveDragItem } from "./use-library-dnd";
 const MAX_STACK_LAYERS = 3;
 
 interface ResourceLike {
-  type?: "website" | "note" | "file";
-  website?: { favicon?: string | null } | null;
   file?: { fileName?: string; mimeType?: string } | null;
   fileUrl?: string | null;
+  type?: "website" | "note" | "file";
+  website?: { favicon?: string | null } | null;
 }
 
 export function LibraryDragOverlay({

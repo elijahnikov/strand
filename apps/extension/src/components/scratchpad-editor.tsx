@@ -3,6 +3,7 @@ import { captureScratchpad } from "@/lib/capture";
 
 const DRAFT_KEY = "omi.scratchpad.draft.v1";
 const TITLE_MAX_LEN = 60;
+const LINE_SPLIT_RE = /\r?\n/;
 
 export function ScratchpadEditor({ onSaved }: { onSaved?: () => void } = {}) {
   const [value, setValue] = useState("");
@@ -87,7 +88,7 @@ export function ScratchpadEditor({ onSaved }: { onSaved?: () => void } = {}) {
 }
 
 function deriveTitle(text: string): string {
-  const firstLine = text.split(/\r?\n/)[0]?.trim() ?? text;
+  const firstLine = text.split(LINE_SPLIT_RE)[0]?.trim() ?? text;
   if (firstLine.length <= TITLE_MAX_LEN) {
     return firstLine;
   }
@@ -97,7 +98,7 @@ function deriveTitle(text: string): string {
 function buildPlainTextDoc(text: string) {
   return {
     type: "doc",
-    content: text.split(/\r?\n/).map((line) => ({
+    content: text.split(LINE_SPLIT_RE).map((line) => ({
       type: "paragraph",
       content: line ? [{ type: "text", text: line }] : [],
     })),

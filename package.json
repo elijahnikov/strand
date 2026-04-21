@@ -10,7 +10,7 @@
     "clean:workspaces": "turbo run clean",
     "auth:generate": "bun -F @omi/backend generate",
     "dev": "turbo watch dev --continue",
-    "typecheck": "turbo run typecheck",
+    "typecheck": "turbo run typecheck --filter=!@omi/expo",
     "test": "turbo run test",
     "ui-add": "turbo run ui-add",
     "android": "expo run:android",

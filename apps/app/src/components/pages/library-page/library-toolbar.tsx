@@ -1,4 +1,3 @@
-import { RiFilter3Fill } from "@remixicon/react";
 import { Button } from "@omi/ui/button";
 import {
   DropdownMenu,
@@ -7,6 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@omi/ui/dropdown-menu";
 import { Input } from "@omi/ui/input";
+import { RiFilter3Fill } from "@remixicon/react";
 import {
   ArrowDownAZIcon,
   ArrowUpDownIcon,

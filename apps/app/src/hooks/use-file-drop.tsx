@@ -14,7 +14,9 @@ interface FileDropContextValue {
 
 const FileDropContext = createContext<FileDropContextValue>({
   isDragging: false,
-  registerHandler: () => () => {},
+  registerHandler: () => () => {
+    //
+  },
 });
 
 export function FileDropProvider({ children }: { children: React.ReactNode }) {

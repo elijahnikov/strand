@@ -1,9 +1,9 @@
 import { convexQuery } from "@convex-dev/react-query";
-import { RiArrowRightUpLine, RiChat3Line, RiCloseLine } from "@remixicon/react";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { Button } from "@omi/ui/button";
 import { Text } from "@omi/ui/text";
+import { RiArrowRightUpLine, RiChat3Line, RiCloseLine } from "@remixicon/react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";

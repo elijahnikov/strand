@@ -1,10 +1,3 @@
-import {
-  RiArrowRightUpLongLine,
-  RiDeleteBin2Fill,
-  RiMoreFill,
-  RiQuestionFill,
-  RiSettings4Fill,
-} from "@remixicon/react";
 import { cn } from "@omi/ui";
 import { Button } from "@omi/ui/button";
 import {
@@ -14,6 +7,13 @@ import {
   DropdownMenuTrigger,
 } from "@omi/ui/dropdown-menu";
 import { Kbd, KbdGroup } from "@omi/ui/kbd";
+import {
+  RiArrowRightUpLongLine,
+  RiDeleteBin2Fill,
+  RiMoreFill,
+  RiQuestionFill,
+  RiSettings4Fill,
+} from "@remixicon/react";
 import { Link, useLocation, useParams } from "@tanstack/react-router";
 
 interface NavMoreMenuProps {

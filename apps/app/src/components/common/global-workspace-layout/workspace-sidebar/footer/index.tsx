@@ -1,6 +1,6 @@
-import { RiQuestionFill, RiSettings4Fill } from "@remixicon/react";
 import { SidebarFooter } from "@omi/ui/sidebar";
 import { TooltipProvider } from "@omi/ui/tooltip";
+import { RiQuestionFill, RiSettings4Fill } from "@remixicon/react";
 import { useParams } from "@tanstack/react-router";
 import { Suspense } from "react";
 import {

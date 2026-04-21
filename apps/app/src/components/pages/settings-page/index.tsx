@@ -1,12 +1,4 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import {
-  RiBarChartHorizontalFill,
-  RiBrain2Fill,
-  RiDownload2Fill,
-  RiGroupFill,
-  RiSettings3Fill,
-  RiShieldKeyholeFill,
-} from "@remixicon/react";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { Badge } from "@omi/ui/badge";
@@ -31,6 +23,14 @@ import { Input } from "@omi/ui/input";
 import { LoadingButton } from "@omi/ui/loading-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omi/ui/tabs";
 import { Text } from "@omi/ui/text";
+import {
+  RiBarChartHorizontalFill,
+  RiBrain2Fill,
+  RiDownload2Fill,
+  RiGroupFill,
+  RiSettings3Fill,
+  RiShieldKeyholeFill,
+} from "@remixicon/react";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";

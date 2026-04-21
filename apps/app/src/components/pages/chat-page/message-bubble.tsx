@@ -176,12 +176,12 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-type ProposalToolPart = {
-  type: "tool-proposeCollection";
+interface ProposalToolPart {
+  output: CollectionProposal;
   state: "output-available";
   toolCallId: string;
-  output: CollectionProposal;
-};
+  type: "tool-proposeCollection";
+}
 
 function isProposalToolPart(part: unknown): part is ProposalToolPart {
   if (!part || typeof part !== "object") {
