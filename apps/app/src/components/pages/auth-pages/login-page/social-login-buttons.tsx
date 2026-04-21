@@ -5,8 +5,8 @@ import { useSearch } from "@tanstack/react-router";
 import { safeRedirect } from "~/lib/safe-redirect";
 
 export function SocialLoginButtons() {
-  const { redirect } = useSearch({ from: "/_auth/login" });
-  const target = safeRedirect(redirect);
+  const search = useSearch({ strict: false }) as { redirect?: string };
+  const target = safeRedirect(search.redirect);
 
   const handleSocialLogin = async (provider: "discord" | "google") => {
     const res = await authClient.signIn.social({

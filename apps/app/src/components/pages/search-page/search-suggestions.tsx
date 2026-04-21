@@ -2,14 +2,15 @@ import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { Badge } from "@omi/ui/badge";
-import { Heading } from "@omi/ui/heading";
 import { Text } from "@omi/ui/text";
 import { toastManager } from "@omi/ui/toast";
+import { RiBookShelfLine } from "@remixicon/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { SparklesIcon, XIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CollapsibleSection } from "~/components/common/collapsible-section";
+import { EmptyState } from "~/components/common/empty-state";
 import { ResourceRow } from "~/components/pages/library-page/resource-row";
 import {
   clearRecent,
@@ -210,14 +211,11 @@ export function SearchSuggestions({
       !stats.hasResources &&
       recent.length === 0 &&
       (!topConcepts || topConcepts.length === 0) ? (
-        <div className="flex flex-col items-center justify-center py-10 text-center">
-          <Heading className="font-medium text-sm text-ui-fg-subtle">
-            Your library is empty.
-          </Heading>
-          <Text className="mt-1 text-ui-fg-muted text-xs">
-            Add a few resources in the library, then come back here to search.
-          </Text>
-        </div>
+        <EmptyState
+          description="Add a few resources in the library, then come back here to search."
+          Icon={RiBookShelfLine}
+          title="Your library is empty"
+        />
       ) : null}
     </div>
   );

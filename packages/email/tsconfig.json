@@ -1,0 +1,11 @@
+{
+  "extends": "@omi/tsconfig/base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "dom", "dom.iterable"],
+    "jsx": "react-jsx",
+    "rootDir": ".",
+    "strictNullChecks": true
+  },
+  "include": ["*.ts", "src"],
+  "exclude": ["node_modules"]
+}

@@ -48,7 +48,27 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     database: authComponent.adapter(ctx),
     emailAndPassword: {
       enabled: true,
-      requireEmailVerification: false,
+      requireEmailVerification: true,
+    },
+    emailVerification: {
+      sendOnSignUp: true,
+      autoSignInAfterVerification: true,
+      sendVerificationEmail: async ({ user, url }) => {
+        if (!("scheduler" in ctx)) {
+          throw new Error(
+            "sendVerificationEmail requires a mutation or action context"
+          );
+        }
+        await ctx.scheduler.runAfter(
+          0,
+          internal.email.sendVerificationEmail.send,
+          {
+            to: user.email,
+            url,
+            name: user.name,
+          }
+        );
+      },
     },
     socialProviders: {
       discord: {

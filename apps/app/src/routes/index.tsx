@@ -1,10 +1,27 @@
+import { convexQuery } from "@convex-dev/react-query";
 import { authClient } from "@omi/auth/client";
+import { api } from "@omi/backend/_generated/api.js";
 import { Button } from "@omi/ui/button";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { ClientAuthBoundary } from "~/lib/auth-client";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,
+  beforeLoad: async ({ context }) => {
+    if (!context.isAuthenticated) {
+      return;
+    }
+    const workspaces = await context.queryClient.ensureQueryData(
+      convexQuery(api.workspace.queries.listByUser, {})
+    );
+    const target = workspaces[0];
+    if (target) {
+      throw redirect({
+        to: "/workspace/$workspaceId",
+        params: { workspaceId: target._id },
+      });
+    }
+  },
 });
 
 function RouteComponent() {

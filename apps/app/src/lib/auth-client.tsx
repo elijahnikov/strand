@@ -5,6 +5,13 @@ import { isUnauthenticatedError } from "@omi/backend/shared.js";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import type { PropsWithChildren } from "react";
 
+const PUBLIC_PATHS = new Set<string>([
+  "/login",
+  "/register",
+  "/verify-email",
+  "/connect-extension",
+]);
+
 export const ClientAuthBoundary = ({ children }: PropsWithChildren) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -14,10 +21,7 @@ export const ClientAuthBoundary = ({ children }: PropsWithChildren) => {
       getAuthUserFn={api.user.queries.currentUser}
       isAuthError={isUnauthenticatedError}
       onUnauth={() => {
-        if (
-          location.pathname === "/login" ||
-          location.pathname === "/connect-extension"
-        ) {
+        if (PUBLIC_PATHS.has(location.pathname)) {
           return;
         }
         navigate({ to: "/login" });

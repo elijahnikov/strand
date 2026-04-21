@@ -44,7 +44,10 @@ export function EmailPasswordRegisterForm() {
       return;
     }
 
-    navigate({ to: "/" });
+    navigate({
+      to: "/verify-email",
+      search: { email: values.email },
+    });
   };
 
   return (
