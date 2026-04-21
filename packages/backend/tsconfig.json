@@ -1,6 +1,8 @@
 {
   "extends": "@omi/tsconfig/base.json",
-  "compilerOptions": {},
+  "compilerOptions": {
+    "jsx": "react-jsx"
+  },
   "include": ["*.ts", "src", "convex", "test"],
   "exclude": ["node_modules"]
 }

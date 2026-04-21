@@ -33,9 +33,11 @@
   "dependencies": {
     "@convex-dev/better-auth": "catalog:convex",
     "@convex-dev/presence": "catalog:convex",
+    "@convex-dev/resend": "catalog:convex",
     "@instantdb/core": "catalog:instant",
     "@instantdb/react": "catalog:instant",
     "@omi/ai": "workspace:*",
+    "@omi/email": "workspace:*",
     "convex": "catalog:convex",
     "convex-helpers": "catalog:convex",
     "fflate": "^0.8.2",

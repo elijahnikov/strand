@@ -17,6 +17,7 @@ import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as WorkspaceAccountRouteImport } from './routes/_workspace/account'
+import { Route as AuthVerifyEmailRouteImport } from './routes/_auth/verify-email'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -73,6 +74,11 @@ const WorkspaceAccountRoute = WorkspaceAccountRouteImport.update({
   id: '/account',
   path: '/account',
   getParentRoute: () => WorkspaceRoute,
+} as any)
+const AuthVerifyEmailRoute = AuthVerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
   id: '/register',
@@ -187,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/connect-extension': typeof ConnectExtensionRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
+  '/verify-email': typeof AuthVerifyEmailRoute
   '/account': typeof WorkspaceAccountRoute
   '/api/chat': typeof ApiChatRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceWorkspaceIdRouteRouteWithChildren
@@ -213,6 +220,7 @@ export interface FileRoutesByTo {
   '/connect-extension': typeof ConnectExtensionRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
+  '/verify-email': typeof AuthVerifyEmailRoute
   '/account': typeof WorkspaceAccountRoute
   '/api/chat': typeof ApiChatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -238,6 +246,7 @@ export interface FileRoutesById {
   '/connect-extension': typeof ConnectExtensionRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
+  '/_auth/verify-email': typeof AuthVerifyEmailRoute
   '/_workspace/account': typeof WorkspaceAccountRoute
   '/api/chat': typeof ApiChatRoute
   '/_workspace/workspace/$workspaceId': typeof WorkspaceWorkspaceWorkspaceIdRouteRouteWithChildren
@@ -266,6 +275,7 @@ export interface FileRouteTypes {
     | '/connect-extension'
     | '/login'
     | '/register'
+    | '/verify-email'
     | '/account'
     | '/api/chat'
     | '/workspace/$workspaceId'
@@ -292,6 +302,7 @@ export interface FileRouteTypes {
     | '/connect-extension'
     | '/login'
     | '/register'
+    | '/verify-email'
     | '/account'
     | '/api/chat'
     | '/api/auth/$'
@@ -316,6 +327,7 @@ export interface FileRouteTypes {
     | '/connect-extension'
     | '/_auth/login'
     | '/_auth/register'
+    | '/_auth/verify-email'
     | '/_workspace/account'
     | '/api/chat'
     | '/_workspace/workspace/$workspaceId'
@@ -404,6 +416,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/account'
       preLoaderRoute: typeof WorkspaceAccountRouteImport
       parentRoute: typeof WorkspaceRoute
+    }
+    '/_auth/verify-email': {
+      id: '/_auth/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof AuthVerifyEmailRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/_auth/register': {
       id: '/_auth/register'
@@ -537,11 +556,13 @@ declare module '@tanstack/react-router' {
 interface AuthRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
+  AuthVerifyEmailRoute: typeof AuthVerifyEmailRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
+  AuthVerifyEmailRoute: AuthVerifyEmailRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)

@@ -71,14 +71,14 @@ export function CollectionHeader({
           workspaceId={workspaceId}
         />
       </nav>
-      <div className="flex items-center gap-2">
+      <div className="mt-2 flex items-center gap-2">
         <span className="text-lg">
           {collection.icon ?? (
-            <FolderIcon className="h-5 w-5 text-ui-fg-muted" />
+            <FolderIcon className="size-6 text-ui-fg-muted" />
           )}
         </span>
         <EditableText
-          className="font-semibold text-lg text-ui-fg-base"
+          className="font-medium text-ui-fg-base text-xl"
           onSave={handleRename}
           value={collection.name}
         />

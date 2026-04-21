@@ -37,6 +37,21 @@ export function EmailPasswordForm() {
     });
 
     if (res.error) {
+      const needsVerification =
+        res.error.status === 403 || res.error.code === "EMAIL_NOT_VERIFIED";
+
+      if (needsVerification) {
+        await authClient.sendVerificationEmail({
+          email: values.email,
+          callbackURL: "/",
+        });
+        navigate({
+          to: "/verify-email",
+          search: { email: values.email },
+        });
+        return;
+      }
+
       toastManager.add({
         type: "error",
         title: res.error.message ?? "Something went wrong",

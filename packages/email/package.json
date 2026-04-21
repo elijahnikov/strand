@@ -1,0 +1,31 @@
+{
+  "name": "@omi/email",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./render": "./src/render.ts",
+    "./senders": "./src/senders.ts",
+    "./templates/verification": "./src/templates/verification.tsx"
+  },
+  "license": "MIT",
+  "scripts": {
+    "preview": "email dev --dir src/templates",
+    "clean": "git clean -xdf .cache .turbo .react-email node_modules",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@react-email/components": "catalog:email",
+    "@react-email/render": "catalog:email"
+  },
+  "devDependencies": {
+    "@omi/tsconfig": "workspace:*",
+    "@types/react": "catalog:react",
+    "react": "catalog:react",
+    "react-email": "catalog:email",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:react"
+  }
+}
