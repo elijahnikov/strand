@@ -1,4 +1,4 @@
-import type { Id } from "@strand/backend/_generated/dataModel.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { useEffect, useRef } from "react";
 import { PageContent } from "~/components/common/page-content";
 import { recordSearch } from "~/lib/search/recent-searches";

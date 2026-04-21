@@ -1,5 +1,5 @@
 {
-  "extends": "@strand/tsconfig/base.json",
+  "extends": "@omi/tsconfig/base.json",
   "compilerOptions": {
     "lib": ["ES2022", "dom", "dom.iterable"],
     "jsx": "preserve",

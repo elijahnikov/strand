@@ -10,9 +10,9 @@ export default defineConfig({
     },
   },
   manifest: {
-    name: "Strand",
+    name: "omi",
     description:
-      "Save pages, highlights, screenshots, images, and quick notes to your Strand workspace.",
+      "Save pages, highlights, screenshots, images, and quick notes to your omi workspace.",
     permissions: [
       "activeTab",
       "contextMenus",
@@ -22,7 +22,7 @@ export default defineConfig({
     ],
     host_permissions: ["<all_urls>"],
     action: {
-      default_title: "Strand",
+      default_title: "omi",
     },
     commands: {
       "save-current-page": {
@@ -30,18 +30,18 @@ export default defineConfig({
           default: "Ctrl+Shift+S",
           mac: "Command+Shift+S",
         },
-        description: "Save current page to Strand",
+        description: "Save current page to omi",
       },
       "capture-screenshot": {
         suggested_key: {
           default: "Ctrl+Shift+Y",
           mac: "Command+Shift+Y",
         },
-        description: "Screenshot current page to Strand",
+        description: "Screenshot current page to omi",
       },
     },
     externally_connectable: {
-      matches: ["https://app.strand.com/*", "http://localhost:*/*"],
+      matches: ["https://app.omi.com/*", "http://localhost:*/*"],
     },
   },
   vite: () => ({

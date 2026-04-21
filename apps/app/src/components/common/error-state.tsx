@@ -1,5 +1,5 @@
+import { Button } from "@omi/ui/button";
 import { RiErrorWarningFill } from "@remixicon/react";
-import { Button } from "@strand/ui/button";
 import { useRouter } from "@tanstack/react-router";
 import { EmptyState } from "./empty-state";
 
@@ -27,7 +27,7 @@ export function ErrorState({
   return (
     <EmptyState
       action={
-        <Button onClick={handleRetry} variant="strand">
+        <Button onClick={handleRetry} variant="omi">
           Try again
         </Button>
       }

@@ -1,4 +1,4 @@
-/* Map BlockNote CSS variables to Strand design tokens.
+/* Map BlockNote CSS variables to omi design tokens.
    Use !important to beat the [data-color-scheme="dark"] selector
    which BlockNote applies based on prefers-color-scheme (not our .dark class). */
 .bn-container {
@@ -156,10 +156,10 @@
 
 /* ------------------------------------------------------------------ */
 /* Suggestion menu (slash menu / block dropdown)                      */
-/* Match Strand MenuPopup / MenuItem 1:1                              */
+/* Match omi MenuPopup / MenuItem 1:1                              */
 /* ------------------------------------------------------------------ */
 
-/* Container — rounded-2xl, component bg, border (no shadow) — match Strand MenuPopup */
+/* Container — rounded-2xl, component bg, border (no shadow) — match omi MenuPopup */
 .bn-suggestion-menu[role="listbox"] {
   padding: 0.25rem;
   overscroll-behavior: contain;
@@ -199,7 +199,7 @@
   background-color: var(--bg-component-hover);
 }
 
-/* Icon container — tighten padding to match Strand items */
+/* Icon container — tighten padding to match omi items */
 .bn-suggestion-menu [role="option"] [data-position="left"] {
   padding: 0;
 }
@@ -246,7 +246,7 @@
 
 /* ------------------------------------------------------------------ */
 /* Side menu buttons (+ and drag handle)                              */
-/* Match Strand Button secondary variant 1:1                          */
+/* Match omi Button secondary variant 1:1                          */
 /* ------------------------------------------------------------------ */
 
 .bn-side-menu {
@@ -296,7 +296,7 @@
 
 /* ------------------------------------------------------------------ */
 /* Toolbar (formatting bar, link edit panel)                          */
-/* Match Strand popover — border only, no shadow                     */
+/* Match omi popover — border only, no shadow                     */
 /* ------------------------------------------------------------------ */
 .bn-toolbar.bn-toolbar {
   padding: 0.25rem !important;
@@ -317,7 +317,7 @@
   box-shadow: none !important;
 }
 
-/* Actual input inside — Strand input base style
+/* Actual input inside — omi input base style
    BlockNote injects "h-auto border-none p-0" via className, so we
    need !important on every property to guarantee our styles win. */
 .bn-text-input.bn-text-input input.bn-text-input,
@@ -345,7 +345,7 @@
 
 /* ------------------------------------------------------------------ */
 /* Grid suggestion menu (emoji picker)                                */
-/* Match Strand MenuPopup — rounded-2xl, component bg, border, no shadow */
+/* Match omi MenuPopup — rounded-2xl, component bg, border, no shadow */
 /* ------------------------------------------------------------------ */
 .bn-grid-suggestion-menu {
   background-color: var(--bg-component) !important;

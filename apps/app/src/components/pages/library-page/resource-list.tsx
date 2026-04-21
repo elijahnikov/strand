@@ -9,15 +9,15 @@ import {
   type Modifier,
   pointerWithin,
 } from "@dnd-kit/core";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { cn } from "@omi/ui";
+import { Badge } from "@omi/ui/badge";
+import { Separator } from "@omi/ui/separator";
+import { Skeleton } from "@omi/ui/skeleton";
+import { Text } from "@omi/ui/text";
+import { toastManager } from "@omi/ui/toast";
 import { RiPushpinFill, RiStackFill } from "@remixicon/react";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { cn } from "@strand/ui";
-import { Badge } from "@strand/ui/badge";
-import { Separator } from "@strand/ui/separator";
-import { Skeleton } from "@strand/ui/skeleton";
-import { Text } from "@strand/ui/text";
-import { toastManager } from "@strand/ui/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";

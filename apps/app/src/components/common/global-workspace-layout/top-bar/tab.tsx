@@ -1,6 +1,6 @@
+import { cn } from "@omi/ui";
+import { ContextMenu } from "@omi/ui/context-menu";
 import { RiCloseLine } from "@remixicon/react";
-import { cn } from "@strand/ui";
-import { ContextMenu } from "@strand/ui/context-menu";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { type MouseEvent, memo, useCallback } from "react";
 import { TabIcon } from "~/components/common/global-workspace-layout/top-bar/tab-icon";

@@ -1,16 +1,8 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import {
-  RiAddLine,
-  RiCloseFill,
-  RiDeleteBin6Line,
-  RiFolderLine,
-  RiPushpinFill,
-  RiPushpinLine,
-} from "@remixicon/react";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { Badge } from "@strand/ui/badge";
-import { Button } from "@strand/ui/button";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { Badge } from "@omi/ui/badge";
+import { Button } from "@omi/ui/button";
 import {
   Command,
   CommandCollection,
@@ -21,19 +13,27 @@ import {
   CommandItem,
   CommandList,
   CommandPanel,
-} from "@strand/ui/command";
+} from "@omi/ui/command";
 import {
   Dialog,
   DialogFooter,
   DialogHeader,
   DialogPopup,
   DialogTitle,
-} from "@strand/ui/dialog";
-import { Popover, PopoverContent, PopoverTrigger } from "@strand/ui/popover";
-import { Separator } from "@strand/ui/separator";
-import { Skeleton } from "@strand/ui/skeleton";
-import { Text } from "@strand/ui/text";
-import { toastManager } from "@strand/ui/toast";
+} from "@omi/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@omi/ui/popover";
+import { Separator } from "@omi/ui/separator";
+import { Skeleton } from "@omi/ui/skeleton";
+import { Text } from "@omi/ui/text";
+import { toastManager } from "@omi/ui/toast";
+import {
+  RiAddLine,
+  RiCloseFill,
+  RiDeleteBin6Line,
+  RiFolderLine,
+  RiPushpinFill,
+  RiPushpinLine,
+} from "@remixicon/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { FolderIcon } from "lucide-react";

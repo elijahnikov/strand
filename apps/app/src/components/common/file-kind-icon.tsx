@@ -1,3 +1,4 @@
+import { cn } from "@omi/ui";
 import {
   RiCodeSSlashFill,
   RiFileExcelFill,
@@ -8,7 +9,6 @@ import {
   RiImageFill,
   RiMarkdownFill,
 } from "@remixicon/react";
-import { cn } from "@strand/ui";
 import { type FilePreviewKind, getFilePreviewKind } from "~/lib/format";
 
 export const FILE_KIND_ICONS: Record<FilePreviewKind, typeof RiFileFill> = {

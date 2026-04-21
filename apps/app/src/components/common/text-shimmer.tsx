@@ -1,4 +1,4 @@
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 import { useMemo } from "react";
 
 export function TextShimmer({

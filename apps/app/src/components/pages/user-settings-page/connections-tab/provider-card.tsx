@@ -1,10 +1,10 @@
 import { useConvexMutation } from "@convex-dev/react-query";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { Badge } from "@strand/ui/badge";
-import { Button } from "@strand/ui/button";
-import { LoadingButton } from "@strand/ui/loading-button";
-import { Text } from "@strand/ui/text";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { Badge } from "@omi/ui/badge";
+import { Button } from "@omi/ui/button";
+import { LoadingButton } from "@omi/ui/loading-button";
+import { Text } from "@omi/ui/text";
 import { useMutation } from "@tanstack/react-query";
 import { INTEGRATION_LOGO } from "~/components/pages/settings-page/import-tab/integration-logos";
 import type { ProviderId } from "./providers";
@@ -115,7 +115,7 @@ export function ProviderCard({
             </LoadingButton>
           </>
         ) : (
-          <Button onClick={onConnect} size="small" variant="strand">
+          <Button onClick={onConnect} size="small" variant="omi">
             Connect
           </Button>
         )}

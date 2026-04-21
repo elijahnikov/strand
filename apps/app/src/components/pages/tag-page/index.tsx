@@ -1,9 +1,9 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { Badge } from "@strand/ui/badge";
-import { Heading } from "@strand/ui/heading";
-import { Skeleton } from "@strand/ui/skeleton";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { Badge } from "@omi/ui/badge";
+import { Heading } from "@omi/ui/heading";
+import { Skeleton } from "@omi/ui/skeleton";
 import {
   useMutation,
   useQuery,

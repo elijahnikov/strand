@@ -1,6 +1,6 @@
 import { openai } from "@ai-sdk/openai";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { generateText, tool } from "ai";
 import { z } from "zod";
 import {
@@ -88,7 +88,7 @@ export function buildSystemPrompt(
   ragContext: RAGContext,
   memory: string | null
 ): string {
-  const basePrompt = `You are a knowledgeable assistant for the user's personal knowledge library in Strand. You help users explore, understand, and connect their saved resources (articles, notes, files).
+  const basePrompt = `You are a knowledgeable assistant for the user's personal knowledge library in omi. You help users explore, understand, and connect their saved resources (articles, notes, files).
 
 ## Resource Reference Syntax — CRITICAL
 

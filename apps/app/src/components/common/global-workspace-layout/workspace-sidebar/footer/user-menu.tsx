@@ -1,16 +1,16 @@
 import { convexQuery } from "@convex-dev/react-query";
-import { authClient } from "@strand/auth/client";
-import { api } from "@strand/backend/_generated/api.js";
-import { Avatar, AvatarFallback, AvatarImage } from "@strand/ui/avatar";
+import { authClient } from "@omi/auth/client";
+import { api } from "@omi/backend/_generated/api.js";
+import { Avatar, AvatarFallback, AvatarImage } from "@omi/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@strand/ui/dropdown-menu";
-import { Skeleton } from "@strand/ui/skeleton";
-import { useTheme } from "@strand/ui/theme";
+} from "@omi/ui/dropdown-menu";
+import { Skeleton } from "@omi/ui/skeleton";
+import { useTheme } from "@omi/ui/theme";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import BoringAvatar from "boring-avatars";

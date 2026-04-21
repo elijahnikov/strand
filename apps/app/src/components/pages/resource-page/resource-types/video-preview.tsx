@@ -1,5 +1,5 @@
-import { Card } from "@strand/ui/card";
-import { FlickeringGrid } from "@strand/ui/flickering-grid";
+import { Card } from "@omi/ui/card";
+import { FlickeringGrid } from "@omi/ui/flickering-grid";
 import { motion } from "motion/react";
 import { useState } from "react";
 

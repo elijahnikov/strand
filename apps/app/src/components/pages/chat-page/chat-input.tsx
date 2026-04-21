@@ -1,11 +1,11 @@
 /** biome-ignore-all lint/performance/useTopLevelRegex: <> */
 import { convexQuery } from "@convex-dev/react-query";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { cn } from "@omi/ui";
+import { Button } from "@omi/ui/button";
+import { Text } from "@omi/ui/text";
 import { RiCloseLine, RiSendPlaneFill, RiStopFill } from "@remixicon/react";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { cn } from "@strand/ui";
-import { Button } from "@strand/ui/button";
-import { Text } from "@strand/ui/text";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -296,7 +296,7 @@ export function ChatInput({
             disabled={!value.trim() && mentions.length === 0}
             onClick={handleSubmit}
             size="small"
-            variant="strand"
+            variant="omi"
           >
             <RiSendPlaneFill className="size-4 shrink-0" />
           </Button>

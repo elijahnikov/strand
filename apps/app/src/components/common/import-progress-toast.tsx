@@ -1,8 +1,8 @@
 import { convexQuery } from "@convex-dev/react-query";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Doc, Id } from "@omi/backend/_generated/dataModel.js";
+import { Text } from "@omi/ui/text";
 import { RiDownload2Fill } from "@remixicon/react";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Doc, Id } from "@strand/backend/_generated/dataModel.js";
-import { Text } from "@strand/ui/text";
 import { useQuery } from "@tanstack/react-query";
 import { CheckIcon, XIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";

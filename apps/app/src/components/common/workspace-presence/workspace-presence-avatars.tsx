@@ -1,5 +1,5 @@
-import { cn } from "@strand/ui";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@strand/ui/tooltip";
+import { cn } from "@omi/ui";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@omi/ui/tooltip";
 import { UserAvatar } from "~/components/common/user-avatar";
 import { useWorkspacePresenceSafe } from ".";
 

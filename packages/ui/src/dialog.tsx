@@ -1,10 +1,10 @@
 "use client";
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
+import { cn } from "@omi/ui";
+import { Button } from "@omi/ui/button";
+import { ScrollArea } from "@omi/ui/scroll-area";
 import { RiCloseFill } from "@remixicon/react";
-import { cn } from "@strand/ui";
-import { Button } from "@strand/ui/button";
-import { ScrollArea } from "@strand/ui/scroll-area";
 
 const DialogCreateHandle = DialogPrimitive.createHandle;
 

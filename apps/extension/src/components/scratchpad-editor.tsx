@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { captureScratchpad } from "@/lib/capture";
 
-const DRAFT_KEY = "strand.scratchpad.draft.v1";
+const DRAFT_KEY = "omi.scratchpad.draft.v1";
 const TITLE_MAX_LEN = 60;
+const LINE_SPLIT_RE = /\r?\n/;
 
 export function ScratchpadEditor({ onSaved }: { onSaved?: () => void } = {}) {
   const [value, setValue] = useState("");
@@ -43,7 +44,7 @@ export function ScratchpadEditor({ onSaved }: { onSaved?: () => void } = {}) {
         jsonContent,
       });
       setStatus("success");
-      setMessage("Saved to Strand");
+      setMessage("Saved to omi");
       setValue("");
       await chrome.storage.local.remove(DRAFT_KEY);
       onSaved?.();
@@ -79,7 +80,7 @@ export function ScratchpadEditor({ onSaved }: { onSaved?: () => void } = {}) {
           onClick={() => void save()}
           type="button"
         >
-          {status === "saving" ? "Saving…" : "Save to Strand"}
+          {status === "saving" ? "Saving…" : "Save to omi"}
         </button>
       </div>
     </div>
@@ -87,7 +88,7 @@ export function ScratchpadEditor({ onSaved }: { onSaved?: () => void } = {}) {
 }
 
 function deriveTitle(text: string): string {
-  const firstLine = text.split(/\r?\n/)[0]?.trim() ?? text;
+  const firstLine = text.split(LINE_SPLIT_RE)[0]?.trim() ?? text;
   if (firstLine.length <= TITLE_MAX_LEN) {
     return firstLine;
   }
@@ -97,7 +98,7 @@ function deriveTitle(text: string): string {
 function buildPlainTextDoc(text: string) {
   return {
     type: "doc",
-    content: text.split(/\r?\n/).map((line) => ({
+    content: text.split(LINE_SPLIT_RE).map((line) => ({
       type: "paragraph",
       content: line ? [{ type: "text", text: line }] : [],
     })),

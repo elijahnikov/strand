@@ -1,13 +1,13 @@
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import { cn } from "@strand/ui";
-import { buttonVariants } from "@strand/ui/button";
+import { cn } from "@omi/ui";
+import { buttonVariants } from "@omi/ui/button";
 import {
   Dialog,
   DialogBackdrop,
   DialogPortal,
   DialogTrigger,
-} from "@strand/ui/dialog";
-import { FlickeringGrid } from "@strand/ui/flickering-grid";
+} from "@omi/ui/dialog";
+import { FlickeringGrid } from "@omi/ui/flickering-grid";
 import { DownloadIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";

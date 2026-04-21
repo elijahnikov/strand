@@ -1,4 +1,4 @@
-import type { Id } from "@strand/backend/_generated/dataModel.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { FolderIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { FileKindIcon } from "~/components/common/file-kind-icon";
@@ -7,12 +7,12 @@ import type { ActiveDragItem } from "./use-library-dnd";
 
 const MAX_STACK_LAYERS = 3;
 
-type ResourceLike = {
-  type?: "website" | "note" | "file";
-  website?: { favicon?: string | null } | null;
+interface ResourceLike {
   file?: { fileName?: string; mimeType?: string } | null;
   fileUrl?: string | null;
-};
+  type?: "website" | "note" | "file";
+  website?: { favicon?: string | null } | null;
+}
 
 export function LibraryDragOverlay({
   item,
@@ -50,7 +50,7 @@ export function LibraryDragOverlay({
         <OverlayIcon data={data} />
       </div>
       {batch && totalCount > 1 ? (
-        <div className="-top-1.5 -right-1.5 absolute z-30 flex h-5 min-w-5 items-center justify-center rounded-full bg-ui-fg-interactive px-1.5 font-medium text-[11px] text-white shadow-sm">
+        <div className="absolute -top-1.5 -right-1.5 z-30 flex h-5 min-w-5 items-center justify-center rounded-full bg-ui-fg-interactive px-1.5 font-medium text-[11px] text-white shadow-sm">
           {totalCount}
         </div>
       ) : null}

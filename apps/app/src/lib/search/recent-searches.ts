@@ -1,5 +1,5 @@
 const MAX_RECENT = 10;
-const STORAGE_PREFIX = "strand.search.recent.";
+const STORAGE_PREFIX = "omi.search.recent.";
 
 export interface RecentSearchFilterSummary {
   collectionId?: string | null;

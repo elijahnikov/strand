@@ -1,6 +1,6 @@
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { Badge } from "@strand/ui/badge";
-import { Skeleton } from "@strand/ui/skeleton";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { Badge } from "@omi/ui/badge";
+import { Skeleton } from "@omi/ui/skeleton";
 import { Link, useParams } from "@tanstack/react-router";
 import { FileIcon, GlobeIcon, PinIcon, StickyNoteIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";

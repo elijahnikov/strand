@@ -1,4 +1,4 @@
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 import type * as React from "react";
 
 function Kbd({ className, ...props }: React.ComponentProps<"kbd">) {

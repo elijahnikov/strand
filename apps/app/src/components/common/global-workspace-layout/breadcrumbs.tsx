@@ -1,14 +1,14 @@
 import { convexQuery } from "@convex-dev/react-query";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@strand/ui/dropdown-menu";
-import { Separator } from "@strand/ui/separator";
-import { Text } from "@strand/ui/text";
+} from "@omi/ui/dropdown-menu";
+import { Separator } from "@omi/ui/separator";
+import { Text } from "@omi/ui/text";
 import { useQuery } from "@tanstack/react-query";
 import {
   Link,

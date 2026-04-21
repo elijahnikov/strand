@@ -1,10 +1,10 @@
 import { useConvexMutation } from "@convex-dev/react-query";
-import { authClient } from "@strand/auth/client";
-import { api } from "@strand/backend/_generated/api.js";
-import { Button } from "@strand/ui/button";
-import { Heading } from "@strand/ui/heading";
-import { LoadingButton } from "@strand/ui/loading-button";
-import { Text } from "@strand/ui/text";
+import { authClient } from "@omi/auth/client";
+import { api } from "@omi/backend/_generated/api.js";
+import { Button } from "@omi/ui/button";
+import { Heading } from "@omi/ui/heading";
+import { LoadingButton } from "@omi/ui/loading-button";
+import { Text } from "@omi/ui/text";
 import { useMutation } from "@tanstack/react-query";
 import {
   createFileRoute,
@@ -73,7 +73,7 @@ function InvalidExtensionScreen({ extId }: { extId: string }) {
       <Heading>Unknown extension</Heading>
       <Text className="mt-2 text-ui-fg-muted" size="small">
         The extension ID <code className="font-mono">{extId || "(none)"}</code>{" "}
-        is not recognised. Open this page from the Strand browser extension.
+        is not recognised. Open this page from the omi browser extension.
       </Text>
     </Shell>
   );
@@ -84,7 +84,7 @@ function SignInPromptScreen({ extId }: { extId: string }) {
   const redirectTarget = `/connect-extension?extId=${encodeURIComponent(extId)}`;
   return (
     <Shell>
-      <Heading>Connect the Strand extension</Heading>
+      <Heading>Connect the omi extension</Heading>
       <Text className="mt-2 text-ui-fg-muted" size="small">
         Sign in to link the extension to your account. You'll come back here
         automatically.
@@ -147,7 +147,7 @@ function ConfirmScreen({ extId }: { extId: string }) {
 
   return (
     <Shell>
-      <Heading>Connect the Strand extension</Heading>
+      <Heading>Connect the omi extension</Heading>
       <Text className="mt-2 text-ui-fg-muted" size="small">
         This will give the extension permission to save captures to your
         workspace. You can revoke access any time in settings.
@@ -214,7 +214,7 @@ function sendTokenToExtension(
     if (!runtime?.sendMessage) {
       reject(
         new Error(
-          "chrome.runtime.sendMessage is unavailable. Open this page from the Strand extension popup."
+          "chrome.runtime.sendMessage is unavailable. Open this page from the omi extension popup."
         )
       );
       return;

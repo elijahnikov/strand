@@ -1,5 +1,5 @@
 {
-  "name": "@strand/auth",
+  "name": "@omi/auth",
   "private": true,
   "type": "module",
   "exports": {
@@ -17,7 +17,7 @@
     "better-auth": "catalog:better-auth"
   },
   "devDependencies": {
-    "@strand/tsconfig": "workspace:*",
+    "@omi/tsconfig": "workspace:*",
     "typescript": "catalog:"
   }
 }

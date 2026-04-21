@@ -1,5 +1,5 @@
 {
-  "name": "@strand/tailwind-config",
+  "name": "@omi/tailwind-config",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -19,7 +19,7 @@
     "tailwindcss": "catalog:tailwind"
   },
   "devDependencies": {
-    "@strand/tsconfig": "*",
+    "@omi/tsconfig": "*",
     "@types/node": "catalog:",
     "typescript": "catalog:"
   }

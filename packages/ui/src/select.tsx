@@ -1,11 +1,11 @@
 import { Select as SelectPrimitive } from "@base-ui/react/select";
+import { cn } from "@omi/ui";
 import {
   RiArrowDownSFill,
   RiArrowDownSLine,
   RiArrowUpSFill,
   RiCheckFill,
 } from "@remixicon/react";
-import { cn } from "@strand/ui";
 
 const Select = SelectPrimitive.Root;
 

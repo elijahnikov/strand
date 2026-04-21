@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 import React from "react";
 import type { ControllerProps, FieldPath, FieldValues } from "react-hook-form";
 import {

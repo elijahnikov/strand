@@ -1,4 +1,4 @@
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 
 interface PageContentProps extends React.ComponentProps<"div"> {
   /** Desktop width class — applied at xl breakpoint. Default: "xl:w-[55%]" */

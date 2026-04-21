@@ -1,5 +1,8 @@
 const TOKEN_PREFIX = "strand_ext_";
 const TOKEN_RANDOM_BYTES = 32;
+const BASE64_PLUS_RE = /\+/g;
+const BASE64_SLASH_RE = /\//g;
+const BASE64_PADDING_RE = /=+$/;
 
 function toBase64Url(bytes: Uint8Array): string {
   let binary = "";
@@ -7,9 +10,9 @@ function toBase64Url(bytes: Uint8Array): string {
     binary += String.fromCharCode(b);
   }
   return btoa(binary)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+    .replace(BASE64_PLUS_RE, "-")
+    .replace(BASE64_SLASH_RE, "_")
+    .replace(BASE64_PADDING_RE, "");
 }
 
 function toHex(bytes: Uint8Array): string {

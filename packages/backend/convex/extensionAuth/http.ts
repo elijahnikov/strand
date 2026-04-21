@@ -5,11 +5,11 @@ import { httpAction } from "../_generated/server";
 const BEARER_PREFIX = "Bearer ";
 
 class HttpError extends Error {
-  constructor(
-    readonly status: number,
-    message: string
-  ) {
+  readonly status: number;
+
+  constructor(status: number, message: string) {
     super(message);
+    this.status = status;
   }
 }
 
@@ -30,7 +30,7 @@ function errorResponse(err: unknown): Response {
 
 function readBearerToken(request: Request): string {
   const header = request.headers.get("authorization");
-  if (!(header && header.startsWith(BEARER_PREFIX))) {
+  if (!header?.startsWith(BEARER_PREFIX)) {
     throw new HttpError(401, "Missing bearer token");
   }
   return header.slice(BEARER_PREFIX.length).trim();

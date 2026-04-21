@@ -3,7 +3,7 @@
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
 
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 
 function Card({
   className,

@@ -1,5 +1,5 @@
-import { cn } from "@strand/ui";
-import { Card } from "@strand/ui/card";
+import { cn } from "@omi/ui";
+import { Card } from "@omi/ui/card";
 
 interface LogoProps {
   size?: "xsmall" | "small" | "base" | "large";

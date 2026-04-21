@@ -1,17 +1,17 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import { RiDownload2Fill } from "@remixicon/react";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Doc, Id } from "@strand/backend/_generated/dataModel.js";
-import { Badge } from "@strand/ui/badge";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Doc, Id } from "@omi/backend/_generated/dataModel.js";
+import { Badge } from "@omi/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@strand/ui/dropdown-menu";
-import { Text } from "@strand/ui/text";
-import { toastManager } from "@strand/ui/toast";
+} from "@omi/ui/dropdown-menu";
+import { Text } from "@omi/ui/text";
+import { toastManager } from "@omi/ui/toast";
+import { RiDownload2Fill } from "@remixicon/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import {

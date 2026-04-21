@@ -16,9 +16,9 @@ import {
 import { BlockNoteView } from "@blocknote/shadcn";
 import "@blocknote/shadcn/style.css";
 import "./note-editor.css";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { useTheme } from "@strand/ui/theme";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { useTheme } from "@omi/ui/theme";
 import { useMutation } from "convex/react";
 import { useEffect, useMemo } from "react";
 import { strandShadCNComponents } from "./note-editor-components";

@@ -1,6 +1,6 @@
+import { authClient } from "@omi/auth/client";
+import { Button } from "@omi/ui/button";
 import { RiDiscordFill, RiGoogleFill } from "@remixicon/react";
-import { authClient } from "@strand/auth/client";
-import { Button } from "@strand/ui/button";
 import { useSearch } from "@tanstack/react-router";
 import { safeRedirect } from "~/lib/safe-redirect";
 

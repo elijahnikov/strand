@@ -1,6 +1,6 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omi/ui/tabs";
+import { Text } from "@omi/ui/text";
 import { RiLinksFill } from "@remixicon/react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@strand/ui/tabs";
-import { Text } from "@strand/ui/text";
 import { PageContent } from "~/components/common/page-content";
 import { ConnectionsTab } from "./connections-tab";
 

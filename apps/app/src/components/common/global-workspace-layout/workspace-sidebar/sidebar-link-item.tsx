@@ -1,7 +1,7 @@
-import { cn } from "@strand/ui";
-import { Button } from "@strand/ui/button";
-import { Text } from "@strand/ui/text";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@strand/ui/tooltip";
+import { cn } from "@omi/ui";
+import { Button } from "@omi/ui/button";
+import { Text } from "@omi/ui/text";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@omi/ui/tooltip";
 import { Link } from "@tanstack/react-router";
 import { memo } from "react";
 import { ShortcutTooltipBody } from "~/components/common/shortcut-tooltip";

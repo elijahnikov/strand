@@ -1,5 +1,5 @@
 import { convexBetterAuthReactStart } from "@convex-dev/better-auth/react-start";
-import { isUnauthenticatedError } from "@strand/backend/shared.js";
+import { isUnauthenticatedError } from "@omi/backend/shared.js";
 
 export const {
   handler,

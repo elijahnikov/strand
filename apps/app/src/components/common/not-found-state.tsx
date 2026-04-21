@@ -1,5 +1,5 @@
+import { Button } from "@omi/ui/button";
 import { RiCompassFill } from "@remixicon/react";
-import { Button } from "@strand/ui/button";
 import { Link } from "@tanstack/react-router";
 import { EmptyState } from "./empty-state";
 
@@ -18,7 +18,7 @@ export function NotFoundState({
     <EmptyState
       action={
         <Link to={homeTo}>
-          <Button variant="strand">{homeLabel}</Button>
+          <Button variant="omi">{homeLabel}</Button>
         </Link>
       }
       description={description}

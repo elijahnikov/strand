@@ -2,7 +2,7 @@
 
 import { Tabs as TabsPrimitive } from "@base-ui/react/tabs";
 
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 
 type TabsVariant = "default" | "underline";
 

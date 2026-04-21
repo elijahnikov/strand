@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "@strand/tailwind-config/theme";
+@import "@omi/tailwind-config/theme";
 
 @config "../../../tailwind.config.ts";
 

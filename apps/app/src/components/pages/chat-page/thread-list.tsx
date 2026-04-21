@@ -2,21 +2,21 @@ import {
   useConvexMutation,
   useConvexPaginatedQuery,
 } from "@convex-dev/react-query";
-import { RiAddLine, RiChatSmile2Fill } from "@remixicon/react";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { cn } from "@strand/ui";
-import { Button } from "@strand/ui/button";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { cn } from "@omi/ui";
+import { Button } from "@omi/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@strand/ui/dropdown-menu";
-import { ScrollArea } from "@strand/ui/scroll-area";
-import { Skeleton } from "@strand/ui/skeleton";
-import { Text } from "@strand/ui/text";
+} from "@omi/ui/dropdown-menu";
+import { ScrollArea } from "@omi/ui/scroll-area";
+import { Skeleton } from "@omi/ui/skeleton";
+import { Text } from "@omi/ui/text";
+import { RiAddLine, RiChatSmile2Fill } from "@remixicon/react";
 import { useMutation } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { MoreHorizontalIcon, PencilIcon, TrashIcon } from "lucide-react";

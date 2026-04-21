@@ -1,4 +1,4 @@
-import { SidebarHeader } from "@strand/ui/sidebar";
+import { SidebarHeader } from "@omi/ui/sidebar";
 
 export default function WorkspaceSidebarHeader() {
   return <SidebarHeader className="mt-8" />;

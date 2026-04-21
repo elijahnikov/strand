@@ -1,4 +1,6 @@
 import { convexQuery } from "@convex-dev/react-query";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
 import {
   type RemixiconComponentType,
   RiBardFill,
@@ -10,8 +12,6 @@ import {
   RiStarFill,
   RiUserFill,
 } from "@remixicon/react";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
 import { useQuery } from "@tanstack/react-query";
 import type { ComponentType, SVGProps } from "react";
 import {

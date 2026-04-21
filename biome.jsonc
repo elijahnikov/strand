@@ -5,9 +5,19 @@
     "ultracite/biome/remix",
     "ultracite/biome/react"
   ],
+  "files": {
+    "includes": [
+      "!**/.wxt",
+      "!**/.output",
+      "!**/.expo",
+      "!**/routeTree.gen.ts",
+      "!apps/expo"
+    ]
+  },
   "linter": {
     "rules": {
       "style": {
+        "useFilenamingConvention": "off",
         "noNestedTernary": "off",
         "noDescendingSpecificity": "off"
       },
@@ -37,6 +47,33 @@
         "rules": {
           "style": {
             "useFilenamingConvention": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/extension/**"],
+      "javascript": {
+        "globals": [
+          "chrome",
+          "browser",
+          "defineBackground",
+          "defineContentScript",
+          "defineUnlistedScript"
+        ]
+      }
+    },
+    {
+      "includes": [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "performance": {
+            "useTopLevelRegex": "off"
           }
         }
       }

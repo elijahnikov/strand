@@ -1,7 +1,7 @@
 "use node";
 
-import { extractMemory, wordJaccardSimilarity } from "@strand/ai/memory";
-import { createOpenAIProvider } from "@strand/ai/providers";
+import { extractMemory, wordJaccardSimilarity } from "@omi/ai/memory";
+import { createOpenAIProvider } from "@omi/ai/providers";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { internalAction } from "../_generated/server";

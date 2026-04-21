@@ -1,4 +1,4 @@
-import type { Id } from "@strand/backend/_generated/dataModel.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
 
 export const MAX_FILE_SIZE = 50 * 1024 * 1024;
 

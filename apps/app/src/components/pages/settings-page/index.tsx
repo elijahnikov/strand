@@ -1,15 +1,7 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import {
-  RiBarChartHorizontalFill,
-  RiBrain2Fill,
-  RiDownload2Fill,
-  RiGroupFill,
-  RiSettings3Fill,
-  RiShieldKeyholeFill,
-} from "@remixicon/react";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { Badge } from "@strand/ui/badge";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { Badge } from "@omi/ui/badge";
 import {
   Dialog,
   DialogClose,
@@ -18,19 +10,27 @@ import {
   DialogHeader,
   DialogPopup,
   DialogTitle,
-} from "@strand/ui/dialog";
+} from "@omi/ui/dialog";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from "@strand/ui/form";
-import { Heading } from "@strand/ui/heading";
-import { Input } from "@strand/ui/input";
-import { LoadingButton } from "@strand/ui/loading-button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@strand/ui/tabs";
-import { Text } from "@strand/ui/text";
+} from "@omi/ui/form";
+import { Heading } from "@omi/ui/heading";
+import { Input } from "@omi/ui/input";
+import { LoadingButton } from "@omi/ui/loading-button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omi/ui/tabs";
+import { Text } from "@omi/ui/text";
+import {
+  RiBarChartHorizontalFill,
+  RiBrain2Fill,
+  RiDownload2Fill,
+  RiGroupFill,
+  RiSettings3Fill,
+  RiShieldKeyholeFill,
+} from "@remixicon/react";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -288,7 +288,7 @@ function GeneralTab({
               loading={isPending}
               size="small"
               type="submit"
-              variant={"strand"}
+              variant={"omi"}
             >
               Save changes
             </LoadingButton>

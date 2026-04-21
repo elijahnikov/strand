@@ -1,4 +1,4 @@
-import { Heading } from "@strand/ui/heading";
+import { Heading } from "@omi/ui/heading";
 import { ChevronRightIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { type ReactNode, useState } from "react";

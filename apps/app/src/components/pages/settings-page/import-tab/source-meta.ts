@@ -1,4 +1,4 @@
-import type { Doc } from "@strand/backend/_generated/dataModel.js";
+import type { Doc } from "@omi/backend/_generated/dataModel.js";
 import { INTEGRATION_LOGO, type LogoComponent } from "./integration-logos";
 import { UI_IMPORT_SOURCES } from "./sources";
 
@@ -36,8 +36,7 @@ export function resolveJobDisplay(job: {
   uiSourceId?: string;
 }): { label: string; Logo: LogoComponent | undefined } {
   const uiId = job.uiSourceId;
-  const label =
-    (uiId && UI_SOURCE_LABELS[uiId]) ?? SOURCE_LABELS[job.source];
+  const label = (uiId && UI_SOURCE_LABELS[uiId]) ?? SOURCE_LABELS[job.source];
   const logoKey =
     uiId && INTEGRATION_LOGO[uiId] ? uiId : JOB_SOURCE_LOGO_ID[job.source];
   const Logo = logoKey ? INTEGRATION_LOGO[logoKey] : undefined;

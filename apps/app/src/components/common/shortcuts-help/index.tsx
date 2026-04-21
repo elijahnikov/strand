@@ -4,9 +4,9 @@ import {
   DialogPanel,
   DialogPopup,
   DialogTitle,
-} from "@strand/ui/dialog";
-import { Kbd, KbdGroup } from "@strand/ui/kbd";
-import { Text } from "@strand/ui/text";
+} from "@omi/ui/dialog";
+import { Kbd, KbdGroup } from "@omi/ui/kbd";
+import { Text } from "@omi/ui/text";
 import {
   createContext,
   type ReactNode,

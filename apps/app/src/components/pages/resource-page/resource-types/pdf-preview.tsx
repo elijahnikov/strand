@@ -1,4 +1,4 @@
-import { FlickeringGrid } from "@strand/ui/flickering-grid";
+import { FlickeringGrid } from "@omi/ui/flickering-grid";
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";

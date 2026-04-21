@@ -1,6 +1,6 @@
+import { Card } from "@omi/ui/card";
+import { FlickeringGrid } from "@omi/ui/flickering-grid";
 import { File as PierreFile } from "@pierre/diffs/react";
-import { Card } from "@strand/ui/card";
-import { FlickeringGrid } from "@strand/ui/flickering-grid";
 import { FileCodeIcon, GlobeIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -166,7 +166,7 @@ function WebsiteEmbed({
         <FramedEmbed
           accentColor="#a259ff"
           aspect="video"
-          src={`https://www.figma.com/embed?embed_host=strand&url=${encodeURIComponent(url)}`}
+          src={`https://www.figma.com/embed?embed_host=omi&url=${encodeURIComponent(url)}`}
           title="Figma file"
         />
       );

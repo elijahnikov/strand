@@ -1,7 +1,7 @@
 import { convexQuery } from "@convex-dev/react-query";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { isUnauthenticatedError } from "@strand/backend/shared.js";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { isUnauthenticatedError } from "@omi/backend/shared.js";
 import {
   createFileRoute,
   isRedirect,

@@ -1,8 +1,8 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { Badge } from "@strand/ui/badge";
-import { Button } from "@strand/ui/button";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { Badge } from "@omi/ui/badge";
+import { Button } from "@omi/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -11,25 +11,25 @@ import {
   DialogHeader,
   DialogPopup,
   DialogTitle,
-} from "@strand/ui/dialog";
+} from "@omi/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@strand/ui/dropdown-menu";
-import { Heading } from "@strand/ui/heading";
-import { Input } from "@strand/ui/input";
-import { LoadingButton } from "@strand/ui/loading-button";
+} from "@omi/ui/dropdown-menu";
+import { Heading } from "@omi/ui/heading";
+import { Input } from "@omi/ui/input";
+import { LoadingButton } from "@omi/ui/loading-button";
 import {
   Select,
   SelectItem,
   SelectPopup,
   SelectTrigger,
   SelectValue,
-} from "@strand/ui/select";
-import { Text } from "@strand/ui/text";
+} from "@omi/ui/select";
+import { Text } from "@omi/ui/text";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ConvexError } from "convex/values";
 import {
@@ -164,7 +164,7 @@ function InviteForm({ workspaceId }: { workspaceId: Id<"workspace"> }) {
           disabled={!email.trim()}
           loading={isPending}
           type="submit"
-          variant={"strand"}
+          variant={"omi"}
         >
           <SendIcon className="size-3 shrink-0" />
           Invite

@@ -1,10 +1,10 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { Badge } from "@strand/ui/badge";
-import { Heading } from "@strand/ui/heading";
-import { Text } from "@strand/ui/text";
-import { toastManager } from "@strand/ui/toast";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { Badge } from "@omi/ui/badge";
+import { Heading } from "@omi/ui/heading";
+import { Text } from "@omi/ui/text";
+import { toastManager } from "@omi/ui/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { SparklesIcon, XIcon } from "lucide-react";

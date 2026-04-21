@@ -1,14 +1,14 @@
-import { authClient } from "@strand/auth/client";
+import { authClient } from "@omi/auth/client";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from "@strand/ui/form";
-import { Input } from "@strand/ui/input";
-import { LoadingButton } from "@strand/ui/loading-button";
-import { toastManager } from "@strand/ui/toast";
+} from "@omi/ui/form";
+import { Input } from "@omi/ui/input";
+import { LoadingButton } from "@omi/ui/loading-button";
+import { toastManager } from "@omi/ui/toast";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { safeRedirect } from "~/lib/safe-redirect";
@@ -87,7 +87,7 @@ export function EmailPasswordForm() {
           className="w-full"
           loading={form.formState.isSubmitting}
           type="submit"
-          variant={"strand"}
+          variant={"omi"}
         >
           Sign in
         </LoadingButton>

@@ -1,11 +1,11 @@
 "use client";
 
+import { cn } from "@omi/ui";
 import {
   RiArrowDownSLine,
   RiArrowLeftSLine,
   RiArrowRightSLine,
 } from "@remixicon/react";
-import { cn } from "@strand/ui";
 import * as React from "react";
 import {
   type DayButton,

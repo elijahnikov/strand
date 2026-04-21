@@ -237,7 +237,7 @@ export const useWorkspaceTabs = create<TabsState>()(
       },
     }),
     {
-      name: "strand-workspace-tabs",
+      name: "omi-workspace-tabs",
       version: 1,
     }
   )

@@ -1,4 +1,4 @@
-import { Input } from "@strand/ui/input";
+import { Input } from "@omi/ui/input";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { SearchIcon, XIcon } from "lucide-react";
 import { useEffect, useRef } from "react";

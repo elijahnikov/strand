@@ -1,15 +1,15 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import { RiNotification3Fill } from "@remixicon/react";
-import { api } from "@strand/backend/_generated/api.js";
-import { Badge } from "@strand/ui/badge";
-import { LoadingButton } from "@strand/ui/loading-button";
+import { api } from "@omi/backend/_generated/api.js";
+import { Badge } from "@omi/ui/badge";
+import { LoadingButton } from "@omi/ui/loading-button";
 import {
   Popover,
   PopoverContent,
   PopoverTitle,
   PopoverTrigger,
-} from "@strand/ui/popover";
-import { Text } from "@strand/ui/text";
+} from "@omi/ui/popover";
+import { Text } from "@omi/ui/text";
+import { RiNotification3Fill } from "@remixicon/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { CheckIcon, XIcon } from "lucide-react";
 export function NotificationsPopover() {
@@ -81,7 +81,7 @@ export function NotificationsPopover() {
                       acceptInvitation({ invitationId: invite._id })
                     }
                     size="small"
-                    variant="strand"
+                    variant="omi"
                   >
                     <CheckIcon className="size-3.5" />
                     Accept

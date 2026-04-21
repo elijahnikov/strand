@@ -1,8 +1,8 @@
 "use client";
 
 import { ContextMenu as ContextMenuPrimitive } from "@base-ui/react/context-menu";
+import { cn } from "@omi/ui";
 import { RiArrowRightSFill, RiCheckFill, RiCircleFill } from "@remixicon/react";
-import { cn } from "@strand/ui";
 import type * as React from "react";
 
 function Menu({

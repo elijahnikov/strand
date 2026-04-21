@@ -1,4 +1,4 @@
-import { Text } from "@strand/ui/text";
+import { Text } from "@omi/ui/text";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { safeRedirect } from "~/lib/safe-redirect";
 
@@ -21,13 +21,13 @@ function AuthLayoutComponent() {
     <div className="relative flex min-h-screen min-w-screen flex-col items-center justify-center bg-ui-bg-subtle">
       <div className="absolute top-6 left-6 flex items-center gap-2">
         <img
-          alt="Strand"
+          alt="omi"
           className="rounded-lg"
           height={32}
-          src="/STRAND.png"
+          src="/omi.png"
           width={32}
         />
-        <span className="font-semibold text-ui-fg-base">Strand</span>
+        <span className="font-semibold text-ui-fg-base">omi</span>
       </div>
       <Outlet />
       <Text
@@ -35,7 +35,7 @@ function AuthLayoutComponent() {
         size="xsmall"
       >
         By clicking "Continue" or signing up, you acknowledge that you have read
-        and agree to Strand's{" "}
+        and agree to omi's{" "}
         <a className="text-ui-fg-base" href="/terms">
           Terms of Service
         </a>{" "}

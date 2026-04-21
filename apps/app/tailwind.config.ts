@@ -1,4 +1,4 @@
-import { preset } from "@strand/tailwind-config/preset";
+import { preset } from "@omi/tailwind-config/preset";
 import type { Config } from "tailwindcss";
 import defaultTheme from "tailwindcss/defaultTheme";
 

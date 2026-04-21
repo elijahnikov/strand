@@ -1,5 +1,5 @@
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { Skeleton } from "@strand/ui/skeleton";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { Skeleton } from "@omi/ui/skeleton";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageContent } from "~/components/common/page-content";
 import { TagsPageComponent } from "~/components/pages/tags-page";

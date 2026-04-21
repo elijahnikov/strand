@@ -1,5 +1,5 @@
-import { authClient } from "@strand/auth/client";
-import { Button } from "@strand/ui/button";
+import { authClient } from "@omi/auth/client";
+import { Button } from "@omi/ui/button";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ClientAuthBoundary } from "~/lib/auth-client";
 

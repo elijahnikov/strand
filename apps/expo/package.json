@@ -1,5 +1,5 @@
 {
-  "name": "@strand/expo",
+  "name": "@omi/expo",
   "private": true,
   "main": "index.ts",
   "scripts": {
@@ -39,8 +39,8 @@
     "superjson": "2.2.3"
   },
   "devDependencies": {
-    "@strand/tailwind-config": "*",
-    "@strand/tsconfig": "*",
+    "@omi/tailwind-config": "*",
+    "@omi/tsconfig": "*",
     "@types/react": "catalog:react",
     "tailwindcss": "catalog:tailwind",
     "typescript": "catalog:"

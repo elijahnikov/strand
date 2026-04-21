@@ -1,18 +1,18 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import { RiDeleteBin6Line } from "@remixicon/react";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Id } from "@strand/backend/_generated/dataModel.js";
-import { Button } from "@strand/ui/button";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { Button } from "@omi/ui/button";
 import {
   Dialog,
   DialogFooter,
   DialogHeader,
   DialogPopup,
   DialogTitle,
-} from "@strand/ui/dialog";
-import { Heading } from "@strand/ui/heading";
-import { Text } from "@strand/ui/text";
-import { toastManager } from "@strand/ui/toast";
+} from "@omi/ui/dialog";
+import { Heading } from "@omi/ui/heading";
+import { Text } from "@omi/ui/text";
+import { toastManager } from "@omi/ui/toast";
+import { RiDeleteBin6Line } from "@remixicon/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { PageContent } from "~/components/common/page-content";

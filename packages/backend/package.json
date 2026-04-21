@@ -1,5 +1,5 @@
 {
-  "name": "@strand/backend",
+  "name": "@omi/backend",
   "private": true,
   "type": "module",
   "exports": {
@@ -19,18 +19,23 @@
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "dev": "bunx convex dev --local --once",
     "generate": "cd convex/betterAuth bunx @better-auth/cli generate -y",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "devDependencies": {
-    "@strand/tsconfig": "workspace:*",
-    "typescript": "catalog:"
+    "@edge-runtime/vm": "^5.0.0",
+    "@omi/tsconfig": "workspace:*",
+    "convex-test": "^0.0.49",
+    "typescript": "catalog:",
+    "vitest": "^3"
   },
   "dependencies": {
     "@convex-dev/better-auth": "catalog:convex",
     "@convex-dev/presence": "catalog:convex",
     "@instantdb/core": "catalog:instant",
     "@instantdb/react": "catalog:instant",
-    "@strand/ai": "workspace:*",
+    "@omi/ai": "workspace:*",
     "convex": "catalog:convex",
     "convex-helpers": "catalog:convex",
     "fflate": "^0.8.2",

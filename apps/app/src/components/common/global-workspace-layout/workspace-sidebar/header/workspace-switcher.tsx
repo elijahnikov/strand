@@ -1,8 +1,8 @@
 import { convexQuery } from "@convex-dev/react-query";
-import { api } from "@strand/backend/_generated/api.js";
-import type { Doc, Id } from "@strand/backend/_generated/dataModel.js";
-import { cn } from "@strand/ui";
-import { Button } from "@strand/ui/button";
+import { api } from "@omi/backend/_generated/api.js";
+import type { Doc, Id } from "@omi/backend/_generated/dataModel.js";
+import { cn } from "@omi/ui";
+import { Button } from "@omi/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,9 +11,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@strand/ui/dropdown-menu";
-import { Skeleton } from "@strand/ui/skeleton";
-import { Text } from "@strand/ui/text";
+} from "@omi/ui/dropdown-menu";
+import { Skeleton } from "@omi/ui/skeleton";
+import { Text } from "@omi/ui/text";
 import { useQuery } from "@tanstack/react-query";
 import type { UseNavigateResult } from "@tanstack/react-router";
 import { useNavigate, useParams } from "@tanstack/react-router";

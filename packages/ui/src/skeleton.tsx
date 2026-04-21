@@ -1,4 +1,4 @@
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 
 function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (

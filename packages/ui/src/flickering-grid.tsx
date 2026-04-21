@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@strand/ui";
+import { cn } from "@omi/ui";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
