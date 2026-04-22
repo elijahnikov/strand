@@ -1,12 +1,14 @@
 import type { UserIdentity } from "convex/server";
 import { ConvexError, v } from "convex/values";
 import {
+  customAction,
   customCtx,
   customMutation,
   customQuery,
 } from "convex-helpers/server/customFunctions";
 import type { Id } from "./_generated/dataModel";
-import { mutation, query } from "./_generated/server";
+import { action, mutation, query } from "./_generated/server";
+import { type RateLimitName, rateLimiter } from "./rateLimiter";
 
 export type AuthIdentity = UserIdentity & {
   userId?: string;
@@ -16,6 +18,15 @@ export type AuthIdentity = UserIdentity & {
 export const getAuthIdentity = (ctx: {
   auth: { getUserIdentity(): Promise<UserIdentity | null> };
 }) => ctx.auth.getUserIdentity() as Promise<AuthIdentity | null>;
+
+interface ProtectedOpts {
+  rateLimit?: RateLimitName;
+}
+
+type WorkspaceRole = "owner" | "admin" | "member";
+interface WorkspaceOpts extends ProtectedOpts {
+  role?: WorkspaceRole[];
+}
 
 export const protectedQuery = customQuery(
   query,
@@ -32,9 +43,9 @@ export const protectedQuery = customQuery(
   })
 );
 
-export const protectedMutation = customMutation(
-  mutation,
-  customCtx(async (ctx) => {
+export const protectedMutation = customMutation(mutation, {
+  args: {},
+  input: async (ctx, _args, opts: ProtectedOpts = {}) => {
     const identity = await getAuthIdentity(ctx);
     if (!identity?.userId) {
       throw new ConvexError("Not authenticated");
@@ -43,14 +54,39 @@ export const protectedMutation = customMutation(
     if (!user) {
       throw new ConvexError("User not found");
     }
-    return { user, identity };
-  })
-);
+    if (opts.rateLimit) {
+      await rateLimiter.limit(ctx, opts.rateLimit, {
+        key: user._id,
+        throws: true,
+      });
+    }
+    return { ctx: { user, identity }, args: {} };
+  },
+});
 
-type WorkspaceRole = "owner" | "admin" | "member";
+export const protectedAction = customAction(action, {
+  args: {},
+  input: async (ctx, _args, opts: ProtectedOpts = {}) => {
+    const identity = await getAuthIdentity(ctx);
+    if (!identity?.userId) {
+      throw new ConvexError("Not authenticated");
+    }
+    if (opts.rateLimit) {
+      await rateLimiter.limit(ctx, opts.rateLimit, {
+        key: identity.userId,
+        throws: true,
+      });
+    }
+    return {
+      ctx: { identity, userId: identity.userId as Id<"user"> },
+      args: {},
+    };
+  },
+});
+
 export const workspaceQuery = customQuery(query, {
   args: { workspaceId: v.id("workspace") },
-  input: async (ctx, args, { role }: { role?: WorkspaceRole[] }) => {
+  input: async (ctx, args, { role }: { role?: WorkspaceRole[] } = {}) => {
     const identity = await getAuthIdentity(ctx);
     if (!identity?.userId) {
       throw new ConvexError("Not authenticated");
@@ -86,7 +122,7 @@ export const workspaceQuery = customQuery(query, {
 
 export const workspaceMutation = customMutation(mutation, {
   args: { workspaceId: v.id("workspace") },
-  input: async (ctx, args, { role }: { role?: WorkspaceRole[] }) => {
+  input: async (ctx, args, opts: WorkspaceOpts = {}) => {
     const identity = await getAuthIdentity(ctx);
     if (!identity?.userId) {
       throw new ConvexError("Not authenticated");
@@ -108,14 +144,41 @@ export const workspaceMutation = customMutation(mutation, {
       )
       .unique();
 
-    if (workspace.ownerId === user._id) {
-      return { ctx: { user, identity, workspace, member }, args: {} };
-    }
-
-    if (!member || (role && !role.includes(member.role))) {
+    const isOwner = workspace.ownerId === user._id;
+    if (
+      !isOwner &&
+      (!member || (opts.role && !opts.role.includes(member.role)))
+    ) {
       throw new ConvexError("Not authorized to access this workspace");
     }
 
+    if (opts.rateLimit) {
+      await rateLimiter.limit(ctx, opts.rateLimit, {
+        key: user._id,
+        throws: true,
+      });
+    }
+
     return { ctx: { user, identity, workspace, member }, args: {} };
+  },
+});
+
+export const workspaceAction = customAction(action, {
+  args: { workspaceId: v.id("workspace") },
+  input: async (ctx, _args, opts: WorkspaceOpts = {}) => {
+    const identity = await getAuthIdentity(ctx);
+    if (!identity?.userId) {
+      throw new ConvexError("Not authenticated");
+    }
+    if (opts.rateLimit) {
+      await rateLimiter.limit(ctx, opts.rateLimit, {
+        key: identity.userId,
+        throws: true,
+      });
+    }
+    return {
+      ctx: { identity, userId: identity.userId as Id<"user"> },
+      args: {},
+    };
   },
 });

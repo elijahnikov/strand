@@ -1,5 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { action } from "../../_generated/server";
+import { rateLimiter } from "../../rateLimiter";
 import { getAuthIdentity } from "../../utils";
 import { getOAuth2Provider, isProviderId } from "../providers/registry";
 import { newNonce, signState } from "./stateSigner";
@@ -24,6 +25,10 @@ export const getAuthorizeUrl = action({
     if (!identity?.userId) {
       throw new ConvexError("Not authenticated");
     }
+    await rateLimiter.limit(ctx, "oauthAuthorize", {
+      key: identity.userId,
+      throws: true,
+    });
     if (!isProviderId(args.provider)) {
       throw new ConvexError(`Unknown provider "${args.provider}"`);
     }

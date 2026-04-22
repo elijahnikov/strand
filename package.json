@@ -59,7 +59,8 @@
         "@convex-dev/better-auth": "^0.11.3",
         "@convex-dev/resend": "^0.2.3",
         "convex-helpers": "^0.1.114",
-        "@convex-dev/presence": "^0.3.0"
+        "@convex-dev/presence": "^0.3.0",
+        "@convex-dev/rate-limiter": "^0.3.2"
       },
       "instant": {
         "@instantdb/core": "^1.0.1",

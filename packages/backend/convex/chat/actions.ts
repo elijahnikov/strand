@@ -6,6 +6,7 @@ import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { action } from "../_generated/server";
+import { rateLimiter } from "../rateLimiter";
 import { getAuthIdentity } from "../utils";
 
 export const searchChunks = action({
@@ -31,6 +32,11 @@ export const searchChunks = action({
     if (!membership) {
       throw new Error("Not authorized");
     }
+
+    await rateLimiter.limit(ctx, "chatSearch", {
+      key: identity.userId,
+      throws: true,
+    });
 
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {

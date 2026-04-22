@@ -12,8 +12,19 @@ const SILENCED_QUERY_ERROR_PATTERN =
   /not authenticated|not authorized|unauthenticated|unauthorized|user not found|not a member|not found|ArgumentValidationError|does not match validator/i;
 
 function getShortErrorMessage(error: unknown): string {
-  if (error instanceof ConvexError && typeof error.data === "string") {
-    return error.data;
+  if (error instanceof ConvexError) {
+    const data = error.data as { kind?: string; retryAfter?: number } | string;
+    if (
+      typeof data === "object" &&
+      data !== null &&
+      data.kind === "RateLimitError"
+    ) {
+      const seconds = Math.max(1, Math.ceil((data.retryAfter ?? 0) / 1000));
+      return `Slow down — try again in ${seconds}s`;
+    }
+    if (typeof data === "string") {
+      return data;
+    }
   }
   if (error instanceof Error) {
     return error.message;

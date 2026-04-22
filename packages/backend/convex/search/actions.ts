@@ -6,6 +6,7 @@ import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { action } from "../_generated/server";
+import { rateLimiter } from "../rateLimiter";
 import { getAuthIdentity } from "../utils";
 import { buildSnippet, extractQueryTokens, highlight } from "./highlight";
 import { extractBoostTerms, matchesBoostTerms } from "./memoryBoost";
@@ -206,6 +207,11 @@ export const hybridSearch = action({
     if (!membership) {
       throw new Error("Not authorized");
     }
+
+    await rateLimiter.limit(ctx, "hybridSearch", {
+      key: identity.userId,
+      throws: true,
+    });
 
     const filters: FiltersArg = args.filters ?? {};
     const sort = args.sort ?? "relevance";

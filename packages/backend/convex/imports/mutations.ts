@@ -31,6 +31,7 @@ export const startImport = workspaceMutation({
     connectionId: v.optional(v.id("connection")),
     options: v.optional(OPTIONS),
   },
+  rateLimit: "startImport",
   handler: async (ctx, args) => {
     if (!(args.storageId || args.connectionId)) {
       throw new ConvexError("Either storageId or connectionId is required");

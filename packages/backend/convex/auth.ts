@@ -8,6 +8,7 @@ import type { DataModel } from "./_generated/dataModel";
 import { internalAction } from "./_generated/server";
 import authConfig from "./auth.config";
 import authSchema from "./betterAuth/schema";
+import { rateLimiter } from "./rateLimiter";
 
 const siteUrl = process.env.SITE_URL;
 const authFunctions: AuthFunctions = internal.auth;
@@ -59,6 +60,10 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
             "sendVerificationEmail requires a mutation or action context"
           );
         }
+        await rateLimiter.limit(ctx, "emailVerificationSend", {
+          key: user.email,
+          throws: true,
+        });
         await ctx.scheduler.runAfter(
           0,
           internal.email.sendVerificationEmail.send,
