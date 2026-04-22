@@ -337,7 +337,11 @@ export default defineSchema({
     workspaceId: v.id("workspace"),
     parentId: v.optional(v.id("collection")),
     name: v.string(),
+    // `icon` holds an emoji character when `iconColor` is unset, otherwise an
+    // icon name resolvable via `getWorkspaceIcon`. This mirrors the dual-mode
+    // icon selector shared with workspaces without needing a `type` field.
     icon: v.optional(v.string()),
+    iconColor: v.optional(v.string()),
     createdBy: v.id("user"),
     updatedAt: v.number(),
     deletedAt: v.optional(v.number()),

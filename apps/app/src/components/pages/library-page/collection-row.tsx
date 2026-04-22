@@ -11,8 +11,9 @@ import {
 } from "@omi/ui/dropdown-menu";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { FolderIcon, MoreHorizontalIcon, TrashIcon } from "lucide-react";
+import { MoreHorizontalIcon, TrashIcon } from "lucide-react";
 import { type Ref, useCallback } from "react";
+import { CollectionIcon } from "~/components/common/collection-icon";
 import { EditableText } from "~/components/common/editable-text";
 import type { DragItemData, DropTargetData } from "./use-library-dnd";
 
@@ -22,6 +23,7 @@ interface CollectionRowProps {
     _id: Id<"collection">;
     name: string;
     icon?: string | null;
+    iconColor?: string | null;
     _creationTime: number;
   };
   onEdited?: () => void;
@@ -97,11 +99,11 @@ export function CollectionRow({
         to="/workspace/$workspaceId/library/collection/$collectionId"
       />
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-ui-bg-subtle text-ui-fg-muted">
-        {collection.icon ? (
-          <span className="text-sm">{collection.icon}</span>
-        ) : (
-          <FolderIcon className="h-4 w-4" />
-        )}
+        <CollectionIcon
+          icon={collection.icon ?? undefined}
+          iconColor={collection.iconColor ?? undefined}
+          size="sm"
+        />
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <EditableText

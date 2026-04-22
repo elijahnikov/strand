@@ -101,7 +101,7 @@ function TabComponent({ tab, isActive, workspaceId }: TabProps) {
           preloadDelay={100}
           to={tab.url}
         >
-          <span className="flex size-3.5 shrink-0 items-center justify-center text-ui-fg-muted">
+          <span className="flex shrink-0 items-center justify-center text-ui-fg-muted">
             <TabIcon tab={tab} workspaceId={workspaceId} />
           </span>
           <span className="truncate">{tab.title}</span>

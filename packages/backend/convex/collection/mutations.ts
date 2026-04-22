@@ -52,6 +52,7 @@ export const updateIcon = workspaceMutation({
   args: {
     collectionId: v.id("collection"),
     icon: v.optional(v.string()),
+    iconColor: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const collection = await ctx.db.get(args.collectionId);
@@ -60,6 +61,7 @@ export const updateIcon = workspaceMutation({
     }
     await ctx.db.patch(args.collectionId, {
       icon: args.icon,
+      iconColor: args.iconColor,
       updatedAt: Date.now(),
     });
   },

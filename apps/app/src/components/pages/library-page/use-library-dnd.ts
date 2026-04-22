@@ -25,6 +25,7 @@ export type DragItemData =
         _id: Id<"collection">;
         name: string;
         icon?: string | null;
+        iconColor?: string | null;
         _creationTime: number;
       };
     };

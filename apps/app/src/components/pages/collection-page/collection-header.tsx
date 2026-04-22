@@ -13,9 +13,11 @@ import {
 import { Separator } from "@omi/ui/separator";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { EllipsisIcon, FolderIcon } from "lucide-react";
+import { EllipsisIcon } from "lucide-react";
 import { Fragment, type ReactNode } from "react";
+import { CollectionIcon } from "~/components/common/collection-icon";
 import { EditableText } from "~/components/common/editable-text";
+import { WorkspaceIconSelector } from "~/components/common/workspace-icon";
 import type { DropTargetData } from "../library-page/use-library-dnd";
 
 interface CollectionHeaderProps {
@@ -23,7 +25,13 @@ interface CollectionHeaderProps {
     _id: Id<"collection">;
     name: string;
     icon?: string | null;
-    breadcrumbs: Array<{ _id: Id<"collection">; name: string }>;
+    iconColor?: string | null;
+    breadcrumbs: Array<{
+      _id: Id<"collection">;
+      name: string;
+      icon?: string | null;
+      iconColor?: string | null;
+    }>;
   };
   workspaceId: Id<"workspace">;
 }
@@ -38,21 +46,18 @@ export function CollectionHeader({
     mutationFn: useConvexMutation(api.collection.mutations.rename),
   });
 
-  const { mutate: remove } = useMutation({
-    mutationFn: useConvexMutation(api.collection.mutations.remove),
+  const { mutate: updateIcon } = useMutation({
+    mutationFn: useConvexMutation(api.collection.mutations.updateIcon),
   });
 
   const handleRename = (name: string) => {
     rename({ workspaceId, collectionId: collection._id, name });
   };
 
-  const _handleDelete = () => {
-    remove({ workspaceId, collectionId: collection._id });
-    navigate({
-      to: "/workspace/$workspaceId/library",
-      params: { workspaceId },
-    });
-  };
+  const currentEmoji =
+    collection.icon && !collection.iconColor ? collection.icon : undefined;
+  const currentIconName =
+    collection.icon && collection.iconColor ? collection.icon : undefined;
 
   return (
     <div className="mb-4 flex flex-col gap-2">
@@ -72,13 +77,37 @@ export function CollectionHeader({
         />
       </nav>
       <div className="mt-2 flex items-center gap-2">
-        <span className="text-lg">
-          {collection.icon ?? (
-            <FolderIcon className="size-6 text-ui-fg-muted" />
-          )}
-        </span>
+        <WorkspaceIconSelector
+          currentEmoji={currentEmoji}
+          currentIcon={currentIconName}
+          currentIconColor={collection.iconColor ?? undefined}
+          onSelect={(value) => {
+            if (value.type === "emoji") {
+              updateIcon({
+                workspaceId,
+                collectionId: collection._id,
+                icon: value.emoji,
+                iconColor: undefined,
+              });
+            } else {
+              updateIcon({
+                workspaceId,
+                collectionId: collection._id,
+                icon: value.name,
+                iconColor: value.color,
+              });
+            }
+          }}
+        >
+          <CollectionIcon
+            className="cursor-pointer rounded-md p-1 transition-colors hover:bg-ui-bg-subtle-hover"
+            icon={collection.icon ?? undefined}
+            iconColor={collection.iconColor ?? undefined}
+            size="xl"
+          />
+        </WorkspaceIconSelector>
         <EditableText
-          className="font-medium text-ui-fg-base text-xl"
+          className="font-medium text-lg text-ui-fg-base"
           onSave={handleRename}
           value={collection.name}
         />
@@ -89,12 +118,34 @@ export function CollectionHeader({
 
 const MAX_VISIBLE_CRUMBS = 2;
 
+interface BreadcrumbCrumb {
+  _id: Id<"collection">;
+  icon?: string | null;
+  iconColor?: string | null;
+  name: string;
+}
+
+function CrumbBadge({ crumb }: { crumb: BreadcrumbCrumb }) {
+  return (
+    <DroppableBadge collectionId={crumb._id} dropId={`breadcrumb-${crumb._id}`}>
+      <span className="inline-flex items-center gap-1">
+        <CollectionIcon
+          icon={crumb.icon ?? undefined}
+          iconColor={crumb.iconColor ?? undefined}
+          size="xs"
+        />
+        {crumb.name}
+      </span>
+    </DroppableBadge>
+  );
+}
+
 function HeaderBreadcrumbs({
   crumbs,
   workspaceId,
   navigate,
 }: {
-  crumbs: Array<{ _id: Id<"collection">; name: string }>;
+  crumbs: BreadcrumbCrumb[];
   workspaceId: Id<"workspace">;
   navigate: ReturnType<typeof useNavigate>;
 }) {
@@ -110,12 +161,7 @@ function HeaderBreadcrumbs({
               preload="intent"
               to="/workspace/$workspaceId/library/collection/$collectionId"
             >
-              <DroppableBadge
-                collectionId={crumb._id}
-                dropId={`breadcrumb-${crumb._id}`}
-              >
-                {crumb.name}
-              </DroppableBadge>
+              <CrumbBadge crumb={crumb} />
             </Link>
           </Fragment>
         ))}
@@ -123,9 +169,9 @@ function HeaderBreadcrumbs({
     );
   }
 
-  const first = crumbs[0] as (typeof crumbs)[number];
+  const first = crumbs[0] as BreadcrumbCrumb;
   const hidden = crumbs.slice(1, -1);
-  const last = crumbs.at(-1) as (typeof crumbs)[number];
+  const last = crumbs.at(-1) as BreadcrumbCrumb;
 
   return (
     <>
@@ -136,12 +182,7 @@ function HeaderBreadcrumbs({
         preload="intent"
         to="/workspace/$workspaceId/library/collection/$collectionId"
       >
-        <DroppableBadge
-          collectionId={first._id}
-          dropId={`breadcrumb-${first._id}`}
-        >
-          {first.name}
-        </DroppableBadge>
+        <CrumbBadge crumb={first} />
       </Link>
       <Separator className="mx-2 h-3 rotate-30" orientation="vertical" />
       <DropdownMenu>
@@ -151,6 +192,7 @@ function HeaderBreadcrumbs({
         <DropdownMenuContent align="start" sideOffset={4}>
           {hidden.map((crumb) => (
             <DropdownMenuItem
+              className="gap-1.5"
               key={crumb._id}
               onClick={() =>
                 navigate({
@@ -159,6 +201,11 @@ function HeaderBreadcrumbs({
                 })
               }
             >
+              <CollectionIcon
+                icon={crumb.icon ?? undefined}
+                iconColor={crumb.iconColor ?? undefined}
+                size="xs"
+              />
               {crumb.name}
             </DropdownMenuItem>
           ))}
@@ -171,12 +218,7 @@ function HeaderBreadcrumbs({
         preload="intent"
         to="/workspace/$workspaceId/library/collection/$collectionId"
       >
-        <DroppableBadge
-          collectionId={last._id}
-          dropId={`breadcrumb-${last._id}`}
-        >
-          {last.name}
-        </DroppableBadge>
+        <CrumbBadge crumb={last} />
       </Link>
     </>
   );

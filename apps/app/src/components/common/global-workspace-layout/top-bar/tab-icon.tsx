@@ -3,7 +3,7 @@ import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { RiChat1Line, RiHashtag, RiStickyNoteLine } from "@remixicon/react";
 import { useQuery } from "@tanstack/react-query";
-import { FolderIcon } from "lucide-react";
+import { CollectionIcon } from "~/components/common/collection-icon";
 import { FileKindIcon } from "~/components/common/file-kind-icon";
 import type { WorkspaceTab } from "~/lib/workspace-tabs-store";
 
@@ -123,8 +123,12 @@ function CollectionTabIcon({
   const { data: collection } = useQuery(
     convexQuery(api.collection.queries.get, { workspaceId, collectionId })
   );
-  if (collection?.icon) {
-    return <span className="text-[13px] leading-none">{collection.icon}</span>;
-  }
-  return <FolderIcon className="size-3.5 text-ui-fg-muted" />;
+  return (
+    <CollectionIcon
+      className="-mr-1"
+      icon={collection?.icon ?? undefined}
+      iconColor={collection?.iconColor ?? undefined}
+      size="md"
+    />
+  );
 }

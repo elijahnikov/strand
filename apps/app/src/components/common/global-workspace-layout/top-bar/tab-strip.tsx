@@ -104,11 +104,11 @@ export function TabStrip({ workspaceId }: TabStripProps) {
       </ScrollArea>
       <span
         aria-hidden
-        className="pointer-events-none absolute top-0 bottom-0 left-0 z-[1] w-6 bg-gradient-to-r from-ui-bg-subtle to-transparent"
+        className="pointer-events-none absolute top-0 bottom-0 left-0 z-[1] w-6 bg-linear-to-r from-ui-bg-subtle to-transparent"
       />
       <span
         aria-hidden
-        className="pointer-events-none absolute top-0 right-0 bottom-0 z-[1] w-12 bg-gradient-to-l from-50% from-ui-bg-subtle to-transparent"
+        className="pointer-events-none absolute top-0 right-0 bottom-0 z-[1] w-12 bg-linear-to-l from-50% from-ui-bg-subtle to-transparent"
       />
     </div>
   );

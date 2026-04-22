@@ -122,7 +122,7 @@ export function useRouteTabsSync() {
     workspaceId as Id<"workspace"> | undefined,
     chatKind?.entityId as Id<"chatThread"> | undefined
   );
-  const { title: collectionTitle, icon: collectionIcon } = useCollectionTitle(
+  const { title: collectionTitle } = useCollectionTitle(
     workspaceId as Id<"workspace"> | undefined,
     collectionKind?.entityId as Id<"collection"> | undefined
   );
@@ -171,9 +171,7 @@ export function useRouteTabsSync() {
     } else if (entity.kind === "chat") {
       resolved = chatTitle;
     } else if (entity.kind === "collection" && collectionTitle) {
-      resolved = collectionIcon
-        ? `${collectionIcon} ${collectionTitle}`
-        : collectionTitle;
+      resolved = collectionTitle;
     } else if (entity.kind === "tag") {
       resolved = `#${entity.entityId}`;
     }
@@ -186,7 +184,6 @@ export function useRouteTabsSync() {
     resourceTitle,
     chatTitle,
     collectionTitle,
-    collectionIcon,
     updateTitle,
   ]);
 }

@@ -29,7 +29,6 @@ import type * as connections_providers_readwise from "../connections/providers/r
 import type * as connections_providers_registry from "../connections/providers/registry.js";
 import type * as connections_providers_types from "../connections/providers/types.js";
 import type * as connections_queries from "../connections/queries.js";
-import type * as debug from "../debug.js";
 import type * as email_resend from "../email/resend.js";
 import type * as email_sendVerificationEmail from "../email/sendVerificationEmail.js";
 import type * as extensionAuth_http from "../extensionAuth/http.js";
@@ -109,7 +108,6 @@ declare const fullApi: ApiFromModules<{
   "connections/providers/registry": typeof connections_providers_registry;
   "connections/providers/types": typeof connections_providers_types;
   "connections/queries": typeof connections_queries;
-  debug: typeof debug;
   "email/resend": typeof email_resend;
   "email/sendVerificationEmail": typeof email_sendVerificationEmail;
   "extensionAuth/http": typeof extensionAuth_http;

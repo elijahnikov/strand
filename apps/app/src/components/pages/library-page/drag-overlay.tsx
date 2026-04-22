@@ -1,6 +1,7 @@
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { FolderIcon } from "lucide-react";
 import { motion } from "motion/react";
+import { CollectionIcon } from "~/components/common/collection-icon";
 import { FileKindIcon } from "~/components/common/file-kind-icon";
 import { NoteIcon, WebsiteIcon } from "./resource-row";
 import type { ActiveDragItem } from "./use-library-dnd";
@@ -60,12 +61,13 @@ export function LibraryDragOverlay({
 
 function OverlayIcon({ data }: { data: ActiveDragItem["data"] }) {
   if (data.type === "collection") {
-    if (data.collection.icon) {
-      return (
-        <span className="text-lg leading-none">{data.collection.icon}</span>
-      );
-    }
-    return <FolderIcon className="h-4 w-4 text-ui-fg-muted" />;
+    return (
+      <CollectionIcon
+        icon={data.collection.icon ?? undefined}
+        iconColor={data.collection.iconColor ?? undefined}
+        size="md"
+      />
+    );
   }
 
   const resource = data.resource as ResourceLike;

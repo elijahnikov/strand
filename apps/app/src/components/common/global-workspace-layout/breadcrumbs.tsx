@@ -18,6 +18,7 @@ import {
 } from "@tanstack/react-router";
 import { EllipsisIcon } from "lucide-react";
 import { Fragment } from "react";
+import { CollectionIcon } from "~/components/common/collection-icon";
 import { FileKindIcon } from "~/components/common/file-kind-icon";
 
 const PAGE_LABELS: Record<string, string> = {
@@ -369,10 +370,12 @@ function CollectionBreadcrumbs({
             workspaceId={workspaceId}
           />
           <BreadcrumbSeparator />
-          <span className="txt-small truncate font-medium text-ui-fg-base">
-            {collection.icon ? (
-              <span className="mr-1">{collection.icon}</span>
-            ) : null}
+          <span className="txt-small inline-flex items-center gap-1 truncate font-medium text-ui-fg-base">
+            <CollectionIcon
+              icon={collection.icon ?? undefined}
+              iconColor={collection.iconColor ?? undefined}
+              size="xs"
+            />
             {collection.name}
           </span>
         </>

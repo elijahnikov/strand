@@ -14,14 +14,24 @@ export const get = workspaceQuery({
     }
 
     // Walk up parentId chain to build breadcrumbs
-    const breadcrumbs: Array<{ _id: typeof collection._id; name: string }> = [];
+    const breadcrumbs: Array<{
+      _id: typeof collection._id;
+      name: string;
+      icon?: string;
+      iconColor?: string;
+    }> = [];
     let current = collection;
     while (current.parentId) {
       const parent = await ctx.db.get(current.parentId);
       if (!parent || parent.deletedAt) {
         break;
       }
-      breadcrumbs.unshift({ _id: parent._id, name: parent.name });
+      breadcrumbs.unshift({
+        _id: parent._id,
+        name: parent.name,
+        icon: parent.icon,
+        iconColor: parent.iconColor,
+      });
       current = parent;
     }
 
@@ -29,6 +39,7 @@ export const get = workspaceQuery({
       _id: collection._id,
       name: collection.name,
       icon: collection.icon,
+      iconColor: collection.iconColor,
       parentId: collection.parentId,
       createdBy: collection.createdBy,
       _creationTime: collection._creationTime,
