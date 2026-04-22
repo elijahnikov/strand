@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+import { register as registerRateLimiter } from "@convex-dev/rate-limiter/test";
 import { convexTest, type TestConvex } from "convex-test";
 import { internal } from "../convex/_generated/api";
 import type { Doc, Id } from "../convex/_generated/dataModel";
@@ -11,7 +12,9 @@ type TestHarness = TestConvex<SchemaDef>;
 // resulting modules map to wire up Convex function references.
 export function createHarness(): TestHarness {
   const modules = import.meta.glob("../convex/**/*.ts");
-  return convexTest(schema, modules);
+  const t = convexTest(schema, modules);
+  registerRateLimiter(t);
+  return t;
 }
 
 interface SeedUserOptions {
