@@ -8,15 +8,19 @@ import { AnchoredToastProvider, ToastProvider } from "@omi/ui/toast";
 import { HotkeysProvider } from "@tanstack/react-hotkeys";
 import type { QueryClient } from "@tanstack/react-query";
 import {
+  CatchBoundary,
   createRootRouteWithContext,
   HeadContent,
   Outlet,
   Scripts,
   useRouteContext,
+  useRouterState,
 } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 import type * as React from "react";
+import { DevCrashTrigger } from "~/components/common/dev-crash-trigger";
+import { ErrorState } from "~/components/common/error-state";
 import { ClientAuthBoundary } from "~/lib/auth-client";
 import { getToken } from "~/lib/auth-server";
 import appCss from "~/styles.css?url";
@@ -79,6 +83,7 @@ export const Route = createRootRouteWithContext<{
 
 function RootComponent() {
   const context = useRouteContext({ from: Route.id });
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
     <ConvexBetterAuthProvider
@@ -93,7 +98,13 @@ function RootComponent() {
               <AnchoredToastProvider>
                 <HotkeysProvider>
                   <ClientAuthBoundary>
-                    <Outlet />
+                    <CatchBoundary
+                      errorComponent={ErrorState}
+                      getResetKey={() => pathname}
+                    >
+                      <DevCrashTrigger scope="root" />
+                      <Outlet />
+                    </CatchBoundary>
                   </ClientAuthBoundary>
                 </HotkeysProvider>
               </AnchoredToastProvider>
