@@ -4,6 +4,8 @@ import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { action } from "../_generated/server";
+import { rateLimiter } from "../rateLimiter";
+import { getAuthIdentity } from "../utils";
 
 export const semanticTagSearch = action({
   args: {
@@ -11,6 +13,16 @@ export const semanticTagSearch = action({
     tagName: v.string(),
   },
   handler: async (ctx, args) => {
+    const identity = await getAuthIdentity(ctx);
+    if (!identity?.userId) {
+      throw new Error("Unauthorized");
+    }
+
+    await rateLimiter.limit(ctx, "semanticTagSearch", {
+      key: identity.userId,
+      throws: true,
+    });
+
     const tag = await ctx.runQuery(internal.resource.aiInternals.getTagByName, {
       workspaceId: args.workspaceId,
       tagName: args.tagName,

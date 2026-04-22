@@ -1,6 +1,8 @@
+import { ConvexError } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { httpAction } from "../_generated/server";
+import { rateLimiter } from "../rateLimiter";
 
 const BEARER_PREFIX = "Bearer ";
 
@@ -23,6 +25,23 @@ function jsonResponse(body: unknown, init?: ResponseInit): Response {
 function errorResponse(err: unknown): Response {
   if (err instanceof HttpError) {
     return jsonResponse({ error: err.message }, { status: err.status });
+  }
+  if (err instanceof ConvexError) {
+    const data = err.data as { kind?: string; retryAfter?: number } | string;
+    if (
+      typeof data === "object" &&
+      data !== null &&
+      data.kind === "RateLimited"
+    ) {
+      const retryAfter = data.retryAfter ?? 0;
+      return jsonResponse(
+        { error: "Rate limit exceeded", retryAfter },
+        {
+          status: 429,
+          headers: { "retry-after": String(Math.ceil(retryAfter / 1000)) },
+        }
+      );
+    }
   }
   const message = err instanceof Error ? err.message : "Unknown error";
   return jsonResponse({ error: message }, { status: 500 });
@@ -129,6 +148,10 @@ interface CaptureWebsiteBody {
 export const captureWebsiteHandler = httpAction(async (ctx, request) => {
   try {
     const auth = await resolveAuth(ctx, request);
+    await rateLimiter.limit(ctx, "extensionCapture", {
+      key: auth.userId,
+      throws: true,
+    });
     const body = await readJson<CaptureWebsiteBody>(request);
     if (!body.url) {
       throw new HttpError(400, "url is required");
@@ -162,6 +185,10 @@ interface CaptureNoteBody {
 export const captureNoteHandler = httpAction(async (ctx, request) => {
   try {
     const auth = await resolveAuth(ctx, request);
+    await rateLimiter.limit(ctx, "extensionCapture", {
+      key: auth.userId,
+      throws: true,
+    });
     const body = await readJson<CaptureNoteBody>(request);
     if (!body.title?.trim()) {
       throw new HttpError(400, "title is required");
@@ -200,6 +227,10 @@ interface CaptureFileBody {
 export const captureFileHandler = httpAction(async (ctx, request) => {
   try {
     const auth = await resolveAuth(ctx, request);
+    await rateLimiter.limit(ctx, "extensionCapture", {
+      key: auth.userId,
+      throws: true,
+    });
     const body = await readJson<CaptureFileBody>(request);
     if (!(body.storageId && body.fileName && body.mimeType && body.fileSize)) {
       throw new HttpError(

@@ -33,6 +33,7 @@
   "dependencies": {
     "@convex-dev/better-auth": "catalog:convex",
     "@convex-dev/presence": "catalog:convex",
+    "@convex-dev/rate-limiter": "catalog:convex",
     "@convex-dev/resend": "catalog:convex",
     "@instantdb/core": "catalog:instant",
     "@instantdb/react": "catalog:instant",

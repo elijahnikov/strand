@@ -2,8 +2,7 @@ import { ConvexError, v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
-import { mutation } from "../_generated/server";
-import { workspaceMutation } from "../utils";
+import { protectedMutation, workspaceMutation } from "../utils";
 
 export interface CreateResourceArgs {
   collectionId?: Id<"collection">;
@@ -181,6 +180,7 @@ export const create = workspaceMutation({
 
     collectionId: v.optional(v.id("collection")),
   },
+  rateLimit: "aiResourceProcess",
   handler: async (ctx, args) => {
     return await createResource(ctx, {
       ...args,
@@ -359,8 +359,9 @@ export const togglePin = workspaceMutation({
   },
 });
 
-export const generateUploadUrl = mutation({
+export const generateUploadUrl = protectedMutation({
   args: {},
+  rateLimit: "resourceUpload",
   handler: async (ctx) => {
     return await ctx.storage.generateUploadUrl();
   },

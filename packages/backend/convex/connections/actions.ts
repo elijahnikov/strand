@@ -4,6 +4,7 @@ import { ConvexError, v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { action } from "../_generated/server";
+import { rateLimiter } from "../rateLimiter";
 import { getAuthIdentity } from "../utils";
 import { getApiTokenProvider } from "./providers/registry";
 
@@ -14,6 +15,10 @@ export const connectReadwise = action({
     if (!identity?.userId) {
       throw new ConvexError("Not authenticated");
     }
+    await rateLimiter.limit(ctx, "oauthAuthorize", {
+      key: identity.userId,
+      throws: true,
+    });
     const token = args.token.trim();
     if (token.length === 0) {
       throw new ConvexError("Token is required");
