@@ -31,7 +31,7 @@ function errorResponse(err: unknown): Response {
     if (
       typeof data === "object" &&
       data !== null &&
-      data.kind === "RateLimitError"
+      data.kind === "RateLimited"
     ) {
       const retryAfter = data.retryAfter ?? 0;
       return jsonResponse(

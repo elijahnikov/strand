@@ -17,7 +17,7 @@ function getShortErrorMessage(error: unknown): string {
     if (
       typeof data === "object" &&
       data !== null &&
-      data.kind === "RateLimitError"
+      data.kind === "RateLimited"
     ) {
       const seconds = Math.max(1, Math.ceil((data.retryAfter ?? 0) / 1000));
       return `Slow down — try again in ${seconds}s`;
