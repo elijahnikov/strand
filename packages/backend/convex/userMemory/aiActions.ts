@@ -11,6 +11,7 @@ const MIN_NEW_MESSAGES = 4;
 const MAX_MESSAGES_IN_CTX = 40;
 const SIMILARITY_FLOOR = 0.7;
 const DRIFT_GUARD_MIN_MESSAGES = 8;
+const MEMORY_EXTRACT_COST = 3;
 
 export const extractUserMemory = internalAction({
   args: {
@@ -110,7 +111,23 @@ export const extractUserMemory = internalAction({
           lastExtractedAt: Date.now(),
         }
       );
-      if (!write.success) {
+      if (write.success) {
+        try {
+          const resolved = await ctx.runQuery(
+            internal.billing.resolver.resolveActing,
+            { userId: row.userId, workspaceId: row.workspaceId }
+          );
+          await ctx.runMutation(internal.billing.credits.debit, {
+            billingAccountId: resolved.billingAccountId,
+            workspaceId: row.workspaceId,
+            actingUserId: row.userId,
+            reason: "memory-extract",
+            amount: MEMORY_EXTRACT_COST,
+          });
+        } catch {
+          // Swallow billing errors — don't undo a successful extraction.
+        }
+      } else {
         await ctx.runMutation(
           internal.userMemory.internals.markExtractionFailed,
           { memoryId: args.memoryId }

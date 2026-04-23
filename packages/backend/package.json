@@ -17,7 +17,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "dev": "bunx convex dev --local --once",
+    "dev": "bunx convex dev",
     "generate": "cd convex/betterAuth bunx @better-auth/cli generate -y",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -31,6 +31,7 @@
     "vitest": "^3"
   },
   "dependencies": {
+    "@better-auth/stripe": "catalog:better-auth",
     "@convex-dev/better-auth": "catalog:convex",
     "@convex-dev/presence": "catalog:convex",
     "@convex-dev/rate-limiter": "catalog:convex",
@@ -42,6 +43,7 @@
     "convex": "catalog:convex",
     "convex-helpers": "catalog:convex",
     "fflate": "^0.8.2",
-    "marked": "^14.1.3"
+    "marked": "^14.1.3",
+    "stripe": "^22.0.2"
   }
 }

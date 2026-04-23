@@ -1,7 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omi/ui/tabs";
 import { Text } from "@omi/ui/text";
-import { RiLinksFill } from "@remixicon/react";
+import { RiBankCardLine, RiLinksFill } from "@remixicon/react";
 import { PageContent } from "~/components/common/page-content";
+import { BillingTab } from "./billing-tab";
 import { ConnectionsTab } from "./connections-tab";
 
 export function UserSettingsPageComponent() {
@@ -19,10 +20,19 @@ export function UserSettingsPageComponent() {
               Connections
             </Text>
           </TabsTrigger>
+          <TabsTrigger className="grow-0 pl-3" value="billing">
+            <RiBankCardLine className="size-4" />
+            <Text className="ml-1 font-medium" size="small">
+              Billing
+            </Text>
+          </TabsTrigger>
         </TabsList>
         <div className="ml-44 h-fit min-h-[calc(100vh-140px)] w-full border-l-[0.5px] pb-8">
           <TabsContent className="pl-8" value="connections">
             <ConnectionsTab />
+          </TabsContent>
+          <TabsContent className="pl-8" value="billing">
+            <BillingTab />
           </TabsContent>
         </div>
       </Tabs>

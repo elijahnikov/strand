@@ -13,8 +13,10 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
+    "@better-auth/stripe": "catalog:better-auth",
     "@convex-dev/better-auth": "catalog:convex",
-    "better-auth": "catalog:better-auth"
+    "better-auth": "catalog:better-auth",
+    "stripe": "^22.0.2"
   },
   "devDependencies": {
     "@omi/tsconfig": "workspace:*",

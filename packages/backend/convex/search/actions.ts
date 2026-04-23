@@ -6,6 +6,7 @@ import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { action } from "../_generated/server";
+import { tokensToCredits } from "../billing/credits";
 import { rateLimiter } from "../rateLimiter";
 import { getAuthIdentity } from "../utils";
 import { buildSnippet, extractQueryTokens, highlight } from "./highlight";
@@ -318,10 +319,28 @@ export const hybridSearch = action({
 
     let queryEmbedding: number[] | null = null;
     if (canSemantic) {
+      const billingAccount = await ctx.runQuery(
+        internal.billing.credits.preflight,
+        {
+          userId: identity.userId as Id<"user">,
+          workspaceId: args.workspaceId,
+          estimate: 1,
+        }
+      );
       const provider = createOpenAIProvider(apiKey as string);
       try {
-        const { embedding } = await generateEmbedding(provider, rawQuery);
+        const { embedding, model, tokens } = await generateEmbedding(
+          provider,
+          rawQuery
+        );
         queryEmbedding = embedding;
+        await ctx.runMutation(internal.billing.credits.debit, {
+          billingAccountId: billingAccount.billingAccountId,
+          workspaceId: args.workspaceId,
+          actingUserId: identity.userId as Id<"user">,
+          reason: "search",
+          amount: tokensToCredits(tokens, model),
+        });
       } catch {
         queryEmbedding = null;
       }

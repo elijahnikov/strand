@@ -6,6 +6,7 @@ import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { action } from "../_generated/server";
+import { tokensToCredits } from "../billing/credits";
 import { rateLimiter } from "../rateLimiter";
 import { getAuthIdentity } from "../utils";
 
@@ -43,8 +44,27 @@ export const searchChunks = action({
       return [];
     }
 
+    const billingAccount = await ctx.runQuery(
+      internal.billing.credits.preflight,
+      {
+        userId: identity.userId as Id<"user">,
+        workspaceId: args.workspaceId,
+        estimate: 1,
+      }
+    );
+
     const provider = createOpenAIProvider(apiKey);
-    const { embedding } = await generateEmbedding(provider, args.query);
+    const { embedding, model, tokens } = await generateEmbedding(
+      provider,
+      args.query
+    );
+    await ctx.runMutation(internal.billing.credits.debit, {
+      billingAccountId: billingAccount.billingAccountId,
+      workspaceId: args.workspaceId,
+      actingUserId: identity.userId as Id<"user">,
+      reason: "chat",
+      amount: tokensToCredits(tokens, model),
+    });
 
     const results = await ctx.vectorSearch("resourceChunk", "by_embedding", {
       vector: embedding,
