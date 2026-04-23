@@ -22,9 +22,11 @@ type BetterAuthCtx = ActionCtx;
 interface PluginSubscription {
   billingInterval?: "day" | "week" | "month" | "year" | undefined;
   periodEnd?: Date | number | string | undefined;
+  periodStart?: Date | number | string | undefined;
   plan?: string | undefined;
   priceId?: string | undefined;
   referenceId: string;
+  status?: string | undefined;
   stripeCustomerId?: string | undefined;
   stripeSubscriptionId?: string | undefined;
 }
@@ -40,11 +42,11 @@ const TIER_RANK: Record<"free" | PaidPlan, number> = {
 };
 
 /**
- * The Convex Better Auth adapter doesn't round-trip Date objects — `periodEnd`
- * comes back as a number (ms) or an ISO string, not `instanceof Date`.
+ * The Convex Better Auth adapter doesn't round-trip Date objects — period
+ * fields come back as a number (ms) or an ISO string, not `instanceof Date`.
  * Handle all three shapes so the UI always gets a real timestamp.
  */
-function coercePeriodEndMs(value: Date | number | string | undefined): number {
+function coerceTimestampMs(value: Date | number | string | undefined): number {
   if (value instanceof Date) {
     return value.getTime();
   }
@@ -101,13 +103,13 @@ export async function applyActiveSubscription(
     return;
   }
   const userId = appUserId as Id<"user">;
-  const currentPeriodEnd = coercePeriodEndMs(subscription.periodEnd);
+  const currentPeriodEnd = coerceTimestampMs(subscription.periodEnd);
+  const periodStart = coerceTimestampMs(subscription.periodStart);
 
   // Snapshot the pre-sync plan so we can detect tier upgrades below.
-  const before = await ctx.runQuery(
-    internal.billing.resolver.resolveActing,
-    { userId }
-  );
+  const before = await ctx.runQuery(internal.billing.resolver.resolveActing, {
+    userId,
+  });
 
   await ctx.runMutation(internal.billing.sync.syncSubscriptionActive, {
     userId,
@@ -117,6 +119,7 @@ export async function applyActiveSubscription(
     planTier: planName,
     cadence,
     currentPeriodEnd,
+    subscriptionStatus: subscription.status,
   });
 
   // Top up on (a) initial checkout activation, or (b) a tier upgrade — e.g.
@@ -128,6 +131,7 @@ export async function applyActiveSubscription(
     await ctx.runMutation(internal.billing.sync.topUpForPeriod, {
       billingAccountId: before.billingAccountId,
       planTier: planName,
+      idempotencyKey: `${stripeSubscriptionId}:${periodStart}:${planName}`,
     });
   }
 }

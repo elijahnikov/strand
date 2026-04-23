@@ -56,6 +56,7 @@ export const syncSubscriptionActive = internalMutation({
     planTier: planValidator,
     cadence: cadenceValidator,
     currentPeriodEnd: v.number(),
+    subscriptionStatus: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const accountId = await getPersonalAccountId(ctx, args.userId);
@@ -66,6 +67,7 @@ export const syncSubscriptionActive = internalMutation({
       stripeSubscriptionId: args.stripeSubscriptionId,
       stripePriceId: args.stripePriceId,
       stripeCurrentPeriodEnd: args.currentPeriodEnd,
+      subscriptionStatus: args.subscriptionStatus,
     });
   },
 });
@@ -86,6 +88,7 @@ export const syncSubscriptionCanceled = internalMutation({
       stripeSubscriptionId: undefined,
       stripePriceId: undefined,
       stripeCurrentPeriodEnd: undefined,
+      subscriptionStatus: undefined,
     });
   },
 });
@@ -100,11 +103,27 @@ export const topUpForPeriod = internalMutation({
   args: {
     billingAccountId: v.id("billingAccount"),
     planTier: planValidator,
+    // `${subId}:${periodStart}:${plan}`. When the account's `lastTopUpKey`
+    // already matches, we skip — this makes duplicate Stripe webhooks (retries,
+    // CLI replays) a no-op so they don't wipe mid-period debits by resetting
+    // balance to allotment. Omitted by the cron reset path which has its own
+    // lock (`creditResetAt > now`).
+    idempotencyKey: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const account = await ctx.db.get(args.billingAccountId);
     if (!account) {
       throw new ConvexError("Billing account not found");
+    }
+    if (
+      args.idempotencyKey !== undefined &&
+      account.lastTopUpKey === args.idempotencyKey
+    ) {
+      return {
+        skipped: true as const,
+        balanceAfter: account.creditBalance,
+        resetAt: account.creditResetAt ?? 0,
+      };
     }
     const allotment = tierToAllotment(args.planTier);
     const previousBalance = account.creditBalance;
@@ -112,6 +131,7 @@ export const topUpForPeriod = internalMutation({
     await ctx.db.patch(args.billingAccountId, {
       creditBalance: allotment,
       creditResetAt: resetAt,
+      lastTopUpKey: args.idempotencyKey,
     });
     await ctx.db.insert("creditLedger", {
       billingAccountId: args.billingAccountId,
@@ -121,7 +141,7 @@ export const topUpForPeriod = internalMutation({
       amount: allotment - previousBalance,
       balanceAfter: allotment,
     });
-    return { balanceAfter: allotment, resetAt };
+    return { skipped: false as const, balanceAfter: allotment, resetAt };
   },
 });
 
@@ -173,6 +193,7 @@ export const resetDueCredits = internalMutation({
       await ctx.db.patch(account._id, {
         creditBalance: allotment,
         creditResetAt: nextResetAt,
+        lastTopUpKey: undefined,
       });
       await ctx.db.insert("creditLedger", {
         billingAccountId: account._id,

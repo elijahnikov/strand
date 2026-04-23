@@ -12,14 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ConnectExtensionRouteImport } from './routes/connect-extension'
 import { Route as WorkspaceRouteImport } from './routes/_workspace'
 import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as R404RouteImport } from './routes/404'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
-import { Route as WorkspaceAccountRouteImport } from './routes/_workspace/account'
 import { Route as AuthVerifyEmailRouteImport } from './routes/_auth/verify-email'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
+import { Route as AppAccountRouteImport } from './routes/_app/account'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as WorkspaceWorkspaceWorkspaceIdRouteRouteImport } from './routes/_workspace/workspace/$workspaceId/route'
 import { Route as WorkspaceWorkspaceWorkspaceIdIndexRouteImport } from './routes/_workspace/workspace/$workspaceId/index'
@@ -50,6 +51,10 @@ const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const R404Route = R404RouteImport.update({
   id: '/404',
   path: '/404',
@@ -70,11 +75,6 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WorkspaceAccountRoute = WorkspaceAccountRouteImport.update({
-  id: '/account',
-  path: '/account',
-  getParentRoute: () => WorkspaceRoute,
-} as any)
 const AuthVerifyEmailRoute = AuthVerifyEmailRouteImport.update({
   id: '/verify-email',
   path: '/verify-email',
@@ -89,6 +89,11 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => AuthRoute,
+} as any)
+const AppAccountRoute = AppAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AppRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -191,10 +196,10 @@ export interface FileRoutesByFullPath {
   '/$': typeof SplatRoute
   '/404': typeof R404Route
   '/connect-extension': typeof ConnectExtensionRoute
+  '/account': typeof AppAccountRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/verify-email': typeof AuthVerifyEmailRoute
-  '/account': typeof WorkspaceAccountRoute
   '/api/chat': typeof ApiChatRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceWorkspaceIdRouteRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -218,10 +223,10 @@ export interface FileRoutesByTo {
   '/$': typeof SplatRoute
   '/404': typeof R404Route
   '/connect-extension': typeof ConnectExtensionRoute
+  '/account': typeof AppAccountRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/verify-email': typeof AuthVerifyEmailRoute
-  '/account': typeof WorkspaceAccountRoute
   '/api/chat': typeof ApiChatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/workspace/$workspaceId/search': typeof WorkspaceWorkspaceWorkspaceIdSearchRoute
@@ -241,13 +246,14 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/404': typeof R404Route
+  '/_app': typeof AppRouteWithChildren
   '/_auth': typeof AuthRouteWithChildren
   '/_workspace': typeof WorkspaceRouteWithChildren
   '/connect-extension': typeof ConnectExtensionRoute
+  '/_app/account': typeof AppAccountRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
   '/_auth/verify-email': typeof AuthVerifyEmailRoute
-  '/_workspace/account': typeof WorkspaceAccountRoute
   '/api/chat': typeof ApiChatRoute
   '/_workspace/workspace/$workspaceId': typeof WorkspaceWorkspaceWorkspaceIdRouteRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -273,10 +279,10 @@ export interface FileRouteTypes {
     | '/$'
     | '/404'
     | '/connect-extension'
+    | '/account'
     | '/login'
     | '/register'
     | '/verify-email'
-    | '/account'
     | '/api/chat'
     | '/workspace/$workspaceId'
     | '/api/auth/$'
@@ -300,10 +306,10 @@ export interface FileRouteTypes {
     | '/$'
     | '/404'
     | '/connect-extension'
+    | '/account'
     | '/login'
     | '/register'
     | '/verify-email'
-    | '/account'
     | '/api/chat'
     | '/api/auth/$'
     | '/workspace/$workspaceId/search'
@@ -322,13 +328,14 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/404'
+    | '/_app'
     | '/_auth'
     | '/_workspace'
     | '/connect-extension'
+    | '/_app/account'
     | '/_auth/login'
     | '/_auth/register'
     | '/_auth/verify-email'
-    | '/_workspace/account'
     | '/api/chat'
     | '/_workspace/workspace/$workspaceId'
     | '/api/auth/$'
@@ -352,6 +359,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
   R404Route: typeof R404Route
+  AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   WorkspaceRoute: typeof WorkspaceRouteWithChildren
   ConnectExtensionRoute: typeof ConnectExtensionRoute
@@ -382,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/404': {
       id: '/404'
       path: '/404'
@@ -410,13 +425,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_workspace/account': {
-      id: '/_workspace/account'
-      path: '/account'
-      fullPath: '/account'
-      preLoaderRoute: typeof WorkspaceAccountRouteImport
-      parentRoute: typeof WorkspaceRoute
-    }
     '/_auth/verify-email': {
       id: '/_auth/verify-email'
       path: '/verify-email'
@@ -437,6 +445,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/login'
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRoute
+    }
+    '/_app/account': {
+      id: '/_app/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AppAccountRouteImport
+      parentRoute: typeof AppRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -553,6 +568,16 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppRouteChildren {
+  AppAccountRoute: typeof AppAccountRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAccountRoute: AppAccountRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 interface AuthRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
@@ -658,12 +683,10 @@ const WorkspaceWorkspaceWorkspaceIdRouteRouteWithChildren =
   )
 
 interface WorkspaceRouteChildren {
-  WorkspaceAccountRoute: typeof WorkspaceAccountRoute
   WorkspaceWorkspaceWorkspaceIdRouteRoute: typeof WorkspaceWorkspaceWorkspaceIdRouteRouteWithChildren
 }
 
 const WorkspaceRouteChildren: WorkspaceRouteChildren = {
-  WorkspaceAccountRoute: WorkspaceAccountRoute,
   WorkspaceWorkspaceWorkspaceIdRouteRoute:
     WorkspaceWorkspaceWorkspaceIdRouteRouteWithChildren,
 }
@@ -676,6 +699,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   R404Route: R404Route,
+  AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   WorkspaceRoute: WorkspaceRouteWithChildren,
   ConnectExtensionRoute: ConnectExtensionRoute,

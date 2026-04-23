@@ -1,3 +1,5 @@
+import { Badge } from "@omi/ui/badge";
+import { Heading } from "@omi/ui/heading";
 import { Text } from "@omi/ui/text";
 
 type Plan = "free" | "basic" | "pro";
@@ -30,9 +32,7 @@ export function CreditsCard({
   plan,
 }: CreditsCardProps) {
   const allotment = PLAN_ALLOTMENT[plan];
-  // When balance > allotment (post-downgrade carryover) we show the bar as
-  // full and switch the denominator to the balance itself so the card reads
-  // sensibly. A note below explains the next reset will drop to the tier cap.
+
   const aboveCap = creditBalance > allotment;
   const used = Math.max(0, allotment - creditBalance);
   const pct = aboveCap
@@ -42,26 +42,25 @@ export function CreditsCard({
       : 0;
 
   return (
-    <section className="flex flex-col gap-3 rounded-lg border p-4">
+    <section className="flex flex-col gap-3 rounded-lg p-4">
       <div className="flex items-baseline justify-between">
-        <Text className="font-medium" size="small">
+        <Heading className="font-medium" level="h2">
           Credits
-        </Text>
-        <Text size="small">
-          <span className="font-medium">{creditBalance.toLocaleString()}</span>
-          <span className="text-ui-fg-subtle">
-            {" "}
-            / {(aboveCap ? creditBalance : allotment).toLocaleString()}
-          </span>
+        </Heading>
+        <Text className="flex gap-x-1" size="small">
+          <Badge variant={"mono"}>{creditBalance.toLocaleString()}</Badge>/
+          <Badge variant={"mono"}>
+            {(aboveCap ? creditBalance : allotment).toLocaleString()}
+          </Badge>
         </Text>
       </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-ui-bg-subtle">
+      <div className="h-2.5 w-full overflow-hidden rounded-full bg-ui-bg-subtle">
         <div
           className="h-full rounded-full bg-ui-fg-base transition-all"
           style={{ width: `${pct}%` }}
         />
       </div>
-      <Text className="text-ui-fg-subtle" size="xsmall">
+      <Text className="text-ui-fg-muted" size="xsmall">
         {aboveCap
           ? `Carried over from previous plan. Drops to ${allotment.toLocaleString()} on ${formatDate(creditResetAt)}.`
           : `Resets ${formatDate(creditResetAt)}`}

@@ -3,6 +3,7 @@ import { register as registerRateLimiter } from "@convex-dev/rate-limiter/test";
 import { convexTest, type TestConvex } from "convex-test";
 import { internal } from "../convex/_generated/api";
 import type { Doc, Id } from "../convex/_generated/dataModel";
+import betterAuthSchema from "../convex/betterAuth/schema";
 import schema from "../convex/schema";
 
 type SchemaDef = typeof schema;
@@ -14,6 +15,11 @@ export function createHarness(): TestHarness {
   const modules = import.meta.glob("../convex/**/*.ts");
   const t = convexTest(schema, modules);
   registerRateLimiter(t);
+  // Register the Better Auth component so tests can exercise code that reaches
+  // into `components.betterAuth.queries.*`. Tests that need a betterAuth `user`
+  // row seed it directly via `t.run(ctx => ctx.runQuery("betterAuth", …))`.
+  const betterAuthModules = import.meta.glob("../convex/betterAuth/**/*.ts");
+  t.registerComponent("betterAuth", betterAuthSchema, betterAuthModules);
   return t;
 }
 

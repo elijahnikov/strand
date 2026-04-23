@@ -29,8 +29,17 @@ export default defineSchema({
     stripeSubscriptionId: v.optional(v.string()),
     stripePriceId: v.optional(v.string()),
     stripeCurrentPeriodEnd: v.optional(v.number()),
+    // Free-form Stripe status ("active" | "past_due" | "unpaid" | "canceled"
+    // | "trialing" | …). Kept as a string so new Stripe statuses don't crash
+    // the validator — the UI renders a banner for known bad states.
+    subscriptionStatus: v.optional(v.string()),
     creditBalance: v.number(),
     creditResetAt: v.optional(v.number()),
+    // Idempotency key for `topUpForPeriod`: `${subId}:${periodStart}:${plan}`.
+    // Period covers renewals; plan in the key covers mid-period tier upgrades.
+    // Stripe webhook retries/replays with the same triple are a no-op; cron
+    // resets clear this so the next Stripe-driven top-up re-arms.
+    lastTopUpKey: v.optional(v.string()),
   })
     .index("by_owner_user", ["ownerUserId"])
     .index("by_stripe_customer", ["stripeCustomerId"]),

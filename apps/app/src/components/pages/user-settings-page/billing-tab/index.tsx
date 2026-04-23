@@ -14,16 +14,25 @@ import { UsageList } from "./usage-list";
 
 type Plan = "free" | "basic" | "pro";
 
+type SubscriptionStatus = "past_due" | "unpaid" | "canceled";
+
+const STATUS_MESSAGE: Record<SubscriptionStatus, string> = {
+  past_due:
+    "Your last payment failed. Update your card in the billing portal to keep your plan.",
+  unpaid:
+    "Your subscription is unpaid. Update your payment method to restore full access.",
+  canceled:
+    "Your subscription has ended. Start a new one to restore paid features.",
+};
+
+function isWarningStatus(value: unknown): value is SubscriptionStatus {
+  return value === "past_due" || value === "unpaid" || value === "canceled";
+}
+
 const PLAN_LABEL: Record<Plan, string> = {
   free: "Free",
   basic: "Basic",
   pro: "Pro",
-};
-
-const PLAN_VARIANT: Record<Plan, "secondary" | "info" | "default"> = {
-  free: "secondary",
-  basic: "info",
-  pro: "default",
 };
 
 function formatDate(ts: number | undefined): string {
@@ -69,7 +78,7 @@ export function BillingTab() {
   const plan = state.plan as Plan;
 
   return (
-    <div className="flex w-full flex-col gap-8">
+    <div className="flex w-full flex-col gap-12">
       <div>
         <Heading>Billing</Heading>
         <Text className="text-ui-fg-subtle" size="small">
@@ -78,13 +87,17 @@ export function BillingTab() {
         </Text>
       </div>
 
-      <section className="flex flex-col gap-3 rounded-lg border p-4">
+      {isWarningStatus(state.subscriptionStatus) ? (
+        <SubscriptionStatusBanner status={state.subscriptionStatus} />
+      ) : null}
+
+      <section className="flex flex-col gap-3 rounded-lg p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Text className="font-medium" size="small">
-              Current plan
-            </Text>
-            <Badge variant={PLAN_VARIANT[plan]}>{PLAN_LABEL[plan]}</Badge>
+            <Heading level="h2">Current plan</Heading>
+            <Badge className="px-2" variant={"secondary"}>
+              {PLAN_LABEL[plan]}
+            </Badge>
           </div>
           {state.hasActiveSubscription ? (
             <ManagePlanButton />
@@ -94,8 +107,14 @@ export function BillingTab() {
         </div>
         {state.hasActiveSubscription && state.stripeCurrentPeriodEnd ? (
           <Text className="text-ui-fg-subtle" size="xsmall">
-            Billed {state.billingCadence ?? "monthly"} · Next renewal{" "}
-            {formatDate(state.stripeCurrentPeriodEnd)}
+            Billed{" "}
+            <span className="text-ui-fg-base">
+              {state.billingCadence ?? "monthly"}
+            </span>{" "}
+            · Next renewal{" "}
+            <Badge size="sm" variant={"secondary"}>
+              {formatDate(state.stripeCurrentPeriodEnd)}
+            </Badge>
           </Text>
         ) : null}
         <ResyncButton />
@@ -109,6 +128,24 @@ export function BillingTab() {
 
       <UsageList />
     </div>
+  );
+}
+
+function SubscriptionStatusBanner({ status }: { status: SubscriptionStatus }) {
+  return (
+    <section className="flex flex-col gap-3 rounded-lg border border-orange-200 bg-warning/8 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-yellow-700/50 dark:bg-warning/16">
+      <div className="flex flex-col gap-1">
+        <Text className="font-medium text-warning-foreground" size="small">
+          {status === "canceled"
+            ? "Subscription ended"
+            : "Action required on your subscription"}
+        </Text>
+        <Text className="text-warning-foreground" size="xsmall">
+          {STATUS_MESSAGE[status]}
+        </Text>
+      </div>
+      <ManagePlanButton />
+    </section>
   );
 }
 
@@ -221,28 +258,20 @@ function ResyncButton() {
     },
   });
   return (
-    <div className="flex items-center justify-between border-t pt-3">
-      <Text className="text-ui-fg-subtle" size="xsmall">
-        Already paid but not reflected here? Resync from Stripe.
-      </Text>
-      <Button
+    <Text className="text-ui-fg-muted" size="xsmall">
+      Already paid but not reflected here?{" "}
+      <button
+        className="underline underline-offset-2 hover:text-ui-fg-subtle disabled:cursor-not-allowed disabled:opacity-60"
         disabled={isPending}
         onClick={() => resync({})}
-        size="small"
-        variant="secondary"
+        type="button"
       >
-        {isPending ? "Syncing…" : "Resync"}
-      </Button>
-    </div>
+        {isPending ? "Syncing…" : "Resync from Stripe"}
+      </button>
+    </Text>
   );
 }
 
-/**
- * After Stripe checkout redirects back with `?checkout=success`, the webhook
- * that updates `billingAccount` may still be in flight. Refetch the billing
- * query on a short interval for ~20s so the UI catches up without the user
- * needing to reload or hit Resync.
- */
 function usePostCheckoutSync() {
   const queryClient = useQueryClient();
   const started = useRef(false);
@@ -257,8 +286,10 @@ function usePostCheckoutSync() {
     }
     started.current = true;
 
-    const queryKey = convexQuery(api.billing.queries.getMyBillingState, {})
-      .queryKey;
+    const queryKey = convexQuery(
+      api.billing.queries.getMyBillingState,
+      {}
+    ).queryKey;
     const start = Date.now();
     const interval = window.setInterval(() => {
       queryClient.invalidateQueries({ queryKey });
@@ -287,7 +318,6 @@ async function upgradeTo(plan: "basic" | "pro", cadence: "monthly" | "yearly") {
     cancelUrl: `${window.location.origin}/account?tab=billing&checkout=cancel`,
   });
   if (error) {
-    // biome-ignore lint/suspicious/noConsole: diagnostic for checkout flow
     console.error("subscription.upgrade failed", error);
     return;
   }

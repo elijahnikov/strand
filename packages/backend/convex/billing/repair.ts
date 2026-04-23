@@ -76,12 +76,21 @@ export const resyncMySubscription = action({
         interval: sub.billingInterval ?? undefined,
       };
     }
-    const currentPeriodEnd =
-      typeof sub.periodEnd === "number"
-        ? sub.periodEnd
-        : sub.periodEnd instanceof Date
-          ? sub.periodEnd.getTime()
-          : 0;
+    const coerce = (value: unknown): number => {
+      if (typeof value === "number") {
+        return value;
+      }
+      if (value instanceof Date) {
+        return value.getTime();
+      }
+      if (typeof value === "string") {
+        const parsed = Date.parse(value);
+        return Number.isNaN(parsed) ? 0 : parsed;
+      }
+      return 0;
+    };
+    const currentPeriodEnd = coerce(sub.periodEnd);
+    const periodStart = coerce(sub.periodStart);
     await ctx.runMutation(internal.billing.sync.syncSubscriptionActive, {
       userId,
       stripeCustomerId,
@@ -90,6 +99,7 @@ export const resyncMySubscription = action({
       planTier: rawPlan,
       cadence,
       currentPeriodEnd,
+      subscriptionStatus: sub.status ?? undefined,
     });
     const resolved = await ctx.runQuery(
       internal.billing.resolver.resolveActing,
@@ -98,6 +108,7 @@ export const resyncMySubscription = action({
     await ctx.runMutation(internal.billing.sync.topUpForPeriod, {
       billingAccountId: resolved.billingAccountId,
       planTier: rawPlan,
+      idempotencyKey: `${stripeSubscriptionId}:${periodStart}:${rawPlan}`,
     });
     return {
       status: "resynced" as const,

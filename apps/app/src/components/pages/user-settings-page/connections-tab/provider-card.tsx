@@ -63,7 +63,7 @@ export function ProviderCard({
   const Logo = INTEGRATION_LOGO[PROVIDER_LOGO_ID[providerId]];
 
   return (
-    <div className="flex items-start justify-between gap-4 rounded-lg border-[0.5px] bg-ui-bg-component p-4">
+    <div className="flex items-center justify-between gap-4 rounded-lg p-4 hover:bg-ui-bg-component">
       <div className="flex min-w-0 items-start gap-3">
         {Logo && (
           <div className="flex h-8 w-8 shrink-0 items-center justify-center">

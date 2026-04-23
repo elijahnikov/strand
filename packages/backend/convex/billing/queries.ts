@@ -20,6 +20,7 @@ export const getMyBillingState = protectedQuery({
       creditResetAt: account.creditResetAt,
       stripeCurrentPeriodEnd: account.stripeCurrentPeriodEnd,
       hasActiveSubscription: !!account.stripeSubscriptionId,
+      subscriptionStatus: account.subscriptionStatus ?? null,
     };
   },
 });

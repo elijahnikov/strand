@@ -38,7 +38,10 @@ function SettingsPage() {
   return (
     <SettingsPageComponent
       onTabChange={(next) =>
-        navigate({ search: { tab: next === "general" ? undefined : next } })
+        navigate({
+          replace: true,
+          search: { tab: next === "general" ? undefined : next },
+        })
       }
       tab={tab ?? "general"}
       workspaceId={workspaceId as Id<"workspace">}
