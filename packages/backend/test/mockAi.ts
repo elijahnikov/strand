@@ -55,10 +55,15 @@ export function mockEmbeddingsModule() {
     generateEmbedding: async (_provider: unknown, text: string) => ({
       embedding: fakeEmbedding(text),
       model: EMBEDDING_MODEL,
+      tokens: Math.max(1, Math.ceil(text.length / 4)),
     }),
     generateEmbeddings: async (_provider: unknown, texts: string[]) => ({
       embeddings: texts.map((t) => fakeEmbedding(t)),
       model: EMBEDDING_MODEL,
+      tokens: texts.reduce(
+        (n, t) => n + Math.max(1, Math.ceil(t.length / 4)),
+        0
+      ),
     }),
   };
 }

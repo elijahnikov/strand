@@ -10,7 +10,58 @@ export default defineSchema({
     image: v.optional(v.string()),
     onboardedAt: v.optional(v.number()),
     onboardingStep: v.number(),
+    personalBillingAccountId: v.optional(v.id("billingAccount")),
   }).index("by_email", ["email"]),
+
+  // BILLING ACCOUNT (owns plan, credits, Stripe identity; 1:1 with user today,
+  // 1:1 with team later). See plan: okay-lets-plan-on-gentle-rossum.md.
+  billingAccount: defineTable({
+    type: v.union(v.literal("individual")),
+    ownerUserId: v.id("user"),
+    plan: v.union(v.literal("free"), v.literal("basic"), v.literal("pro")),
+    // Stripe billing cadence for the active subscription. Credit resets are
+    // always monthly regardless (yearly subscribers don't get 12x credits
+    // upfront); this is purely informational for the billing UI.
+    billingCadence: v.optional(
+      v.union(v.literal("monthly"), v.literal("yearly"))
+    ),
+    stripeCustomerId: v.optional(v.string()),
+    stripeSubscriptionId: v.optional(v.string()),
+    stripePriceId: v.optional(v.string()),
+    stripeCurrentPeriodEnd: v.optional(v.number()),
+    // Free-form Stripe status ("active" | "past_due" | "unpaid" | "canceled"
+    // | "trialing" | …). Kept as a string so new Stripe statuses don't crash
+    // the validator — the UI renders a banner for known bad states.
+    subscriptionStatus: v.optional(v.string()),
+    creditBalance: v.number(),
+    creditResetAt: v.optional(v.number()),
+    // Idempotency key for `topUpForPeriod`: `${subId}:${periodStart}:${plan}`.
+    // Period covers renewals; plan in the key covers mid-period tier upgrades.
+    // Stripe webhook retries/replays with the same triple are a no-op; cron
+    // resets clear this so the next Stripe-driven top-up re-arms.
+    lastTopUpKey: v.optional(v.string()),
+  })
+    .index("by_owner_user", ["ownerUserId"])
+    .index("by_stripe_customer", ["stripeCustomerId"]),
+
+  // CREDIT LEDGER (append-only, per billingAccount; source of truth for usage)
+  creditLedger: defineTable({
+    billingAccountId: v.id("billingAccount"),
+    // Workspace where the debit happened. Undefined for top-ups / adjustments.
+    workspaceId: v.optional(v.id("workspace")),
+    actingUserId: v.id("user"),
+    kind: v.union(
+      v.literal("debit"),
+      v.literal("credit"),
+      v.literal("adjustment")
+    ),
+    reason: v.string(),
+    amount: v.number(),
+    balanceAfter: v.number(),
+    resourceId: v.optional(v.id("resource")),
+  })
+    .index("by_account_time", ["billingAccountId"])
+    .index("by_workspace_time", ["workspaceId"]),
 
   // WORKSPACE
   workspace: defineTable({

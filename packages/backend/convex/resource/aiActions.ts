@@ -14,6 +14,7 @@ import { internalAction } from "../_generated/server";
 
 const RETRY_BACKOFFS = [5000, 30_000, 120_000];
 const MIN_CONTENT_LENGTH = 50;
+const ENRICH_COST = 5;
 
 function computeHash(text: string): string {
   return createHash("sha256").update(text).digest("hex");
@@ -355,6 +356,25 @@ export const processResourceAI = internalAction({
         resourceId: args.resourceId,
         status: "completed",
       });
+
+      try {
+        const resolved = await ctx.runQuery(
+          internal.billing.resolver.resolveActingByResource,
+          { resourceId: args.resourceId }
+        );
+        await ctx.runMutation(internal.billing.credits.debit, {
+          billingAccountId: resolved.billingAccountId,
+          workspaceId: resolved.workspaceId,
+          actingUserId: resolved.actingUserId,
+          reason: "enrich",
+          amount: ENRICH_COST,
+          resourceId: args.resourceId,
+        });
+      } catch {
+        // Don't fail enrichment if billing debit fails (e.g. insufficient
+        // credits from a race). Balance will just go slightly negative on the
+        // last bit of a period. Log via normal observability.
+      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
