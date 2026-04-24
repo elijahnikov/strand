@@ -1,7 +1,7 @@
 import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
-import { RiChat1Line, RiHashtag, RiStickyNoteLine } from "@remixicon/react";
+import { RiChat1Line, RiStickyNoteLine } from "@remixicon/react";
 import { useQuery } from "@tanstack/react-query";
 import { CollectionIcon } from "~/components/common/collection-icon";
 import { FileKindIcon } from "~/components/common/file-kind-icon";
@@ -32,7 +32,7 @@ export function TabIcon({ tab, workspaceId }: TabIconProps) {
   if (tab.kind === "chat") {
     return <RiChat1Line className="size-3.5 text-ui-fg-muted" />;
   }
-  return <RiHashtag className="size-3.5 text-ui-fg-muted" />;
+  return null;
 }
 
 function ResourceTabIcon({

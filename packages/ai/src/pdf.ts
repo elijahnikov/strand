@@ -1,3 +1,4 @@
+import "./promise-try-polyfill";
 import { extractText } from "unpdf";
 
 export interface PdfPage {

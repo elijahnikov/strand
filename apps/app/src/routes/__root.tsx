@@ -94,7 +94,7 @@ function RootComponent() {
       <RootDocument>
         <NuqsAdapter>
           <ThemeProvider>
-            <ToastProvider>
+            <ToastProvider position="bottom-right">
               <AnchoredToastProvider>
                 <HotkeysProvider>
                   <ClientAuthBoundary>

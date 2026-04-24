@@ -8,13 +8,30 @@ export type BillingCadence = "monthly" | "yearly";
  * reset cadence decoupled from Stripe's billing cadence.
  */
 export const TIER_ALLOTMENT: Record<Plan, number> = {
-  free: 500,
+  free: 1500,
   basic: 3000,
   pro: 10_000,
 };
 
 export function tierToAllotment(plan: Plan): number {
   return TIER_ALLOTMENT[plan];
+}
+
+const MB = 1024 * 1024;
+const GB = 1024 * MB;
+
+/**
+ * Total file-storage bytes per plan. Enforced by `assertStorageAvailable` in
+ * billing/storage.ts on every upload path (app, extension, imports).
+ */
+export const TIER_STORAGE_BYTES: Record<Plan, number> = {
+  free: 100 * MB,
+  basic: 5 * GB,
+  pro: 50 * GB,
+};
+
+export function tierToStorageBytes(plan: Plan): number {
+  return TIER_STORAGE_BYTES[plan];
 }
 
 /**

@@ -2,6 +2,12 @@ import { ConvexError, v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
+import { resolveActingBillingAccount } from "../billing/resolver";
+import {
+  assertStorageAvailable,
+  decrementStorageBytes,
+  incrementStorageBytes,
+} from "../billing/storage";
 import { protectedMutation, workspaceMutation } from "../utils";
 
 export interface CreateResourceArgs {
@@ -62,7 +68,7 @@ export async function createResource(
       await insertNoteResource(ctx, resourceId, args);
       break;
     case "file":
-      await insertFileResource(ctx, resourceId, args);
+      await insertFileResource(ctx, resourceId, args.userId, args);
       break;
     default:
       throw new ConvexError(
@@ -141,7 +147,7 @@ export async function createResourceForImport(
       await insertNoteResource(ctx, resourceId, args);
       break;
     case "file":
-      await insertFileResource(ctx, resourceId, args);
+      await insertFileResource(ctx, resourceId, args.userId, args);
       break;
     default:
       throw new ConvexError(
@@ -235,6 +241,7 @@ async function insertNoteResource(
 async function insertFileResource(
   ctx: MutationCtx,
   resourceId: Id<"resource">,
+  userId: Id<"user">,
   args: {
     storageId?: Id<"_storage">;
     fileName?: string;
@@ -256,6 +263,9 @@ async function insertFileResource(
     throw new ConvexError("File size exceeds the 50MB limit");
   }
 
+  const resolved = await resolveActingBillingAccount(ctx, userId);
+  await assertStorageAvailable(ctx, resolved.billingAccountId, args.fileSize);
+
   await ctx.db.insert("fileResource", {
     resourceId,
     storageId: args.storageId,
@@ -266,6 +276,8 @@ async function insertFileResource(
     height: args.height,
     duration: args.duration,
   });
+
+  await incrementStorageBytes(ctx, resolved.billingAccountId, args.fileSize);
 }
 
 const UPDATED_AT_THROTTLE_MS = 60_000;
@@ -550,7 +562,8 @@ export const removeMany = workspaceMutation({
 
 async function deleteDerivedArtifacts(
   ctx: MutationCtx,
-  resourceId: Id<"resource">
+  resourceId: Id<"resource">,
+  createdBy: Id<"user">
 ) {
   const embeddings = await ctx.db
     .query("resourceEmbedding")
@@ -574,6 +587,25 @@ async function deleteDerivedArtifacts(
     .collect();
   for (const link of conceptLinks) {
     await ctx.db.delete(link._id);
+  }
+
+  const fileRow = await ctx.db
+    .query("fileResource")
+    .withIndex("by_resource", (q) => q.eq("resourceId", resourceId))
+    .unique();
+  if (fileRow) {
+    const owner = await ctx.db.get(createdBy);
+    if (owner?.personalBillingAccountId) {
+      await decrementStorageBytes(
+        ctx,
+        owner.personalBillingAccountId,
+        fileRow.fileSize
+      );
+    }
+    if (fileRow.storageId) {
+      await ctx.storage.delete(fileRow.storageId);
+    }
+    await ctx.db.delete(fileRow._id);
   }
 }
 
@@ -624,7 +656,7 @@ async function purgeResource(
     await ctx.db.delete(pin._id);
   }
 
-  await deleteDerivedArtifacts(ctx, resourceId);
+  await deleteDerivedArtifacts(ctx, resourceId, resource.createdBy);
 
   await ctx.db.delete(resourceId);
 }

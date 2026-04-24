@@ -103,7 +103,7 @@ export function defaultEnrichmentResult(
 export function mockEnrichmentModule(result: MockEnrichmentResult) {
   return {
     createEnricher: (_provider: unknown, _input: unknown) => ({
-      enrich: async () => result,
+      enrich: async () => ({ result, tokens: 500, model: "gpt-4o-mini" }),
     }),
   };
 }

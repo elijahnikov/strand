@@ -1,8 +1,8 @@
-import { openai } from "@ai-sdk/openai";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { createFileRoute } from "@tanstack/react-router";
 import { stepCountIs, streamText } from "ai";
+import { ConvexError } from "convex/values";
 import { fetchAuthMutation, fetchAuthQuery, getToken } from "~/lib/auth-server";
 import {
   buildRAGContext,
@@ -11,6 +11,7 @@ import {
   extractCitations,
   extractToolPartsFromSteps,
   generateThreadTitle,
+  getChatModel,
   PERSISTED_TOOL_NAMES,
   saveAssistantMessage,
 } from "~/lib/chat-server";
@@ -59,6 +60,26 @@ export const Route = createFileRoute("/api/chat")({
           });
         }
 
+        try {
+          await fetchAuthQuery(api.chat.queries.preflightChat, {
+            workspaceId: workspaceId as Id<"workspace">,
+          });
+        } catch (err) {
+          if (
+            err instanceof ConvexError &&
+            String(err.data) === "Insufficient credits"
+          ) {
+            return new Response(
+              JSON.stringify({ error: "insufficient_credits" }),
+              {
+                status: 402,
+                headers: { "Content-Type": "application/json" },
+              }
+            );
+          }
+          throw err;
+        }
+
         await fetchAuthMutation(api.chat.mutations.saveUserMessage, {
           workspaceId: workspaceId as Id<"workspace">,
           threadId: threadId as Id<"chatThread">,
@@ -79,12 +100,16 @@ export const Route = createFileRoute("/api/chat")({
 
         const tools = createChatTools(workspaceId);
 
+        const { model: chatModel, modelId: CHAT_MODEL_ID } =
+          await getChatModel(workspaceId);
+        const MAX_HISTORY_TURNS = 20;
+        const recentMessages = messages.slice(-MAX_HISTORY_TURNS);
         const result = streamText({
-          model: openai("gpt-4.1-mini"),
+          model: chatModel,
           system: systemPrompt,
           tools,
           stopWhen: stepCountIs(5),
-          messages: messages.map((m) => ({
+          messages: recentMessages.map((m) => ({
             role: m.role as "user" | "assistant",
             content:
               m.content ??
@@ -94,7 +119,7 @@ export const Route = createFileRoute("/api/chat")({
                 .join("") ??
               "",
           })),
-          onFinish: async ({ text, steps }) => {
+          onFinish: async ({ text, steps, usage }) => {
             const citations = extractCitations(ragContext);
             const toolParts = extractToolPartsFromSteps(
               steps,
@@ -107,6 +132,16 @@ export const Route = createFileRoute("/api/chat")({
               citations,
               toolParts
             );
+
+            fetchAuthMutation(api.chat.mutations.recordChatUsage, {
+              workspaceId: workspaceId as Id<"workspace">,
+              threadId: threadId as Id<"chatThread">,
+              model: CHAT_MODEL_ID,
+              promptTokens: usage?.inputTokens ?? 0,
+              completionTokens: usage?.outputTokens ?? 0,
+            }).catch((err) => {
+              console.error("[recordChatUsage] failed:", err);
+            });
 
             fetchAuthMutation(api.userMemory.mutations.scheduleExtraction, {
               workspaceId: workspaceId as Id<"workspace">,

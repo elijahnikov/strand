@@ -4,8 +4,8 @@ import { Text } from "@omi/ui/text";
 import { RiArrowLeftLine, RiBankCardLine, RiLinksFill } from "@remixicon/react";
 import { useRouter } from "@tanstack/react-router";
 import { PageContent } from "~/components/common/page-content";
-import { BillingTab } from "./billing-tab";
 import { ConnectionsTab } from "./connections-tab";
+import { UsageAndBillingTab } from "./usage-and-billing-tab";
 
 export type UserSettingsTab = "connections" | "billing";
 
@@ -18,7 +18,7 @@ export function UserSettingsPageComponent({
 }) {
   const router = useRouter();
   return (
-    <PageContent className="mt-8 h-[calc(95vh-80px)] py-8" width="xl:w-2/3">
+    <PageContent className="mt-8 min-h-[calc(95vh-80px)] py-8" width="xl:w-2/3">
       <Tabs
         className="h-full"
         onValueChange={(next) => onTabChange(next as UserSettingsTab)}
@@ -47,7 +47,7 @@ export function UserSettingsPageComponent({
             <TabsTrigger className="grow-0 pl-3" value="billing">
               <RiBankCardLine className="size-4" />
               <Text className="ml-1 font-medium" size="small">
-                Billing
+                Usage & Billing
               </Text>
             </TabsTrigger>
           </TabsList>
@@ -57,7 +57,7 @@ export function UserSettingsPageComponent({
             <ConnectionsTab />
           </TabsContent>
           <TabsContent className="pl-8" value="billing">
-            <BillingTab />
+            <UsageAndBillingTab />
           </TabsContent>
         </div>
       </Tabs>

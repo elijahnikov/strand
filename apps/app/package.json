@@ -11,6 +11,8 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.71",
+    "@ai-sdk/google": "^3.0.51",
     "@ai-sdk/openai": "^3.0.52",
     "@ai-sdk/react": "^3.0.156",
     "@blocknote/core": "^0.47.3",
@@ -21,10 +23,10 @@
     "@dnd-kit/core": "^6.3.1",
     "@fontsource-variable/geist": "^5.2.8",
     "@fontsource-variable/geist-mono": "^5.2.7",
-    "@pierre/diffs": "^1.1.10",
     "@omi/auth": "*",
     "@omi/backend": "*",
     "@omi/ui": "*",
+    "@pierre/diffs": "^1.1.10",
     "@t3-oss/env-core": "^0.13.8",
     "@tanstack/react-form": "catalog:tanstack",
     "@tanstack/react-hotkeys": "catalog:tanstack",

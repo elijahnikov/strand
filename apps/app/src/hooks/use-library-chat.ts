@@ -6,10 +6,12 @@ export function useLibraryChat({
   workspaceId,
   threadId,
   resourceId,
+  onError,
 }: {
   workspaceId: string;
   threadId?: string;
   resourceId?: string;
+  onError?: (error: Error) => void;
 }) {
   const transport = useMemo(
     () =>
@@ -24,5 +26,5 @@ export function useLibraryChat({
     [workspaceId, threadId, resourceId]
   );
 
-  return useChat({ transport });
+  return useChat({ transport, onError });
 }

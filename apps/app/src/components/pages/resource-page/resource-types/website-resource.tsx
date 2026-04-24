@@ -33,7 +33,7 @@ function OgImage({ alt, src }: { alt: string; src: string }) {
     // biome-ignore lint/a11y/noNoninteractiveElementInteractions: image error fallback
     <img
       alt={alt}
-      className="mx-auto mt-4 aspect-auto h-[400px] w-full rounded-xl object-cover ring-1 ring-black/10 dark:ring-white/10"
+      className="mx-auto mt-4 aspect-auto h-[400px] w-full rounded-xl object-cover ring-0"
       height="auto"
       onError={() => setError(true)}
       src={src}
