@@ -20,11 +20,6 @@ async function createPersonalAccount(
   return accountId;
 }
 
-/**
- * Called from the Better Auth `user.onCreate` trigger so every new user gets
- * a Free-tier billing account at signup. Idempotent — if the user already has
- * one (e.g. re-trigger after a crash), returns the existing id.
- */
 export const createPersonalAccountForUser = internalMutation({
   args: { userId: v.id("user") },
   handler: async (ctx, args) => {
@@ -39,14 +34,6 @@ export const createPersonalAccountForUser = internalMutation({
   },
 });
 
-/**
- * One-shot backfill: creates a personal `billingAccount` row for every existing
- * user that doesn't have one, and stamps `user.personalBillingAccountId`.
- *
- * Safe to re-run — users that already have a personal account are skipped.
- * Run once after the schema migration lands, before any billing reads/writes
- * start depending on `personalBillingAccountId`.
- */
 export const createPersonalAccountsForExistingUsers = internalMutation({
   args: {},
   handler: async (ctx) => {

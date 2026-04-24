@@ -7,11 +7,6 @@ import {
 } from "../_generated/server";
 import { tierToStorageBytes } from "./pricing";
 
-/**
- * Throws ConvexError("Storage limit reached") when adding `incomingBytes` to
- * the billing account's running total would exceed its plan's allotment. Call
- * BEFORE inserting a fileResource row (web upload, chrome extension, import).
- */
 export async function assertStorageAvailable(
   ctx: QueryCtx | MutationCtx,
   billingAccountId: Id<"billingAccount">,
@@ -61,12 +56,6 @@ export async function decrementStorageBytes(
   await ctx.db.patch(billingAccountId, { storageBytesUsed: next });
 }
 
-/**
- * One-off backfill. Walks every fileResource, resolves the owning billing
- * account via the resource.createdBy user, sums fileSize into
- * `billingAccount.storageBytesUsed`. Safe to re-run: resets each account to
- * the freshly summed value rather than incrementing.
- */
 export const backfillStorageUsage = internalMutation({
   args: {},
   handler: async (ctx) => {

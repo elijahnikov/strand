@@ -46,10 +46,6 @@ export const getWorkspaceProvider = query({
   },
 });
 
-/**
- * Internal: returns the raw encrypted row for a workspace. Node-side actions
- * call this then decrypt the key locally. Never expose to clients.
- */
 export const getProviderRowInternal = internalQuery({
   args: { workspaceId: v.id("workspace") },
   handler: async (ctx, args) => {

@@ -2,10 +2,6 @@ import { ConvexError, v } from "convex/values";
 import { internalMutation, internalQuery } from "../_generated/server";
 import { resolveActingBillingAccount } from "./resolver";
 
-/**
- * Rough internal conversion: 1 credit = 1,000 tokens * per-model multiplier.
- * Kept internal to the backend — users see a single credit number.
- */
 const MODEL_MULTIPLIER: Record<string, number> = {
   "text-embedding-3-small": 0.1,
   "text-embedding-3-large": 0.3,

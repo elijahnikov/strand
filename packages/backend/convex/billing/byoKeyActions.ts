@@ -136,12 +136,6 @@ export const setWorkspaceKey = action({
   },
 });
 
-/**
- * Internal: returns the decrypted key plus the workspace's chosen model
- * identity. Used by the chat server route to select between platform OpenAI
- * and the user's own key. Returns `{ provider: "platform" }` when nothing is
- * configured.
- */
 type ResolvedProvider =
   | {
       provider: "platform";
@@ -154,14 +148,6 @@ type ResolvedProvider =
       apiKey: string;
     };
 
-/**
- * Called from the TanStack Start chat handler to pick between platform and
- * BYO. The caller is already authenticated via `fetchAuthAction`, and the
- * workspace's authorization is enforced by the fact that only workspace
- * members can reach the chat route in the first place (the preflight query
- * rejects non-members). The returned API key is sent to the node process that
- * spawned the chat stream and not echoed back to the browser.
- */
 export const resolveAIProvider = action({
   args: { workspaceId: v.id("workspace") },
   handler: async (ctx, args): Promise<ResolvedProvider> => {
