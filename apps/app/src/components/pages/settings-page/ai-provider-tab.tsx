@@ -310,9 +310,7 @@ function KeyForm({
         <LoadingButton
           disabled={apiKey.trim().length < 10}
           loading={saving}
-          onClick={() =>
-            onSubmit({ provider, apiKey: apiKey.trim(), model })
-          }
+          onClick={() => onSubmit({ provider, apiKey: apiKey.trim(), model })}
           size="small"
           variant="omi"
         >
