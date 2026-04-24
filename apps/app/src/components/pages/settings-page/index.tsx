@@ -24,10 +24,10 @@ import { LoadingButton } from "@omi/ui/loading-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omi/ui/tabs";
 import { Text } from "@omi/ui/text";
 import {
-  RiBarChartHorizontalFill,
   RiBrain2Fill,
   RiDownload2Fill,
   RiGroupFill,
+  RiKey2Fill,
   RiSettings3Fill,
   RiShieldKeyholeFill,
 } from "@remixicon/react";
@@ -40,15 +40,16 @@ import {
   WorkspaceIcon,
   WorkspaceIconSelector,
 } from "~/components/common/workspace-icon";
+import { AIProviderTab } from "./ai-provider-tab";
 import { ImportTab } from "./import-tab";
 import { MembersTab } from "./members-tab";
 import { MemoryTab } from "./memory-tab";
 
 export type SettingsTab =
   | "general"
-  | "usage"
   | "members"
   | "memory"
+  | "ai-provider"
   | "import"
   | "advanced";
 
@@ -80,12 +81,6 @@ export function SettingsPageComponent({
               General
             </Text>
           </TabsTrigger>
-          <TabsTrigger className="grow-0 pl-3" value="usage">
-            <RiBarChartHorizontalFill className="size-4" />
-            <Text className="ml-1 font-medium" size="small">
-              Usage
-            </Text>
-          </TabsTrigger>
           <TabsTrigger className="grow-0 pl-3" value="members">
             <RiGroupFill className="size-4" />
             <Text className="ml-1 font-medium" size="small">
@@ -96,6 +91,12 @@ export function SettingsPageComponent({
             <RiBrain2Fill className="size-4" />
             <Text className="ml-1 font-medium" size="small">
               Memory
+            </Text>
+          </TabsTrigger>
+          <TabsTrigger className="grow-0 pl-3" value="ai-provider">
+            <RiKey2Fill className="size-4" />
+            <Text className="ml-1 font-medium" size="small">
+              AI provider
             </Text>
           </TabsTrigger>
           <TabsTrigger className="grow-0 pl-3" value="import">
@@ -129,6 +130,9 @@ export function SettingsPageComponent({
           </TabsContent>
           <TabsContent className="pl-8" value="memory">
             <MemoryTab workspaceId={workspaceId} />
+          </TabsContent>
+          <TabsContent className="pl-8" value="ai-provider">
+            <AIProviderTab workspaceId={workspaceId} />
           </TabsContent>
           <TabsContent className="pl-8" value="import">
             <ImportTab workspaceId={workspaceId} />

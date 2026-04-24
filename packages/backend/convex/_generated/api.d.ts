@@ -10,12 +10,16 @@
 
 import type * as auth from "../auth.js";
 import type * as billing_backfill from "../billing/backfill.js";
+import type * as billing_byoKey from "../billing/byoKey.js";
+import type * as billing_byoKeyActions from "../billing/byoKeyActions.js";
+import type * as billing_byoModels from "../billing/byoModels.js";
 import type * as billing_credits from "../billing/credits.js";
 import type * as billing_hooks from "../billing/hooks.js";
 import type * as billing_pricing from "../billing/pricing.js";
 import type * as billing_queries from "../billing/queries.js";
 import type * as billing_repair from "../billing/repair.js";
 import type * as billing_resolver from "../billing/resolver.js";
+import type * as billing_storage from "../billing/storage.js";
 import type * as billing_sync from "../billing/sync.js";
 import type * as chat_actions from "../chat/actions.js";
 import type * as chat_internals from "../chat/internals.js";
@@ -98,12 +102,16 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   "billing/backfill": typeof billing_backfill;
+  "billing/byoKey": typeof billing_byoKey;
+  "billing/byoKeyActions": typeof billing_byoKeyActions;
+  "billing/byoModels": typeof billing_byoModels;
   "billing/credits": typeof billing_credits;
   "billing/hooks": typeof billing_hooks;
   "billing/pricing": typeof billing_pricing;
   "billing/queries": typeof billing_queries;
   "billing/repair": typeof billing_repair;
   "billing/resolver": typeof billing_resolver;
+  "billing/storage": typeof billing_storage;
   "billing/sync": typeof billing_sync;
   "chat/actions": typeof chat_actions;
   "chat/internals": typeof chat_internals;

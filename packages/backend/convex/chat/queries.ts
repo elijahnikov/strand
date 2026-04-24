@@ -1,6 +1,40 @@
 import { paginationOptsValidator } from "convex/server";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
+import { resolveActingBillingAccount } from "../billing/resolver";
 import { workspaceQuery } from "../utils";
+
+/**
+ * Gate the chat endpoint before `streamText` runs. Throws
+ * `ConvexError("Insufficient credits")` when the user's balance is below the
+ * estimate, which the TanStack Start handler surfaces as HTTP 402 so the UI
+ * can render an upgrade CTA. BYO-key workspaces skip the check.
+ */
+export const preflightChat = workspaceQuery({
+  args: {
+    estimate: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const byo = await ctx.db
+      .query("workspaceAIProvider")
+      .withIndex("by_workspaceId", (q) =>
+        q.eq("workspaceId", ctx.workspace._id)
+      )
+      .unique();
+    if (byo) {
+      return { ok: true as const, byo: true as const };
+    }
+    const resolved = await resolveActingBillingAccount(
+      ctx,
+      ctx.user._id,
+      ctx.workspace._id
+    );
+    const estimate = args.estimate ?? 5;
+    if (resolved.creditBalance < estimate) {
+      throw new ConvexError("Insufficient credits");
+    }
+    return { ok: true as const, byo: false as const };
+  },
+});
 
 export const searchResources = workspaceQuery({
   args: {

@@ -11,10 +11,11 @@ import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { internalAction } from "../_generated/server";
+import { tokensToCredits } from "../billing/credits";
 
 const RETRY_BACKOFFS = [5000, 30_000, 120_000];
 const MIN_CONTENT_LENGTH = 50;
-const ENRICH_COST = 5;
+const MAX_ENRICH_CREDITS = 200;
 
 function computeHash(text: string): string {
   return createHash("sha256").update(text).digest("hex");
@@ -50,6 +51,11 @@ export const processResourceAI = internalAction({
       );
 
       const provider = createOpenAIProvider(apiKey);
+
+      const tokensByModel: Record<string, number> = {};
+      const addTokens = (model: string, tokens: number) => {
+        tokensByModel[model] = (tokensByModel[model] ?? 0) + tokens;
+      };
 
       let enricherInput: EnricherInput | undefined;
       let embeddingText = content.title;
@@ -125,7 +131,12 @@ export const processResourceAI = internalAction({
       }
 
       const enricher = createEnricher(provider, enricherInput);
-      const result = await enricher.enrich();
+      const {
+        result,
+        tokens: enrichTokens,
+        model: enrichModel,
+      } = await enricher.enrich();
+      addTokens(enrichModel, enrichTokens);
 
       await ctx.runMutation(internal.resource.aiInternals.updateResourceAI, {
         resourceId: args.resourceId,
@@ -153,10 +164,12 @@ export const processResourceAI = internalAction({
           .filter((t) => t.length > 0);
 
         if (normalizedTags.length > 0) {
-          const { embeddings: tagEmbeddings } = await generateEmbeddings(
-            provider,
-            normalizedTags
-          );
+          const {
+            embeddings: tagEmbeddings,
+            tokens: tagTokens,
+            model: tagEmbedModel,
+          } = await generateEmbeddings(provider, normalizedTags);
+          addTokens(tagEmbedModel, tagTokens);
 
           for (let i = 0; i < normalizedTags.length; i++) {
             const tagName = normalizedTags[i];
@@ -188,10 +201,12 @@ export const processResourceAI = internalAction({
         }));
 
         const conceptNames = normalizedConcepts.map((c) => c.name);
-        const { embeddings: conceptEmbeddings } = await generateEmbeddings(
-          provider,
-          conceptNames
-        );
+        const {
+          embeddings: conceptEmbeddings,
+          tokens: conceptTokens,
+          model: conceptEmbedModel,
+        } = await generateEmbeddings(provider, conceptNames);
+        addTokens(conceptEmbedModel, conceptTokens);
 
         for (let i = 0; i < normalizedConcepts.length; i++) {
           const concept = normalizedConcepts[i];
@@ -270,10 +285,12 @@ export const processResourceAI = internalAction({
       }
 
       const inputHash = computeHash(embeddingText);
-      const { embedding, model } = await generateEmbedding(
-        provider,
-        embeddingText
-      );
+      const {
+        embedding,
+        model,
+        tokens: mainEmbedTokens,
+      } = await generateEmbedding(provider, embeddingText);
+      addTokens(model, mainEmbedTokens);
 
       await ctx.runMutation(
         internal.resource.aiInternals.upsertResourceEmbedding,
@@ -328,8 +345,12 @@ export const processResourceAI = internalAction({
 
           const cappedChunks = chunks.slice(0, MAX_CHUNKS);
           const chunkTexts = cappedChunks.map((c) => c.content);
-          const { embeddings: chunkEmbeddings, model: chunkModel } =
-            await generateEmbeddings(provider, chunkTexts);
+          const {
+            embeddings: chunkEmbeddings,
+            model: chunkModel,
+            tokens: chunkTokens,
+          } = await generateEmbeddings(provider, chunkTexts);
+          addTokens(chunkModel, chunkTokens);
 
           const chunkDocs = cappedChunks.map((chunk, i) => ({
             resourceId: args.resourceId,
@@ -358,18 +379,28 @@ export const processResourceAI = internalAction({
       });
 
       try {
-        const resolved = await ctx.runQuery(
-          internal.billing.resolver.resolveActingByResource,
-          { resourceId: args.resourceId }
+        const rawCredits = Object.entries(tokensByModel).reduce(
+          (sum, [m, t]) => sum + tokensToCredits(t, m),
+          0
         );
-        await ctx.runMutation(internal.billing.credits.debit, {
-          billingAccountId: resolved.billingAccountId,
-          workspaceId: resolved.workspaceId,
-          actingUserId: resolved.actingUserId,
-          reason: "enrich",
-          amount: ENRICH_COST,
-          resourceId: args.resourceId,
-        });
+        const capped = rawCredits > MAX_ENRICH_CREDITS;
+        const amount = capped ? MAX_ENRICH_CREDITS : rawCredits;
+        const reason = capped ? "enrich:capped" : "enrich";
+
+        if (amount > 0) {
+          const resolved = await ctx.runQuery(
+            internal.billing.resolver.resolveActingByResource,
+            { resourceId: args.resourceId }
+          );
+          await ctx.runMutation(internal.billing.credits.debit, {
+            billingAccountId: resolved.billingAccountId,
+            workspaceId: resolved.workspaceId,
+            actingUserId: resolved.actingUserId,
+            reason,
+            amount,
+            resourceId: args.resourceId,
+          });
+        }
       } catch {
         // Don't fail enrichment if billing debit fails (e.g. insufficient
         // credits from a race). Balance will just go slightly negative on the

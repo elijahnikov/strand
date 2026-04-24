@@ -2,16 +2,16 @@ import { ConvexError, v } from "convex/values";
 import { internalMutation, internalQuery } from "../_generated/server";
 import { resolveActingBillingAccount } from "./resolver";
 
-/**
- * Rough internal conversion: 1 credit = 1,000 tokens * per-model multiplier.
- * Kept internal to the backend — users see a single credit number.
- */
 const MODEL_MULTIPLIER: Record<string, number> = {
   "text-embedding-3-small": 0.1,
   "text-embedding-3-large": 0.3,
   "gpt-4o-mini": 1,
+  "gpt-4.1-mini": 2,
   "gpt-4o": 5,
   "gpt-4-turbo": 5,
+  "gemini-2.5-flash": 0.25,
+  "claude-haiku-4-5": 2.5,
+  "claude-sonnet-4-6": 6,
 };
 
 export function tokensToCredits(tokens: number, model: string): number {
@@ -85,6 +85,38 @@ export const topUp = internalMutation({
       });
     }
     return { balanceAfter: next };
+  },
+});
+
+/**
+ * Writes a visibility-only ledger row when a workspace has BYO API keys set
+ * and the AI call was paid by the user's own provider account. Balance is
+ * unchanged; the row exists so Usage dashboards can surface "actions taken
+ * via BYO" alongside debited ones.
+ */
+export const logByoUsage = internalMutation({
+  args: {
+    billingAccountId: v.id("billingAccount"),
+    workspaceId: v.id("workspace"),
+    actingUserId: v.id("user"),
+    reason: v.string(),
+    resourceId: v.optional(v.id("resource")),
+  },
+  handler: async (ctx, args) => {
+    const account = await ctx.db.get(args.billingAccountId);
+    if (!account) {
+      throw new ConvexError("Billing account not found");
+    }
+    await ctx.db.insert("creditLedger", {
+      billingAccountId: args.billingAccountId,
+      workspaceId: args.workspaceId,
+      actingUserId: args.actingUserId,
+      kind: "byo-key",
+      reason: args.reason,
+      amount: 0,
+      balanceAfter: account.creditBalance,
+      resourceId: args.resourceId,
+    });
   },
 });
 

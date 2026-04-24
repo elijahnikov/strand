@@ -2,13 +2,8 @@ import type { Plan } from "./resolver";
 
 export type BillingCadence = "monthly" | "yearly";
 
-/**
- * Monthly credit allotment per plan. Yearly subscribers receive this same
- * amount every 30 days — they do NOT get 12x upfront. This keeps the credit
- * reset cadence decoupled from Stripe's billing cadence.
- */
 export const TIER_ALLOTMENT: Record<Plan, number> = {
-  free: 500,
+  free: 1500,
   basic: 3000,
   pro: 10_000,
 };
@@ -17,11 +12,19 @@ export function tierToAllotment(plan: Plan): number {
   return TIER_ALLOTMENT[plan];
 }
 
-/**
- * Plan names fed to the Better Auth Stripe plugin. The plugin accepts
- * `priceId` (monthly) and `annualDiscountPriceId` (yearly) per plan, so one
- * entry per tier covers both cadences.
- */
+const MB = 1024 * 1024;
+const GB = 1024 * MB;
+
+export const TIER_STORAGE_BYTES: Record<Plan, number> = {
+  free: 100 * MB,
+  basic: 5 * GB,
+  pro: 50 * GB,
+};
+
+export function tierToStorageBytes(plan: Plan): number {
+  return TIER_STORAGE_BYTES[plan];
+}
+
 export const PAID_PLANS = ["basic", "pro"] as const;
 export type PaidPlan = (typeof PAID_PLANS)[number];
 
@@ -39,10 +42,6 @@ function envOr(name: string): string {
   return value;
 }
 
-/**
- * Called lazily (inside the plugin's `plans` function) so missing env vars
- * don't crash module import during codegen. Read envs at request time.
- */
 export function getPaidPlans(): PlanPricing[] {
   return [
     {
@@ -58,11 +57,6 @@ export function getPaidPlans(): PlanPricing[] {
   ];
 }
 
-/**
- * Resolve a Stripe price ID back to our internal `{plan, cadence}` tuple.
- * Used by subscription sync callbacks — Stripe tells us the priceId, we map
- * it to the tier that drives allotment + the cadence surfaced in the UI.
- */
 export function priceIdToPlan(
   priceId: string
 ): { plan: Plan; cadence: BillingCadence } | null {
@@ -77,12 +71,6 @@ export function priceIdToPlan(
   return null;
 }
 
-/**
- * Inverse of `priceIdToPlan`: given the plan name + cadence stored on a
- * Better Auth subscription row, return the matching Stripe price ID. Used by
- * repair tooling where the subscription row holds `plan` + `billingInterval`
- * rather than a priceId.
- */
 export function planAndCadenceToPriceId(
   plan: PaidPlan,
   cadence: BillingCadence

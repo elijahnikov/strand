@@ -14,16 +14,6 @@ export interface ResolvedBillingAccount {
   plan: Plan;
 }
 
-/**
- * Single place that answers: "for this user acting in this workspace,
- * which billingAccount pays and which plan gates?"
- *
- * Today: always returns the user's personal billingAccount.
- * When teams arrive: this function is the ONLY place that changes — it will
- * return the team's billingAccount when the workspace is team-owned and the
- * user is a member. Every debit + gate reads through here, so no callsite
- * needs to change.
- */
 export async function resolveActingBillingAccount(
   ctx: QueryCtx | MutationCtx,
   userId: Id<"user">,
@@ -49,7 +39,6 @@ export async function resolveActingBillingAccount(
   };
 }
 
-/** Action-callable wrapper — actions hit this via ctx.runQuery. */
 export const resolveActing = internalQuery({
   args: {
     userId: v.id("user"),
@@ -59,11 +48,6 @@ export const resolveActing = internalQuery({
     resolveActingBillingAccount(ctx, args.userId, args.workspaceId),
 });
 
-/**
- * Resolve the billing account that pays for work triggered by a resource —
- * the resource's creator. Used by background AI actions (enrichment, chunking,
- * link generation) that don't have a user in scope but do have the resource.
- */
 export const resolveActingByResource = internalQuery({
   args: { resourceId: v.id("resource") },
   handler: async (ctx, args) => {

@@ -3,7 +3,6 @@ import type { Id } from "../_generated/dataModel";
 import { internalMutation, type MutationCtx } from "../_generated/server";
 import { tierToAllotment } from "./pricing";
 
-// Re-export for backward compat with existing imports (backfill.ts uses this).
 export { TIER_ALLOTMENT, tierToAllotment } from "./pricing";
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
@@ -30,10 +29,6 @@ async function getPersonalAccountId(
   return user.personalBillingAccountId;
 }
 
-/**
- * Resolve the billing account by Stripe customer id. Preferred over userId
- * lookup inside webhook handlers — Stripe events always carry the customer id.
- */
 async function getAccountByStripeCustomerId(
   ctx: MutationCtx,
   stripeCustomerId: string
@@ -93,21 +88,10 @@ export const syncSubscriptionCanceled = internalMutation({
   },
 });
 
-/**
- * Top up an account to its tier allotment and arm the next 30-day reset.
- * Called on initial subscription activation and again on each monthly reset
- * (via the cron in `crons.ts`) — NOT driven by Stripe's billing interval,
- * so yearly subscribers still get monthly credit resets.
- */
 export const topUpForPeriod = internalMutation({
   args: {
     billingAccountId: v.id("billingAccount"),
     planTier: planValidator,
-    // `${subId}:${periodStart}:${plan}`. When the account's `lastTopUpKey`
-    // already matches, we skip — this makes duplicate Stripe webhooks (retries,
-    // CLI replays) a no-op so they don't wipe mid-period debits by resetting
-    // balance to allotment. Omitted by the cron reset path which has its own
-    // lock (`creditResetAt > now`).
     idempotencyKey: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -145,12 +129,6 @@ export const topUpForPeriod = internalMutation({
   },
 });
 
-/**
- * Refresh the stored Stripe period-end date. Called from the `invoice.paid`
- * event handler so the Billing UI shows the correct next-renewal date after
- * Stripe advances the subscription period. Does NOT top up credits — credit
- * resets are driven by the 30-day cron, independent of Stripe's cadence.
- */
 export const touchCurrentPeriodEnd = internalMutation({
   args: {
     stripeCustomerId: v.string(),
@@ -170,12 +148,6 @@ export const touchCurrentPeriodEnd = internalMutation({
   },
 });
 
-/**
- * Cron-driven: reset any accounts whose `creditResetAt` has passed. Runs
- * daily; resets each account to its current tier's allotment and arms the
- * next 30-day window. Safe to re-run — only acts on accounts whose reset
- * timestamp is in the past.
- */
 export const resetDueCredits = internalMutation({
   args: {},
   handler: async (ctx) => {

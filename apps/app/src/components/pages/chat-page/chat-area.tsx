@@ -2,6 +2,7 @@ import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { Skeleton } from "@omi/ui/skeleton";
+import { toastManager } from "@omi/ui/toast";
 import { RiChatSmile2Fill } from "@remixicon/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { UIMessage } from "ai";
@@ -115,6 +116,22 @@ export function ChatArea({
     workspaceId,
     threadId,
     resourceId,
+    onError: (error) => {
+      if (error.message.includes("insufficient_credits")) {
+        toastManager.add({
+          type: "error",
+          title: "You're out of AI actions",
+          description:
+            "Upgrade your plan at /account?tab=billing to keep chatting.",
+        });
+        return;
+      }
+      toastManager.add({
+        type: "error",
+        title: "Chat failed",
+        description: error.message,
+      });
+    },
   });
 
   const hasSyncedRef = useRef(false);

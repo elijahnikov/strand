@@ -1,14 +1,3 @@
-/**
- * One-shot repair: reconcile the current user's `billingAccount` with any
- * existing active Better Auth subscription row. Useful when a checkout
- * completed but the lifecycle hook failed to sync (e.g. during earlier
- * iterations of the hook wiring).
- *
- * Safe to re-run: if there's no active subscription in the component table,
- * it's a no-op; if the billingAccount already reflects the active sub, the
- * patch is idempotent.
- */
-
 import { ConvexError } from "convex/values";
 import { components, internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";

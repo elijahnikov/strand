@@ -7,9 +7,9 @@ import {
 
 const SETTINGS_TABS: readonly SettingsTab[] = [
   "general",
-  "usage",
   "members",
   "memory",
+  "ai-provider",
   "import",
   "advanced",
 ];

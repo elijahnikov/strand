@@ -10,14 +10,19 @@ export abstract class ResourceEnricher {
     this.provider = provider;
   }
 
-  async enrich(): Promise<EnrichmentResult> {
+  async enrich(): Promise<{
+    result: EnrichmentResult;
+    tokens: number;
+    model: string;
+  }> {
     const messages = this.buildMessages();
-    const result = await generateObject({
-      model: this.provider("gpt-4o-mini"),
+    const model = "gpt-4o-mini";
+    const { object, usage } = await generateObject({
+      model: this.provider(model),
       schema: enrichmentSchema,
       messages,
     });
-    return result.object;
+    return { result: object, tokens: usage?.totalTokens ?? 0, model };
   }
 
   protected abstract buildMessages(): CoreMessage[];

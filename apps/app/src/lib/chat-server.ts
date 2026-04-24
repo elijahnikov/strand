@@ -1,7 +1,9 @@
-import { openai } from "@ai-sdk/openai";
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createOpenAI, openai } from "@ai-sdk/openai";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
-import { generateText, tool } from "ai";
+import { generateText, type LanguageModel, tool } from "ai";
 import { z } from "zod";
 import {
   fetchAuthAction,
@@ -33,7 +35,47 @@ export function createOpenAIModel() {
   return openai("gpt-5.1-mini");
 }
 
-const RAG_CHUNK_LIMIT = 6;
+type ResolvedChatProvider =
+  | { provider: "platform"; model: null; apiKey: null }
+  | {
+      provider: "openai" | "google" | "anthropic";
+      model: string;
+      apiKey: string;
+    };
+
+/**
+ * Resolves the workspace's configured AI provider (platform default or BYO
+ * key) and returns the ai-sdk model plus its identifier. The identifier is
+ * persisted in the credit ledger so usage rows carry the exact model name
+ * used for the turn.
+ */
+export async function getChatModel(workspaceId: string): Promise<{
+  model: LanguageModel;
+  modelId: string;
+}> {
+  const resolved = (await fetchAuthAction(
+    api.billing.byoKeyActions.resolveAIProvider,
+    { workspaceId: workspaceId as Id<"workspace"> }
+  )) as ResolvedChatProvider;
+
+  if (resolved.provider === "platform") {
+    const modelId = "gpt-4.1-mini";
+    return { model: openai(modelId), modelId };
+  }
+  const modelId = resolved.model;
+  if (resolved.provider === "openai") {
+    const provider = createOpenAI({ apiKey: resolved.apiKey });
+    return { model: provider(modelId), modelId };
+  }
+  if (resolved.provider === "anthropic") {
+    const provider = createAnthropic({ apiKey: resolved.apiKey });
+    return { model: provider(modelId), modelId };
+  }
+  const provider = createGoogleGenerativeAI({ apiKey: resolved.apiKey });
+  return { model: provider(modelId), modelId };
+}
+
+const RAG_CHUNK_LIMIT = 5;
 
 export async function buildRAGContext(
   workspaceId: string,
