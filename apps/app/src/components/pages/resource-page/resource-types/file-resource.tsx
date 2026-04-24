@@ -35,7 +35,7 @@ function FileImage({ alt, src }: { alt: string; src: string }) {
         <motion.img
           alt={alt}
           animate={{ opacity: 1, y: 0 }}
-          className="mx-auto mt-4 h-[300px] w-full rounded-xl object-cover ring-1 ring-black/10 dark:ring-white/10"
+          className="mx-auto mt-4 h-[300px] w-full rounded-xl object-cover"
           height="auto"
           initial={{ opacity: 0, y: 4 }}
           key="image"

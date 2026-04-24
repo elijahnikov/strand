@@ -90,7 +90,7 @@ export function UploadingFileRow({ fileName }: { fileName: string }) {
         <DotGridLoader />
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
-        <TextShimmer className="truncate font-medium text-sm">
+        <TextShimmer className="block truncate font-medium text-sm">
           {fileName}
         </TextShimmer>
       </div>
@@ -189,7 +189,7 @@ function WebsiteRow({
               exit={{ opacity: 0, transition: { duration: 0.15 } }}
               key="shimmer"
             >
-              <TextShimmer className="truncate font-medium text-sm">
+              <TextShimmer className="block truncate font-medium text-sm">
                 {website?.url ?? resource.title}
               </TextShimmer>
             </motion.div>
@@ -355,7 +355,7 @@ function FileRow({
               exit={{ opacity: 0, transition: { duration: 0.15 } }}
               key="shimmer"
             >
-              <TextShimmer className="truncate font-medium text-sm">
+              <TextShimmer className="block truncate font-medium text-sm">
                 {file?.fileName ?? resource.title}
               </TextShimmer>
             </motion.div>

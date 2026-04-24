@@ -52,7 +52,7 @@ export function ResourceChatPanel({
       {open && (
         <motion.div
           animate={{ y: 0, opacity: 1 }}
-          className="fixed right-4 bottom-4 z-50 flex h-[600px] max-h-[calc(100vh-2rem)] w-[420px] flex-col overflow-hidden rounded-xl border-[0.5px] bg-ui-bg-subtle shadow-lg"
+          className="fixed right-4 bottom-4 z-50 flex h-[600px] max-h-[calc(100vh-2rem)] w-[500px] flex-col overflow-hidden rounded-xl border-[0.5px] bg-ui-bg-subtle shadow-lg"
           exit={{ y: 700, opacity: 0 }}
           initial={{ y: 700, opacity: 0 }}
           transition={{ type: "spring", stiffness: 400, damping: 35 }}

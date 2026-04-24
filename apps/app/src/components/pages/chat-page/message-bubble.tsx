@@ -260,19 +260,19 @@ export function MessageBubble({
           size={28}
         />
       ) : (
-        <div className="relative top-0 left-3.5 flex size-10 shrink-0 items-center justify-center">
+        <div className="relative top-0 left-2 flex size-10 shrink-0 items-center justify-center">
           <img
             alt="omi"
             className="hidden rounded-lg dark:block"
             height={64}
-            src="/STRAND_TRANSPARENT_WHITE.png"
+            src="/omi_white_on_transparent.png"
             width={64}
           />
           <img
             alt="omi"
             className="rounded-lg dark:hidden"
             height={64}
-            src="/STRAND_TRANSPARENT_BLACK.png"
+            src="/omi_black_on_transparent.png"
             width={64}
           />
         </div>
