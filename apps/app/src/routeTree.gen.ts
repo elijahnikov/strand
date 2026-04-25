@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ConnectRaycastRouteImport } from './routes/connect-raycast'
 import { Route as ConnectExtensionRouteImport } from './routes/connect-extension'
 import { Route as WorkspaceRouteImport } from './routes/_workspace'
 import { Route as AuthRouteImport } from './routes/_auth'
@@ -38,6 +39,11 @@ import { Route as WorkspaceWorkspaceWorkspaceIdResourceResourceIdRouteImport } f
 import { Route as WorkspaceWorkspaceWorkspaceIdChatThreadIdRouteImport } from './routes/_workspace/workspace/$workspaceId/chat/$threadId'
 import { Route as WorkspaceWorkspaceWorkspaceIdLibraryCollectionCollectionIdRouteImport } from './routes/_workspace/workspace/$workspaceId/library/collection/$collectionId'
 
+const ConnectRaycastRoute = ConnectRaycastRouteImport.update({
+  id: '/connect-raycast',
+  path: '/connect-raycast',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConnectExtensionRoute = ConnectExtensionRouteImport.update({
   id: '/connect-extension',
   path: '/connect-extension',
@@ -196,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/$': typeof SplatRoute
   '/404': typeof R404Route
   '/connect-extension': typeof ConnectExtensionRoute
+  '/connect-raycast': typeof ConnectRaycastRoute
   '/account': typeof AppAccountRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
@@ -223,6 +230,7 @@ export interface FileRoutesByTo {
   '/$': typeof SplatRoute
   '/404': typeof R404Route
   '/connect-extension': typeof ConnectExtensionRoute
+  '/connect-raycast': typeof ConnectRaycastRoute
   '/account': typeof AppAccountRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
@@ -250,6 +258,7 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/_workspace': typeof WorkspaceRouteWithChildren
   '/connect-extension': typeof ConnectExtensionRoute
+  '/connect-raycast': typeof ConnectRaycastRoute
   '/_app/account': typeof AppAccountRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
@@ -279,6 +288,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/404'
     | '/connect-extension'
+    | '/connect-raycast'
     | '/account'
     | '/login'
     | '/register'
@@ -306,6 +316,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/404'
     | '/connect-extension'
+    | '/connect-raycast'
     | '/account'
     | '/login'
     | '/register'
@@ -332,6 +343,7 @@ export interface FileRouteTypes {
     | '/_auth'
     | '/_workspace'
     | '/connect-extension'
+    | '/connect-raycast'
     | '/_app/account'
     | '/_auth/login'
     | '/_auth/register'
@@ -363,12 +375,20 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   WorkspaceRoute: typeof WorkspaceRouteWithChildren
   ConnectExtensionRoute: typeof ConnectExtensionRoute
+  ConnectRaycastRoute: typeof ConnectRaycastRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/connect-raycast': {
+      id: '/connect-raycast'
+      path: '/connect-raycast'
+      fullPath: '/connect-raycast'
+      preLoaderRoute: typeof ConnectRaycastRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/connect-extension': {
       id: '/connect-extension'
       path: '/connect-extension'
@@ -703,6 +723,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   WorkspaceRoute: WorkspaceRouteWithChildren,
   ConnectExtensionRoute: ConnectExtensionRoute,
+  ConnectRaycastRoute: ConnectRaycastRoute,
   ApiChatRoute: ApiChatRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

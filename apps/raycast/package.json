@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "omi",
+  "title": "Omi",
+  "description": "Save and search your omi resources from Raycast.",
+  "icon": "icon.png",
+  "author": "omi",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "private": true,
+  "version": "0.0.1",
+  "preferences": [
+    {
+      "name": "appUrl",
+      "title": "Omi App URL",
+      "description": "URL of the omi web app (e.g. https://app.omi.ac, or http://localhost:3000 for local dev).",
+      "type": "textfield",
+      "required": true,
+      "default": "https://app.omi.ac"
+    },
+    {
+      "name": "convexSiteUrl",
+      "title": "Omi API URL",
+      "description": "URL of the omi Convex site. Most users should leave this as the default.",
+      "type": "textfield",
+      "required": true,
+      "default": "https://mild-emu-110.convex.site"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-resources",
+      "title": "Search Resources",
+      "subtitle": "Omi",
+      "description": "Browse your saved resources in a visual grid.",
+      "mode": "view"
+    },
+    {
+      "name": "save-url",
+      "title": "Save URL",
+      "subtitle": "Omi",
+      "description": "Save a URL to your omi workspace.",
+      "mode": "view"
+    },
+    {
+      "name": "save-tab",
+      "title": "Save Current Tab",
+      "subtitle": "Omi",
+      "description": "Save the active browser tab to your omi workspace.",
+      "mode": "no-view"
+    },
+    {
+      "name": "save-note",
+      "title": "Save Note",
+      "subtitle": "Omi",
+      "description": "Quickly save a note to your omi workspace.",
+      "mode": "view"
+    },
+    {
+      "name": "connect",
+      "title": "Connect Omi",
+      "subtitle": "Omi",
+      "description": "Link Raycast to your omi account.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "@types/react": "^19.2.7",
+    "react": "^19.2.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish",
+    "typecheck": "tsc --noEmit"
+  }
+}

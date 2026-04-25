@@ -1,5 +1,11 @@
+import { paginationOptsValidator } from "convex/server";
 import { ConvexError, v } from "convex/values";
-import { internalMutation, internalQuery } from "../_generated/server";
+import type { Doc, Id } from "../_generated/dataModel";
+import {
+  internalMutation,
+  internalQuery,
+  type QueryCtx,
+} from "../_generated/server";
 import { createResource } from "./mutations";
 
 export const createForUser = internalMutation({
@@ -144,5 +150,133 @@ export const getWebsiteResource = internalQuery({
       .query("websiteResource")
       .withIndex("by_resource", (q) => q.eq("resourceId", args.resourceId))
       .unique();
+  },
+});
+
+const PLAIN_TEXT_SNIPPET_LEN = 160;
+
+async function buildExtPreview(ctx: QueryCtx, resource: Doc<"resource">) {
+  const base = {
+    _id: resource._id,
+    type: resource.type,
+    title: resource.title,
+    description: resource.description ?? null,
+    updatedAt: resource.updatedAt ?? resource._creationTime,
+  };
+
+  switch (resource.type) {
+    case "website": {
+      const website = await ctx.db
+        .query("websiteResource")
+        .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
+        .unique();
+      return {
+        ...base,
+        url: website?.url ?? null,
+        domain: website?.domain ?? null,
+        previewUrl: website?.ogImage ?? null,
+        faviconUrl: website?.favicon ?? null,
+      };
+    }
+    case "file": {
+      const file = await ctx.db
+        .query("fileResource")
+        .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
+        .unique();
+      let previewUrl: string | null = null;
+      if (file?.thumbnailStorageId) {
+        previewUrl = await ctx.storage.getUrl(file.thumbnailStorageId);
+      } else if (file?.mimeType?.startsWith("image/") && file.storageId) {
+        previewUrl = await ctx.storage.getUrl(file.storageId);
+      }
+      return {
+        ...base,
+        mimeType: file?.mimeType ?? null,
+        fileName: file?.fileName ?? null,
+        previewUrl,
+      };
+    }
+    case "note": {
+      const note = await ctx.db
+        .query("noteResource")
+        .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
+        .unique();
+      const snippet = note?.plainTextContent
+        ? note.plainTextContent.slice(0, PLAIN_TEXT_SNIPPET_LEN)
+        : null;
+      return {
+        ...base,
+        snippet,
+      };
+    }
+    default:
+      return base;
+  }
+}
+
+export const listForUser = internalQuery({
+  args: {
+    workspaceId: v.id("workspace"),
+    paginationOpts: paginationOptsValidator,
+    search: v.optional(v.string()),
+    type: v.optional(
+      v.union(v.literal("website"), v.literal("note"), v.literal("file"))
+    ),
+  },
+  handler: async (ctx, args) => {
+    const search = args.search?.trim();
+    const workspaceId: Id<"workspace"> = args.workspaceId;
+
+    let results: {
+      page: Doc<"resource">[];
+      isDone: boolean;
+      continueCursor: string;
+    };
+
+    if (search) {
+      results = await ctx.db
+        .query("resource")
+        .withSearchIndex("search_title", (q) => {
+          let sq = q
+            .search("title", search)
+            .eq("workspaceId", workspaceId)
+            .eq("deletedAt", undefined);
+          if (args.type) {
+            sq = sq.eq("type", args.type);
+          }
+          return sq;
+        })
+        .paginate(args.paginationOpts);
+    } else if (args.type) {
+      results = await ctx.db
+        .query("resource")
+        .withIndex("by_workspace_type", (q) =>
+          q
+            .eq("workspaceId", workspaceId)
+            // biome-ignore lint/style/noNonNullAssertion: type checked above
+            .eq("type", args.type!)
+            .eq("deletedAt", undefined)
+        )
+        .order("desc")
+        .paginate(args.paginationOpts);
+    } else {
+      results = await ctx.db
+        .query("resource")
+        .withIndex("by_workspace", (q) =>
+          q.eq("workspaceId", workspaceId).eq("deletedAt", undefined)
+        )
+        .order("desc")
+        .paginate(args.paginationOpts);
+    }
+
+    const items = await Promise.all(
+      results.page.map((resource) => buildExtPreview(ctx, resource))
+    );
+
+    return {
+      items,
+      cursor: results.continueCursor,
+      isDone: results.isDone,
+    };
   },
 });

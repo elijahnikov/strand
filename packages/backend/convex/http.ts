@@ -5,6 +5,7 @@ import {
   captureFileHandler,
   captureNoteHandler,
   captureWebsiteHandler,
+  listResourcesHandler,
   meHandler,
   uploadUrlHandler,
 } from "./extensionAuth/http";
@@ -25,6 +26,11 @@ http.route({
   path: "/api/ext/me",
   method: "GET",
   handler: meHandler,
+});
+http.route({
+  path: "/api/ext/resources",
+  method: "GET",
+  handler: listResourcesHandler,
 });
 http.route({
   path: "/api/ext/upload-url",
