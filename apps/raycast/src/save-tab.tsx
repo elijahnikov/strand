@@ -3,6 +3,8 @@ import {
   LaunchType,
   launchCommand,
   showHUD,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { api } from "~/lib/api";
@@ -29,13 +31,19 @@ export default async function SaveTab(): Promise<void> {
     return;
   }
 
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Saving tab to Omi…",
+  });
   try {
     await api.captureWebsite({
       url: active.url,
       title: active.title?.trim() || undefined,
     });
+    await toast.hide();
     await showHUD("Saved to Omi ✓");
   } catch (err) {
+    await toast.hide();
     if (err instanceof NotConnectedError) {
       await launchCommand({
         name: "connect",

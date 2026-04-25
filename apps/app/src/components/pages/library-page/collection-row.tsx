@@ -9,13 +9,25 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@omi/ui/dropdown-menu";
+import { toastManager } from "@omi/ui/toast";
 import { useMutation } from "@tanstack/react-query";
+import { ConvexError } from "convex/values";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { MoreHorizontalIcon, TrashIcon } from "lucide-react";
 import { type Ref, useCallback } from "react";
 import { CollectionIcon } from "~/components/common/collection-icon";
 import { EditableText } from "~/components/common/editable-text";
 import type { DragItemData, DropTargetData } from "./use-library-dnd";
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof ConvexError) {
+    return typeof error.data === "string" ? error.data : "An error occurred";
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return "An error occurred";
+}
 
 interface CollectionRowProps {
   autoEdit?: boolean;
@@ -40,10 +52,24 @@ export function CollectionRow({
 
   const { mutate: rename } = useMutation({
     mutationFn: useConvexMutation(api.collection.mutations.rename),
+    onError: (err) => {
+      toastManager.add({
+        type: "error",
+        title: "Could not rename collection",
+        description: getErrorMessage(err),
+      });
+    },
   });
 
   const { mutate: remove } = useMutation({
     mutationFn: useConvexMutation(api.collection.mutations.remove),
+    onError: (err) => {
+      toastManager.add({
+        type: "error",
+        title: "Could not delete collection",
+        description: getErrorMessage(err),
+      });
+    },
   });
 
   const dragData: DragItemData = {

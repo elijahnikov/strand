@@ -47,6 +47,10 @@ export default function SaveNote() {
       return;
     }
     setSubmitting(true);
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Saving note…",
+    });
     try {
       const body = values.body.trim();
       await api.captureNote({
@@ -54,12 +58,11 @@ export default function SaveNote() {
         plainTextContent: body || undefined,
         jsonContent: body ? JSON.stringify(buildNoteDoc(body)) : undefined,
       });
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Note saved",
-      });
+      toast.style = Toast.Style.Success;
+      toast.title = "Note saved";
       await popToRoot();
     } catch (err) {
+      toast.hide();
       if (err instanceof NotConnectedError) {
         await launchCommand({
           name: "connect",

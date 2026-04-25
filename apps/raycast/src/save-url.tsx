@@ -33,18 +33,21 @@ export default function SaveUrl() {
       return;
     }
     setSubmitting(true);
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Saving to Omi…",
+    });
     try {
       await api.captureWebsite({
         url,
         title: values.title.trim() || undefined,
         description: values.description.trim() || undefined,
       });
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Saved to Omi",
-      });
+      toast.style = Toast.Style.Success;
+      toast.title = "Saved to Omi";
       await popToRoot();
     } catch (err) {
+      toast.hide();
       if (err instanceof NotConnectedError) {
         await launchCommand({
           name: "connect",
