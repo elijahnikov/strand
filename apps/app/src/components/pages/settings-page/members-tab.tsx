@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@omi/ui/select";
 import { Text } from "@omi/ui/text";
+import { toastManager } from "@omi/ui/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ConvexError } from "convex/values";
 import {
@@ -183,6 +184,13 @@ function PendingInvitations({ workspaceId }: { workspaceId: Id<"workspace"> }) {
 
   const { mutate: revokeInvitation } = useMutation({
     mutationFn: useConvexMutation(api.workspace.mutations.revokeInvitation),
+    onError: (err) => {
+      toastManager.add({
+        type: "error",
+        title: "Could not revoke invitation",
+        description: getErrorMessage(err),
+      });
+    },
   });
 
   if (!invitations?.length) {
@@ -244,10 +252,24 @@ function MembersList({
 
   const { mutate: updateRole } = useMutation({
     mutationFn: useConvexMutation(api.workspace.mutations.updateRole),
+    onError: (err) => {
+      toastManager.add({
+        type: "error",
+        title: "Could not update role",
+        description: getErrorMessage(err),
+      });
+    },
   });
 
   const { mutate: removeMember } = useMutation({
     mutationFn: useConvexMutation(api.workspace.mutations.removeMember),
+    onError: (err) => {
+      toastManager.add({
+        type: "error",
+        title: "Could not remove member",
+        description: getErrorMessage(err),
+      });
+    },
   });
 
   const [confirmRemove, setConfirmRemove] = useState<{

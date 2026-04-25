@@ -16,8 +16,10 @@ import {
 import { ScrollArea } from "@omi/ui/scroll-area";
 import { Skeleton } from "@omi/ui/skeleton";
 import { Text } from "@omi/ui/text";
+import { toastManager } from "@omi/ui/toast";
 import { RiAddLine, RiChatSmile2Fill } from "@remixicon/react";
 import { useMutation } from "@tanstack/react-query";
+import { ConvexError } from "convex/values";
 import { Link } from "@tanstack/react-router";
 import { MoreHorizontalIcon, PencilIcon, TrashIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -25,6 +27,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { EditableText } from "~/components/common/editable-text";
 import { EmptyState } from "~/components/common/empty-state";
 import { TextShimmer } from "~/components/common/text-shimmer";
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof ConvexError) {
+    return typeof error.data === "string" ? error.data : "An error occurred";
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return "An error occurred";
+}
 
 function ThreadListSkeleton() {
   return (
@@ -53,10 +65,24 @@ export function ThreadList({
 
   const { mutate: updateTitle } = useMutation({
     mutationFn: useConvexMutation(api.chat.mutations.updateThreadTitle),
+    onError: (err) => {
+      toastManager.add({
+        type: "error",
+        title: "Could not rename thread",
+        description: getErrorMessage(err),
+      });
+    },
   });
 
   const { mutate: deleteThread } = useMutation({
     mutationFn: useConvexMutation(api.chat.mutations.deleteThread),
+    onError: (err) => {
+      toastManager.add({
+        type: "error",
+        title: "Could not delete thread",
+        description: getErrorMessage(err),
+      });
+    },
   });
 
   const handleUpdateTitle = useCallback(
