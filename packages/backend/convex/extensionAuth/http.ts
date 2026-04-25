@@ -224,6 +224,61 @@ interface CaptureFileBody {
   workspaceId?: string;
 }
 
+const DEFAULT_LIST_LIMIT = 30;
+const MAX_LIST_LIMIT = 100;
+
+function parseListLimit(raw: string | null): number {
+  if (!raw) {
+    return DEFAULT_LIST_LIMIT;
+  }
+  const n = Number.parseInt(raw, 10);
+  if (Number.isNaN(n) || n <= 0) {
+    return DEFAULT_LIST_LIMIT;
+  }
+  return Math.min(n, MAX_LIST_LIMIT);
+}
+
+function parseListType(
+  raw: string | null
+): "website" | "note" | "file" | undefined {
+  if (raw === "website" || raw === "note" || raw === "file") {
+    return raw;
+  }
+  return undefined;
+}
+
+export const listResourcesHandler = httpAction(async (ctx, request) => {
+  try {
+    const auth = await resolveAuth(ctx, request);
+    const url = new URL(request.url);
+    const search = url.searchParams.get("search") ?? undefined;
+    const cursor = url.searchParams.get("cursor");
+    const type = parseListType(url.searchParams.get("type"));
+    const limit = parseListLimit(url.searchParams.get("limit"));
+    const workspaceId = await resolveWorkspaceId(
+      ctx,
+      auth,
+      url.searchParams.get("workspaceId") ?? undefined
+    );
+
+    const result = await ctx.runQuery(internal.resource.internals.listForUser, {
+      workspaceId,
+      paginationOpts: { numItems: limit, cursor: cursor ?? null },
+      search: search?.trim() || undefined,
+      type,
+    });
+
+    return jsonResponse({
+      items: result.items,
+      cursor: result.isDone ? null : result.cursor,
+      isDone: result.isDone,
+      workspaceId,
+    });
+  } catch (err) {
+    return errorResponse(err);
+  }
+});
+
 export const captureFileHandler = httpAction(async (ctx, request) => {
   try {
     const auth = await resolveAuth(ctx, request);

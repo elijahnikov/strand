@@ -11,6 +11,7 @@
       "!**/.output",
       "!**/.expo",
       "!**/routeTree.gen.ts",
+      "!**/raycast-env.d.ts",
       "!apps/expo"
     ]
   },
