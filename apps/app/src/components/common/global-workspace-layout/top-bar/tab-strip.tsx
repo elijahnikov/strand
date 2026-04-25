@@ -91,7 +91,7 @@ export function TabStrip({ workspaceId }: TabStripProps) {
       ref={rootRef}
     >
       <ScrollArea className="h-11 min-w-0 flex-1 **:data-[slot=scroll-area-scrollbar]:hidden">
-        <div className="flex h-11 items-end gap-x-2 pr-4 pl-4">
+        <div className="flex h-11 w-max items-end gap-x-2 pr-4 pl-4">
           {tabs.map((tab) => (
             <Tab
               isActive={tab.id === activeId}

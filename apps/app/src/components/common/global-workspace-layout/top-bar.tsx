@@ -15,7 +15,6 @@ import {
   UserMenu,
   UserMenuSkeleton,
 } from "~/components/common/global-workspace-layout/workspace-sidebar/footer/user-menu";
-import { WorkspaceSwitcher } from "~/components/common/global-workspace-layout/workspace-sidebar/header/workspace-switcher";
 import SidebarLinkItem from "~/components/common/global-workspace-layout/workspace-sidebar/sidebar-link-item";
 import { getNavShortcutByTitle } from "~/lib/hotkeys/registry";
 
@@ -78,7 +77,6 @@ export function TopBar() {
         <Suspense fallback={<UserMenuSkeleton />}>
           <UserMenu />
         </Suspense>
-        <WorkspaceSwitcher />
         <div className="flex items-center gap-x-1">
           <TooltipProvider>
             {navigationItems.map((item) => (

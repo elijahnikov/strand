@@ -7,7 +7,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@omi/ui/dropdown-menu";
-import { RiMosaicLine } from "@remixicon/react";
 import { ArrowUpDownIcon } from "lucide-react";
 import { useState } from "react";
 import {
@@ -53,13 +52,6 @@ export function FilterBar({
           workspaceId={workspaceId}
         />
       ))}
-      <Button
-        className="size-8! h-8 gap-x-1.5 whitespace-nowrap rounded-full border-[0.5px] px-3 text-xs"
-        size="small"
-        variant="omi"
-      >
-        <RiMosaicLine className="size-4.5 shrink-0" />
-      </Button>
       <AddFilterMenu workspaceId={workspaceId} />
       <DropdownMenu>
         <DropdownMenuTrigger
