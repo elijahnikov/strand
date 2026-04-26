@@ -170,11 +170,11 @@ export function SearchSuggestions({
                 type="button"
               >
                 <Badge
-                  className="h-7 cursor-pointer rounded-full px-3 text-xs transition-colors hover:bg-ui-bg-component"
+                  className="flex h-7 cursor-pointer items-center rounded-full px-3 font-medium text-xs transition-colors hover:bg-ui-bg-component"
                   variant="mono"
                 >
                   {concept.name}
-                  <span className="ml-1 font-mono text-[10px] text-ui-fg-muted">
+                  <span className="ml-1 font-mono font-normal! text-[10px] text-ui-fg-muted">
                     {concept.count}
                   </span>
                 </Badge>

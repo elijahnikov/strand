@@ -134,19 +134,94 @@ function extractMetaContent(
   return match?.[1] ?? match?.[2] ?? undefined;
 }
 
-const FAVICON_REGEX =
-  /<link[^>]*rel=["'](?:icon|shortcut icon)["'][^>]*href=["']([^"']*)["']/i;
+const LINK_TAG_REGEX = /<link\b[^>]*>/gi;
+const REL_ATTR_REGEX = /\brel\s*=\s*["']([^"']+)["']/i;
+const HREF_ATTR_REGEX = /\bhref\s*=\s*["']([^"']+)["']/i;
+const WHITESPACE_REGEX = /\s+/;
+const ICON_REL_PRIORITY = [
+  "icon",
+  "shortcut icon",
+  "apple-touch-icon",
+  "apple-touch-icon-precomposed",
+  "mask-icon",
+  "fluid-icon",
+];
 
-function extractFavicon(html: string, baseUrl: string): string | undefined {
-  const match = html.match(FAVICON_REGEX);
-  if (!match?.[1]) {
-    return undefined;
+function extractFaviconCandidates(html: string, baseUrl: string): string[] {
+  const found: { rel: string; href: string }[] = [];
+  const matches = html.matchAll(LINK_TAG_REGEX);
+  for (const m of matches) {
+    const tag = m[0];
+    const relMatch = tag.match(REL_ATTR_REGEX);
+    const hrefMatch = tag.match(HREF_ATTR_REGEX);
+    if (!(relMatch?.[1] && hrefMatch?.[1])) {
+      continue;
+    }
+    const rels = relMatch[1].toLowerCase().split(WHITESPACE_REGEX);
+    const matchedRel = ICON_REL_PRIORITY.find((r) =>
+      rels.includes(r.toLowerCase())
+    );
+    if (!matchedRel) {
+      continue;
+    }
+    found.push({ rel: matchedRel, href: hrefMatch[1] });
   }
 
+  found.sort(
+    (a, b) =>
+      ICON_REL_PRIORITY.indexOf(a.rel) - ICON_REL_PRIORITY.indexOf(b.rel)
+  );
+
+  const urls: string[] = [];
+  for (const { href } of found) {
+    try {
+      urls.push(new URL(href, baseUrl).href);
+    } catch {
+      // skip invalid hrefs
+    }
+  }
+  return urls;
+}
+
+function googleS2Favicon(baseUrl: string): string | undefined {
   try {
-    return new URL(match[1], baseUrl).href;
+    const domain = new URL(baseUrl).hostname;
+    if (domain) {
+      return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
+    }
   } catch {
-    return undefined;
+    // invalid baseUrl
+  }
+  return undefined;
+}
+
+async function isValidIconUrl(url: string): Promise<boolean> {
+  try {
+    // Try GET with a tiny range; some servers reject HEAD or block bot UAs.
+    const res = await fetch(url, {
+      method: "GET",
+      redirect: "follow",
+      signal: AbortSignal.timeout(3000),
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        Accept: "image/*,*/*;q=0.8",
+        Range: "bytes=0-0",
+      },
+    });
+    if (!res.ok && res.status !== 206) {
+      return false;
+    }
+    const contentType = (res.headers.get("content-type") ?? "").toLowerCase();
+    if (
+      contentType.includes("text/html") ||
+      contentType.includes("application/json")
+    ) {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
   }
 }
 
@@ -154,12 +229,7 @@ async function resolveValidFavicon(
   html: string,
   baseUrl: string
 ): Promise<string | undefined> {
-  const candidates: string[] = [];
-
-  const declared = extractFavicon(html, baseUrl);
-  if (declared) {
-    candidates.push(declared);
-  }
+  const candidates: string[] = [...extractFaviconCandidates(html, baseUrl)];
 
   try {
     candidates.push(new URL("/favicon.ico", baseUrl).href);
@@ -168,22 +238,15 @@ async function resolveValidFavicon(
   }
 
   for (const url of candidates) {
-    try {
-      const res = await fetch(url, {
-        method: "HEAD",
-        redirect: "follow",
-        signal: AbortSignal.timeout(3000),
-      });
-      const contentType = res.headers.get("content-type") ?? "";
-      if (res.ok && !contentType.includes("text/html")) {
-        return url;
-      }
-    } catch {
-      // timeout or network error, try next
+    if (await isValidIconUrl(url)) {
+      return url;
     }
   }
 
-  return undefined;
+  // Final fallback: Google's S2 favicon service. Always returns something
+  // (a generic globe for unknown domains), so don't validate it — just
+  // hand back the URL and let the browser load it.
+  return googleS2Favicon(baseUrl);
 }
 
 export const extractWebsiteMetadata = internalAction({
@@ -297,15 +360,16 @@ export const extractWebsiteMetadata = internalAction({
         );
       }
     } catch (error) {
-      await ctx.runMutation(
-        internal.resource.internals.setWebsiteMetadataStatus,
-        {
-          resourceId: args.resourceId,
-          metadataStatus: "failed",
-          metadataError:
-            error instanceof Error ? error.message : "Unknown error",
-        }
-      );
+      // Even when the page fetch fails (Cloudflare block, timeout, 4xx/5xx),
+      // we still know the URL — so fall back to Google's S2 favicon service
+      // so the row at least has a recognisable icon instead of nothing.
+      await ctx.runMutation(internal.resource.internals.updateWebsiteMetadata, {
+        resourceId: args.resourceId,
+        favicon: googleS2Favicon(websiteResource.url),
+        isEmbeddable: false,
+        metadataStatus: "failed",
+        metadataError: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   },
 });

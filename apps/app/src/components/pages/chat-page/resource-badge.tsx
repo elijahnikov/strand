@@ -133,14 +133,14 @@ export function ResourceBadge({
       }}
       to="/workspace/$workspaceId/resource/$resourceId"
     >
-      <Badge className="max-w-full" variant={"mono"}>
+      <Badge className="w-full max-w-full" variant={"mono"}>
         <ResourceIcon
           favicon={resource?.preview?.favicon}
           fileUrl={resource?.preview?.fileUrl}
           mimeType={resource?.preview?.mimeType}
           type={displayType}
         />
-        <span className="min-w-0 truncate font-medium font-mono text-xs">
+        <span className="min-w-0 truncate font-medium font-sans! text-xs">
           {displayTitle}
         </span>
       </Badge>

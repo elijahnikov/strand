@@ -45,7 +45,7 @@ export function SearchInput({
         {isPending ? <DotGridLoader /> : <SearchIcon className="size-4" />}
       </div>
       <Input
-        className="rounded-full bg-ui-bg-base-hover pr-8 pl-8"
+        className="rounded-full bg-ui-bg-field-component-hover pr-8 pl-8 hover:bg-ui-bg-component-hover dark:bg-ui-bg-field-component dark:hover:bg-ui-bg-field-component-hover"
         onChange={(e) => onChange(e.target.value)}
         placeholder="Search your library…"
         ref={inputRef}

@@ -71,7 +71,7 @@ export function LibraryToolbar({
   return (
     <div className="fixed inset-x-0 top-11 z-30 flex w-full items-center gap-x-2 bg-ui-bg-base! p-2 md:sticky md:inset-x-auto md:top-0 md:rounded-t-lg">
       <Input
-        className="w-48 rounded-full bg-ui-bg-base-hover"
+        className="w-48 rounded-full bg-ui-bg-field-component-hover hover:bg-ui-bg-component-hover dark:bg-ui-bg-field-component dark:hover:bg-ui-bg-field-component-hover"
         onChange={(e) => setSearch(e.target.value || null)}
         placeholder="Search"
         type="search"

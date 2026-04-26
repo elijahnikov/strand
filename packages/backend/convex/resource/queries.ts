@@ -564,7 +564,10 @@ export const listPinned = workspaceQuery({
   },
 });
 
-const enrichResource = async (ctx: QueryCtx, resource: Doc<"resource">) => {
+export const enrichResource = async (
+  ctx: QueryCtx,
+  resource: Doc<"resource">
+) => {
   const resourceAI = await ctx.db
     .query("resourceAI")
     .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
