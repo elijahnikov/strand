@@ -49,6 +49,7 @@ import type * as extensionAuth_internals from "../extensionAuth/internals.js";
 import type * as extensionAuth_mutations from "../extensionAuth/mutations.js";
 import type * as extensionAuth_queries from "../extensionAuth/queries.js";
 import type * as extensionAuth_shared from "../extensionAuth/shared.js";
+import type * as home_queries from "../home/queries.js";
 import type * as http from "../http.js";
 import type * as imports_actions from "../imports/actions.js";
 import type * as imports_internals from "../imports/internals.js";
@@ -141,6 +142,7 @@ declare const fullApi: ApiFromModules<{
   "extensionAuth/mutations": typeof extensionAuth_mutations;
   "extensionAuth/queries": typeof extensionAuth_queries;
   "extensionAuth/shared": typeof extensionAuth_shared;
+  "home/queries": typeof home_queries;
   http: typeof http;
   "imports/actions": typeof imports_actions;
   "imports/internals": typeof imports_internals;

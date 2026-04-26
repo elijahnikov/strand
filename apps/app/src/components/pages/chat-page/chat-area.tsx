@@ -95,11 +95,15 @@ export function ChatArea({
   threadId,
   resourceId,
   onThreadCreated,
+  initialValue,
+  autoSend,
 }: {
   workspaceId: Id<"workspace">;
   threadId?: Id<"chatThread">;
   resourceId?: Id<"resource">;
   onThreadCreated?: (threadId: Id<"chatThread">) => void;
+  initialValue?: string;
+  autoSend?: boolean;
 }) {
   const { mutateAsync: createThread } = useMutation({
     mutationFn: useConvexMutation(api.chat.mutations.createThread),
@@ -188,6 +192,14 @@ export function ChatArea({
     ]
   );
 
+  const autoSendFiredRef = useRef(false);
+  useEffect(() => {
+    if (autoSend && initialValue && !(threadId || autoSendFiredRef.current)) {
+      autoSendFiredRef.current = true;
+      handleSend(initialValue, []);
+    }
+  }, [autoSend, initialValue, threadId, handleSend]);
+
   if (threadId && !isLoadingThread && !thread) {
     return <NotFoundState />;
   }
@@ -226,7 +238,12 @@ export function ChatArea({
             </div>
           </div>
         </div>
-        <ChatInput isStreaming={false} onSend={handleSend} onStop={stop} />
+        <ChatInput
+          initialValue={initialValue}
+          isStreaming={false}
+          onSend={handleSend}
+          onStop={stop}
+        />
       </div>
     );
   }
@@ -274,7 +291,12 @@ export function ChatArea({
           {isStreaming && <StreamingIndicator messages={messages} />}
         </div>
       </div>
-      <ChatInput isStreaming={isStreaming} onSend={handleSend} onStop={stop} />
+      <ChatInput
+        initialValue={initialValue}
+        isStreaming={isStreaming}
+        onSend={handleSend}
+        onStop={stop}
+      />
     </div>
   );
 }

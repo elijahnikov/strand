@@ -1,27 +1,32 @@
 import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
-import { Button } from "@omi/ui/button";
-import { toastManager } from "@omi/ui/toast";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { HomePageComponent } from "~/components/pages/home-page";
 
 export const Route = createFileRoute("/_workspace/workspace/$workspaceId/")({
-  component: WorkspacePage,
+  loader: ({ context, params }) =>
+    context.queryClient.ensureQueryData(
+      convexQuery(api.home.queries.getHome, {
+        workspaceId: params.workspaceId as Id<"workspace">,
+      })
+    ),
+  component: WorkspaceHomePage,
 });
 
-function WorkspacePage() {
+function WorkspaceHomePage() {
   const { workspaceId } = Route.useParams();
-  const { data } = useSuspenseQuery(
-    convexQuery(api.workspace.queries.getById, {
-      workspaceId: workspaceId as Id<"workspace">,
-    })
+  const { data: currentUser } = useQuery(
+    convexQuery(api.user.queries.currentUser, {})
   );
 
+  const username = currentUser?.user?.username ?? "there";
+
   return (
-    <div>
-      <h1>{data.workspace.name}</h1>
-      <Button onClick={() => toastManager.add({ title: "test" })}>Toast</Button>
-    </div>
+    <HomePageComponent
+      username={username}
+      workspaceId={workspaceId as Id<"workspace">}
+    />
   );
 }

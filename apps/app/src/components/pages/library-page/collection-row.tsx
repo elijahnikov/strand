@@ -11,8 +11,8 @@ import {
 } from "@omi/ui/dropdown-menu";
 import { toastManager } from "@omi/ui/toast";
 import { useMutation } from "@tanstack/react-query";
-import { ConvexError } from "convex/values";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { ConvexError } from "convex/values";
 import { MoreHorizontalIcon, TrashIcon } from "lucide-react";
 import { type Ref, useCallback } from "react";
 import { CollectionIcon } from "~/components/common/collection-icon";

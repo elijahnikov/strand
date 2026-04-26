@@ -9,6 +9,7 @@ import { RiCloseLine, RiSendPlaneFill, RiStopFill } from "@remixicon/react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ResourceBadge, ResourceIcon } from "./resource-badge";
 
 export interface Mention {
@@ -21,19 +22,22 @@ export function ChatInput({
   onSend,
   onStop,
   isStreaming,
+  initialValue,
+  fullWidth = false,
 }: {
   onSend: (content: string, mentions: Mention[]) => void;
   onStop: () => void;
   isStreaming: boolean;
+  initialValue?: string;
+  fullWidth?: boolean;
 }) {
   const { workspaceId } = useParams({ strict: false }) as {
     workspaceId?: string;
   };
 
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(initialValue ?? "");
   const [mentions, setMentions] = useState<Mention[]>([]);
 
-  // Mention picker state: tracks the @ position and current query
   const [mentionState, setMentionState] = useState<{
     start: number;
     query: string;
@@ -41,6 +45,8 @@ export function ChatInput({
   const [highlightIndex, setHighlightIndex] = useState(0);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [wrapperRect, setWrapperRect] = useState<DOMRect | null>(null);
 
   const { data: searchResults } = useQuery(
     convexQuery(
@@ -49,7 +55,7 @@ export function ChatInput({
         ? {
             workspaceId: workspaceId as Id<"workspace">,
             query: mentionState.query || " ",
-            limit: 6,
+            limit: 5,
           }
         : "skip"
     )
@@ -166,13 +172,15 @@ export function ChatInput({
     ]
   );
 
+  const maxAutoGrow = fullWidth ? 240 : 200;
+
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const newValue = e.target.value;
       setValue(newValue);
       const el = e.target;
       el.style.height = "auto";
-      el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+      el.style.height = `${Math.min(el.scrollHeight, maxAutoGrow)}px`;
 
       const cursor = el.selectionStart;
       const textUpToCursor = newValue.slice(0, cursor);
@@ -193,20 +201,43 @@ export function ChatInput({
       }
       setMentionState({ start: atIdx, query });
     },
-    []
+    [maxAutoGrow]
   );
 
   const showPicker = mentionState !== null;
 
+  useEffect(() => {
+    if (!showPicker) {
+      return;
+    }
+    const update = () => {
+      if (wrapperRef.current) {
+        setWrapperRect(wrapperRef.current.getBoundingClientRect());
+      }
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+    };
+  }, [showPicker]);
+
   return (
-    <div className="px-4 pt-0 pb-3">
+    <div className={cn(fullWidth ? "" : "px-4 pt-0 pb-3")}>
       <div
-        className={cn("relative mx-auto max-w-2xl", [
-          "txt-compact-small w-full rounded-md border-[0.5px] bg-ui-bg-field-component text-ui-fg-base placeholder-ui-fg-muted caret-ui-fg-base outline-none transition-fg hover:bg-ui-bg-field-component-hover",
-          "focus-visible:shadow-borders-interactive-with-active",
-          "disabled:cursor-not-allowed disabled:bg-ui-bg-disabled! disabled:text-ui-fg-disabled disabled:placeholder-ui-fg-disabled",
-          "invalid:shadow-borders-error! aria-invalid:shadow-borders-error!",
-        ])}
+        className={cn(
+          "relative",
+          fullWidth ? "mx-auto w-full!" : "mx-auto max-w-2xl",
+          [
+            "txt-compact-small w-full rounded-md border-[0.5px] bg-ui-bg-field-component-hover text-ui-fg-base placeholder-ui-fg-muted caret-ui-fg-base outline-none transition-fg hover:bg-ui-bg-component-hover dark:bg-ui-bg-field-component dark:hover:bg-ui-bg-field-component-hover",
+            "focus-visible:shadow-borders-interactive-with-active",
+            "disabled:cursor-not-allowed disabled:bg-ui-bg-disabled! disabled:text-ui-fg-disabled disabled:placeholder-ui-fg-disabled",
+            "invalid:shadow-borders-error! aria-invalid:shadow-borders-error!",
+          ]
+        )}
+        ref={wrapperRef}
       >
         {mentions.length > 0 && (
           <div className="flex flex-wrap gap-1.5 px-3 pt-2">
@@ -233,7 +264,12 @@ export function ChatInput({
           </div>
         )}
         <textarea
-          className="txt-compact-small max-h-[200px] min-h-[80px] w-full resize-none py-2 pr-10 pl-3 outline-none placeholder:text-muted-foreground"
+          className={cn(
+            "txt-compact-small w-full resize-none py-2 pr-10 pl-3 outline-none placeholder:text-muted-foreground",
+            fullWidth
+              ? "max-h-[240px] min-h-[110px]"
+              : "max-h-[200px] min-h-[80px]"
+          )}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           placeholder="Ask about your library... (use @ to reference a resource)"
@@ -241,15 +277,21 @@ export function ChatInput({
           rows={1}
           value={value}
         />
-        {showPicker && results.length > 0 && (
-          <div className="absolute bottom-full left-0 z-50 mb-2 w-full flex-1 rounded-xl border bg-ui-bg-component px-1.5 py-1">
-            <div className="max-h-64 overflow-y-auto py-1">
-              {results.length === 0 ? (
-                <div className="px-3 py-4 text-center text-sm text-ui-fg-muted">
-                  No resources found
-                </div>
-              ) : (
-                results.map((r, i) => (
+        {showPicker &&
+          results.length > 0 &&
+          wrapperRect &&
+          typeof document !== "undefined" &&
+          createPortal(
+            <div
+              className="fixed z-[200] rounded-xl border border-[0.5px] bg-ui-bg-component px-1.5 py-1"
+              style={{
+                left: wrapperRect.left,
+                width: wrapperRect.width,
+                bottom: window.innerHeight - wrapperRect.top + 8,
+              }}
+            >
+              <div className="max-h-64 overflow-y-auto py-1">
+                {results.map((r, i) => (
                   <button
                     className={cn(
                       "txt-compact-small group/menuitem relative flex w-full cursor-pointer select-none items-center gap-x-2 rounded-xl bg-ui-bg-component px-2 py-1.5 text-left font-medium text-ui-fg-subtle outline-none transition-colors [&_svg]:mr-2 [&_svg]:size-4 [&_svg]:text-ui-fg-base",
@@ -276,11 +318,11 @@ export function ChatInput({
                       {r.title}
                     </Text>
                   </button>
-                ))
-              )}
-            </div>
-          </div>
-        )}
+                ))}
+              </div>
+            </div>,
+            document.body
+          )}
         {isStreaming ? (
           <Button
             className="absolute right-2 bottom-1.5 size-7 rounded-full"

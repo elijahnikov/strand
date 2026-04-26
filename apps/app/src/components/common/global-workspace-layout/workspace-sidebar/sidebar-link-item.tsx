@@ -26,7 +26,7 @@ function SidebarLinkItem({
   const Icon = icon as React.ComponentType<{ className?: string }>;
 
   const buttonClassName = cn(
-    "group/menu flex h-7 items-center rounded-full text-left font-sans text-[13px] focus-visible:bg-transparent! focus-visible:shadow-borders-interactive-with-active!",
+    "group/menu flex h-7 items-center rounded-md text-left font-sans text-[13px] focus-visible:bg-transparent! focus-visible:shadow-borders-interactive-with-active!",
     isActive
       ? "pointer-events-none bg-[rgba(0,0,0,0.070)] text-ui-fg-base dark:bg-[rgba(255,255,255,0.070)]"
       : "text-ui-fg-muted/70 transition-colors duration-200 hover:bg-[rgba(0,0,0,0.070)] hover:text-ui-fg-base dark:hover:bg-[rgba(255,255,255,0.070)]"

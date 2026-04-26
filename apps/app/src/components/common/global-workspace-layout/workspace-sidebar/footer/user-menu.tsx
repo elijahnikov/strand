@@ -24,6 +24,7 @@ import { useNavigate, useParams, useRouter } from "@tanstack/react-router";
 import BoringAvatar from "boring-avatars";
 import {
   CheckIcon,
+  FolderOpenIcon,
   LogOutIcon,
   MonitorIcon,
   MoonIcon,
@@ -82,19 +83,14 @@ function WorkspaceSubMenu() {
     convexQuery(api.workspace.queries.listByUser, {})
   );
 
-  const current = workspaces?.find((w) => w._id === workspaceId);
+  const _current = workspaces?.find((w) => w._id === workspaceId);
   const owned = workspaces?.filter((w) => w.role === "owner") ?? [];
   const memberOf = workspaces?.filter((w) => w.role !== "owner") ?? [];
 
   return (
     <DropdownMenuSub>
-      <DropdownMenuSubTrigger className="pl-2.5">
-        <WorkspaceIcon
-          emoji={current?.emoji}
-          icon={current?.icon}
-          iconColor={current?.iconColor}
-          size="xs"
-        />
+      <DropdownMenuSubTrigger>
+        <FolderOpenIcon />
         <span className="truncate">Workspaces</span>
       </DropdownMenuSubTrigger>
       <DropdownMenuSubContent className="w-56 max-w-56 overflow-x-hidden">
