@@ -135,6 +135,7 @@ export function CollectionRow({
         <EditableText
           autoEdit={autoEdit}
           className="font-medium text-sm text-ui-fg-base"
+          onCancel={onEdited}
           onClick={handleNavigate}
           onSave={(name) => {
             rename({ workspaceId, collectionId: collection._id, name });

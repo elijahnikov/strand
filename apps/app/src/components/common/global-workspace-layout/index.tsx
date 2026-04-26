@@ -5,6 +5,7 @@ import {
   useParams,
   useRouterState,
 } from "@tanstack/react-router";
+import { useLayoutEffect, useRef } from "react";
 import { CommandPaletteProvider } from "~/components/common/command-palette/use-command-palette";
 import { DevCrashTrigger } from "~/components/common/dev-crash-trigger";
 import { ErrorState } from "~/components/common/error-state";
@@ -58,13 +59,19 @@ function GlobalHotkeys({ workspaceId }: { workspaceId: Id<"workspace"> }) {
 function DropZoneInset({ children }: { children: React.ReactNode }) {
   const { isDragging } = useFileDrop();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const mainRef = useRef<HTMLElement>(null);
+
+  useScrollRestoration(mainRef, pathname);
 
   return (
     <SidebarInset className="relative mx-2 rounded-t-2xl transition-[background-color,box-shadow] duration-200">
       {isDragging && (
         <div className="pointer-events-none absolute inset-0 z-50 rounded-[inherit] bg-blue-50 ring-2 ring-blue-400 ring-inset dark:bg-blue-950/30 dark:ring-blue-500" />
       )}
-      <main className="h-full flex-1 overflow-y-auto pt-11 md:pt-0">
+      <main
+        className="h-full flex-1 overflow-y-auto pt-11 md:pt-0"
+        ref={mainRef}
+      >
         <CatchBoundary errorComponent={ErrorState} getResetKey={() => pathname}>
           <DevCrashTrigger scope="page" />
           {children}
@@ -72,4 +79,21 @@ function DropZoneInset({ children }: { children: React.ReactNode }) {
       </main>
     </SidebarInset>
   );
+}
+
+function useScrollRestoration(
+  ref: React.RefObject<HTMLElement | null>,
+  pathname: string
+) {
+  // Reset the inner scroll container to the top whenever the route changes.
+  // The shared <main> persists across navigations, so without this the
+  // outgoing route's scrollTop carries over into the incoming route.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pathname is the trigger
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) {
+      return;
+    }
+    el.scrollTop = 0;
+  }, [ref, pathname]);
 }

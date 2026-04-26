@@ -1,4 +1,3 @@
-import { useConvexPaginatedQuery } from "@convex-dev/react-query";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { cn } from "@omi/ui";
@@ -7,8 +6,7 @@ import { Skeleton } from "@omi/ui/skeleton";
 import { Text } from "@omi/ui/text";
 import { RiHashtag } from "@remixicon/react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
 import { EmptyState } from "~/components/common/empty-state";
 import { PageContent } from "~/components/common/page-content";
@@ -16,6 +14,7 @@ import {
   type ListNavItem,
   useListNavigation,
 } from "~/lib/hotkeys/use-list-navigation";
+import { useCachedPaginatedQuery } from "~/lib/use-cached-paginated-query";
 import { TagsToolbar, useTagsFilters } from "./tags-toolbar";
 
 const PAGE_SIZE = 30;
@@ -27,14 +26,14 @@ export function TagsPageComponent({
 }) {
   const { search, order } = useTagsFilters();
 
-  const { results, status, loadMore } = useConvexPaginatedQuery(
+  const { results, status, loadMore } = useCachedPaginatedQuery(
     api.resource.queries.listWorkspaceTags,
     {
       workspaceId,
       search: search || undefined,
       order: order ?? undefined,
     },
-    { initialNumItems: PAGE_SIZE }
+    PAGE_SIZE
   );
 
   const sorted = useMemo(() => {
@@ -54,13 +53,6 @@ export function TagsPageComponent({
   }, [results, order, search]);
 
   const { ref: loadMoreRef, inView } = useInView();
-  const initialLoadDone = useRef(false);
-
-  useEffect(() => {
-    if (results.length > 0 && !initialLoadDone.current) {
-      initialLoadDone.current = true;
-    }
-  }, [results.length]);
 
   useEffect(() => {
     if (inView && status === "CanLoadMore") {
@@ -104,47 +96,34 @@ export function TagsPageComponent({
           />
         ) : (
           <div className="flex flex-col">
-            <AnimatePresence>
-              {sorted.map((tag, i) => {
-                const navId = `tag-${tag._id}`;
-                const isActive = activeId === navId;
-                return (
-                  <motion.div
-                    animate={{ opacity: 1, y: 0 }}
-                    className={cn(
-                      "rounded-lg",
-                      isActive && "ring-2 ring-ui-fg-interactive ring-inset"
-                    )}
-                    data-nav-active={isActive}
-                    exit={{ opacity: 0, height: 0 }}
-                    initial={
-                      initialLoadDone.current ? false : { opacity: 0, y: 8 }
-                    }
-                    key={tag._id}
-                    transition={{
-                      type: "spring",
-                      stiffness: 500,
-                      damping: 35,
-                      delay: initialLoadDone.current ? 0 : i * 0.03,
-                    }}
+            {sorted.map((tag) => {
+              const navId = `tag-${tag._id}`;
+              const isActive = activeId === navId;
+              return (
+                <div
+                  className={cn(
+                    "rounded-lg",
+                    isActive && "ring-2 ring-ui-fg-interactive ring-inset"
+                  )}
+                  data-nav-active={isActive}
+                  key={tag._id}
+                >
+                  <Link
+                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-ui-bg-base-hover"
+                    params={{ workspaceId, tagName: tag.name }}
+                    to="/workspace/$workspaceId/tags/$tagName"
                   >
-                    <Link
-                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-ui-bg-base-hover"
-                      params={{ workspaceId, tagName: tag.name }}
-                      to="/workspace/$workspaceId/tags/$tagName"
-                    >
-                      <Text className="text-ui-fg-muted">#</Text>
-                      <Text className="flex-1 truncate font-medium text-ui-fg-base">
-                        {tag.name}
-                      </Text>
-                      <Badge size="sm" variant={"mono"}>
-                        {tag.resourceCount}
-                      </Badge>
-                    </Link>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
+                    <Text className="text-ui-fg-muted">#</Text>
+                    <Text className="flex-1 truncate font-medium text-ui-fg-base">
+                      {tag.name}
+                    </Text>
+                    <Badge size="sm" variant={"mono"}>
+                      {tag.resourceCount}
+                    </Badge>
+                  </Link>
+                </div>
+              );
+            })}
             <div className="h-px" ref={loadMoreRef} />
             {status === "LoadingMore" && <LoadingMoreSkeleton />}
           </div>
