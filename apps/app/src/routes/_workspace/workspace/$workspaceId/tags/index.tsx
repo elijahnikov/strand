@@ -1,14 +1,25 @@
+import { convexQuery } from "@convex-dev/react-query";
+import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { Skeleton } from "@omi/ui/skeleton";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageContent } from "~/components/common/page-content";
 import { TagsPageComponent } from "~/components/pages/tags-page";
 
+const PAGE_SIZE = 30;
+
 export const Route = createFileRoute(
   "/_workspace/workspace/$workspaceId/tags/"
 )({
   pendingComponent: TagsPageSkeleton,
   component: TagsPage,
+  loader: ({ context, params }) =>
+    context.queryClient.ensureQueryData(
+      convexQuery(api.resource.queries.listWorkspaceTags, {
+        workspaceId: params.workspaceId as Id<"workspace">,
+        paginationOpts: { numItems: PAGE_SIZE, cursor: null },
+      })
+    ),
 });
 
 function TagsPage() {

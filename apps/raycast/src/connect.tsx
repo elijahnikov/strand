@@ -16,14 +16,14 @@ import {
 import type { ConnectLaunchContext } from "~/lib/types";
 
 const TRAILING_SLASH_RE = /\/$/;
-
+const APP_URL_REGEX = /^https?:\/\//i;
 const RAYCAST_AUTHOR = "omi";
 const RAYCAST_EXTENSION = "omi";
 
 function appUrl(): string {
   const { appUrl: value } = getPreferenceValues<Preferences.Connect>();
   const trimmed = value.trim().replace(TRAILING_SLASH_RE, "");
-  if (!/^https?:\/\//i.test(trimmed)) {
+  if (!APP_URL_REGEX.test(trimmed)) {
     return `http://${trimmed}`;
   }
   return trimmed;

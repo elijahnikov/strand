@@ -5,13 +5,23 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { HomePageComponent } from "~/components/pages/home-page";
 
+const RECENT_LIMIT = 8;
+
 export const Route = createFileRoute("/_workspace/workspace/$workspaceId/")({
-  loader: ({ context, params }) =>
-    context.queryClient.ensureQueryData(
-      convexQuery(api.home.queries.getHome, {
-        workspaceId: params.workspaceId as Id<"workspace">,
-      })
-    ),
+  loader: async ({ context, params }) => {
+    const workspaceId = params.workspaceId as Id<"workspace">;
+    await Promise.all([
+      context.queryClient.ensureQueryData(
+        convexQuery(api.home.queries.getHome, { workspaceId })
+      ),
+      context.queryClient.ensureQueryData(
+        convexQuery(api.resource.queries.listRecent, {
+          workspaceId,
+          limit: RECENT_LIMIT,
+        })
+      ),
+    ]);
+  },
   component: WorkspaceHomePage,
 });
 

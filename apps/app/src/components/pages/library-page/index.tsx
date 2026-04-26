@@ -20,8 +20,14 @@ export function LibraryPageComponent({
     mutationFn: useConvexMutation(api.resource.mutations.create),
   });
 
+  const [justCreatedCollectionId, setJustCreatedCollectionId] =
+    useState<Id<"collection"> | null>(null);
+
   const { mutate: createCollection } = useMutation({
     mutationFn: useConvexMutation(api.collection.mutations.create),
+    onSuccess: (newId: Id<"collection">) => {
+      setJustCreatedCollectionId(newId);
+    },
   });
 
   const [pendingCollection, setPendingCollection] = useState<{
@@ -129,7 +135,9 @@ export function LibraryPageComponent({
       <LibraryToolbar onCreateCollection={handleCreateCollection} />
       <PageContent className="pt-14 pb-4 md:pt-4" width="xl:w-2/3">
         <ResourceList
+          justCreatedCollectionId={justCreatedCollectionId}
           onClearBatch={handleClearBatch}
+          onClearJustCreatedCollection={() => setJustCreatedCollectionId(null)}
           onClearPendingCollection={() => setPendingCollection(null)}
           pendingCollection={pendingCollection}
           uploadingFiles={uploadingFiles}

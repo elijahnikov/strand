@@ -31,6 +31,11 @@ export function EditableText({
     setEditValue(value);
   }, [value]);
 
+  // Only re-fire when isEditing flips. autoEdit is read once at the moment
+  // the input enters editing mode — if the parent later toggles autoEdit
+  // (e.g. an optimistic-row → real-row swap clears it), we don't want to
+  // re-focus and clobber the user's existing selection.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: autoEdit read intentionally only when isEditing flips
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
@@ -41,7 +46,7 @@ export function EditableText({
         inputRef.current.setSelectionRange(len, len);
       }
     }
-  }, [isEditing, autoEdit]);
+  }, [isEditing]);
 
   const handleSave = useCallback(() => {
     const trimmed = editValue.trim();

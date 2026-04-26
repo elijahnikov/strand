@@ -7,6 +7,7 @@ import type {
 } from "~/lib/types";
 
 const TRAILING_SLASH_RE = /\/$/;
+const APP_URL_REGEX = /^https?:\/\//i;
 
 export class OmiApiError extends Error {
   readonly status: number;
@@ -24,7 +25,7 @@ function siteUrl(): string {
     throw new OmiApiError(0, "Omi API URL is not set in extension preferences");
   }
   const trimmed = convexSiteUrl.trim().replace(TRAILING_SLASH_RE, "");
-  if (!/^https?:\/\//i.test(trimmed)) {
+  if (!APP_URL_REGEX.test(trimmed)) {
     return `https://${trimmed}`;
   }
   return trimmed;
