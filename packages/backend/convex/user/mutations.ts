@@ -53,6 +53,16 @@ export const setAvatarFromStorage = protectedMutation({
   },
 });
 
+export const completeOnboarding = protectedMutation({
+  args: {},
+  handler: async (ctx) => {
+    if (ctx.user.onboardedAt !== undefined) {
+      return;
+    }
+    await ctx.db.patch(ctx.user._id, { onboardedAt: Date.now() });
+  },
+});
+
 export const deleteAccount = protectedMutation({
   args: {},
   handler: async (ctx) => {
