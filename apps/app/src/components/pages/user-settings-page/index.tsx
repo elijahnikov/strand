@@ -1,13 +1,31 @@
 import { Button } from "@omi/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omi/ui/tabs";
 import { Text } from "@omi/ui/text";
-import { RiArrowLeftLine, RiBankCardLine, RiLinksFill } from "@remixicon/react";
+import {
+  RiArrowLeftLine,
+  RiBankCardLine,
+  RiBuilding2Line,
+  RiComputerLine,
+  RiLinksFill,
+  RiShieldUserLine,
+  RiUserLine,
+} from "@remixicon/react";
 import { useRouter } from "@tanstack/react-router";
 import { PageContent } from "~/components/common/page-content";
+import { AccountTab } from "./account-tab";
 import { ConnectionsTab } from "./connections-tab";
+import { DevicesTab } from "./devices-tab";
+import { GeneralTab } from "./general-tab";
 import { UsageAndBillingTab } from "./usage-and-billing-tab";
+import { WorkspacesTab } from "./workspaces-tab";
 
-export type UserSettingsTab = "connections" | "billing";
+export type UserSettingsTab =
+  | "general"
+  | "workspaces"
+  | "connections"
+  | "devices"
+  | "billing"
+  | "account";
 
 export function UserSettingsPageComponent({
   tab,
@@ -38,10 +56,28 @@ export function UserSettingsPageComponent({
             </Text>
           </Button>
           <TabsList className="w-full items-start justify-start">
+            <TabsTrigger className="grow-0 pl-3" value="general">
+              <RiUserLine className="size-4" />
+              <Text className="ml-1 font-medium" size="small">
+                General
+              </Text>
+            </TabsTrigger>
+            <TabsTrigger className="grow-0 pl-3" value="workspaces">
+              <RiBuilding2Line className="size-4" />
+              <Text className="ml-1 font-medium" size="small">
+                Workspaces
+              </Text>
+            </TabsTrigger>
             <TabsTrigger className="grow-0 pl-3" value="connections">
               <RiLinksFill className="size-4" />
               <Text className="ml-1 font-medium" size="small">
                 Connections
+              </Text>
+            </TabsTrigger>
+            <TabsTrigger className="grow-0 pl-3" value="devices">
+              <RiComputerLine className="size-4" />
+              <Text className="ml-1 font-medium" size="small">
+                Devices
               </Text>
             </TabsTrigger>
             <TabsTrigger className="grow-0 pl-3" value="billing">
@@ -50,14 +86,32 @@ export function UserSettingsPageComponent({
                 Usage & Billing
               </Text>
             </TabsTrigger>
+            <TabsTrigger className="grow-0 pl-3" value="account">
+              <RiShieldUserLine className="size-4" />
+              <Text className="ml-1 font-medium" size="small">
+                Account
+              </Text>
+            </TabsTrigger>
           </TabsList>
         </div>
         <div className="ml-44 h-fit w-full pb-8">
+          <TabsContent className="pl-8" value="general">
+            <GeneralTab />
+          </TabsContent>
+          <TabsContent className="pl-8" value="workspaces">
+            <WorkspacesTab />
+          </TabsContent>
           <TabsContent className="pl-8" value="connections">
             <ConnectionsTab />
           </TabsContent>
+          <TabsContent className="pl-8" value="devices">
+            <DevicesTab />
+          </TabsContent>
           <TabsContent className="pl-8" value="billing">
             <UsageAndBillingTab />
+          </TabsContent>
+          <TabsContent className="pl-8" value="account">
+            <AccountTab />
           </TabsContent>
         </div>
       </Tabs>
