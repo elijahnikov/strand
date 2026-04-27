@@ -21,7 +21,7 @@ export function HomePageComponent({
   );
 
   return (
-    <PageContent className="pt-20! pb-16 md:pt-16!" width="xl:w-[60%]">
+    <PageContent className="pt-20! pb-16 md:pt-16!" width="xl:w-[55%]">
       <Greeting
         username={username}
         workspaceEmoji={data.workspace.emoji}

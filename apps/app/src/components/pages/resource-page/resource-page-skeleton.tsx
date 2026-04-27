@@ -3,7 +3,7 @@ import { PageContent } from "~/components/common/page-content";
 
 export function ResourcePageSkeleton() {
   return (
-    <PageContent className="mt-2">
+    <PageContent className="mt-8">
       {/* Header: title */}
       <Skeleton className="h-8 w-3/4" />
       {/* Header: badges row */}
