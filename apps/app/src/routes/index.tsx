@@ -11,6 +11,12 @@ export const Route = createFileRoute("/")({
     if (!context.isAuthenticated) {
       return;
     }
+    const { user } = await context.queryClient.ensureQueryData(
+      convexQuery(api.user.queries.currentUser, {})
+    );
+    if (user && user.onboardedAt === undefined) {
+      throw redirect({ to: "/onboarding" });
+    }
     const workspaces = await context.queryClient.ensureQueryData(
       convexQuery(api.workspace.queries.listByUser, {})
     );

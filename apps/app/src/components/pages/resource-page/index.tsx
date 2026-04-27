@@ -5,7 +5,7 @@ import { ResourcePageSkeleton } from "~/components/pages/resource-page/resource-
 export default function ResourcePageComponent() {
   return (
     <Suspense fallback={<ResourcePageSkeleton />}>
-      <div className="mx-auto h-full px-3 pt-2">
+      <div className="mx-auto h-full px-3 pt-8">
         <Resource />
       </div>
     </Suspense>

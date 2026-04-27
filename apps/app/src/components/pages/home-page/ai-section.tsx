@@ -142,8 +142,8 @@ function ForgottenGemsSection({
 
 function EmptyAICard({ message }: { message: string }) {
   return (
-    <div className="rounded-lg bg-ui-bg-subtle/50 p-4">
-      <Text className="font-medium text-ui-fg-subtle" size="small">
+    <div>
+      <Text className="font-medium text-ui-fg-muted" size="xsmall">
         {message}
       </Text>
     </div>

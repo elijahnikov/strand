@@ -5,7 +5,7 @@ import { Badge } from "@omi/ui/badge";
 import { Button } from "@omi/ui/button";
 import { Separator } from "@omi/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@omi/ui/tooltip";
-import { RiChatAi3Fill } from "@remixicon/react";
+import { RiArrowRightUpLine, RiChatAi3Fill } from "@remixicon/react";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
@@ -168,6 +168,7 @@ function TypeBadge({ resource }: { resource: GetResourceData }) {
             <span className="-ml-1 min-w-0 flex-1">
               <MiddleTruncate text={new URL(website.url).pathname} />
             </span>
+            <RiArrowRightUpLine />
           </Badge>
         </a>
       );
