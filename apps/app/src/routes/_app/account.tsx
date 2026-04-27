@@ -5,8 +5,12 @@ import {
 } from "~/components/pages/user-settings-page";
 
 const USER_SETTINGS_TABS: readonly UserSettingsTab[] = [
+  "general",
+  "workspaces",
   "connections",
+  "devices",
   "billing",
+  "account",
 ];
 
 interface Search {
@@ -39,11 +43,11 @@ function AccountPage() {
           replace: true,
           search: (prev) => ({
             ...prev,
-            tab: next === "connections" ? undefined : next,
+            tab: next === "general" ? undefined : next,
           }),
         })
       }
-      tab={tab ?? "connections"}
+      tab={tab ?? "general"}
     />
   );
 }

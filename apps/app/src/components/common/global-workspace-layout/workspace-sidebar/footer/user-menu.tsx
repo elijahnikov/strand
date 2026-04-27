@@ -62,6 +62,7 @@ function WorkspaceItem({
       }
     >
       <WorkspaceIcon
+        className={cn(workspace.emoji && "mr-1 -ml-1")}
         emoji={workspace.emoji}
         icon={workspace.icon}
         iconColor={workspace.iconColor}
@@ -111,14 +112,16 @@ function WorkspaceSubMenu() {
         {memberOf.length > 0 && (
           <DropdownMenuGroup>
             <DropdownMenuLabel>Shared with you</DropdownMenuLabel>
-            {memberOf.map((workspace) => (
-              <WorkspaceItem
-                isActive={workspace._id === workspaceId}
-                key={workspace._id}
-                onSelect={navigate}
-                workspace={workspace}
-              />
-            ))}
+            <div className="flex flex-col gap-y-2 space-y-2">
+              {memberOf.map((workspace) => (
+                <WorkspaceItem
+                  isActive={workspace._id === workspaceId}
+                  key={workspace._id}
+                  onSelect={navigate}
+                  workspace={workspace}
+                />
+              ))}
+            </div>
           </DropdownMenuGroup>
         )}
         <DropdownMenuSeparator />

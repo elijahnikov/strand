@@ -117,7 +117,11 @@ export function TagsPageComponent({
                     <Text className="flex-1 truncate font-medium text-ui-fg-base">
                       {tag.name}
                     </Text>
-                    <Badge size="sm" variant={"mono"}>
+                    <Badge
+                      className="text-[12px]!"
+                      size="default"
+                      variant={"mono"}
+                    >
                       {tag.resourceCount}
                     </Badge>
                   </Link>

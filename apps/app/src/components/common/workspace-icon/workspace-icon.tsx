@@ -3,7 +3,7 @@ import { BoxIcon } from "lucide-react";
 import { getWorkspaceIcon } from "~/lib/workspace-icons";
 
 const sizeConfig = {
-  xs: { container: "size-5", emoji: "text-xs", icon: "size-3" },
+  xs: { container: "size-5", emoji: "text-sm", icon: "size-3" },
   sm: { container: "size-6", emoji: "text-sm", icon: "size-3.5" },
   md: { container: "size-8", emoji: "text-base", icon: "size-4" },
   lg: { container: "size-10", emoji: "text-lg", icon: "size-5" },

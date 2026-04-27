@@ -4,6 +4,8 @@ import { protectedMutation, workspaceMutation } from "../utils";
 
 // ── Workspace ────────────────────────────────────────────────────────
 
+const MAX_WORKSPACES_PER_USER = 20;
+
 export const seedWorkspace = internalMutation({
   args: { userId: v.id("user") },
   handler: async (ctx, args) => {
@@ -24,6 +26,49 @@ export const seedWorkspace = internalMutation({
       lastAccessedAt: Date.now(),
     });
 
+    return workspaceId;
+  },
+});
+
+export const create = protectedMutation({
+  args: {
+    name: v.string(),
+    emoji: v.optional(v.string()),
+    icon: v.optional(v.string()),
+    iconColor: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const trimmed = args.name.trim();
+    if (!trimmed) {
+      throw new ConvexError("Workspace name cannot be empty");
+    }
+    if (trimmed.length > 60) {
+      throw new ConvexError("Workspace name must be 60 characters or fewer");
+    }
+
+    const memberships = await ctx.db
+      .query("workspaceMember")
+      .withIndex("by_user", (q) => q.eq("userId", ctx.user._id))
+      .collect();
+    if (memberships.length >= MAX_WORKSPACES_PER_USER) {
+      throw new ConvexError(
+        `You can belong to at most ${MAX_WORKSPACES_PER_USER} workspaces`
+      );
+    }
+
+    const workspaceId = await ctx.db.insert("workspace", {
+      name: trimmed,
+      ownerId: ctx.user._id,
+      emoji: args.emoji,
+      icon: args.icon,
+      iconColor: args.iconColor,
+    });
+    await ctx.db.insert("workspaceMember", {
+      workspaceId,
+      userId: ctx.user._id,
+      role: "owner",
+      lastAccessedAt: Date.now(),
+    });
     return workspaceId;
   },
 });
