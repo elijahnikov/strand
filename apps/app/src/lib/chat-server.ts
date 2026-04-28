@@ -1,5 +1,5 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createGoogleGenerativeAI, google } from "@ai-sdk/google";
 import { createOpenAI, openai } from "@ai-sdk/openai";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
@@ -59,8 +59,8 @@ export async function getChatModel(workspaceId: string): Promise<{
   )) as ResolvedChatProvider;
 
   if (resolved.provider === "platform") {
-    const modelId = "gpt-4.1-mini";
-    return { model: openai(modelId), modelId };
+    const modelId = "gemini-2.5-flash";
+    return { model: google(modelId), modelId };
   }
   const modelId = resolved.model;
   if (resolved.provider === "openai") {

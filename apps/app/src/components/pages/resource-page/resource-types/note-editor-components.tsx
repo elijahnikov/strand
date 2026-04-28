@@ -302,7 +302,7 @@ function SelectTrigger({
   return (
     <SelectPrimitive.Trigger
       className={cn(
-        "flex w-fit items-center justify-between gap-2 whitespace-nowrap rounded-lg border bg-ui-bg-field-component px-2 py-1.5 text-sm text-ui-fg-base shadow-borders-base outline-none transition-all",
+        "flex w-fit items-center justify-between gap-2 whitespace-nowrap rounded-lg border border-[0.5px] bg-ui-bg-field-component px-2 py-1.5 text-sm text-ui-fg-base outline-none transition-all",
         "placeholder:text-ui-fg-muted hover:bg-ui-bg-field-component-hover",
         "focus-visible:shadow-borders-interactive-with-active",
         "disabled:cursor-not-allowed disabled:opacity-50",
@@ -418,7 +418,7 @@ function StrandTooltipContent({
   return (
     <TooltipPrimitive.Content
       className={cn(
-        "z-50 w-fit rounded-xl border bg-ui-bg-component px-2 py-1 text-ui-fg-base text-xs shadow-elevation-flyout",
+        "z-50 w-fit rounded-xl border border-[0.5px] bg-ui-bg-component px-2 py-1 text-ui-fg-base text-xs",
         "fade-in-0 zoom-in-95 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 animate-in data-[state=closed]:animate-out",
         className
       )}
@@ -532,7 +532,7 @@ function StrandInput({ className, ...props }: React.ComponentProps<"input">) {
   return (
     <input
       className={cn(
-        "txt-compact-medium h-8 w-full appearance-none rounded-lg bg-ui-bg-field-component px-2 py-1.5 text-ui-fg-base placeholder-ui-fg-muted caret-ui-fg-base shadow-borders-base outline-none transition-all",
+        "txt-compact-medium h-8 w-full appearance-none rounded-lg border-[0.5px] bg-ui-bg-field-component px-2 py-1.5 text-ui-fg-base placeholder-ui-fg-muted caret-ui-fg-base outline-none transition-all",
         "hover:bg-ui-bg-field-component-hover",
         "focus-visible:shadow-borders-interactive-with-active",
         "disabled:cursor-not-allowed disabled:bg-ui-bg-disabled disabled:text-ui-fg-disabled",

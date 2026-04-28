@@ -64,7 +64,7 @@ function DropZoneInset({ children }: { children: React.ReactNode }) {
   useScrollRestoration(mainRef, pathname);
 
   return (
-    <SidebarInset className="relative mx-2 rounded-t-2xl transition-[background-color,box-shadow] duration-200">
+    <SidebarInset className="relative mx-2 rounded-t-2xl border-[0.5px] transition-[background-color,box-shadow] duration-200">
       {isDragging && (
         <div className="pointer-events-none absolute inset-0 z-50 rounded-[inherit] bg-blue-50 ring-2 ring-blue-400 ring-inset dark:bg-blue-950/30 dark:ring-blue-500" />
       )}

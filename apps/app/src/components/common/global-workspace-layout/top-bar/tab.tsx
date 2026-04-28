@@ -93,7 +93,7 @@ function TabComponent({ tab, isActive, workspaceId }: TabProps) {
           className={cn(
             "relative flex min-w-[120px] max-w-[220px] items-center gap-1.5 px-2 font-medium text-[13px] outline-none transition-colors",
             isActive
-              ? "-top-[0.5px] z-[100] h-9.5 rounded-t-lg rounded-b-0 bg-ui-bg-base pb-[6.5px] text-ui-fg-base"
+              ? "z-[100] h-9.5 rounded-t-lg rounded-b-0 bg-ui-bg-base pb-[6.5px] text-ui-fg-base ring-[0.5px] ring-ui-border-base"
               : "h-7 rounded-full text-ui-fg-muted hover:bg-[rgba(0,0,0,0.070)] hover:text-ui-fg-base dark:hover:bg-[rgba(255,255,255,0.070)]"
           )}
           onMouseDown={handleMouseDown}
@@ -140,18 +140,18 @@ function TabCorners() {
     <>
       <span
         aria-hidden
-        className="pointer-events-none absolute bottom-[0.5px] left-[-12px] z-[100] size-[12px]"
+        className="pointer-events-none absolute bottom-0 left-[-12px] z-[100] size-[12px]"
         style={{
           backgroundImage:
-            "radial-gradient(circle at top left, transparent 11.25px, transparent 11.5px, transparent 11.5px, var(--bg-base) 12px)",
+            "radial-gradient(circle at top left, transparent 11.25px, var(--border-base) 11.5px, var(--border-base) 11.5px, var(--bg-base) 12px)",
         }}
       />
       <span
         aria-hidden
-        className="pointer-events-none absolute right-[-12px] bottom-[0.5px] z-[100] size-[12px]"
+        className="pointer-events-none absolute right-[-12px] bottom-0 z-[100] size-[12px]"
         style={{
           backgroundImage:
-            "radial-gradient(circle at top right, transparent 11.25px, transparent 11.5px, transparent 11.5px, var(--bg-base) 12px)",
+            "radial-gradient(circle at top right, transparent 11.25px, var(--border-base) 11.5px, var(--border-base) 11.5px, var(--bg-base) 12px)",
         }}
       />
     </>

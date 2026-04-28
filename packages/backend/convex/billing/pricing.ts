@@ -3,7 +3,7 @@ import type { Plan } from "./resolver";
 export type BillingCadence = "monthly" | "yearly";
 
 export const TIER_ALLOTMENT: Record<Plan, number> = {
-  free: 1500,
+  free: 500,
   basic: 3000,
   pro: 10_000,
 };
@@ -18,11 +18,21 @@ const GB = 1024 * MB;
 export const TIER_STORAGE_BYTES: Record<Plan, number> = {
   free: 100 * MB,
   basic: 5 * GB,
-  pro: 50 * GB,
+  pro: 25 * GB,
 };
 
 export function tierToStorageBytes(plan: Plan): number {
   return TIER_STORAGE_BYTES[plan];
+}
+
+export const TIER_WORKSPACE_LIMIT: Record<Plan, number> = {
+  free: 3,
+  basic: Number.POSITIVE_INFINITY,
+  pro: Number.POSITIVE_INFINITY,
+};
+
+export function tierToWorkspaceLimit(plan: Plan): number {
+  return TIER_WORKSPACE_LIMIT[plan];
 }
 
 export const PAID_PLANS = ["basic", "pro"] as const;

@@ -73,7 +73,7 @@ export function TopBar() {
 
   return (
     <div className="absolute top-0 right-0 left-0 z-[40] flex h-11 items-end bg-ui-bg-subtle px-2">
-      <div className="relative z-[3] mb-1.25 flex shrink-0 items-center gap-x-2 pr-3 pb-[3px]">
+      <div className="relative z-[3] mb-1.25 flex shrink-0 items-center gap-x-2 pr-3 pb-[3px] pl-2">
         <Suspense fallback={<UserMenuSkeleton />}>
           <UserMenu />
         </Suspense>

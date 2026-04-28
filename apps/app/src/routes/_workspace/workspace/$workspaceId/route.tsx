@@ -24,6 +24,16 @@ export const Route = createFileRoute("/_workspace/workspace/$workspaceId")({
       if (isUnauthenticatedError(error)) {
         throw redirect({ to: "/login" });
       }
+      const fallback = await context.queryClient
+        .ensureQueryData(convexQuery(api.workspace.queries.listByUser, {}))
+        .catch(() => []);
+      const next = fallback.find((w) => w._id !== params.workspaceId);
+      if (next) {
+        throw redirect({
+          to: "/workspace/$workspaceId",
+          params: { workspaceId: next._id },
+        });
+      }
       throw redirect({ to: "/404" });
     }
   },

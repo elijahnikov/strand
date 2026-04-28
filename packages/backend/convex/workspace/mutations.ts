@@ -1,10 +1,10 @@
 import { ConvexError, v } from "convex/values";
 import { internalMutation } from "../_generated/server";
+import { tierToWorkspaceLimit } from "../billing/pricing";
+import { resolveActingBillingAccount } from "../billing/resolver";
 import { protectedMutation, workspaceMutation } from "../utils";
 
 // ── Workspace ────────────────────────────────────────────────────────
-
-const MAX_WORKSPACES_PER_USER = 20;
 
 export const seedWorkspace = internalMutation({
   args: { userId: v.id("user") },
@@ -50,9 +50,13 @@ export const create = protectedMutation({
       .query("workspaceMember")
       .withIndex("by_user", (q) => q.eq("userId", ctx.user._id))
       .collect();
-    if (memberships.length >= MAX_WORKSPACES_PER_USER) {
+    const { plan } = await resolveActingBillingAccount(ctx, ctx.user._id);
+    const limit = tierToWorkspaceLimit(plan);
+    if (memberships.length >= limit) {
       throw new ConvexError(
-        `You can belong to at most ${MAX_WORKSPACES_PER_USER} workspaces`
+        plan === "free"
+          ? `Free plan is limited to ${limit} workspaces. Upgrade to Basic for unlimited.`
+          : `You can belong to at most ${limit} workspaces`
       );
     }
 

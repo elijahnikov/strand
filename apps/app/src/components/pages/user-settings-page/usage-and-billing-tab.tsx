@@ -4,11 +4,13 @@ import { api } from "@omi/backend/_generated/api.js";
 import { Badge } from "@omi/ui/badge";
 import { Button } from "@omi/ui/button";
 import { Heading } from "@omi/ui/heading";
+import { Tabs, TabsList, TabsTrigger } from "@omi/ui/tabs";
 import { Text } from "@omi/ui/text";
 import { toastManager } from "@omi/ui/toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ConvexError } from "convex/values";
-import { useEffect, useRef } from "react";
+import { CheckIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 type Plan = "free" | "basic" | "pro";
 
@@ -19,9 +21,66 @@ const PLAN_LABEL: Record<Plan, string> = {
 };
 
 const PLAN_ALLOTMENT: Record<Plan, number> = {
-  free: 1500,
+  free: 500,
   basic: 3000,
   pro: 10_000,
+};
+
+const PLAN_ORDER: Plan[] = ["free", "basic", "pro"];
+
+const PLAN_RANK: Record<Plan, number> = {
+  free: 0,
+  basic: 1,
+  pro: 2,
+};
+
+interface PlanInfo {
+  features: string[];
+  name: Plan;
+  pricing: {
+    monthly: string;
+    yearly: string;
+  };
+  tagline: string;
+}
+
+const PLANS: Record<Plan, PlanInfo> = {
+  free: {
+    name: "free",
+    tagline: "Try the product without a card.",
+    pricing: { monthly: "$0", yearly: "$0" },
+    features: [
+      "500 AI actions / month",
+      "100 MB file storage",
+      "Up to 3 workspaces",
+      "Auto-summaries, tagging, semantic search, and chat — within your credit budget",
+      "All imports and connections (Notion, Raindrop, Readwise, Fabric, MyMind, Evernote, bookmarks)",
+      "Bring your own API key (skips credit charges for chat and search)",
+    ],
+  },
+  basic: {
+    name: "basic",
+    tagline: "For active personal libraries.",
+    pricing: { monthly: "$5 / mo", yearly: "$50 / yr" },
+    features: [
+      "3,000 AI actions / month",
+      "5 GB file storage",
+      "Unlimited workspaces",
+      "Home-page AI insights: concept clusters, recent connections, forgotten gems",
+      "Everything in Free",
+    ],
+  },
+  pro: {
+    name: "pro",
+    tagline: "For heavy users.",
+    pricing: { monthly: "$12 / mo", yearly: "$120 / yr" },
+    features: [
+      "10,000 AI actions / month",
+      "25 GB file storage",
+      "Unlimited workspaces",
+      "Everything in Basic",
+    ],
+  },
 };
 
 type SubscriptionStatus = "past_due" | "unpaid" | "canceled";
@@ -151,8 +210,149 @@ export function UsageAndBillingTab() {
       />
 
       <UsageList />
+
+      <PlansSection currentPlan={plan} />
     </div>
   );
+}
+
+function PlansSection({ currentPlan }: { currentPlan: Plan }) {
+  const [cadence, setCadence] = useState<"monthly" | "yearly">("monthly");
+
+  return (
+    <section className="flex flex-col gap-4 rounded-lg border-[0.5px] bg-ui-bg-field p-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <Heading level="h2">Plans</Heading>
+          <Text className="text-ui-fg-subtle" size="small">
+            Compare what's included and upgrade when you outgrow your current
+            plan.
+          </Text>
+        </div>
+        <Tabs
+          onValueChange={(next) => setCadence(next as "monthly" | "yearly")}
+          orientation="horizontal"
+          value={cadence}
+        >
+          <TabsList>
+            <TabsTrigger value="monthly">
+              <Text className="font-medium" size="small">
+                Monthly
+              </Text>
+            </TabsTrigger>
+            <TabsTrigger value="yearly">
+              <Text className="font-medium" size="small">
+                Yearly
+              </Text>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+        {PLAN_ORDER.map((p) => (
+          <PlanCard
+            cadence={cadence}
+            currentPlan={currentPlan}
+            key={p}
+            plan={p}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function PlanCard({
+  plan,
+  currentPlan,
+  cadence,
+}: {
+  plan: Plan;
+  currentPlan: Plan;
+  cadence: "monthly" | "yearly";
+}) {
+  const info = PLANS[plan];
+  const isCurrent = plan === currentPlan;
+  const rank = PLAN_RANK[plan];
+  const currentRank = PLAN_RANK[currentPlan];
+  const isUpgrade = rank > currentRank;
+  const isDowngrade = rank < currentRank;
+
+  return (
+    <div
+      className={`flex flex-col gap-3 rounded-lg border-[0.5px] p-4 ${
+        isCurrent ? "bg-ui-bg-base shadow-borders-focus" : "bg-ui-bg-base"
+      }`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <Heading level="h3">{PLAN_LABEL[plan]}</Heading>
+      </div>
+      <div>
+        <Text className="font-semibold" size="large">
+          {info.pricing[cadence]}
+        </Text>
+        <Text className="text-ui-fg-subtle" size="xsmall">
+          {info.tagline}
+        </Text>
+      </div>
+      <ul className="flex flex-col gap-2">
+        {info.features.map((feature) => (
+          <li className="flex items-start gap-2" key={feature}>
+            <CheckIcon className="mt-0.5 size-3.5 shrink-0 text-ui-fg-muted" />
+            <Text className="text-ui-fg-subtle" size="xsmall">
+              {feature}
+            </Text>
+          </li>
+        ))}
+      </ul>
+      <PlanCardCta
+        cadence={cadence}
+        isCurrent={isCurrent}
+        isDowngrade={isDowngrade}
+        isUpgrade={isUpgrade}
+        plan={plan}
+      />
+    </div>
+  );
+}
+
+function PlanCardCta({
+  plan,
+  isCurrent,
+  isUpgrade,
+  isDowngrade,
+  cadence,
+}: {
+  plan: Plan;
+  isCurrent: boolean;
+  isUpgrade: boolean;
+  isDowngrade: boolean;
+  cadence: "monthly" | "yearly";
+}) {
+  if (isCurrent) {
+    return (
+      <Button className="mt-auto" disabled size="small" variant="secondary">
+        Current plan
+      </Button>
+    );
+  }
+  if (isDowngrade) {
+    return <ManagePlanButton />;
+  }
+  if (isUpgrade && plan !== "free") {
+    return (
+      <Button
+        className="mt-auto"
+        onClick={() => upgradeTo(plan as "basic" | "pro", cadence)}
+        size="small"
+        variant={plan === "pro" ? "omi" : "secondary"}
+      >
+        Upgrade to {PLAN_LABEL[plan]}
+      </Button>
+    );
+  }
+  return null;
 }
 
 function SubscriptionStatusBanner({ status }: { status: SubscriptionStatus }) {
@@ -193,11 +393,7 @@ function PlanSection({
             {PLAN_LABEL[plan]}
           </Badge>
         </div>
-        {hasActiveSubscription ? (
-          <ManagePlanButton />
-        ) : (
-          <UpgradeButtons currentPlan={plan} />
-        )}
+        {hasActiveSubscription && <ManagePlanButton />}
       </div>
       {hasActiveSubscription && stripeCurrentPeriodEnd ? (
         <Text className="text-ui-fg-subtle" size="xsmall">
@@ -231,7 +427,7 @@ function ManagePlanButton() {
   );
 }
 
-function UpgradeButtons({ currentPlan }: { currentPlan: Plan }) {
+function _UpgradeButtons({ currentPlan }: { currentPlan: Plan }) {
   return (
     <div className="flex flex-wrap gap-2">
       {currentPlan === "free" ? (
@@ -364,13 +560,8 @@ function CreditsCard({
   plan: Plan;
 }) {
   const allotment = PLAN_ALLOTMENT[plan];
-  const aboveCap = creditBalance > allotment;
   const used = Math.max(0, allotment - creditBalance);
-  const pct = aboveCap
-    ? 100
-    : allotment > 0
-      ? Math.min(100, (used / allotment) * 100)
-      : 0;
+  const pct = allotment > 0 ? Math.min(100, (used / allotment) * 100) : 0;
 
   return (
     <section className="flex flex-col gap-3 rounded-lg border-[0.5px] bg-ui-bg-field p-4">
@@ -380,9 +571,7 @@ function CreditsCard({
         </Heading>
         <Text className="flex gap-x-1" size="small">
           <Badge variant="mono">{creditBalance.toLocaleString()}</Badge>/
-          <Badge variant="mono">
-            {(aboveCap ? creditBalance : allotment).toLocaleString()}
-          </Badge>
+          <Badge variant="mono">{allotment.toLocaleString()}</Badge>
         </Text>
       </div>
       <div className="h-2.5 w-full overflow-hidden rounded-full bg-ui-bg-subtle">
@@ -392,9 +581,7 @@ function CreditsCard({
         />
       </div>
       <Text className="text-ui-fg-muted" size="xsmall">
-        {aboveCap
-          ? `Carried over from previous plan. Drops to ${allotment.toLocaleString()} on ${formatShortDate(creditResetAt)}.`
-          : `Resets ${formatShortDate(creditResetAt)}`}
+        Resets {formatShortDate(creditResetAt)}
       </Text>
     </section>
   );

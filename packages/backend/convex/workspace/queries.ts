@@ -39,7 +39,10 @@ export const listByUser = protectedQuery({
     const workspaces = await Promise.all(
       members.map(async (member) => {
         const workspace = await ctx.db.get(member.workspaceId);
-        return workspace ? { ...workspace, role: member.role } : null;
+        if (!workspace || workspace.deletedAt !== undefined) {
+          return null;
+        }
+        return { ...workspace, role: member.role };
       })
     );
 

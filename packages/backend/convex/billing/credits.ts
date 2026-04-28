@@ -9,7 +9,7 @@ const MODEL_MULTIPLIER: Record<string, number> = {
   "gpt-4.1-mini": 2,
   "gpt-4o": 5,
   "gpt-4-turbo": 5,
-  "gemini-2.5-flash": 0.25,
+  "gemini-2.5-flash": 1,
   "claude-haiku-4-5": 2.5,
   "claude-sonnet-4-6": 6,
 };
