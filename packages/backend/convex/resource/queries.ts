@@ -476,8 +476,9 @@ export const list = workspaceQuery({
       results = await query.paginate(args.paginationOpts);
     }
 
+    const filtered = results.page.filter((r) => !r.dailyNoteDate);
     const enrichedPage = await Promise.all(
-      results.page.map((resource) => enrichResource(ctx, resource))
+      filtered.map((resource) => enrichResource(ctx, resource))
     );
 
     return { ...results, page: enrichedPage };
@@ -488,15 +489,18 @@ export const listRecent = workspaceQuery({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 5;
+    // Over-fetch to compensate for daily-note filtering, then trim.
+    const overFetch = limit * 3;
     const resources = await ctx.db
       .query("resource")
       .withIndex("by_workspace", (q) =>
         q.eq("workspaceId", ctx.workspace._id).eq("deletedAt", undefined)
       )
       .order("desc")
-      .take(limit);
+      .take(overFetch);
 
-    return Promise.all(resources.map((r) => enrichResource(ctx, r)));
+    const visible = resources.filter((r) => !r.dailyNoteDate).slice(0, limit);
+    return Promise.all(visible.map((r) => enrichResource(ctx, r)));
   },
 });
 

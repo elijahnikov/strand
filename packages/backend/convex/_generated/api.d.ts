@@ -42,6 +42,8 @@ import type * as connections_providers_registry from "../connections/providers/r
 import type * as connections_providers_types from "../connections/providers/types.js";
 import type * as connections_queries from "../connections/queries.js";
 import type * as crons from "../crons.js";
+import type * as dailyNotes_mutations from "../dailyNotes/mutations.js";
+import type * as dailyNotes_queries from "../dailyNotes/queries.js";
 import type * as email_resend from "../email/resend.js";
 import type * as email_sendVerificationEmail from "../email/sendVerificationEmail.js";
 import type * as extensionAuth_http from "../extensionAuth/http.js";
@@ -138,6 +140,8 @@ declare const fullApi: ApiFromModules<{
   "connections/providers/types": typeof connections_providers_types;
   "connections/queries": typeof connections_queries;
   crons: typeof crons;
+  "dailyNotes/mutations": typeof dailyNotes_mutations;
+  "dailyNotes/queries": typeof dailyNotes_queries;
   "email/resend": typeof email_resend;
   "email/sendVerificationEmail": typeof email_sendVerificationEmail;
   "extensionAuth/http": typeof extensionAuth_http;

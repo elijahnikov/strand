@@ -11,6 +11,7 @@ import { DevCrashTrigger } from "~/components/common/dev-crash-trigger";
 import { ErrorState } from "~/components/common/error-state";
 import { TopBar } from "~/components/common/global-workspace-layout/top-bar";
 import { useGlobalHotkeys } from "~/components/common/global-workspace-layout/use-global-hotkeys";
+import MainSidebar from "~/components/common/global-workspace-layout/workspace-sidebar";
 import { ImportProgressToast } from "~/components/common/import-progress-toast";
 import { ShortcutsHelpProvider } from "~/components/common/shortcuts-help";
 import { WorkspacePresenceProvider } from "~/components/common/workspace-presence";
@@ -28,6 +29,7 @@ export function GlobalLayout({ children }: { children: React.ReactNode }) {
         defaultOpen={true}
         open={true}
       >
+        <MainSidebar />
         <TopBar />
         <DropZoneInset>{children}</DropZoneInset>
       </SidebarProvider>
@@ -64,7 +66,7 @@ function DropZoneInset({ children }: { children: React.ReactNode }) {
   useScrollRestoration(mainRef, pathname);
 
   return (
-    <SidebarInset className="relative mx-2 rounded-t-2xl border-[0.5px] transition-[background-color,box-shadow] duration-200">
+    <SidebarInset className="relative mx-2 mt-1 rounded-t-2xl border-[0.5px] transition-[background-color,box-shadow] duration-200 md:h-[calc(100vh-52px)]">
       {isDragging && (
         <div className="pointer-events-none absolute inset-0 z-50 rounded-[inherit] bg-blue-50 ring-2 ring-blue-400 ring-inset dark:bg-blue-950/30 dark:ring-blue-500" />
       )}

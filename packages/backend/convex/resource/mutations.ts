@@ -12,6 +12,7 @@ import { protectedMutation, workspaceMutation } from "../utils";
 
 export interface CreateResourceArgs {
   collectionId?: Id<"collection">;
+  dailyNoteDate?: string;
   description?: string;
   duration?: number;
   fileName?: string;
@@ -58,6 +59,7 @@ export async function createResource(
     isPinned: false,
     isArchived: false,
     updatedAt: now,
+    dailyNoteDate: args.dailyNoteDate,
   });
 
   switch (args.type) {
@@ -76,10 +78,14 @@ export async function createResource(
       );
   }
 
+  const isEmptyDailyNote =
+    args.dailyNoteDate !== undefined &&
+    (args.plainTextContent ?? "").trim().length === 0;
+
   await ctx.db.insert("resourceAI", {
     resourceId,
     workspaceId: args.workspaceId,
-    status: "pending",
+    status: isEmptyDailyNote ? "skipped" : "pending",
   });
 
   if (args.type === "website") {
@@ -90,7 +96,7 @@ export async function createResource(
     );
   }
 
-  if (args.type === "note" || args.type === "file") {
+  if ((args.type === "note" || args.type === "file") && !isEmptyDailyNote) {
     await ctx.scheduler.runAfter(
       0,
       internal.resource.aiActions.processResourceAI,

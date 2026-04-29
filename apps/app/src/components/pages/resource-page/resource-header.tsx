@@ -104,16 +104,16 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
           </TooltipContent>
         </Tooltip>
       </div>
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+      <div className="flex w-full min-w-0 items-center gap-x-2">
         <TypeBadge resource={resource} />
         {resource.type !== "note" && (
-          <Separator className="h-4" orientation="vertical" />
+          <Separator className="h-4 shrink-0" orientation="vertical" />
         )}
-        <Badge className="text-xs" variant="mono">
+        <Badge className="shrink-0 text-xs" variant="mono">
           {format(new Date(resource._creationTime), "d MMM yyyy HH:mm")}
         </Badge>
-        <Separator className="h-4" orientation="vertical" />
-        <Badge className="text-xs" variant="mono">
+        <Separator className="h-4 shrink-0" orientation="vertical" />
+        <Badge className="shrink-0 text-xs" variant="mono">
           <UserAvatar
             className="size-3.5"
             image={resource.createdBy?.image}
@@ -146,13 +146,13 @@ function TypeBadge({ resource }: { resource: GetResourceData }) {
       }
       return (
         <a
-          className="flex max-w-[420px]"
+          className="flex min-w-0 max-w-[420px]"
           href={website.url}
           rel="noopener"
           target="_blank"
         >
           <Badge
-            className="max-w-full text-ui-fg-subtle text-xs"
+            className="min-w-0 max-w-full text-ui-fg-subtle text-xs"
             variant="mono"
           >
             <img
@@ -165,10 +165,10 @@ function TypeBadge({ resource }: { resource: GetResourceData }) {
             <span className="shrink-0 font-medium text-ui-fg-base">
               {new URL(website.url).hostname}
             </span>
-            <span className="-ml-1 min-w-0 flex-1">
+            <span className="-ml-1 inline-block min-w-0 flex-1">
               <MiddleTruncate text={new URL(website.url).pathname} />
             </span>
-            <RiArrowRightUpLine />
+            <RiArrowRightUpLine className="shrink-0" />
           </Badge>
         </a>
       );
@@ -179,7 +179,7 @@ function TypeBadge({ resource }: { resource: GetResourceData }) {
         return null;
       }
       return (
-        <Badge className="max-w-[460px] text-xs" variant="mono">
+        <Badge className="min-w-0 max-w-[460px] text-xs" variant="mono">
           <FileKindIcon
             className="h-3.5 w-3.5 shrink-0"
             fileName={file.fileName}

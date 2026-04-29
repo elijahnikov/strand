@@ -1,14 +1,13 @@
 import { SidebarFooter } from "@omi/ui/sidebar";
 import { TooltipProvider } from "@omi/ui/tooltip";
-import { RiQuestionFill, RiSettings4Fill } from "@remixicon/react";
-import { useParams } from "@tanstack/react-router";
-import { Suspense } from "react";
 import {
-  UserMenu,
-  UserMenuSkeleton,
-} from "~/components/common/global-workspace-layout/workspace-sidebar/footer/user-menu";
+  RiDeleteBin2Fill,
+  RiQuestionFill,
+  RiSettings4Fill,
+} from "@remixicon/react";
+import { useParams } from "@tanstack/react-router";
 import SidebarLinkItem from "~/components/common/global-workspace-layout/workspace-sidebar/sidebar-link-item";
-import { NotificationsPopover } from "~/components/common/notifications-popover";
+import { getNavShortcutByTitle } from "~/lib/hotkeys/registry";
 
 export default function WorkspaceSidebarFooter() {
   const params = useParams({ strict: false }) as {
@@ -16,12 +15,21 @@ export default function WorkspaceSidebarFooter() {
   };
 
   return (
-    <SidebarFooter className="relative bottom-2">
+    <SidebarFooter className="relative bottom-2 px-2">
       <TooltipProvider>
-        <div className="relative left-2px flex flex-col gap-2">
+        <div className="flex w-full flex-col gap-1">
+          {params?.workspaceId && (
+            <SidebarLinkItem
+              icon={RiDeleteBin2Fill}
+              shortcut={getNavShortcutByTitle("Trash")}
+              title="Trash"
+              url={`/workspace/${params.workspaceId}/trash`}
+            />
+          )}
           {params?.workspaceId && (
             <SidebarLinkItem
               icon={RiSettings4Fill}
+              shortcut={getNavShortcutByTitle("Settings")}
               title="Settings"
               url={`/workspace/${params.workspaceId}/settings`}
             />
@@ -29,19 +37,11 @@ export default function WorkspaceSidebarFooter() {
           <SidebarLinkItem
             external
             icon={RiQuestionFill}
-            title="Help & Feedback"
-            url="https://github.com/your-repo/omi/issues"
+            title="Help"
+            url="https://docs.omi.co"
           />
         </div>
-        <Suspense>
-          <NotificationsPopover />
-        </Suspense>
       </TooltipProvider>
-      <div className="flex items-center gap-1">
-        <Suspense fallback={<UserMenuSkeleton />}>
-          <UserMenu />
-        </Suspense>
-      </div>
     </SidebarFooter>
   );
 }

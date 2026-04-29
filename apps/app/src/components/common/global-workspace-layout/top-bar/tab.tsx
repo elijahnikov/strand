@@ -83,7 +83,7 @@ function TabComponent({ tab, isActive, workspaceId }: TabProps) {
           <div
             className={cn(
               "group/tab relative flex shrink-0 items-end",
-              isActive ? "sticky right-4.5 left-4.5 z-[2] h-9" : "mb-2 h-8"
+              isActive ? "sticky right-4.5 left-6 z-[2] h-9" : "mb-2 h-8"
             )}
             data-active={isActive || undefined}
           />
@@ -91,10 +91,10 @@ function TabComponent({ tab, isActive, workspaceId }: TabProps) {
       >
         <Link
           className={cn(
-            "relative flex min-w-[120px] max-w-[220px] items-center gap-1.5 px-2 font-medium text-[13px] outline-none transition-colors",
+            "relative flex min-w-[120px] max-w-[220px] items-center gap-1.5 px-2 outline-none transition-colors",
             isActive
-              ? "z-[100] h-9.5 rounded-t-lg rounded-b-0 bg-ui-bg-base pb-[6.5px] text-ui-fg-base ring-[0.5px] ring-ui-border-base"
-              : "h-7 rounded-full text-ui-fg-muted hover:bg-[rgba(0,0,0,0.070)] hover:text-ui-fg-base dark:hover:bg-[rgba(255,255,255,0.070)]"
+              ? "z-[100] h-9.5 rounded-t-lg rounded-b-0 bg-ui-bg-base pb-[6.5px] font-medium! text-ui-fg-base ring-[0.5px] ring-ui-border-base"
+              : "h-7 rounded-md text-ui-fg-muted hover:bg-[rgba(0,0,0,0.070)] hover:text-ui-fg-base dark:hover:bg-[rgba(255,255,255,0.070)]"
           )}
           onMouseDown={handleMouseDown}
           preload="intent"
@@ -104,7 +104,7 @@ function TabComponent({ tab, isActive, workspaceId }: TabProps) {
           <span className="flex shrink-0 items-center justify-center text-ui-fg-muted">
             <TabIcon tab={tab} workspaceId={workspaceId} />
           </span>
-          <span className="truncate">{tab.title}</span>
+          <span className="truncate text-xs!">{tab.title}</span>
           <button
             aria-label={`Close ${tab.title}`}
             className="ml-auto flex size-3 shrink-0 items-center justify-center rounded-full text-ui-fg-muted hover:bg-black/8 hover:text-ui-fg-base dark:hover:bg-white/10"

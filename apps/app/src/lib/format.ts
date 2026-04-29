@@ -128,6 +128,79 @@ export function getCodeLanguage(fileName?: string): string | undefined {
   return ext ? CODE_EXTENSIONS[ext] : undefined;
 }
 
+function getLocalDateParts(
+  timestamp: number,
+  timeZone?: string
+): { year: number; month: number; day: number } {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const parts = formatter.formatToParts(new Date(timestamp));
+  const lookup: Record<string, string> = {};
+  for (const part of parts) {
+    lookup[part.type] = part.value;
+  }
+  return {
+    year: Number(lookup.year),
+    month: Number(lookup.month),
+    day: Number(lookup.day),
+  };
+}
+
+export function getBrowserTimeZone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
+export function todayLocalDateString(timeZone?: string): string {
+  const { year, month, day } = getLocalDateParts(Date.now(), timeZone);
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+export function isValidDateString(date: string): boolean {
+  if (!ISO_DATE_PATTERN.test(date)) {
+    return false;
+  }
+  const parsed = new Date(`${date}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) {
+    return false;
+  }
+  return parsed.toISOString().slice(0, 10) === date;
+}
+
+export function addDays(date: string, n: number): string {
+  const parsed = new Date(`${date}T00:00:00Z`);
+  parsed.setUTCDate(parsed.getUTCDate() + n);
+  return parsed.toISOString().slice(0, 10);
+}
+
+export function formatDateTitle(date: string): string {
+  // "2026-04-29" -> "April 29, 2026"
+  const parsed = new Date(`${date}T00:00:00Z`);
+  return parsed.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+export function formatDateHeader(date: string): string {
+  // "2026-04-29" -> "Wed, April 29 2026"
+  const parsed = new Date(`${date}T00:00:00Z`);
+  return parsed.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export function getFilePreviewKind(
   mimeType?: string,
   fileName?: string
