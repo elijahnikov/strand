@@ -80,35 +80,18 @@ export function MiddleTruncate({
       return;
     }
 
-    let availableWidth = 0;
-
-    const evaluate = () => {
-      if (availableWidth <= 0) {
-        return;
-      }
-      el.textContent = text;
+    const update = () => {
       const style = getComputedStyle(el);
       const font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-      const fullWidth = measure(text, font);
-      if (fullWidth <= availableWidth) {
-        setTruncated(text);
-        return;
-      }
-      setTruncated(middleTruncate(text, font, availableWidth));
+      const maxWidth = parent.clientWidth;
+      setTruncated(middleTruncate(text, font, maxWidth));
     };
 
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) {
-        return;
-      }
-      availableWidth = entry.contentRect.width;
-      evaluate();
-    });
+    update();
+
+    const observer = new ResizeObserver(update);
     observer.observe(parent);
-    return () => {
-      observer.disconnect();
-    };
+    return () => observer.disconnect();
   }, [text]);
 
   return (

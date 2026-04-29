@@ -2,6 +2,7 @@ import { cn } from "@omi/ui";
 import { Button } from "@omi/ui/button";
 import { Text } from "@omi/ui/text";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@omi/ui/tooltip";
+import { RiArrowRightUpLine } from "@remixicon/react";
 import { Link } from "@tanstack/react-router";
 import { memo } from "react";
 import { ShortcutTooltipBody } from "~/components/common/shortcut-tooltip";
@@ -26,9 +27,9 @@ function SidebarLinkItem({
   const Icon = icon as React.ComponentType<{ className?: string }>;
 
   const buttonClassName = cn(
-    "group/menu flex h-7 items-center rounded-md text-left font-sans text-[13px] focus-visible:bg-transparent! focus-visible:shadow-borders-interactive-with-active!",
+    "group/menu flex h-7.5 w-full items-center justify-start gap-x-2 rounded-md px-2 text-left font-sans text-[13px] focus-visible:bg-transparent! focus-visible:shadow-borders-interactive-with-active!",
     isActive
-      ? "pointer-events-none bg-[rgba(0,0,0,0.070)] text-ui-fg-base dark:bg-[rgba(255,255,255,0.070)]"
+      ? "pointer-events-none border-[0.5px] bg-ui-bg-base text-ui-fg-base"
       : "text-ui-fg-muted/70 transition-colors duration-200 hover:bg-[rgba(0,0,0,0.070)] hover:text-ui-fg-base dark:hover:bg-[rgba(255,255,255,0.070)]"
   );
 
@@ -51,6 +52,10 @@ function SidebarLinkItem({
           }
         >
           <Icon className="size-3.5 shrink-0" />
+          <Text size={"small"} weight="plus">
+            {title}
+          </Text>
+          <RiArrowRightUpLine className="ml-auto size-3.5 shrink-0" />
         </TooltipTrigger>
         <TooltipContent side="right">
           <ShortcutTooltipBody shortcut={shortcut} title={title} />
@@ -80,7 +85,7 @@ function SidebarLinkItem({
   return (
     <Tooltip>
       <TooltipTrigger render={button} />
-      <TooltipContent side="bottom">
+      <TooltipContent className={"rounded-md"} side="right">
         <ShortcutTooltipBody shortcut={shortcut} title={title} />
       </TooltipContent>
     </Tooltip>

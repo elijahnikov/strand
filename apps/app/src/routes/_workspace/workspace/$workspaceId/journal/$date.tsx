@@ -27,11 +27,6 @@ export const Route = createFileRoute(
         params: { workspaceId: params.workspaceId, resourceId },
       });
     }
-    await context.queryClient.ensureQueryData(
-      convexQuery(api.dailyNotes.queries.list, {
-        workspaceId: params.workspaceId as Id<"workspace">,
-      })
-    );
   },
   component: JournalDateRoute,
 });

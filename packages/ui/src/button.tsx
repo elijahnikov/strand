@@ -34,7 +34,7 @@ const buttonVariants = cva(
           "disabled:text-green-200"
         ),
         outline: cn(
-          "after:button-neutral-gradient bg-ui-button-neutral text-ui-fg-base shadow-buttons-neutral",
+          "after:button-neutral-gradient border-[0.5px] bg-ui-button-neutral text-ui-fg-base",
           "hover:after:button-neutral-hover-gradient hover:bg-ui-button-neutral-hover",
           "active:after:button-neutral-pressed-gradient active:bg-ui-button-neutral-pressed",
           "focus-visible:shadow-buttons-neutral-focus"

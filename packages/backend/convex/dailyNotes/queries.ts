@@ -1,3 +1,4 @@
+import { paginationOptsValidator } from "convex/server";
 import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
@@ -222,21 +223,26 @@ async function buildSavedTodayCard(
 }
 
 export const list = workspaceQuery({
-  args: {},
-  handler: async (ctx) => {
-    const rows = await ctx.db
+  args: {
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
+    const results = await ctx.db
       .query("resource")
       .withIndex("by_workspace_dailyNoteDate", (q) =>
         q.eq("workspaceId", ctx.workspace._id)
       )
-      .collect();
+      .order("desc")
+      .paginate(args.paginationOpts);
 
-    const live = rows.filter((r) => !r.deletedAt && r.dailyNoteDate);
-    live.sort((a, b) =>
-      (b.dailyNoteDate as string).localeCompare(a.dailyNoteDate as string)
+    const filtered = results.page.filter(
+      (r) => !r.deletedAt && r.dailyNoteDate
+    );
+    const enrichedPage = await Promise.all(
+      filtered.map((r) => enrichResource(ctx, r))
     );
 
-    return await Promise.all(live.map((r) => enrichResource(ctx, r)));
+    return { ...results, page: enrichedPage };
   },
 });
 

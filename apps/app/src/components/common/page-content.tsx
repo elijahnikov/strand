@@ -10,7 +10,7 @@ interface PageContentProps extends React.ComponentProps<"div"> {
  * Full-width on mobile, scales up through breakpoints.
  */
 export function PageContent({
-  width = "xl:w-[55%]",
+  width = "xl:w-[65%]",
   className,
   children,
   ...props

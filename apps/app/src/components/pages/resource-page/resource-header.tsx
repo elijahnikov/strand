@@ -104,7 +104,7 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
           </TooltipContent>
         </Tooltip>
       </div>
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+      <div className="flex w-full min-w-0 items-center gap-x-2">
         <TypeBadge resource={resource} />
         {resource.type !== "note" && (
           <Separator className="h-4 shrink-0" orientation="vertical" />
@@ -146,12 +146,15 @@ function TypeBadge({ resource }: { resource: GetResourceData }) {
       }
       return (
         <a
-          className="flex min-w-0 max-w-[420px] flex-1 basis-0"
+          className="flex min-w-0 max-w-[420px]"
           href={website.url}
           rel="noopener"
           target="_blank"
         >
-          <Badge className="w-max text-ui-fg-subtle text-xs" variant="mono">
+          <Badge
+            className="min-w-0 max-w-full text-ui-fg-subtle text-xs"
+            variant="mono"
+          >
             <img
               alt={website.url}
               className="shrink-0 rounded-[4px]"
@@ -162,10 +165,10 @@ function TypeBadge({ resource }: { resource: GetResourceData }) {
             <span className="shrink-0 font-medium text-ui-fg-base">
               {new URL(website.url).hostname}
             </span>
-            <span className="-ml-1 min-w-0 flex-1">
+            <span className="-ml-1 inline-block min-w-0 flex-1">
               <MiddleTruncate text={new URL(website.url).pathname} />
             </span>
-            <RiArrowRightUpLine />
+            <RiArrowRightUpLine className="shrink-0" />
           </Badge>
         </a>
       );
@@ -176,10 +179,7 @@ function TypeBadge({ resource }: { resource: GetResourceData }) {
         return null;
       }
       return (
-        <Badge
-          className="min-w-0 max-w-[460px] flex-1 basis-0 text-xs"
-          variant="mono"
-        >
+        <Badge className="min-w-0 max-w-[460px] text-xs" variant="mono">
           <FileKindIcon
             className="h-3.5 w-3.5 shrink-0"
             fileName={file.fileName}

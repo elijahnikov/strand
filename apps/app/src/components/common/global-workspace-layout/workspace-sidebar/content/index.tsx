@@ -2,6 +2,7 @@ import { SidebarContent } from "@omi/ui/sidebar";
 import { TooltipProvider } from "@omi/ui/tooltip";
 import {
   RiBookmarkFill,
+  RiCalendarLine,
   RiChat1Fill,
   RiHashtag,
   RiHome3Fill,
@@ -58,22 +59,30 @@ export default function WorkspaceSidebarContent() {
           pathname === `${workspacePath}/tags` ||
           pathname.includes(`${workspacePath}/tags`),
       },
+      {
+        icon: RiCalendarLine,
+        title: "Journal",
+        url: `/workspace/${params.workspaceId}/journal`,
+        isActive: pathname.startsWith(`${workspacePath}/journal`),
+      },
     ];
   }, [pathname, params?.workspaceId]);
 
   return (
-    <SidebarContent className="mx-auto flex">
+    <SidebarContent className="w-full px-2">
       <TooltipProvider>
-        {navigationItems.map((item) => (
-          <SidebarLinkItem
-            icon={item.icon}
-            isActive={item.isActive}
-            key={item.title}
-            shortcut={getNavShortcutByTitle(item.title)}
-            title={item.title}
-            url={item.url}
-          />
-        ))}
+        <div className="flex w-full flex-col gap-1">
+          {navigationItems.map((item) => (
+            <SidebarLinkItem
+              icon={item.icon}
+              isActive={item.isActive}
+              key={item.title}
+              shortcut={getNavShortcutByTitle(item.title)}
+              title={item.title}
+              url={item.url}
+            />
+          ))}
+        </div>
       </TooltipProvider>
     </SidebarContent>
   );
