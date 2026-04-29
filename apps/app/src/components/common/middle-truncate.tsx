@@ -80,42 +80,34 @@ export function MiddleTruncate({
       return;
     }
 
-    let maxObservedWidth = 0;
+    let availableWidth = 0;
 
-    const update = () => {
-      // Render the full text first so we can ask the browser whether it
-      // actually overflows. scrollWidth/clientWidth is the source of truth —
-      // pretext-based measurement is only used to find the cut point once
-      // we know the real text doesn't fit.
-      el.textContent = text;
-      const fits = el.scrollWidth <= parent.clientWidth;
-      const currentWidth = parent.clientWidth;
-      if (currentWidth > maxObservedWidth) {
-        maxObservedWidth = currentWidth;
+    const evaluate = () => {
+      if (availableWidth <= 0) {
+        return;
       }
-      if (fits) {
+      el.textContent = text;
+      const style = getComputedStyle(el);
+      const font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+      const fullWidth = measure(text, font);
+      if (fullWidth <= availableWidth) {
         setTruncated(text);
         return;
       }
-      const style = getComputedStyle(el);
-      const font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-      setTruncated(middleTruncate(text, font, maxObservedWidth));
+      setTruncated(middleTruncate(text, font, availableWidth));
     };
 
-    const handleWindowResize = () => {
-      maxObservedWidth = 0;
-      setTruncated(text);
-      requestAnimationFrame(update);
-    };
-
-    update();
-
-    const observer = new ResizeObserver(update);
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) {
+        return;
+      }
+      availableWidth = entry.contentRect.width;
+      evaluate();
+    });
     observer.observe(parent);
-    window.addEventListener("resize", handleWindowResize);
     return () => {
       observer.disconnect();
-      window.removeEventListener("resize", handleWindowResize);
     };
   }, [text]);
 

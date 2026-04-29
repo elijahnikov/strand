@@ -51,6 +51,12 @@ export const NAV_SHORTCUTS: NavShortcut[] = [
     path: (id) => `${workspaceBase(id)}/tags`,
   },
   {
+    keys: ["G", "J"],
+    label: "Go to Journal",
+    section: "Navigation",
+    path: (id) => `${workspaceBase(id)}/journal`,
+  },
+  {
     keys: ["G", "D"],
     label: "Go to Trash",
     section: "Navigation",
@@ -70,6 +76,7 @@ const NAV_SHORTCUT_BY_TITLE: Record<string, string[]> = {
   Search: ["G", "S"],
   Chat: ["G", "C"],
   Tags: ["G", "T"],
+  Journal: ["G", "J"],
   Trash: ["G", "D"],
   Settings: ["G", ","],
 };

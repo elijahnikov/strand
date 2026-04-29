@@ -126,9 +126,11 @@ export default defineSchema({
     updatedAt: v.number(),
     collectionId: v.optional(v.id("collection")),
     importedFrom: v.optional(v.string()),
+    dailyNoteDate: v.optional(v.string()),
   })
     .index("by_workspace", ["workspaceId", "deletedAt"])
     .index("by_workspace_imported_from", ["workspaceId", "importedFrom"])
+    .index("by_workspace_dailyNoteDate", ["workspaceId", "dailyNoteDate"])
     .index("by_workspace_collection", [
       "workspaceId",
       "collectionId",

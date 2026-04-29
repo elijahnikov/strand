@@ -1,6 +1,8 @@
 import { lazy, Suspense } from "react";
 import { PageContent } from "~/components/common/page-content";
 import type { GetResourceData } from "~/lib/convex-types";
+import { DailyNoteSavedToday } from "../daily-note-saved-today";
+import { DailyNoteTodaysConcepts } from "../daily-note-todays-concepts";
 import { RelatedResources } from "../related-resources";
 import { ResourceHeader } from "../resource-header";
 import { ResourceSummary } from "../resource-summary";
@@ -28,6 +30,18 @@ export function NoteResource({ resource }: { resource: GetResourceData }) {
         resourceId={resource._id}
         tags={resource.tags}
       />
+      {resource.dailyNoteDate && (
+        <>
+          <DailyNoteSavedToday
+            date={resource.dailyNoteDate}
+            workspaceId={resource.workspaceId}
+          />
+          <DailyNoteTodaysConcepts
+            date={resource.dailyNoteDate}
+            workspaceId={resource.workspaceId}
+          />
+        </>
+      )}
       <ResourceSummary resource={resource} />
       {"links" in resource && (
         <RelatedResources

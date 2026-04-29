@@ -107,13 +107,13 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <TypeBadge resource={resource} />
         {resource.type !== "note" && (
-          <Separator className="h-4" orientation="vertical" />
+          <Separator className="h-4 shrink-0" orientation="vertical" />
         )}
-        <Badge className="text-xs" variant="mono">
+        <Badge className="shrink-0 text-xs" variant="mono">
           {format(new Date(resource._creationTime), "d MMM yyyy HH:mm")}
         </Badge>
-        <Separator className="h-4" orientation="vertical" />
-        <Badge className="text-xs" variant="mono">
+        <Separator className="h-4 shrink-0" orientation="vertical" />
+        <Badge className="shrink-0 text-xs" variant="mono">
           <UserAvatar
             className="size-3.5"
             image={resource.createdBy?.image}
@@ -146,15 +146,12 @@ function TypeBadge({ resource }: { resource: GetResourceData }) {
       }
       return (
         <a
-          className="flex max-w-[420px]"
+          className="flex min-w-0 max-w-[420px] flex-1 basis-0"
           href={website.url}
           rel="noopener"
           target="_blank"
         >
-          <Badge
-            className="max-w-full text-ui-fg-subtle text-xs"
-            variant="mono"
-          >
+          <Badge className="w-max text-ui-fg-subtle text-xs" variant="mono">
             <img
               alt={website.url}
               className="shrink-0 rounded-[4px]"
@@ -179,7 +176,10 @@ function TypeBadge({ resource }: { resource: GetResourceData }) {
         return null;
       }
       return (
-        <Badge className="max-w-[460px] text-xs" variant="mono">
+        <Badge
+          className="min-w-0 max-w-[460px] flex-1 basis-0 text-xs"
+          variant="mono"
+        >
           <FileKindIcon
             className="h-3.5 w-3.5 shrink-0"
             fileName={file.fileName}

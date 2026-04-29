@@ -1,6 +1,6 @@
-import { TooltipProvider } from "@omi/ui/tooltip";
 import {
   RiBookmarkFill,
+  RiCalendarLine,
   RiChat1Fill,
   RiHashtag,
   RiHome3Fill,
@@ -8,15 +8,12 @@ import {
 } from "@remixicon/react";
 import { useLocation, useParams } from "@tanstack/react-router";
 import { Suspense, useMemo } from "react";
-import { NavMoreMenu } from "~/components/common/global-workspace-layout/top-bar/nav-more-menu";
 import { TabStrip } from "~/components/common/global-workspace-layout/top-bar/tab-strip";
 import { useRouteTabsSync } from "~/components/common/global-workspace-layout/top-bar/use-route-tabs-sync";
 import {
   UserMenu,
   UserMenuSkeleton,
 } from "~/components/common/global-workspace-layout/workspace-sidebar/footer/user-menu";
-import SidebarLinkItem from "~/components/common/global-workspace-layout/workspace-sidebar/sidebar-link-item";
-import { getNavShortcutByTitle } from "~/lib/hotkeys/registry";
 
 export function TopBar() {
   useRouteTabsSync();
@@ -26,7 +23,7 @@ export function TopBar() {
   };
   const pathname = useLocation({ select: (location) => location.pathname });
 
-  const navigationItems = useMemo(() => {
+  const _navigationItems = useMemo(() => {
     if (!params?.workspaceId) {
       return [];
     }
@@ -64,6 +61,12 @@ export function TopBar() {
         url: `${workspacePath}/tags`,
         isActive: pathname === `${workspacePath}/tags`,
       },
+      {
+        icon: RiCalendarLine,
+        title: "Journal",
+        url: `${workspacePath}/journal`,
+        isActive: pathname.startsWith(`${workspacePath}/journal`),
+      },
     ];
   }, [pathname, params?.workspaceId]);
 
@@ -77,7 +80,7 @@ export function TopBar() {
         <Suspense fallback={<UserMenuSkeleton />}>
           <UserMenu />
         </Suspense>
-        <div className="flex items-center gap-x-1">
+        {/* <div className="flex items-center gap-x-1">
           <TooltipProvider>
             {navigationItems.map((item) => (
               <SidebarLinkItem
@@ -91,7 +94,7 @@ export function TopBar() {
             ))}
             <NavMoreMenu workspaceId={params.workspaceId} />
           </TooltipProvider>
-        </div>
+        </div> */}
       </div>
       <TabStrip workspaceId={params.workspaceId} />
       {/* <div className="relative z-[3] flex shrink-0 items-center gap-x-2 pb-[3px] pl-2">
