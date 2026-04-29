@@ -67,14 +67,14 @@ export function SettingsPageComponent({
   );
 
   return (
-    <PageContent className="mt-8 h-[calc(95vh-80px)] py-8" width="xl:w-2/3">
+    <PageContent className="mt-8 py-8" width="xl:w-2/3">
       <Tabs
-        className="h-full"
+        className="flex h-full gap-0"
         onValueChange={(next) => onTabChange(next as SettingsTab)}
         orientation="vertical"
         value={tab}
       >
-        <TabsList className="fixed h-full w-44 shrink-0 items-start justify-start self-start pr-4">
+        <TabsList className="sticky top-8 h-fit w-44 shrink-0 items-start justify-start self-start pr-4">
           <TabsTrigger className="grow-0 pl-3" value="general">
             <RiSettings3Fill className="size-4" />
             <Text className="ml-1 font-medium" size="small">
@@ -112,7 +112,7 @@ export function SettingsPageComponent({
             </Text>
           </TabsTrigger>
         </TabsList>
-        <div className="ml-44 h-fit min-h-[calc(100vh-140px)] w-full border-l-[0.5px] pb-8">
+        <div className="h-fit min-h-[calc(100vh-140px)] flex-1 border-l-[0.5px] pb-8">
           <TabsContent className="pl-8" value="general">
             <GeneralTab
               isAdminOrOwner={
