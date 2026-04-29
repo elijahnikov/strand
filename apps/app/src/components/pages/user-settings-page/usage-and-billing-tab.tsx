@@ -274,10 +274,7 @@ function PlanCard({
 }) {
   const info = PLANS[plan];
   const isCurrent = plan === currentPlan;
-  const rank = PLAN_RANK[plan];
-  const currentRank = PLAN_RANK[currentPlan];
-  const isUpgrade = rank > currentRank;
-  const isDowngrade = rank < currentRank;
+  const isUpgrade = PLAN_RANK[plan] > PLAN_RANK[currentPlan];
 
   return (
     <div
@@ -309,7 +306,6 @@ function PlanCard({
       <PlanCardCta
         cadence={cadence}
         isCurrent={isCurrent}
-        isDowngrade={isDowngrade}
         isUpgrade={isUpgrade}
         plan={plan}
       />
@@ -321,24 +317,22 @@ function PlanCardCta({
   plan,
   isCurrent,
   isUpgrade,
-  isDowngrade,
   cadence,
 }: {
   plan: Plan;
   isCurrent: boolean;
   isUpgrade: boolean;
-  isDowngrade: boolean;
   cadence: "monthly" | "yearly";
 }) {
   if (isCurrent) {
     return (
-      <Button className="mt-auto" disabled size="small" variant="secondary">
-        Current plan
-      </Button>
+      <div className="mt-auto flex items-center justify-between gap-2">
+        <Text className="font-medium" size="small">
+          Current plan
+        </Text>
+        {plan === "free" ? null : <ManagePlanButton />}
+      </div>
     );
-  }
-  if (isDowngrade) {
-    return <ManagePlanButton />;
   }
   if (isUpgrade && plan !== "free") {
     return (

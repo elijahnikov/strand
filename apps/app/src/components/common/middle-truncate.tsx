@@ -1,7 +1,7 @@
 import { layoutWithLines, prepareWithSegments } from "@chenglou/pretext";
 import { useEffect, useRef, useState } from "react";
 
-const ELLIPSIS = "\u2026";
+const ELLIPSIS = "…";
 
 function measure(text: string, font: string): number {
   const prepared = prepareWithSegments(text, font);
@@ -80,21 +80,28 @@ export function MiddleTruncate({
       return;
     }
 
-    // Track max width to prevent oscillation: parent may shrink as a consequence
-    // of our own truncation, which would otherwise cause an infinite shrink loop.
     let maxObservedWidth = 0;
 
     const update = () => {
-      const style = getComputedStyle(el);
-      const font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+      // Render the full text first so we can ask the browser whether it
+      // actually overflows. scrollWidth/clientWidth is the source of truth —
+      // pretext-based measurement is only used to find the cut point once
+      // we know the real text doesn't fit.
+      el.textContent = text;
+      const fits = el.scrollWidth <= parent.clientWidth;
       const currentWidth = parent.clientWidth;
       if (currentWidth > maxObservedWidth) {
         maxObservedWidth = currentWidth;
       }
+      if (fits) {
+        setTruncated(text);
+        return;
+      }
+      const style = getComputedStyle(el);
+      const font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
       setTruncated(middleTruncate(text, font, maxObservedWidth));
     };
 
-    // On window resize, reset and re-measure from full text
     const handleWindowResize = () => {
       maxObservedWidth = 0;
       setTruncated(text);

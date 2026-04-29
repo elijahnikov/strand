@@ -10,7 +10,7 @@ import {
   RiShieldUserLine,
   RiUserLine,
 } from "@remixicon/react";
-import { useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { PageContent } from "~/components/common/page-content";
 import { AccountTab } from "./account-tab";
 import { ConnectionsTab } from "./connections-tab";
@@ -34,7 +34,8 @@ export function UserSettingsPageComponent({
   tab: UserSettingsTab;
   onTabChange: (next: UserSettingsTab) => void;
 }) {
-  const router = useRouter();
+  const navigate = useNavigate();
+
   return (
     <PageContent className="mt-8 min-h-[calc(95vh-80px)] py-8" width="xl:w-2/3">
       <Tabs
@@ -46,7 +47,7 @@ export function UserSettingsPageComponent({
         <div className="fixed flex h-screen w-44 shrink-0 flex-col gap-3 self-start border-r-[0.5px] pr-4">
           <Button
             className="self-start"
-            onClick={() => router.history.back()}
+            onClick={() => navigate({ to: "/" })}
             size="small"
             variant="ghost"
           >
