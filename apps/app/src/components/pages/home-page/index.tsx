@@ -23,13 +23,14 @@ export function HomePageComponent({
   return (
     <PageContent className="pt-20! pb-16 md:pt-16!" width="xl:w-[55%]">
       <Greeting
+        aiAccess={!!data.ai}
         username={username}
         workspaceEmoji={data.workspace.emoji}
         workspaceIcon={data.workspace.icon}
         workspaceIconColor={data.workspace.iconColor}
         workspaceName={data.workspace.name}
       />
-      <div className="-mt-10" />
+      <div className="-mt-8" />
       <HomeSearchBox workspaceId={workspaceId} />
       {data.ai ? <HomeChatBox workspaceId={workspaceId} /> : null}
       <RecentResources workspaceId={workspaceId} />

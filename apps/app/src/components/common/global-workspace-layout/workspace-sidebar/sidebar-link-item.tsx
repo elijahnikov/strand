@@ -27,11 +27,14 @@ function SidebarLinkItem({
   const Icon = icon as React.ComponentType<{ className?: string }>;
 
   const buttonClassName = cn(
-    "group/menu flex h-7.5 w-full items-center justify-start gap-x-2 rounded-md px-2 text-left font-sans text-[13px] focus-visible:bg-transparent! focus-visible:shadow-borders-interactive-with-active!",
+    "group/menu flex h-7.5 w-full items-center justify-start gap-x-2 overflow-hidden rounded-md px-2 text-left font-sans text-[13px] focus-visible:bg-transparent! focus-visible:shadow-borders-interactive-with-active!",
     isActive
       ? "pointer-events-none border-[0.5px] bg-ui-bg-base text-ui-fg-base"
       : "text-ui-fg-muted/70 transition-colors duration-200 hover:bg-[rgba(0,0,0,0.070)] hover:text-ui-fg-base dark:hover:bg-[rgba(255,255,255,0.070)]"
   );
+
+  const fadeClassName =
+    "whitespace-nowrap transition-[opacity,filter] duration-200 ease-out group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:blur-[4px]";
 
   const buttonVariant = "ghost";
 
@@ -52,10 +55,12 @@ function SidebarLinkItem({
           }
         >
           <Icon className="size-3.5 shrink-0" />
-          <Text size={"small"} weight="plus">
+          <Text className={fadeClassName} size={"small"} weight="plus">
             {title}
           </Text>
-          <RiArrowRightUpLine className="ml-auto size-3.5 shrink-0" />
+          <RiArrowRightUpLine
+            className={cn("ml-auto size-3.5 shrink-0", fadeClassName)}
+          />
         </TooltipTrigger>
         <TooltipContent side="right">
           <ShortcutTooltipBody shortcut={shortcut} title={title} />
@@ -72,7 +77,7 @@ function SidebarLinkItem({
       variant={buttonVariant}
     >
       <Icon className="size-3.5 shrink-0" />
-      <Text size={"small"} weight="plus">
+      <Text className={fadeClassName} size={"small"} weight="plus">
         {title}
       </Text>
     </Button>

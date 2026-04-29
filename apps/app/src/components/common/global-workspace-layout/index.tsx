@@ -5,7 +5,7 @@ import {
   useParams,
   useRouterState,
 } from "@tanstack/react-router";
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { CommandPaletteProvider } from "~/components/common/command-palette/use-command-palette";
 import { DevCrashTrigger } from "~/components/common/dev-crash-trigger";
 import { ErrorState } from "~/components/common/error-state";
@@ -16,18 +16,27 @@ import { ImportProgressToast } from "~/components/common/import-progress-toast";
 import { ShortcutsHelpProvider } from "~/components/common/shortcuts-help";
 import { WorkspacePresenceProvider } from "~/components/common/workspace-presence";
 import { FileDropProvider, useFileDrop } from "~/hooks/use-file-drop";
+import { useSidebarStore } from "~/lib/sidebar-store";
 
 export function GlobalLayout({ children }: { children: React.ReactNode }) {
   const { workspaceId } = useParams({ strict: false }) as {
     workspaceId?: string;
   };
+  const sidebarOpen = useSidebarStore((s) => s.open);
+  const setSidebarOpen = useSidebarStore((s) => s.setOpen);
+  const transitionsEnabled = useTransitionsEnabledAfterMount();
 
   const content = (
     <FileDropProvider>
       <SidebarProvider
-        className="relative bg-ui-bg-subtle!"
-        defaultOpen={true}
-        open={true}
+        className={
+          transitionsEnabled
+            ? "relative bg-ui-bg-subtle!"
+            : "[&_*]:!transition-none relative bg-ui-bg-subtle!"
+        }
+        defaultOpen={sidebarOpen}
+        onOpenChange={setSidebarOpen}
+        open={sidebarOpen}
       >
         <MainSidebar />
         <TopBar />
@@ -66,7 +75,7 @@ function DropZoneInset({ children }: { children: React.ReactNode }) {
   useScrollRestoration(mainRef, pathname);
 
   return (
-    <SidebarInset className="relative mx-2 mt-1 rounded-t-2xl border-[0.5px] transition-[background-color,box-shadow] duration-200 md:h-[calc(100vh-52px)]">
+    <SidebarInset className="relative mx-2 mt-1 rounded-t-2xl border-[0.5px] transition-[background-color,box-shadow] duration-200 md:h-[calc(100vh-48px)]">
       {isDragging && (
         <div className="pointer-events-none absolute inset-0 z-50 rounded-[inherit] bg-blue-50 ring-2 ring-blue-400 ring-inset dark:bg-blue-950/30 dark:ring-blue-500" />
       )}
@@ -83,13 +92,19 @@ function DropZoneInset({ children }: { children: React.ReactNode }) {
   );
 }
 
+function useTransitionsEnabledAfterMount() {
+  const [enabled, setEnabled] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setEnabled(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+  return enabled;
+}
+
 function useScrollRestoration(
   ref: React.RefObject<HTMLElement | null>,
   pathname: string
 ) {
-  // Reset the inner scroll container to the top whenever the route changes.
-  // The shared <main> persists across navigations, so without this the
-  // outgoing route's scrollTop carries over into the incoming route.
   // biome-ignore lint/correctness/useExhaustiveDependencies: pathname is the trigger
   useLayoutEffect(() => {
     const el = ref.current;

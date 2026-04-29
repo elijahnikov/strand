@@ -27,7 +27,7 @@ const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = "12rem";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
-const SIDEBAR_WIDTH_ICON = "3rem";
+const SIDEBAR_WIDTH_ICON = "1.8rem";
 
 interface SidebarContextProps {
   isMobile: boolean;
@@ -276,8 +276,8 @@ const SidebarTrigger = ({
       variant="ghost"
       {...props}
     >
-      <PanelLeft className="size-4" />
-      {/* <span className="sr-only">Toggle Sidebar</span> */}
+      <PanelLeft className="size-3.5 shrink-0" />
+      <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );
 };

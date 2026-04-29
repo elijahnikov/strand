@@ -1,8 +1,9 @@
+import { cn } from "@omi/ui";
 import { SidebarContent } from "@omi/ui/sidebar";
 import { TooltipProvider } from "@omi/ui/tooltip";
 import {
+  RiBookletFill,
   RiBookmarkFill,
-  RiCalendarLine,
   RiChat1Fill,
   RiHashtag,
   RiHome3Fill,
@@ -12,12 +13,14 @@ import { useLocation, useParams } from "@tanstack/react-router";
 import { useMemo } from "react";
 import SidebarLinkItem from "~/components/common/global-workspace-layout/workspace-sidebar/sidebar-link-item";
 import { getNavShortcutByTitle } from "~/lib/hotkeys/registry";
+import { useSidebarStore } from "~/lib/sidebar-store";
 
 export default function WorkspaceSidebarContent() {
   const params = useParams({ strict: false }) as {
     workspaceId?: string;
   };
   const pathname = useLocation({ select: (location) => location.pathname });
+  const sidebarOpen = useSidebarStore((s) => s.open);
 
   const navigationItems = useMemo(() => {
     if (!params?.workspaceId) {
@@ -60,7 +63,7 @@ export default function WorkspaceSidebarContent() {
           pathname.includes(`${workspacePath}/tags`),
       },
       {
-        icon: RiCalendarLine,
+        icon: RiBookletFill,
         title: "Journal",
         url: `/workspace/${params.workspaceId}/journal`,
         isActive: pathname.startsWith(`${workspacePath}/journal`),
@@ -69,7 +72,7 @@ export default function WorkspaceSidebarContent() {
   }, [pathname, params?.workspaceId]);
 
   return (
-    <SidebarContent className="w-full px-2">
+    <SidebarContent className={cn(sidebarOpen ? "px-2" : "pl-2", "w-full")}>
       <TooltipProvider>
         <div className="flex w-full flex-col gap-1">
           {navigationItems.map((item) => (

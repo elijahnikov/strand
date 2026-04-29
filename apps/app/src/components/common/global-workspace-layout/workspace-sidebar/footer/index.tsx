@@ -5,7 +5,7 @@ import {
   RiQuestionFill,
   RiSettings4Fill,
 } from "@remixicon/react";
-import { useParams } from "@tanstack/react-router";
+import { useLocation, useParams } from "@tanstack/react-router";
 import SidebarLinkItem from "~/components/common/global-workspace-layout/workspace-sidebar/sidebar-link-item";
 import { getNavShortcutByTitle } from "~/lib/hotkeys/registry";
 
@@ -13,6 +13,8 @@ export default function WorkspaceSidebarFooter() {
   const params = useParams({ strict: false }) as {
     workspaceId?: string;
   };
+  const pathname = useLocation({ select: (location) => location.pathname });
+  const workspacePath = `/workspace/${params.workspaceId}`;
 
   return (
     <SidebarFooter className="relative bottom-2 px-2">
@@ -21,6 +23,7 @@ export default function WorkspaceSidebarFooter() {
           {params?.workspaceId && (
             <SidebarLinkItem
               icon={RiDeleteBin2Fill}
+              isActive={pathname === `${workspacePath}/trash`}
               shortcut={getNavShortcutByTitle("Trash")}
               title="Trash"
               url={`/workspace/${params.workspaceId}/trash`}
@@ -29,6 +32,7 @@ export default function WorkspaceSidebarFooter() {
           {params?.workspaceId && (
             <SidebarLinkItem
               icon={RiSettings4Fill}
+              isActive={pathname === `${workspacePath}/settings`}
               shortcut={getNavShortcutByTitle("Settings")}
               title="Settings"
               url={`/workspace/${params.workspaceId}/settings`}
