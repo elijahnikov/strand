@@ -8,19 +8,25 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { ChatArea } from "~/components/pages/chat-page/chat-area";
+import {
+  FLOATING_PANEL_WIDTH,
+  useFloatingPanelOffset,
+  useFloatingPanelOpen,
+  useFloatingPanelsStore,
+} from "./floating-panels-store";
 
 export function ResourceChatPanel({
-  open,
-  onOpenChange,
   workspaceId,
   resource,
 }: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   workspaceId: Id<"workspace">;
   resource: { _id: Id<"resource">; title: string; type: string };
 }) {
   const navigate = useNavigate();
+  const open = useFloatingPanelOpen("chat");
+  const closePanel = useFloatingPanelsStore((s) => s.closePanel);
+  const setActive = useFloatingPanelsStore((s) => s.setActive);
+  const right = useFloatingPanelOffset("chat");
 
   const { data: latestThread, isLoading } = useQuery(
     convexQuery(
@@ -44,17 +50,20 @@ export function ResourceChatPanel({
         params: { workspaceId: workspaceId as string },
       });
     }
-    onOpenChange(false);
+    closePanel("chat");
   };
 
   return (
     <AnimatePresence>
       {open && (
         <motion.div
-          animate={{ y: 0, opacity: 1 }}
-          className="fixed right-4 bottom-4 z-50 flex h-[600px] max-h-[calc(100vh-2rem)] w-[500px] flex-col overflow-hidden rounded-xl border-[0.5px] bg-ui-bg-subtle shadow-lg"
+          animate={{ y: 0, opacity: 1, right }}
+          className="fixed bottom-4 z-50 flex h-[600px] max-h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-xl border-[0.5px] bg-ui-bg-subtle shadow-lg"
           exit={{ y: 700, opacity: 0 }}
-          initial={{ y: 700, opacity: 0 }}
+          initial={{ y: 700, opacity: 0, right }}
+          onFocusCapture={() => setActive("chat")}
+          onMouseDownCapture={() => setActive("chat")}
+          style={{ width: FLOATING_PANEL_WIDTH }}
           transition={{ type: "spring", stiffness: 400, damping: 35 }}
         >
           <div className="flex items-center justify-between border-b-[0.5px] px-3 py-2">
@@ -77,7 +86,7 @@ export function ResourceChatPanel({
               <Button
                 aria-label="Close chat"
                 className="size-6"
-                onClick={() => onOpenChange(false)}
+                onClick={() => closePanel("chat")}
                 size="xsmall"
                 variant="ghost"
               >
