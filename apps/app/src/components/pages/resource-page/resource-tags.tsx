@@ -4,7 +4,7 @@ import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { Badge } from "@omi/ui/badge";
 import { Skeleton } from "@omi/ui/skeleton";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link, useParams } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { PlusIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
@@ -18,23 +18,21 @@ interface TagData {
 
 export function ResourceTags({
   resourceId,
+  workspaceId,
   tags,
   aiStatus,
 }: {
   resourceId: Id<"resource">;
+  workspaceId: Id<"workspace">;
   tags: TagData[];
   aiStatus?: string;
 }) {
   const [isAdding, setIsAdding] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
-  const { workspaceId } = useParams({
-    from: "/_workspace/workspace/$workspaceId/resource/$resourceId",
-  });
-
   const queryClient = useQueryClient();
   const queryKey = convexQuery(api.resource.queries.get, {
-    workspaceId: workspaceId as Id<"workspace">,
+    workspaceId,
     resourceId,
   }).queryKey;
 
@@ -95,7 +93,7 @@ export function ResourceTags({
     addTag({
       resourceId,
       name,
-      workspaceId: workspaceId as Id<"workspace">,
+      workspaceId,
     });
     setInputValue("");
     setIsAdding(false);

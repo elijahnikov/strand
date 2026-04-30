@@ -1,4 +1,7 @@
+import { convexQuery } from "@convex-dev/react-query";
+import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
+import { useQuery } from "@tanstack/react-query";
 import { useLocation, useParams } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef } from "react";
 import {
@@ -29,14 +32,29 @@ function detectEntity(
     threadId?: string;
     tagName?: string;
     collectionId?: string;
+    date?: string;
   },
-  pathname: string
+  pathname: string,
+  journalResourceId: string | undefined
 ): RouteEntity | null {
   const { workspaceId } = params;
   if (!workspaceId) {
     return null;
   }
   const base = `/workspace/${workspaceId}`;
+
+  if (params.date && pathname.startsWith(`${base}/journal/`)) {
+    if (!journalResourceId) {
+      return null;
+    }
+    return {
+      kind: "resource",
+      entityId: journalResourceId,
+      url: `${base}/journal/${params.date}`,
+      id: `resource:${journalResourceId}`,
+      fallbackTitle: params.date,
+    };
+  }
 
   if (params.resourceId) {
     return {
@@ -88,17 +106,43 @@ export function useRouteTabsSync() {
     threadId?: string;
     tagName?: string;
     collectionId?: string;
+    date?: string;
   };
   const pathname = useLocation({ select: (l) => l.pathname });
-  const { workspaceId, resourceId, threadId, tagName, collectionId } = params;
+  const { workspaceId, resourceId, threadId, tagName, collectionId, date } =
+    params;
+
+  const onJournalDate =
+    !!date &&
+    !!workspaceId &&
+    pathname.startsWith(`/workspace/${workspaceId}/journal/`);
+
+  const { data: journalResourceId } = useQuery(
+    convexQuery(
+      api.dailyNotes.queries.getByDate,
+      onJournalDate
+        ? { workspaceId: workspaceId as Id<"workspace">, date: date as string }
+        : "skip"
+    )
+  );
 
   const entity = useMemo(
     () =>
       detectEntity(
-        { workspaceId, resourceId, threadId, tagName, collectionId },
-        pathname
+        { workspaceId, resourceId, threadId, tagName, collectionId, date },
+        pathname,
+        journalResourceId ?? undefined
       ),
-    [workspaceId, resourceId, threadId, tagName, collectionId, pathname]
+    [
+      workspaceId,
+      resourceId,
+      threadId,
+      tagName,
+      collectionId,
+      date,
+      pathname,
+      journalResourceId,
+    ]
   );
 
   const openOrActivate = useWorkspaceTabs((s) => s.openOrActivate);

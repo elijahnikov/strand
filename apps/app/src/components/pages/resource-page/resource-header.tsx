@@ -1,6 +1,5 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { api } from "@omi/backend/_generated/api.js";
-import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { Badge } from "@omi/ui/badge";
 import { Button } from "@omi/ui/button";
 import { Separator } from "@omi/ui/separator";
@@ -12,7 +11,6 @@ import {
 } from "@remixicon/react";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback } from "react";
@@ -29,9 +27,7 @@ import { ResourceChatPanel } from "./resource-chat-panel";
 import { ResourceCommentsPanel } from "./resource-comments-panel";
 
 export function ResourceHeader({ resource }: { resource: GetResourceData }) {
-  const { workspaceId } = useParams({
-    from: "/_workspace/workspace/$workspaceId/resource/$resourceId",
-  });
+  const workspaceId = resource.workspaceId;
 
   const togglePanel = useFloatingPanelsStore((s) => s.togglePanel);
   const openPanel = useFloatingPanelsStore((s) => s.openPanel);
@@ -53,7 +49,7 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
 
   const { data: unreadInfo } = useQuery(
     convexQuery(api.resourceComment.queries.getUnreadInfo, {
-      workspaceId: workspaceId as Id<"workspace">,
+      workspaceId,
       resourceId: resource._id,
     })
   );
@@ -64,7 +60,7 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
 
   const queryClient = useQueryClient();
   const queryKey = convexQuery(api.resource.queries.get, {
-    workspaceId: workspaceId as Id<"workspace">,
+    workspaceId,
     resourceId: resource._id,
   }).queryKey;
 
@@ -77,7 +73,7 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
       updateTitle({
         resourceId: resource._id,
         title,
-        workspaceId: workspaceId as Id<"workspace">,
+        workspaceId,
       });
       queryClient.setQueryData(queryKey, (prev: GetResourceData | undefined) =>
         prev ? { ...prev, title } : prev
@@ -164,10 +160,7 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
             />
           </TooltipContent>
         </Tooltip>
-        <ResourceActionsMenu
-          resource={resource}
-          workspaceId={workspaceId as Id<"workspace">}
-        />
+        <ResourceActionsMenu resource={resource} workspaceId={workspaceId} />
       </div>
       <div className="flex w-full min-w-0 items-center gap-x-2">
         <TypeBadge resource={resource} />
@@ -194,11 +187,11 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
           title: resource.title,
           type: resource.type,
         }}
-        workspaceId={workspaceId as Id<"workspace">}
+        workspaceId={workspaceId}
       />
       <ResourceCommentsPanel
         resource={{ _id: resource._id, title: resource.title }}
-        workspaceId={workspaceId as Id<"workspace">}
+        workspaceId={workspaceId}
       />
     </div>
   );

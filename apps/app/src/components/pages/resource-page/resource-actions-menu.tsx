@@ -49,7 +49,9 @@ export function ResourceActionsMenu({
   });
 
   const handleCopyLink = async () => {
-    const path = `/workspace/${workspaceId}/resource/${resource._id}`;
+    const path = resource.dailyNoteDate
+      ? `/workspace/${workspaceId}/journal/${resource.dailyNoteDate}`
+      : `/workspace/${workspaceId}/resource/${resource._id}`;
     const url = `${window.location.origin}${path}`;
     try {
       await navigator.clipboard.writeText(url);

@@ -98,12 +98,13 @@ export const get = workspaceQuery({
   handler: async (ctx, args) => {
     assertValidDateString(args.date);
 
-    const note = await ctx.db
+    const noteCandidates = await ctx.db
       .query("resource")
       .withIndex("by_workspace_dailyNoteDate", (q) =>
         q.eq("workspaceId", ctx.workspace._id).eq("dailyNoteDate", args.date)
       )
-      .unique();
+      .collect();
+    const note = noteCandidates.find((r) => !r.deletedAt) ?? null;
 
     const startMs = startOfDayMs(args.date, args.timeZone);
     const endMs = startMs + DAY_MS;
@@ -252,16 +253,14 @@ export const getByDate = workspaceQuery({
     if (!DATE_PATTERN.test(args.date)) {
       return null;
     }
-    const note = await ctx.db
+    const candidates = await ctx.db
       .query("resource")
       .withIndex("by_workspace_dailyNoteDate", (q) =>
         q.eq("workspaceId", ctx.workspace._id).eq("dailyNoteDate", args.date)
       )
-      .unique();
-    if (!note || note.deletedAt) {
-      return null;
-    }
-    return note._id;
+      .collect();
+    const live = candidates.find((r) => !r.deletedAt);
+    return live?._id ?? null;
   },
 });
 

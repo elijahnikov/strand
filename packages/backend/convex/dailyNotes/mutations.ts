@@ -37,15 +37,16 @@ export const getOrCreate = workspaceMutation({
   handler: async (ctx, args) => {
     assertValidDateString(args.date);
 
-    const existing = await ctx.db
+    const candidates = await ctx.db
       .query("resource")
       .withIndex("by_workspace_dailyNoteDate", (q) =>
         q.eq("workspaceId", ctx.workspace._id).eq("dailyNoteDate", args.date)
       )
-      .unique();
+      .collect();
 
-    if (existing && !existing.deletedAt) {
-      return existing._id;
+    const live = candidates.find((r) => !r.deletedAt);
+    if (live) {
+      return live._id;
     }
 
     return await createResource(ctx, {

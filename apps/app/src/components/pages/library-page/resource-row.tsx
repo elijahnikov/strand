@@ -101,10 +101,23 @@ export function UploadingFileRow({ fileName }: { fileName: string }) {
 function RowLink({
   workspaceId,
   resourceId,
+  dailyNoteDate,
 }: {
   workspaceId: Id<"workspace">;
   resourceId: Id<"resource">;
+  dailyNoteDate?: string;
 }) {
+  if (dailyNoteDate) {
+    return (
+      <Link
+        className="absolute inset-0 z-10 rounded-lg"
+        params={{ workspaceId, date: dailyNoteDate }}
+        preload="intent"
+        tabIndex={-1}
+        to="/workspace/$workspaceId/journal/$date"
+      />
+    );
+  }
   return (
     <Link
       className="absolute inset-0 z-10 rounded-lg"
@@ -118,14 +131,23 @@ function RowLink({
 
 function useResourceNavigate(
   workspaceId: Id<"workspace">,
-  resourceId: Id<"resource">
+  resourceId: Id<"resource">,
+  dailyNoteDate?: string
 ) {
   const navigate = useNavigate();
-  return () =>
+  return () => {
+    if (dailyNoteDate) {
+      navigate({
+        to: "/workspace/$workspaceId/journal/$date",
+        params: { workspaceId, date: dailyNoteDate },
+      });
+      return;
+    }
     navigate({
       to: "/workspace/$workspaceId/resource/$resourceId",
       params: { workspaceId, resourceId },
     });
+  };
 }
 
 function WebsiteRow({
@@ -249,11 +271,20 @@ function NoteRow({
   onPurge,
   snippet,
 }: ResourceRowProps) {
-  const handleNavigate = useResourceNavigate(workspaceId, resource._id);
+  const dailyNoteDate = resource.dailyNoteDate ?? undefined;
+  const handleNavigate = useResourceNavigate(
+    workspaceId,
+    resource._id,
+    dailyNoteDate
+  );
 
   return (
     <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-ui-bg-component-hover dark:hover:bg-ui-bg-component">
-      <RowLink resourceId={resource._id} workspaceId={workspaceId} />
+      <RowLink
+        dailyNoteDate={dailyNoteDate}
+        resourceId={resource._id}
+        workspaceId={workspaceId}
+      />
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-ui-bg-subtle text-ui-fg-muted">
         <NoteIcon />
       </div>

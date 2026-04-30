@@ -4,6 +4,7 @@ import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { NotFoundState } from "~/components/common/not-found-state";
+import type { GetResourceData } from "~/lib/convex-types";
 import { FileResource } from "./resource-types/file-resource";
 import { NoteResource } from "./resource-types/note-resource";
 import { WebsiteResource } from "./resource-types/website-resource";
@@ -24,6 +25,10 @@ export default function Resource() {
     return <NotFoundState />;
   }
 
+  return <RenderResource resource={resource} />;
+}
+
+export function RenderResource({ resource }: { resource: GetResourceData }) {
   switch (resource.type) {
     case "website":
       return <WebsiteResource resource={resource} />;
