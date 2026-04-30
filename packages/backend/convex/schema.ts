@@ -548,6 +548,28 @@ export default defineSchema({
     .index("by_user", ["userId", "revokedAt"])
     .index("by_hash", ["tokenHash"]),
 
+  // RESOURCE COMMENT (multi-user discussion thread on a resource)
+  resourceComment: defineTable({
+    workspaceId: v.id("workspace"),
+    resourceId: v.id("resource"),
+    authorId: v.id("user"),
+    content: v.string(),
+    mentions: v.optional(v.array(v.id("user"))),
+    createdAt: v.number(),
+    editedAt: v.optional(v.number()),
+    deletedAt: v.optional(v.number()),
+  })
+    .index("by_resource", ["resourceId", "deletedAt", "createdAt"])
+    .index("by_workspace_author", ["workspaceId", "authorId"]),
+
+  // RESOURCE COMMENT READ (per-user last-seen marker for unread dot)
+  resourceCommentRead: defineTable({
+    userId: v.id("user"),
+    resourceId: v.id("resource"),
+    workspaceId: v.id("workspace"),
+    lastSeenAt: v.number(),
+  }).index("by_user_resource", ["userId", "resourceId"]),
+
   // CHAT MESSAGE
   chatMessage: defineTable({
     threadId: v.id("chatThread"),

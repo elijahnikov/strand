@@ -33,7 +33,7 @@ export function JournalPageComponent({
   const _todayString = useTodayString();
   const navigate = useNavigate();
 
-  const { mutateAsync: getOrCreate, isPending } = useMutation({
+  const { mutateAsync: getOrCreate } = useMutation({
     mutationFn: useConvexMutation(api.dailyNotes.mutations.getOrCreate),
   });
   const { mutate: updateTitle } = useMutation({

@@ -1,3 +1,4 @@
+import { v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import { query } from "../_generated/server";
 import { getAuthIdentity, protectedQuery, workspaceQuery } from "../utils";
@@ -139,5 +140,50 @@ export const listMembers = workspaceQuery({
 
     const roleOrder = { owner: 0, admin: 1, member: 2 } as const;
     return enriched.sort((a, b) => roleOrder[a.role] - roleOrder[b.role]);
+  },
+});
+
+export const searchMembers = workspaceQuery({
+  args: {
+    query: v.string(),
+    limit: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const normalized = args.query.toLowerCase().trim();
+
+    const members = await ctx.db
+      .query("workspaceMember")
+      .withIndex("by_workspace", (q) => q.eq("workspaceId", ctx.workspace._id))
+      .collect();
+
+    const enriched = await Promise.all(
+      members.map(async (member) => {
+        const user = await ctx.db.get(member.userId);
+        if (!user) {
+          return null;
+        }
+        return {
+          _id: user._id,
+          username: user.username ?? "",
+          email: user.email ?? "",
+          image: user.image,
+        };
+      })
+    );
+
+    const filtered = enriched.filter((m): m is NonNullable<typeof m> => {
+      if (!m) {
+        return false;
+      }
+      if (!normalized) {
+        return true;
+      }
+      return (
+        m.username.toLowerCase().includes(normalized) ||
+        m.email.toLowerCase().includes(normalized)
+      );
+    });
+
+    return filtered.slice(0, args.limit);
   },
 });

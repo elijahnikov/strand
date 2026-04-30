@@ -5,13 +5,18 @@ import { Badge } from "@omi/ui/badge";
 import { Button } from "@omi/ui/button";
 import { Separator } from "@omi/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@omi/ui/tooltip";
-import { RiArrowRightUpLine, RiChatAi3Fill } from "@remixicon/react";
+import {
+  RiArrowRightUpLine,
+  RiChatAi3Fill,
+  RiDiscussFill,
+  RiMoreFill,
+} from "@remixicon/react";
 import { useHotkey } from "@tanstack/react-hotkeys";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { DotGridLoader } from "~/components/common/dot-grid-loader";
 import { EditableText } from "~/components/common/editable-text";
 import { FileKindIcon } from "~/components/common/file-kind-icon";
@@ -19,18 +24,40 @@ import { MiddleTruncate } from "~/components/common/middle-truncate";
 import { ShortcutTooltipBody } from "~/components/common/shortcut-tooltip";
 import { UserAvatar } from "~/components/common/user-avatar";
 import type { GetResourceData } from "~/lib/convex-types";
+import { useFloatingPanelsStore } from "./floating-panels-store";
 import { ResourceChatPanel } from "./resource-chat-panel";
+import { ResourceCommentsPanel } from "./resource-comments-panel";
 
 export function ResourceHeader({ resource }: { resource: GetResourceData }) {
   const { workspaceId } = useParams({
     from: "/_workspace/workspace/$workspaceId/resource/$resourceId",
   });
 
-  const [chatOpen, setChatOpen] = useState(false);
+  const togglePanel = useFloatingPanelsStore((s) => s.togglePanel);
+  const openPanel = useFloatingPanelsStore((s) => s.openPanel);
+  const closePanel = useFloatingPanelsStore((s) => s.closePanel);
 
   useHotkey("Shift+C", () => {
-    setChatOpen((prev) => !prev);
+    togglePanel("chat");
   });
+  useHotkey("Shift+D", () => {
+    togglePanel("comments");
+  });
+  useHotkey("Escape", () => {
+    const { active, open } = useFloatingPanelsStore.getState();
+    const target = active ?? open.at(-1);
+    if (target) {
+      closePanel(target);
+    }
+  });
+
+  const { data: unreadInfo } = useQuery(
+    convexQuery(api.resourceComment.queries.getUnreadInfo, {
+      workspaceId: workspaceId as Id<"workspace">,
+      resourceId: resource._id,
+    })
+  );
+  const hasUnread = unreadInfo?.hasUnread ?? false;
 
   const aiStatus = resource.resourceAI?.status;
   const isAiProcessing = aiStatus === "pending" || aiStatus === "processing";
@@ -81,14 +108,48 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
           value={resource.title}
         />
       </div>
-      <div className="absolute top-1.5 right-1.5 z-50 ml-auto flex size-8 shrink-0 items-center gap-x-2">
+      <div className="absolute top-1.5 right-1.5 z-50 ml-auto flex size-8 w-max shrink-0 items-center gap-x-2">
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                aria-label="Open comments"
+                className="relative size-8 shrink-0"
+                onClick={() => openPanel("comments")}
+                size="small"
+                variant="ghost"
+              />
+            }
+          >
+            <RiDiscussFill className="size-4 shrink-0 text-ui-fg-subtle group-hover:text-ui-fg-base" />
+            <AnimatePresence>
+              {hasUnread && (
+                <motion.span
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="pointer-events-none absolute -top-0.5 -right-0.5"
+                  exit={{ opacity: 0, scale: 0.5 }}
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                >
+                  <span className="relative block size-2">
+                    <span className="absolute inset-0 animate-ping rounded-full bg-blue-500/70" />
+                    <span className="relative block size-2 rounded-full bg-blue-500" />
+                  </span>
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            <ShortcutTooltipBody shortcut={["Shift+D"]} title="Comments" />
+          </TooltipContent>
+        </Tooltip>
         <Tooltip>
           <TooltipTrigger
             render={
               <Button
                 aria-label="Chat about this resource"
                 className="size-8 shrink-0"
-                onClick={() => setChatOpen(true)}
+                onClick={() => openPanel("chat")}
                 size="small"
                 variant="ghost"
               />
@@ -103,6 +164,14 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
             />
           </TooltipContent>
         </Tooltip>
+        <Button
+          aria-label="More actions"
+          className="-ml-1 size-8 shrink-0"
+          size="small"
+          variant="ghost"
+        >
+          <RiMoreFill className="size-4 shrink-0 text-ui-fg-subtle group-hover:text-ui-fg-base" />
+        </Button>
       </div>
       <div className="flex w-full min-w-0 items-center gap-x-2">
         <TypeBadge resource={resource} />
@@ -124,13 +193,15 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
         </Badge>
       </div>
       <ResourceChatPanel
-        onOpenChange={setChatOpen}
-        open={chatOpen}
         resource={{
           _id: resource._id,
           title: resource.title,
           type: resource.type,
         }}
+        workspaceId={workspaceId as Id<"workspace">}
+      />
+      <ResourceCommentsPanel
+        resource={{ _id: resource._id, title: resource.title }}
         workspaceId={workspaceId as Id<"workspace">}
       />
     </div>
