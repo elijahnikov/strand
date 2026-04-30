@@ -83,6 +83,8 @@ import type * as resource_queries from "../resource/queries.js";
 import type * as resource_tagActions from "../resource/tagActions.js";
 import type * as resourceComment_mutations from "../resourceComment/mutations.js";
 import type * as resourceComment_queries from "../resourceComment/queries.js";
+import type * as resourceShare_mutations from "../resourceShare/mutations.js";
+import type * as resourceShare_queries from "../resourceShare/queries.js";
 import type * as search_actions from "../search/actions.js";
 import type * as search_highlight from "../search/highlight.js";
 import type * as search_internals from "../search/internals.js";
@@ -183,6 +185,8 @@ declare const fullApi: ApiFromModules<{
   "resource/tagActions": typeof resource_tagActions;
   "resourceComment/mutations": typeof resourceComment_mutations;
   "resourceComment/queries": typeof resourceComment_queries;
+  "resourceShare/mutations": typeof resourceShare_mutations;
+  "resourceShare/queries": typeof resourceShare_queries;
   "search/actions": typeof search_actions;
   "search/highlight": typeof search_highlight;
   "search/internals": typeof search_internals;

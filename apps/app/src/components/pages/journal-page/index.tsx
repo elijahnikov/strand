@@ -6,7 +6,7 @@ import { toastManager } from "@omi/ui/toast";
 import { RiAddLine, RiCalendarLine } from "@remixicon/react";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { EmptyState } from "~/components/common/empty-state";
 import { PageContent } from "~/components/common/page-content";
@@ -30,8 +30,9 @@ export function JournalPageComponent({
     PAGE_SIZE
   );
 
-  const _todayString = useTodayString();
+  const todayString = useTodayString();
   const navigate = useNavigate();
+  const [creatingDate, setCreatingDate] = useState<string | null>(null);
 
   const { mutateAsync: getOrCreate } = useMutation({
     mutationFn: useConvexMutation(api.dailyNotes.mutations.getOrCreate),
@@ -50,11 +51,21 @@ export function JournalPageComponent({
   });
 
   const createForDate = async (date: string) => {
-    const resourceId = await getOrCreate({ workspaceId, date });
-    navigate({
-      to: "/workspace/$workspaceId/resource/$resourceId",
-      params: { workspaceId, resourceId },
-    });
+    setCreatingDate(date);
+    try {
+      await getOrCreate({ workspaceId, date });
+      navigate({
+        to: "/workspace/$workspaceId/journal/$date",
+        params: { workspaceId, date },
+      });
+    } catch (err) {
+      setCreatingDate(null);
+      toastManager.add({
+        type: "error",
+        title: "Couldn't create journal entry",
+        description: err instanceof Error ? err.message : String(err),
+      });
+    }
   };
 
   const handleUpdateTitle = useCallback(
@@ -102,42 +113,59 @@ export function JournalPageComponent({
   const isLoadingFirstPage =
     status === "LoadingFirstPage" && results.length === 0;
 
+  const targetDate = selectedDate ?? todayString;
+  const isToday = targetDate === todayString;
+  const createLabel = isToday ? "Today's entry" : `Entry for ${targetDate}`;
+
+  const visibleResults = creatingDate
+    ? results.filter((r) => r.dailyNoteDate !== creatingDate)
+    : results;
+
   return (
     <PageContent className="pt-14 pb-4 md:pt-16" width="xl:w-2/3">
       <div className="flex flex-col gap-y-6">
         {isLoadingFirstPage ? (
           <ResourceListSkeleton />
         ) : results.length > 0 ? (
-          <div className="-mx-3 flex flex-col gap-y-1">
-            {results.map((entry) => (
-              <ResourceRow
-                isPinned={entry.isPinned}
-                key={entry._id}
-                onDelete={handleDelete}
-                onTogglePin={handleTogglePin}
-                onUpdateTitle={handleUpdateTitle}
-                resource={entry}
-                workspaceId={workspaceId}
-              />
-            ))}
-            <div className="h-px" ref={loadMoreRef} />
-            {status === "LoadingMore" && <ResourceListSkeleton count={3} />}
-          </div>
-        ) : (
-          <EmptyState
-            action={
+          <>
+            <div className="flex items-center justify-end">
               <Button
-                onClick={() => {
-                  if (!selectedDate) {
-                    return;
-                  }
-                  createForDate(selectedDate);
-                }}
+                disabled={creatingDate !== null}
+                onClick={() => createForDate(targetDate)}
                 size="xsmall"
                 variant="outline"
               >
                 <RiAddLine className="size-4" />
-                Create entry
+                {createLabel}
+              </Button>
+            </div>
+            <div className="-mx-3 flex flex-col gap-y-1">
+              {visibleResults.map((entry) => (
+                <ResourceRow
+                  isPinned={entry.isPinned}
+                  key={entry._id}
+                  onDelete={handleDelete}
+                  onTogglePin={handleTogglePin}
+                  onUpdateTitle={handleUpdateTitle}
+                  resource={entry}
+                  workspaceId={workspaceId}
+                />
+              ))}
+              <div className="h-px" ref={loadMoreRef} />
+              {status === "LoadingMore" && <ResourceListSkeleton count={3} />}
+            </div>
+          </>
+        ) : (
+          <EmptyState
+            action={
+              <Button
+                disabled={creatingDate !== null}
+                onClick={() => createForDate(targetDate)}
+                size="xsmall"
+                variant="outline"
+              >
+                <RiAddLine className="size-4" />
+                {createLabel}
               </Button>
             }
             description="Capture a moment and your daily entries will live here."

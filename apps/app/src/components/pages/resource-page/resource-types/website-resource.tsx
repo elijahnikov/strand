@@ -53,7 +53,7 @@ function OgImageEmpty() {
   );
 }
 
-function LoadingPreview() {
+export function LoadingPreview() {
   return (
     <Card className="mt-4 rounded-2xl p-2 pb-0">
       <div className="relative h-[300px] w-full overflow-hidden rounded-lg">
@@ -70,7 +70,7 @@ function LoadingPreview() {
   );
 }
 
-function WebsiteImage({
+export function WebsiteImage({
   website,
   title,
 }: {
@@ -109,7 +109,7 @@ function WebsiteImage({
   );
 }
 
-function WebsiteEmbed({
+export function WebsiteEmbed({
   embedType,
   embedId,
   url,
@@ -657,12 +657,14 @@ export function WebsiteResource({ resource }: { resource: GetResourceData }) {
         aiStatus={resource.resourceAI?.status}
         resourceId={resource._id}
         tags={resource.tags}
+        workspaceId={resource.workspaceId}
       />
       <ResourceSummary resource={resource} />
       {"links" in resource && (
         <RelatedResources
           aiStatus={resource.resourceAI?.status}
           links={resource.links}
+          workspaceId={resource.workspaceId}
         />
       )}
       <Suspense fallback={<div className="mt-6 min-h-[100px]" />}>

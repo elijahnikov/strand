@@ -29,6 +29,7 @@ export function NoteResource({ resource }: { resource: GetResourceData }) {
         aiStatus={resource.resourceAI?.status}
         resourceId={resource._id}
         tags={resource.tags}
+        workspaceId={resource.workspaceId}
       />
       {resource.dailyNoteDate && (
         <>
@@ -47,6 +48,7 @@ export function NoteResource({ resource }: { resource: GetResourceData }) {
         <RelatedResources
           aiStatus={resource.resourceAI?.status}
           links={resource.links}
+          workspaceId={resource.workspaceId}
         />
       )}
       <Suspense fallback={<div className="mt-6 min-h-[100px]" />}>

@@ -1,7 +1,7 @@
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { Badge } from "@omi/ui/badge";
 import { Skeleton } from "@omi/ui/skeleton";
-import { Link, useParams } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { FileIcon, GlobeIcon, PinIcon, StickyNoteIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
@@ -120,14 +120,12 @@ function ResourcePreview({
 export function RelatedResources({
   links,
   aiStatus,
+  workspaceId,
 }: {
   links: LinkData[];
   aiStatus?: string;
+  workspaceId: Id<"workspace">;
 }) {
-  const { workspaceId } = useParams({
-    from: "/_workspace/workspace/$workspaceId/resource/$resourceId",
-  });
-
   const isProcessing = aiStatus === "pending" || aiStatus === "processing";
 
   const [wasProcessing, setWasProcessing] = useState(isProcessing);

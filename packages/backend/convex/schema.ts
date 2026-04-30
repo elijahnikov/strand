@@ -548,6 +548,17 @@ export default defineSchema({
     .index("by_user", ["userId", "revokedAt"])
     .index("by_hash", ["tokenHash"]),
 
+  // RESOURCE SHARE (public read-only link for a resource)
+  resourceShare: defineTable({
+    resourceId: v.id("resource"),
+    workspaceId: v.id("workspace"),
+    slug: v.string(),
+    createdBy: v.id("user"),
+    createdAt: v.number(),
+  })
+    .index("by_resource", ["resourceId"])
+    .index("by_slug", ["slug"]),
+
   // RESOURCE COMMENT (multi-user discussion thread on a resource)
   resourceComment: defineTable({
     workspaceId: v.id("workspace"),

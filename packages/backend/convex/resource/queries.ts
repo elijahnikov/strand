@@ -164,6 +164,11 @@ export const get = workspaceQuery({
       .query("resourceContent")
       .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
       .unique();
+    const shareDoc = await ctx.db
+      .query("resourceShare")
+      .withIndex("by_resource", (q) => q.eq("resourceId", resource._id))
+      .unique();
+    const share = shareDoc ? { slug: shareDoc.slug } : null;
 
     switch (resource.type) {
       case "website": {
@@ -181,6 +186,7 @@ export const get = workspaceQuery({
 
           links,
           tags,
+          share,
         };
       }
       case "note": {
@@ -198,6 +204,7 @@ export const get = workspaceQuery({
 
           links,
           tags,
+          share,
         };
       }
       case "file": {
@@ -219,6 +226,7 @@ export const get = workspaceQuery({
 
           links,
           tags,
+          share,
         };
       }
       default:
@@ -232,6 +240,7 @@ export const get = workspaceQuery({
 
           links,
           tags,
+          share,
         };
     }
   },

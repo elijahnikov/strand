@@ -99,7 +99,7 @@ function FilePreviewEmpty({
   );
 }
 
-function FilePreview({
+export function FilePreview({
   kind,
   fileUrl,
   file,
@@ -183,12 +183,14 @@ export function FileResource({ resource }: { resource: GetResourceData }) {
         aiStatus={resource.resourceAI?.status}
         resourceId={resource._id}
         tags={resource.tags}
+        workspaceId={resource.workspaceId}
       />
       <ResourceSummary resource={resource} />
       {"links" in resource && (
         <RelatedResources
           aiStatus={resource.resourceAI?.status}
           links={resource.links}
+          workspaceId={resource.workspaceId}
         />
       )}
       <Suspense fallback={<div className="mt-6 min-h-[100px]" />}>
