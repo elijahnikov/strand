@@ -99,7 +99,7 @@ function FilePreviewEmpty({
   );
 }
 
-function FilePreview({
+export function FilePreview({
   kind,
   fileUrl,
   file,

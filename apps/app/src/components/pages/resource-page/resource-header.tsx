@@ -9,7 +9,6 @@ import {
   RiArrowRightUpLine,
   RiChatAi3Fill,
   RiDiscussFill,
-  RiMoreFill,
 } from "@remixicon/react";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -25,6 +24,7 @@ import { ShortcutTooltipBody } from "~/components/common/shortcut-tooltip";
 import { UserAvatar } from "~/components/common/user-avatar";
 import type { GetResourceData } from "~/lib/convex-types";
 import { useFloatingPanelsStore } from "./floating-panels-store";
+import { ResourceActionsMenu } from "./resource-actions-menu";
 import { ResourceChatPanel } from "./resource-chat-panel";
 import { ResourceCommentsPanel } from "./resource-comments-panel";
 
@@ -164,14 +164,10 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
             />
           </TooltipContent>
         </Tooltip>
-        <Button
-          aria-label="More actions"
-          className="-ml-1 size-8 shrink-0"
-          size="small"
-          variant="ghost"
-        >
-          <RiMoreFill className="size-4 shrink-0 text-ui-fg-subtle group-hover:text-ui-fg-base" />
-        </Button>
+        <ResourceActionsMenu
+          resource={resource}
+          workspaceId={workspaceId as Id<"workspace">}
+        />
       </div>
       <div className="flex w-full min-w-0 items-center gap-x-2">
         <TypeBadge resource={resource} />

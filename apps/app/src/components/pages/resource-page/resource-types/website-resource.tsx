@@ -53,7 +53,7 @@ function OgImageEmpty() {
   );
 }
 
-function LoadingPreview() {
+export function LoadingPreview() {
   return (
     <Card className="mt-4 rounded-2xl p-2 pb-0">
       <div className="relative h-[300px] w-full overflow-hidden rounded-lg">
@@ -70,7 +70,7 @@ function LoadingPreview() {
   );
 }
 
-function WebsiteImage({
+export function WebsiteImage({
   website,
   title,
 }: {
@@ -109,7 +109,7 @@ function WebsiteImage({
   );
 }
 
-function WebsiteEmbed({
+export function WebsiteEmbed({
   embedType,
   embedId,
   url,

@@ -18,6 +18,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as R404RouteImport } from './routes/404'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ShareSlugRouteImport } from './routes/share/$slug'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthVerifyEmailRouteImport } from './routes/_auth/verify-email'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
@@ -82,6 +83,11 @@ const SplatRoute = SplatRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShareSlugRoute = ShareSlugRouteImport.update({
+  id: '/share/$slug',
+  path: '/share/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -229,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof AuthRegisterRoute
   '/verify-email': typeof AuthVerifyEmailRoute
   '/api/chat': typeof ApiChatRoute
+  '/share/$slug': typeof ShareSlugRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceWorkspaceIdRouteRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/workspace/$workspaceId/chat': typeof WorkspaceWorkspaceWorkspaceIdChatRouteRouteWithChildren
@@ -260,6 +267,7 @@ export interface FileRoutesByTo {
   '/register': typeof AuthRegisterRoute
   '/verify-email': typeof AuthVerifyEmailRoute
   '/api/chat': typeof ApiChatRoute
+  '/share/$slug': typeof ShareSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/workspace/$workspaceId/search': typeof WorkspaceWorkspaceWorkspaceIdSearchRoute
   '/workspace/$workspaceId/settings': typeof WorkspaceWorkspaceWorkspaceIdSettingsRoute
@@ -291,6 +299,7 @@ export interface FileRoutesById {
   '/_auth/register': typeof AuthRegisterRoute
   '/_auth/verify-email': typeof AuthVerifyEmailRoute
   '/api/chat': typeof ApiChatRoute
+  '/share/$slug': typeof ShareSlugRoute
   '/_workspace/workspace/$workspaceId': typeof WorkspaceWorkspaceWorkspaceIdRouteRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_workspace/workspace/$workspaceId/chat': typeof WorkspaceWorkspaceWorkspaceIdChatRouteRouteWithChildren
@@ -324,6 +333,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/verify-email'
     | '/api/chat'
+    | '/share/$slug'
     | '/workspace/$workspaceId'
     | '/api/auth/$'
     | '/workspace/$workspaceId/chat'
@@ -355,6 +365,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/verify-email'
     | '/api/chat'
+    | '/share/$slug'
     | '/api/auth/$'
     | '/workspace/$workspaceId/search'
     | '/workspace/$workspaceId/settings'
@@ -385,6 +396,7 @@ export interface FileRouteTypes {
     | '/_auth/register'
     | '/_auth/verify-email'
     | '/api/chat'
+    | '/share/$slug'
     | '/_workspace/workspace/$workspaceId'
     | '/api/auth/$'
     | '/_workspace/workspace/$workspaceId/chat'
@@ -416,6 +428,7 @@ export interface RootRouteChildren {
   ConnectRaycastRoute: typeof ConnectRaycastRoute
   OnboardingRoute: typeof OnboardingRoute
   ApiChatRoute: typeof ApiChatRoute
+  ShareSlugRoute: typeof ShareSlugRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -482,6 +495,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/share/$slug': {
+      id: '/share/$slug'
+      path: '/share/$slug'
+      fullPath: '/share/$slug'
+      preLoaderRoute: typeof ShareSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -792,6 +812,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConnectRaycastRoute: ConnectRaycastRoute,
   OnboardingRoute: OnboardingRoute,
   ApiChatRoute: ApiChatRoute,
+  ShareSlugRoute: ShareSlugRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
