@@ -1,5 +1,5 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
-import { createGoogleGenerativeAI, google } from "@ai-sdk/google";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI, openai } from "@ai-sdk/openai";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
@@ -32,7 +32,7 @@ export interface RAGContext {
 }
 
 export function createOpenAIModel() {
-  return openai("gpt-5.1-mini");
+  return openai("gpt-4o-mini");
 }
 
 type ResolvedChatProvider =
@@ -59,8 +59,8 @@ export async function getChatModel(workspaceId: string): Promise<{
   )) as ResolvedChatProvider;
 
   if (resolved.provider === "platform") {
-    const modelId = "gemini-2.5-flash";
-    return { model: google(modelId), modelId };
+    const modelId = "gpt-4o-mini";
+    return { model: openai(modelId), modelId };
   }
   const modelId = resolved.model;
   if (resolved.provider === "openai") {
@@ -398,7 +398,7 @@ export async function generateThreadTitle(
   assistantMessage: string
 ): Promise<string> {
   const { text } = await generateText({
-    model: openai("gpt-5-nano"),
+    model: openai("gpt-4o-mini"),
     system:
       "Generate a short, concise title (max 50 chars) for this conversation. Return ONLY the title text, no quotes or extra punctuation.",
     prompt: `User: ${userMessage.slice(0, 500)}\n\nAssistant: ${assistantMessage.slice(0, 500)}`,

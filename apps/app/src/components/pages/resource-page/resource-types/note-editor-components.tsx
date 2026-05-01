@@ -438,9 +438,9 @@ const toggleVariants = cva(
     variants: {
       variant: {
         default:
-          "text-ui-fg-subtle hover:bg-ui-bg-subtle-hover hover:text-ui-fg-base data-[state=on]:bg-ui-bg-component-hover data-[state=on]:text-ui-fg-base",
+          "text-ui-fg-base hover:bg-ui-button-transparent-hover hover:text-ui-fg-base active:bg-ui-button-transparent-pressed data-[state=on]:bg-ui-bg-component-hover data-[state=on]:text-ui-fg-base",
         outline:
-          "border shadow-borders-base hover:bg-ui-bg-subtle-hover hover:text-ui-fg-base data-[state=on]:bg-ui-bg-component-hover data-[state=on]:text-ui-fg-base",
+          "border shadow-borders-base hover:bg-ui-button-transparent-hover hover:text-ui-fg-base active:bg-ui-button-transparent-pressed data-[state=on]:bg-ui-bg-component-hover data-[state=on]:text-ui-fg-base",
       },
       size: {
         default: "h-8 min-w-8 px-2",
