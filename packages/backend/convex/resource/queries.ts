@@ -617,6 +617,11 @@ export const enrichResource = async (
   }
 };
 
+export const getStorageUrl = workspaceQuery({
+  args: { storageId: v.id("_storage") },
+  handler: (ctx, args) => ctx.storage.getUrl(args.storageId),
+});
+
 export const getPreview = workspaceQuery({
   args: { resourceId: v.id("resource") },
   handler: async (ctx, args) => {

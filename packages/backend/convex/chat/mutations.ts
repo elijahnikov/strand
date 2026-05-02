@@ -200,6 +200,67 @@ export const recordChatUsage = workspaceMutation({
 });
 
 /**
+ * Records token usage for an inline-AI editor command (e.g. /improve, /continue).
+ * Mirrors `recordChatUsage` but is not scoped to a chat thread.
+ */
+export const recordInlineAIUsage = workspaceMutation({
+  args: {
+    promptTokens: v.number(),
+    completionTokens: v.number(),
+    model: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const byo = await ctx.db
+      .query("workspaceAIProvider")
+      .withIndex("by_workspaceId", (q) =>
+        q.eq("workspaceId", ctx.workspace._id)
+      )
+      .unique();
+
+    const resolved = await resolveActingBillingAccount(
+      ctx,
+      ctx.user._id,
+      ctx.workspace._id
+    );
+
+    if (byo) {
+      await ctx.runMutation(internal.billing.credits.logByoUsage, {
+        billingAccountId: resolved.billingAccountId,
+        workspaceId: ctx.workspace._id,
+        actingUserId: ctx.user._id,
+        reason: "inline-ai",
+      });
+      return { debited: 0, byo: true as const };
+    }
+
+    const totalTokens = args.promptTokens + args.completionTokens;
+    const amount = tokensToCredits(totalTokens, args.model);
+
+    if (amount <= 0 || resolved.creditBalance < amount) {
+      await ctx.db.insert("creditLedger", {
+        billingAccountId: resolved.billingAccountId,
+        workspaceId: ctx.workspace._id,
+        actingUserId: ctx.user._id,
+        kind: "debit",
+        reason: "inline-ai:underfunded",
+        amount: 0,
+        balanceAfter: resolved.creditBalance,
+      });
+      return { debited: 0, byo: false as const };
+    }
+
+    await ctx.runMutation(internal.billing.credits.debit, {
+      billingAccountId: resolved.billingAccountId,
+      workspaceId: ctx.workspace._id,
+      actingUserId: ctx.user._id,
+      reason: "inline-ai",
+      amount,
+    });
+    return { debited: amount, byo: false as const };
+  },
+});
+
+/**
  * Generic patch for a persisted tool part's `output` field. Looks up the
  * containing chatMessage by `toolCallId` within `threadId` and shallow-merges
  * `outputPatch` into the part's `output`. Used by interactive tool result UIs

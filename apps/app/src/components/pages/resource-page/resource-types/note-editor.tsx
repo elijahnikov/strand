@@ -1,16 +1,20 @@
 import {
   type Block,
-  type BlockNoteEditor,
   BlockNoteEditor as BlockNoteEditorClass,
   BlockNoteSchema,
   createCodeBlockSpec,
   createExtension,
   defaultBlockSpecs,
+  defaultInlineContentSpecs,
   nodeToBlock,
 } from "@blocknote/core";
 import {
+  FormattingToolbar,
   FormattingToolbarController,
+  getDefaultReactSlashMenuItems,
+  getFormattingToolbarItems,
   SuggestionMenuController,
+  useBlockNoteEditor,
   useCreateBlockNote,
 } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
@@ -18,10 +22,29 @@ import "@blocknote/shadcn/style.css";
 import "./note-editor.css";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@omi/ui/dropdown-menu";
 import { useTheme } from "@omi/ui/theme";
-import { useMutation } from "convex/react";
-import { useEffect, useMemo } from "react";
+import { toastManager } from "@omi/ui/toast";
+import { RiSparkling2Fill } from "@remixicon/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useConvex, useMutation } from "convex/react";
+import { ChevronDownIcon } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { MAX_FILE_SIZE } from "~/lib/upload-file";
+import {
+  AIDraftSpec,
+  type Command,
+  getAIItems,
+  hasAIDraftBlocks,
+  runEditorAICommand,
+} from "./note-editor-ai";
 import { strandShadCNComponents } from "./note-editor-components";
+import { getMentionItems, Mention } from "./note-editor-mentions";
 
 const supportedLanguages = {
   text: { name: "Plain Text" },
@@ -45,8 +68,13 @@ const supportedLanguages = {
 const shikiParserSymbol = Symbol.for("blocknote.shikiParser");
 
 const schema = BlockNoteSchema.create({
+  inlineContentSpecs: {
+    ...defaultInlineContentSpecs,
+    mention: Mention,
+  },
   blockSpecs: {
     ...defaultBlockSpecs,
+    aiDraft: AIDraftSpec,
     codeBlock: createCodeBlockSpec({
       defaultLanguage: "text",
       supportedLanguages,
@@ -168,7 +196,48 @@ export default function NoteEditor({
   fallbackHtml,
 }: NoteEditorProps) {
   const { resolvedTheme } = useTheme();
+  const queryClient = useQueryClient();
   const updateContent = useMutation(api.resource.mutations.updateContent);
+  const generateUploadUrl = useMutation(
+    api.resource.mutations.generateUploadUrl
+  );
+  const convex = useConvex();
+
+  const handleUpload = useCallback(
+    async (file: File): Promise<string> => {
+      if (file.size > MAX_FILE_SIZE) {
+        toastManager.add({
+          type: "error",
+          title: "File too large",
+          description: `Max size is ${MAX_FILE_SIZE / (1024 * 1024)}MB`,
+        });
+        throw new Error("File too large");
+      }
+      const uploadUrl = await generateUploadUrl();
+      const res = await fetch(uploadUrl, {
+        method: "POST",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      if (!res.ok) {
+        toastManager.add({ type: "error", title: "Upload failed" });
+        throw new Error("Upload failed");
+      }
+      const { storageId } = (await res.json()) as {
+        storageId: Id<"_storage">;
+      };
+      const url = await convex.query(api.resource.queries.getStorageUrl, {
+        workspaceId,
+        storageId,
+      });
+      if (!url) {
+        toastManager.add({ type: "error", title: "Upload failed" });
+        throw new Error("No URL");
+      }
+      return url;
+    },
+    [generateUploadUrl, convex, workspaceId]
+  );
 
   const effectiveInitialContent = useMemo(() => {
     const pendingLocal = readPendingLocal(resourceId);
@@ -205,10 +274,15 @@ export default function NoteEditor({
 
   const initialBlocks = savedBlocks ?? fallbackBlocks;
 
-  const editor: BlockNoteEditor = useCreateBlockNote({
+  const editor = useCreateBlockNote({
     schema,
     initialContent: initialBlocks,
     extensions: [codeBlockTripleBacktick],
+    uploadFile: handleUpload,
+    dropCursor: {
+      width: 2,
+      color: "rgba(115, 115, 115, 0.55)",
+    },
   });
 
   useEffect(() => {
@@ -258,6 +332,11 @@ export default function NoteEditor({
     };
 
     const unsubscribe = editor.onChange(() => {
+      // Skip autosave while an AI draft block is in flight — the user must
+      // accept or discard before progress is committed to the DB.
+      if (hasAIDraftBlocks(editor.document as { type: string }[])) {
+        return;
+      }
       const json = JSON.stringify(editor.prosemirrorState.doc.toJSON());
       pending = json;
       writePendingLocal(resourceId, json);
@@ -293,7 +372,7 @@ export default function NoteEditor({
   };
 
   return (
-    <div className="mt-12">
+    <div className="mt-12 pb-[25vh]">
       <BlockNoteView
         editor={editor}
         formattingToolbar={false}
@@ -301,12 +380,109 @@ export default function NoteEditor({
         slashMenu={false}
         theme={resolvedTheme}
       >
-        <FormattingToolbarController floatingUIOptions={fixedFloating} />
+        <FormattingToolbarController
+          floatingUIOptions={fixedFloating}
+          formattingToolbar={() => (
+            <FormattingToolbar>
+              <AIToolbarMenu workspaceId={workspaceId} />
+              {getFormattingToolbarItems()}
+            </FormattingToolbar>
+          )}
+        />
         <SuggestionMenuController
           floatingUIOptions={fixedFloating}
+          getItems={(query) => {
+            const filter = query.trim().toLowerCase();
+            const defaults = getDefaultReactSlashMenuItems(editor as never);
+            const filteredDefaults = defaults.filter((item) => {
+              const t = item.title.toLowerCase();
+              return !(t === "file" || t === "video" || t === "audio");
+            });
+            const all = [
+              ...getAIItems(editor as never, workspaceId),
+              ...filteredDefaults,
+            ];
+            if (!filter) {
+              return Promise.resolve(all);
+            }
+            return Promise.resolve(
+              all.filter((item) => {
+                const haystack = [
+                  item.title,
+                  ...(item.aliases ?? []),
+                  item.subtext ?? "",
+                ]
+                  .join(" ")
+                  .toLowerCase();
+                return haystack.includes(filter);
+              })
+            );
+          }}
           triggerCharacter="/"
+        />
+        <SuggestionMenuController
+          floatingUIOptions={fixedFloating}
+          getItems={(query) =>
+            getMentionItems({
+              editor: editor as never,
+              query,
+              queryClient,
+              workspaceId,
+            })
+          }
+          triggerCharacter="@"
         />
       </BlockNoteView>
     </div>
+  );
+}
+
+function AIToolbarMenu({ workspaceId }: { workspaceId: Id<"workspace"> }) {
+  const editor = useBlockNoteEditor();
+  const [open, setOpen] = useState(false);
+
+  const run = (command: Command, prompt?: string) => {
+    setOpen(false);
+    runEditorAICommand({
+      editor: editor as never,
+      workspaceId,
+      command,
+      prompt,
+    });
+  };
+
+  return (
+    <DropdownMenu onOpenChange={setOpen} open={open}>
+      <DropdownMenuTrigger
+        render={
+          <button
+            className="bn-button inline-flex h-8 items-center gap-1 self-center rounded-lg px-2 align-middle font-medium text-sm text-ui-fg-base outline-none hover:bg-ui-button-transparent-hover focus-visible:bg-ui-bg-base focus-visible:shadow-buttons-neutral-focus active:bg-ui-button-transparent-pressed"
+            type="button"
+          >
+            <RiSparkling2Fill className="size-3.5 text-blue-500" />
+            AI
+            <ChevronDownIcon className="size-3 text-ui-fg-muted" />
+          </button>
+        }
+      />
+      <DropdownMenuContent align="start" className="w-56" sideOffset={6}>
+        <DropdownMenuItem onClick={() => run("ask")}>
+          <RiSparkling2Fill className="size-4 text-blue-500" />
+          Ask AI
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => run("improve")}>
+          <RiSparkling2Fill className="size-4 text-blue-500" />
+          Improve writing
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => run("continue")}>
+          <RiSparkling2Fill className="size-4 text-blue-500" />
+          Continue writing
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => run("summarize")}>
+          <RiSparkling2Fill className="size-4 text-blue-500" />
+          Summarize
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

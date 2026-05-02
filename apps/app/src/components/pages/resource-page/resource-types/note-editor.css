@@ -56,6 +56,14 @@
   text-underline-offset: 2px;
 }
 
+/* Mention inline content uses a Link internally for navigation but should
+   inherit badge styling, not the underlined-blue link treatment above. */
+.bn-editor [data-inline-content-type="mention"] a,
+.bn-editor [data-inline-content-type="mention"] a:hover {
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
 /* Headings */
 .bn-editor [data-content-type="heading"][data-level="1"] {
   font-family: var(--font-sans);
@@ -161,12 +169,35 @@
 
 /* Container — rounded-2xl, component bg, border (no shadow) — match omi MenuPopup */
 .bn-suggestion-menu[role="listbox"] {
+  max-height: 320px;
   padding: 0.25rem;
+  overflow-y: auto;
   overscroll-behavior: contain;
   background-color: var(--bg-component);
   border: 1px solid var(--border-base);
   border-radius: 1rem;
   box-shadow: none;
+}
+
+/* Loading spinner — BlockNote's default wraps an SVG in animate-spin div
+   without explicit dimensions, so the rotation origin drifts. Force a
+   square box centered on the SVG so it spins in place. */
+.bn-suggestion-menu .animate-spin,
+.bn-suggestion-menu [class*="animate-spin"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  transform-origin: center;
+}
+
+.bn-suggestion-menu .animate-spin > svg,
+.bn-suggestion-menu [class*="animate-spin"] > svg {
+  width: 1rem;
+  height: 1rem;
+  color: var(--fg-muted);
+  fill: currentColor;
 }
 
 /* Group label — xs, muted, medium weight */
@@ -299,6 +330,9 @@
 /* Match omi popover — border only, no shadow                     */
 /* ------------------------------------------------------------------ */
 .bn-toolbar.bn-toolbar {
+  display: flex !important;
+  gap: 0.125rem;
+  align-items: center !important;
   padding: 0.25rem !important;
   background-color: var(--bg-component) !important;
   border: 1px solid var(--border-base) !important;
