@@ -56,6 +56,14 @@
   text-underline-offset: 2px;
 }
 
+/* Mention inline content uses a Link internally for navigation but should
+   inherit badge styling, not the underlined-blue link treatment above. */
+.bn-editor [data-inline-content-type="mention"] a,
+.bn-editor [data-inline-content-type="mention"] a:hover {
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
 /* Headings */
 .bn-editor [data-content-type="heading"][data-level="1"] {
   font-family: var(--font-sans);

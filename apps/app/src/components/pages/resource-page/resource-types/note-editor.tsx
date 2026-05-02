@@ -279,6 +279,10 @@ export default function NoteEditor({
     initialContent: initialBlocks,
     extensions: [codeBlockTripleBacktick],
     uploadFile: handleUpload,
+    dropCursor: {
+      width: 2,
+      color: "rgba(115, 115, 115, 0.55)",
+    },
   });
 
   useEffect(() => {

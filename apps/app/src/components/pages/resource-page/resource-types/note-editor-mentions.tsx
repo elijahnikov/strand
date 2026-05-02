@@ -12,12 +12,8 @@ import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { Badge } from "@omi/ui/badge";
 import type { QueryClient } from "@tanstack/react-query";
-import { FileTextIcon, GlobeIcon } from "lucide-react";
-import { FileKindIcon } from "~/components/common/file-kind-icon";
 import { UserAvatar } from "~/components/common/user-avatar";
-import { ResourceBadge } from "../../chat-page/resource-badge";
-
-type ResourceType = "website" | "note" | "file";
+import { ResourceBadge, ResourceIcon } from "../../chat-page/resource-badge";
 
 export const Mention = createReactInlineContentSpec(
   {
@@ -36,16 +32,21 @@ export const Mention = createReactInlineContentSpec(
       const props = inlineContent.props;
       const kind = props.kind === "user" ? "user" : "page";
 
-      if (kind === "user") {
-        return <UserMentionBadge label={props.label} userId={props.entityId} />;
-      }
+      const inner =
+        kind === "user" ? (
+          <UserMentionBadge label={props.label} userId={props.entityId} />
+        ) : (
+          <ResourceBadge
+            resourceId={props.entityId}
+            title={props.label}
+            type={props.resourceType}
+          />
+        );
 
       return (
-        <ResourceBadge
-          resourceId={props.entityId}
-          title={props.label}
-          type={props.resourceType}
-        />
+        <span contentEditable={false} draggable={false}>
+          {inner}
+        </span>
       );
     },
   }
@@ -72,7 +73,7 @@ function UserMentionBadge({
           size={14}
         />
         <span className="min-w-0 truncate font-medium font-sans! text-xs">
-          @{username}
+          {username}
         </span>
       </Badge>
     </span>
@@ -143,7 +144,14 @@ export async function getMentionItems({
   const pageItems: DefaultReactSuggestionItem[] = pages.map((page) => ({
     title: page.title,
     group: "Pages",
-    icon: <PageItemIcon page={page} />,
+    icon: (
+      <ResourceIcon
+        favicon={page.favicon}
+        fileUrl={page.fileUrl}
+        mimeType={page.mimeType}
+        type={page.type}
+      />
+    ),
     onItemClick: () => {
       insertMention(editor, {
         kind: "page",
@@ -156,42 +164,6 @@ export async function getMentionItems({
   }));
 
   return [...peopleItems, ...pageItems];
-}
-
-function PageItemIcon({
-  page,
-}: {
-  page: {
-    type: ResourceType;
-    favicon: string | null;
-    fileUrl: string | null;
-    mimeType: string | null;
-  };
-}) {
-  if (page.type === "website" && page.favicon) {
-    return (
-      <img
-        alt=""
-        className="size-4 rounded-[2px]"
-        height={16}
-        src={page.favicon}
-        width={16}
-      />
-    );
-  }
-  if (page.type === "website") {
-    return <GlobeIcon className="size-4 text-ui-fg-muted" />;
-  }
-  if (page.type === "file") {
-    return (
-      <FileKindIcon
-        className="size-4 text-ui-fg-muted"
-        fileName={undefined}
-        mimeType={page.mimeType ?? undefined}
-      />
-    );
-  }
-  return <FileTextIcon className="size-4 text-ui-fg-muted" />;
 }
 
 function insertMention(
