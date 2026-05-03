@@ -82,18 +82,24 @@ export const oauthCallbackHandler = httpAction(async (ctx, request) => {
       code,
       redirectUri(descriptor.id)
     );
-    const accountInfo = await descriptor.fetchAccountInfo(tokens.accessToken);
-    await ctx.runMutation(internal.connections.internals.insertConnection, {
-      userId: state.userId as Id<"user">,
-      provider: descriptor.id,
-      authType: "oauth2",
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      expiresAt: tokens.expiresAt,
-      scope: tokens.scope,
-      providerAccountId: accountInfo.providerAccountId,
-      providerAccountLabel: accountInfo.providerAccountLabel,
-    });
+    const accountInfo = await descriptor.fetchAccountInfo(
+      tokens.accessToken,
+      tokens.raw
+    );
+    await ctx.runAction(
+      internal.connections.tokens.encryptAndInsertConnection,
+      {
+        userId: state.userId as Id<"user">,
+        provider: descriptor.id,
+        authType: "oauth2",
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        expiresAt: tokens.expiresAt,
+        scope: tokens.scope,
+        providerAccountId: accountInfo.providerAccountId,
+        providerAccountLabel: accountInfo.providerAccountLabel,
+      }
+    );
   } catch (err) {
     const message = err instanceof Error ? err.message : "unknown_error";
     return errorRedirect(state.returnTo, message);

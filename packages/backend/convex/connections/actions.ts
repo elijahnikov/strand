@@ -7,6 +7,7 @@ import { action } from "../_generated/server";
 import { rateLimiter } from "../rateLimiter";
 import { getAuthIdentity } from "../utils";
 import { getApiTokenProvider } from "./providers/registry";
+import { encryptToken } from "./tokens";
 
 export const connectReadwise = action({
   args: { token: v.string() },
@@ -30,13 +31,15 @@ export const connectReadwise = action({
       throw new ConvexError(message);
     });
 
+    const encrypted = encryptToken(token);
     return await ctx.runMutation(
       internal.connections.internals.insertConnection,
       {
         userId: identity.userId as Id<"user">,
         provider: "readwise",
         authType: "api_token",
-        accessToken: token,
+        encryptedAccessToken: encrypted.ciphertext,
+        tokenKeyVersion: encrypted.keyVersion,
         providerAccountId: accountInfo.providerAccountId,
         providerAccountLabel: accountInfo.providerAccountLabel,
       }

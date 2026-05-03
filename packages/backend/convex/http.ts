@@ -1,6 +1,7 @@
 import { httpRouter } from "convex/server";
 import { authComponent, createAuth } from "./auth";
 import { oauthCallbackHandler } from "./connections/oauth/httpRoutes";
+import { webhookHandler as integrationsWebhookHandler } from "./connections/sync/httpRoutes";
 import {
   captureFileHandler,
   captureNoteHandler,
@@ -19,6 +20,23 @@ for (const provider of ["notion", "raindrop", "google_drive"] as const) {
     path: `/api/oauth/${provider}/callback`,
     method: "GET",
     handler: oauthCallbackHandler,
+  });
+}
+
+// Provider webhooks for continuous sync. One URL per provider — the payload
+// itself carries a key (e.g. Notion's workspace_id) that the handler uses to
+// route the event to the correct connection.
+// Path shape: /api/integrations/:provider/webhook
+for (const provider of [
+  "notion",
+  "github",
+  "linear",
+  "google_drive",
+] as const) {
+  http.route({
+    path: `/api/integrations/${provider}/webhook`,
+    method: "POST",
+    handler: integrationsWebhookHandler,
   });
 }
 

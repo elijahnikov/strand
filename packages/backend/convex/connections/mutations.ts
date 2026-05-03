@@ -1,5 +1,16 @@
 import { ConvexError, v } from "convex/values";
+import { internal } from "../_generated/api";
+import { requirePlan } from "../billing/resolver";
 import { protectedMutation } from "../utils";
+
+const SYNC_PLANS = ["pro"] as const;
+const WEBHOOK_SECRET_BYTES = 32;
+
+function newWebhookSecret(): string {
+  const bytes = new Uint8Array(WEBHOOK_SECRET_BYTES);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
 
 export const disconnect = protectedMutation({
   args: { connectionId: v.id("connection") },
@@ -13,11 +24,141 @@ export const disconnect = protectedMutation({
     }
     await ctx.db.patch(args.connectionId, {
       status: "revoked",
-      accessToken: "",
+      accessToken: undefined,
       refreshToken: undefined,
+      encryptedAccessToken: undefined,
+      encryptedRefreshToken: undefined,
+      tokenKeyVersion: undefined,
       syncEnabled: false,
       disconnectedAt: Date.now(),
     });
+  },
+});
+
+/**
+ * Pro-only. Turns on continuous sync for a connection: binds it to a workspace,
+ * stores scope selection, and seeds the delta cursor at "now" so the first
+ * sync run only ingests changes that happen *after* this moment. No backfill
+ * of existing content — by design.
+ */
+export const enableSync = protectedMutation({
+  args: {
+    connectionId: v.id("connection"),
+    workspaceId: v.id("workspace"),
+    scopeSelection: v.optional(v.any()),
+  },
+  handler: async (ctx, args) => {
+    await requirePlan(ctx, ctx.user._id, [...SYNC_PLANS], "Continuous sync");
+
+    const connection = await ctx.db.get(args.connectionId);
+    if (!connection || connection.userId !== ctx.user._id) {
+      throw new ConvexError("Connection not found");
+    }
+    if (connection.status !== "active") {
+      throw new ConvexError(`Connection is ${connection.status}`);
+    }
+
+    const member = await ctx.db
+      .query("workspaceMember")
+      .withIndex("by_workspace_user", (q) =>
+        q.eq("workspaceId", args.workspaceId).eq("userId", ctx.user._id)
+      )
+      .first();
+    if (!member) {
+      throw new ConvexError("Not a member of this workspace");
+    }
+
+    await ctx.db.patch(args.connectionId, {
+      workspaceId: args.workspaceId,
+      scopeSelection: args.scopeSelection,
+      syncEnabled: true,
+      webhookSecret: connection.webhookSecret ?? newWebhookSecret(),
+      status: "active",
+      lastSyncedAt: Date.now(),
+    });
+
+    // Seed the delta cursor so the first poll/webhook only sees post-enable
+    // edits. Convention: providers store ISO timestamps as cursors.
+    const nowIso = new Date().toISOString();
+    const existing = await ctx.db
+      .query("syncCursor")
+      .withIndex("by_connection_scope", (q) =>
+        q.eq("connectionId", args.connectionId).eq("scopeKey", "delta")
+      )
+      .unique();
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        cursor: nowIso,
+        updatedAt: Date.now(),
+      });
+    } else {
+      await ctx.db.insert("syncCursor", {
+        connectionId: args.connectionId,
+        scopeKey: "delta",
+        cursor: nowIso,
+        updatedAt: Date.now(),
+      });
+    }
+  },
+});
+
+export const setScopeSelection = protectedMutation({
+  args: {
+    connectionId: v.id("connection"),
+    scopeSelection: v.any(),
+  },
+  handler: async (ctx, args) => {
+    await requirePlan(ctx, ctx.user._id, [...SYNC_PLANS], "Continuous sync");
+    const connection = await ctx.db.get(args.connectionId);
+    if (!connection || connection.userId !== ctx.user._id) {
+      throw new ConvexError("Connection not found");
+    }
+    await ctx.db.patch(args.connectionId, {
+      scopeSelection: args.scopeSelection,
+    });
+    // Note: changing scope does not retroactively pull existing content; only
+    // changes after this point that match the new scope will be synced.
+  },
+});
+
+export const setSyncPaused = protectedMutation({
+  args: {
+    connectionId: v.id("connection"),
+    paused: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const connection = await ctx.db.get(args.connectionId);
+    if (!connection || connection.userId !== ctx.user._id) {
+      throw new ConvexError("Connection not found");
+    }
+    if (args.paused) {
+      await ctx.db.patch(args.connectionId, {
+        status: "paused",
+        syncEnabled: false,
+      });
+    } else {
+      await requirePlan(ctx, ctx.user._id, [...SYNC_PLANS], "Continuous sync");
+      await ctx.db.patch(args.connectionId, {
+        status: "active",
+        syncEnabled: true,
+      });
+    }
+  },
+});
+
+export const triggerSyncNow = protectedMutation({
+  args: { connectionId: v.id("connection") },
+  handler: async (ctx, args) => {
+    await requirePlan(ctx, ctx.user._id, [...SYNC_PLANS], "Continuous sync");
+    const connection = await ctx.db.get(args.connectionId);
+    if (!connection || connection.userId !== ctx.user._id) {
+      throw new ConvexError("Connection not found");
+    }
+    await ctx.scheduler.runAfter(
+      0,
+      internal.connections.sync.worker.runDelta,
+      { connectionId: args.connectionId }
+    );
   },
 });
 
