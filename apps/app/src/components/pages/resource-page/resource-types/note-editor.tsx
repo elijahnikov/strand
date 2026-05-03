@@ -34,7 +34,7 @@ import { RiSparkling2Fill } from "@remixicon/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useConvex, useMutation } from "convex/react";
 import { ChevronDownIcon } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MAX_FILE_SIZE } from "~/lib/upload-file";
 import {
   AIDraftSpec,
@@ -285,10 +285,16 @@ export default function NoteEditor({
     },
   });
 
+  // Snapshot blocks parsed from the HTML/markdown fallback into resourceContent
+  // so the editor reads jsonContent on subsequent loads. Must only fire ONCE
+  // per mount — re-firing would write the editor's stale in-memory state back
+  // over a fresh sync that just cleared jsonContent.
+  const hasSnapshottedFallbackRef = useRef(false);
   useEffect(() => {
-    if (!fallbackBlocksAreFromImport) {
+    if (!fallbackBlocksAreFromImport || hasSnapshottedFallbackRef.current) {
       return;
     }
+    hasSnapshottedFallbackRef.current = true;
     const json = JSON.stringify(editor.prosemirrorState.doc.toJSON());
     void updateContent({ workspaceId, resourceId, jsonContent: json });
   }, [

@@ -81,6 +81,7 @@ export default function WorkspaceSidebarContent() {
               isActive={item.isActive}
               key={item.title}
               shortcut={getNavShortcutByTitle(item.title)}
+              sidebarOpen={sidebarOpen}
               title={item.title}
               url={item.url}
             />
