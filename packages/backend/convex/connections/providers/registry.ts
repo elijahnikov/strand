@@ -1,3 +1,4 @@
+import { github } from "./github";
 import { googleDrive } from "./google_drive";
 import { notion } from "./notion";
 import { raindrop } from "./raindrop";
@@ -14,6 +15,7 @@ const providers: Partial<Record<ProviderId, ProviderDescriptor>> = {
   raindrop,
   google_drive: googleDrive,
   readwise,
+  github,
 };
 
 export function getProvider(id: ProviderId): ProviderDescriptor {

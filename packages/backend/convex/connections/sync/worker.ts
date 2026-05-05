@@ -1,7 +1,7 @@
 "use node";
 
-import { v } from "convex/values";
 import type { GenericActionCtx } from "convex/server";
+import { v } from "convex/values";
 import { internal } from "../../_generated/api";
 import type { DataModel, Id } from "../../_generated/dataModel";
 import { internalAction } from "../../_generated/server";
@@ -24,7 +24,7 @@ const providerValidator = v.union(
 
 interface PreparedRun {
   connectionId: Id<"connection">;
-  workspaceId: Id<"workspace">;
+  ctx: SyncContext;
   providerId:
     | "notion"
     | "raindrop"
@@ -33,7 +33,7 @@ interface PreparedRun {
     | "github"
     | "linear";
   sync: ProviderSync;
-  ctx: SyncContext;
+  workspaceId: Id<"workspace">;
 }
 
 type ActionCtx = GenericActionCtx<DataModel>;
@@ -162,16 +162,17 @@ export const runDelta = internalAction({
           break;
         }
       }
-      await ctx.runMutation(
-        internal.connections.sync.internals.finishSyncJob,
-        { jobId, status: "completed" }
-      );
+      await ctx.runMutation(internal.connections.sync.internals.finishSyncJob, {
+        jobId,
+        status: "completed",
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      await ctx.runMutation(
-        internal.connections.sync.internals.finishSyncJob,
-        { jobId, status: "failed", lastError: message }
-      );
+      await ctx.runMutation(internal.connections.sync.internals.finishSyncJob, {
+        jobId,
+        status: "failed",
+        lastError: message,
+      });
     }
   },
 });

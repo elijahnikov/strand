@@ -24,4 +24,11 @@ crons.daily(
   {}
 );
 
+crons.interval(
+  "integrations: github stars poll",
+  { minutes: 30 },
+  internal.connections.providers.github_actions.pollAllStars,
+  {}
+);
+
 export default crons;

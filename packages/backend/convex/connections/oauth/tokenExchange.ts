@@ -3,10 +3,10 @@ import type { OAuth2ProviderDescriptor } from "../providers/types";
 export interface TokenResponse {
   accessToken: string;
   expiresAt?: number;
-  refreshToken?: string;
-  scope?: string;
   // Provider-specific extras (e.g. Notion's workspace_id, bot_id).
   raw: Record<string, unknown>;
+  refreshToken?: string;
+  scope?: string;
 }
 
 interface RawTokenResponse {

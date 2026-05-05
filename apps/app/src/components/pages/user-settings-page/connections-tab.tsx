@@ -7,6 +7,7 @@ import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
 import { Badge } from "@omi/ui/badge";
 import { Button } from "@omi/ui/button";
+import { Checkbox } from "@omi/ui/checkbox";
 import {
   Dialog,
   DialogClose,
@@ -26,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@omi/ui/select";
+import { Switch } from "@omi/ui/switch";
 import { Text } from "@omi/ui/text";
 import { toastManager } from "@omi/ui/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -33,7 +35,7 @@ import { ConvexError } from "convex/values";
 import { useEffect, useMemo, useState } from "react";
 import { INTEGRATION_LOGO } from "~/components/pages/settings-page/import-tab/integration-logos";
 
-type ProviderId = "notion" | "raindrop" | "readwise";
+type ProviderId = "notion" | "raindrop" | "readwise" | "github";
 
 type AuthType = "oauth2" | "api_token";
 
@@ -68,12 +70,20 @@ const UI_PROVIDERS: UiProviderDescriptor[] = [
       "Import bookmarks, collections, and highlights from your Raindrop account.",
     authType: "oauth2",
   },
+  {
+    id: "github",
+    label: "GitHub",
+    description:
+      "Sync issues and pull requests from selected repositories. Optional: track new stars.",
+    authType: "oauth2",
+  },
 ];
 
-const PROVIDER_LOGO_ID: Record<ProviderId, string> = {
+const PROVIDER_LOGO_ID: Partial<Record<ProviderId, string>> = {
   notion: "notion_oauth",
   raindrop: "raindrop_oauth",
   readwise: "readwise",
+  github: "github",
 };
 
 type ConnectionStatus = "active" | "expired" | "error" | "paused";
@@ -243,67 +253,70 @@ function ProviderCard({
   const activeConnection =
     connection && connection.status !== "revoked" ? connection : undefined;
   const status = activeConnection?.status as ConnectionStatus | undefined;
-  const Logo = INTEGRATION_LOGO[PROVIDER_LOGO_ID[providerId]];
+  const logoId = PROVIDER_LOGO_ID[providerId];
+  const Logo = logoId ? INTEGRATION_LOGO[logoId] : undefined;
 
   return (
     <div className="flex flex-col gap-3 rounded-lg p-4 hover:bg-ui-bg-component">
       <div className="flex items-start justify-between gap-4">
-      <div className="flex min-w-0 items-start gap-3">
-        {Logo && (
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center">
-            <Logo aria-hidden="true" className="h-8 w-8" />
-          </div>
-        )}
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <Text className="font-medium">{label}</Text>
-            {status && (
-              <Badge variant={STATUS_VARIANT[status]}>
-                {STATUS_LABEL[status]}
-              </Badge>
+        <div className="flex min-w-0 items-start gap-3">
+          {Logo && (
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center">
+              <Logo aria-hidden="true" className="h-8 w-8" />
+            </div>
+          )}
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <Text className="font-medium">{label}</Text>
+              {status && (
+                <Badge variant={STATUS_VARIANT[status]}>
+                  {STATUS_LABEL[status]}
+                </Badge>
+              )}
+            </div>
+            <Text className="mt-1 text-ui-fg-subtle" size="small">
+              {description}
+            </Text>
+            {activeConnection?.providerAccountLabel && (
+              <Text className="mt-2 text-ui-fg-muted" size="small">
+                {activeConnection.providerAccountLabel}
+              </Text>
+            )}
+            {status === "error" && activeConnection?.lastError && (
+              <Text className="mt-2 text-ui-fg-error" size="small">
+                {activeConnection.lastError}
+              </Text>
             )}
           </div>
-          <Text className="mt-1 text-ui-fg-subtle" size="small">
-            {description}
-          </Text>
-          {activeConnection?.providerAccountLabel && (
-            <Text className="mt-2 text-ui-fg-muted" size="small">
-              {activeConnection.providerAccountLabel}
-            </Text>
-          )}
-          {status === "error" && activeConnection?.lastError && (
-            <Text className="mt-2 text-ui-fg-error" size="small">
-              {activeConnection.lastError}
-            </Text>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          {activeConnection ? (
+            <>
+              <Button
+                data-provider={providerId}
+                onClick={onConnect}
+                size="small"
+                variant="secondary"
+              >
+                Reconnect
+              </Button>
+              <LoadingButton
+                loading={disconnecting}
+                onClick={() =>
+                  disconnect({ connectionId: activeConnection._id })
+                }
+                size="small"
+                variant="secondary"
+              >
+                Disconnect
+              </LoadingButton>
+            </>
+          ) : (
+            <Button onClick={onConnect} size="small" variant="omi">
+              Connect
+            </Button>
           )}
         </div>
-      </div>
-      <div className="flex shrink-0 items-center gap-2">
-        {activeConnection ? (
-          <>
-            <Button
-              data-provider={providerId}
-              onClick={onConnect}
-              size="small"
-              variant="secondary"
-            >
-              Reconnect
-            </Button>
-            <LoadingButton
-              loading={disconnecting}
-              onClick={() => disconnect({ connectionId: activeConnection._id })}
-              size="small"
-              variant="secondary"
-            >
-              Disconnect
-            </LoadingButton>
-          </>
-        ) : (
-          <Button onClick={onConnect} size="small" variant="omi">
-            Connect
-          </Button>
-        )}
-      </div>
       </div>
       {activeConnection?.supportsSync ? (
         <SyncControls connection={activeConnection} />
@@ -327,6 +340,7 @@ function SyncControls({ connection }: { connection: ConnectionRow }) {
   const [pickerWorkspace, setPickerWorkspace] = useState<
     Id<"workspace"> | undefined
   >(undefined);
+  const [githubDialogOpen, setGithubDialogOpen] = useState(false);
 
   const defaultWorkspace = useMemo(() => {
     if (connection.workspaceId) {
@@ -394,14 +408,45 @@ function SyncControls({ connection }: { connection: ConnectionRow }) {
   }
 
   if (!connection.syncEnabled) {
+    if (connection.provider === "github") {
+      return (
+        <>
+          <div className="flex flex-col gap-2 rounded-md border border-ui-border-base bg-ui-bg-subtle px-3 py-2">
+            <Text className="font-medium" size="small">
+              Continuous sync
+            </Text>
+            <Text className="text-ui-fg-subtle" size="small">
+              Pick which repositories to subscribe to and choose the workspace
+              their issues + PRs land in.
+            </Text>
+            <div className="mt-1">
+              <Button
+                onClick={() => setGithubDialogOpen(true)}
+                size="small"
+                variant="omi"
+              >
+                Configure sync
+              </Button>
+            </div>
+          </div>
+          <GithubScopeDialog
+            connectionId={connection._id}
+            defaultWorkspaceId={defaultWorkspace}
+            onOpenChange={setGithubDialogOpen}
+            open={githubDialogOpen}
+            workspaces={workspaces ?? []}
+          />
+        </>
+      );
+    }
+
     return (
       <div className="flex flex-col gap-2 rounded-md border border-ui-border-base bg-ui-bg-subtle px-3 py-2">
         <Text className="font-medium" size="small">
           Continuous sync
         </Text>
         <Text className="text-ui-fg-subtle" size="small">
-          Pull this account into a workspace and keep it in sync. Initial
-          backfill caps at 10,000 items.
+          Pull this account into a workspace and keep it in sync.
         </Text>
         <div className="mt-1 flex items-center gap-2">
           <Select
@@ -449,7 +494,7 @@ function SyncControls({ connection }: { connection: ConnectionRow }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-ui-border-base bg-ui-bg-subtle px-3 py-2">
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-md px-3 py-2">
       <div className="flex items-center gap-2">
         <Badge variant={isActiveSync ? "mono" : "warning"}>
           {isActiveSync ? "Sync on" : "Paused"}
@@ -678,6 +723,264 @@ function TokenDialog({
             variant="omi"
           >
             Connect
+          </LoadingButton>
+        </DialogFooter>
+      </DialogPopup>
+    </Dialog>
+  );
+}
+
+interface GithubRepo {
+  description: string | null;
+  fullName: string;
+  private: boolean;
+}
+
+function GithubScopeDialog({
+  connectionId,
+  defaultWorkspaceId,
+  onOpenChange,
+  open,
+  workspaces,
+}: {
+  connectionId: Id<"connection">;
+  defaultWorkspaceId: Id<"workspace"> | undefined;
+  onOpenChange: (next: boolean) => void;
+  open: boolean;
+  workspaces: Array<{ _id: Id<"workspace">; name: string }>;
+}) {
+  const listRepos = useConvexAction(
+    api.connections.providers.github_actions.listMyRepos
+  );
+  const enableSync = useConvexMutation(api.connections.mutations.enableSync);
+
+  const [repos, setRepos] = useState<GithubRepo[] | null>(null);
+  const [loadingRepos, setLoadingRepos] = useState(false);
+  const [selectedRepos, setSelectedRepos] = useState<Set<string>>(new Set());
+  const [starsEnabled, setStarsEnabled] = useState(false);
+  const [workspaceId, setWorkspaceId] = useState<Id<"workspace"> | undefined>(
+    defaultWorkspaceId
+  );
+  const [filter, setFilter] = useState("");
+  const [enabling, setEnabling] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    setLoadingRepos(true);
+    listRepos({ connectionId })
+      .then((result) => setRepos(result))
+      .catch((err) => {
+        const message =
+          err instanceof ConvexError && typeof err.data === "string"
+            ? err.data
+            : err instanceof Error
+              ? err.message
+              : "Unknown error";
+        toastManager.add({
+          type: "error",
+          title: "Could not load repositories",
+          description: message,
+        });
+        setRepos([]);
+      })
+      .finally(() => setLoadingRepos(false));
+  }, [open, connectionId, listRepos]);
+
+  useEffect(() => {
+    setWorkspaceId(defaultWorkspaceId);
+  }, [defaultWorkspaceId]);
+
+  const toggleRepo = (name: string) => {
+    setSelectedRepos((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) {
+        next.delete(name);
+      } else {
+        next.add(name);
+      }
+      return next;
+    });
+  };
+
+  const filtered = useMemo(() => {
+    if (!repos) {
+      return [];
+    }
+    const q = filter.trim().toLowerCase();
+    if (!q) {
+      return repos;
+    }
+    return repos.filter((r) => r.fullName.toLowerCase().includes(q));
+  }, [repos, filter]);
+
+  const canEnable =
+    !!workspaceId && (selectedRepos.size > 0 || starsEnabled) && !enabling;
+
+  const handleEnable = async () => {
+    if (!workspaceId) {
+      return;
+    }
+    setEnabling(true);
+    try {
+      await enableSync({
+        connectionId,
+        workspaceId,
+        scopeSelection: {
+          repos: Array.from(selectedRepos).map((name) => ({ name })),
+          starsEnabled,
+        },
+      });
+      toastManager.add({
+        type: "success",
+        title: "Sync enabled",
+        description: starsEnabled
+          ? "Webhooks registering on selected repos. Stars baseline captured shortly."
+          : "Webhooks registering on selected repos.",
+      });
+      onOpenChange(false);
+    } catch (err) {
+      const message =
+        err instanceof ConvexError && typeof err.data === "string"
+          ? err.data
+          : err instanceof Error
+            ? err.message
+            : "Unknown error";
+      toastManager.add({
+        type: "error",
+        title: "Could not enable sync",
+        description: message,
+      });
+    } finally {
+      setEnabling(false);
+    }
+  };
+
+  return (
+    <Dialog onOpenChange={onOpenChange} open={open}>
+      <DialogPopup className="max-w-xl!">
+        <DialogHeader>
+          <DialogTitle className="font-medium text-sm">
+            Configure GitHub sync
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-4 px-6 py-4">
+          <div className="flex flex-col gap-1.5">
+            <Text className="font-medium" size="small">
+              Workspace
+            </Text>
+            <Select
+              onValueChange={(val) => {
+                if (typeof val === "string") {
+                  setWorkspaceId(val as Id<"workspace">);
+                }
+              }}
+              value={workspaceId ?? ""}
+            >
+              <SelectTrigger>
+                <SelectValue>
+                  {workspaces.find((w) => w._id === workspaceId)?.name ??
+                    "Select workspace"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectPopup alignItemWithTrigger={false}>
+                {workspaces.map((w) => (
+                  <SelectItem key={w._id} value={w._id}>
+                    {w.name}
+                  </SelectItem>
+                ))}
+              </SelectPopup>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Text className="font-medium" size="small">
+              Repositories
+            </Text>
+            <Text className="text-ui-fg-subtle" size="small">
+              Issues and pull requests in checked repos will sync via webhooks.
+              Only repos where you have admin permissions are listed.
+            </Text>
+            <Input
+              onChange={(e) => setFilter(e.target.value)}
+              placeholder="Filter repos…"
+              type="search"
+              value={filter}
+            />
+            <div className="max-h-72 overflow-y-auto rounded-md border border-ui-border-base">
+              {loadingRepos ? (
+                <div className="px-3 py-4">
+                  <Text className="text-ui-fg-subtle" size="small">
+                    Loading repositories…
+                  </Text>
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="px-3 py-4">
+                  <Text className="text-ui-fg-subtle" size="small">
+                    {repos && repos.length === 0
+                      ? "No admin-eligible repositories found on your account."
+                      : "No repos match the filter."}
+                  </Text>
+                </div>
+              ) : (
+                filtered.map((r) => (
+                  <label
+                    className="flex cursor-pointer items-start gap-2 px-3 py-2 hover:bg-ui-bg-component"
+                    key={r.fullName}
+                  >
+                    <Checkbox
+                      checked={selectedRepos.has(r.fullName)}
+                      onCheckedChange={() => toggleRepo(r.fullName)}
+                    />
+                    <div className="min-w-0">
+                      <Text className="font-medium" size="small">
+                        {r.fullName}
+                        {r.private ? (
+                          <Badge className="ml-2" variant="warning">
+                            private
+                          </Badge>
+                        ) : null}
+                      </Text>
+                      {r.description ? (
+                        <Text className="text-ui-fg-subtle" size="small">
+                          {r.description}
+                        </Text>
+                      ) : null}
+                    </div>
+                  </label>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between rounded-md border border-ui-border-base px-3 py-2">
+            <div>
+              <Text className="font-medium" size="small">
+                Track new stars
+              </Text>
+              <Text className="text-ui-fg-subtle" size="small">
+                Adds a resource for each repo you star going forward. Existing
+                stars are not pulled in.
+              </Text>
+            </div>
+            <Switch
+              checked={starsEnabled}
+              onCheckedChange={(next) => setStarsEnabled(Boolean(next))}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <DialogClose render={<Button variant="secondary" />}>
+            Cancel
+          </DialogClose>
+          <LoadingButton
+            disabled={!canEnable}
+            loading={enabling}
+            onClick={handleEnable}
+            variant="omi"
+          >
+            Enable sync
           </LoadingButton>
         </DialogFooter>
       </DialogPopup>

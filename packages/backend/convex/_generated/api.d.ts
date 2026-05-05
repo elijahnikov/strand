@@ -36,6 +36,9 @@ import type * as connections_oauth_authorize from "../connections/oauth/authoriz
 import type * as connections_oauth_httpRoutes from "../connections/oauth/httpRoutes.js";
 import type * as connections_oauth_stateSigner from "../connections/oauth/stateSigner.js";
 import type * as connections_oauth_tokenExchange from "../connections/oauth/tokenExchange.js";
+import type * as connections_providers_github from "../connections/providers/github.js";
+import type * as connections_providers_github_actions from "../connections/providers/github_actions.js";
+import type * as connections_providers_github_internals from "../connections/providers/github_internals.js";
 import type * as connections_providers_google_drive from "../connections/providers/google_drive.js";
 import type * as connections_providers_notion from "../connections/providers/notion.js";
 import type * as connections_providers_raindrop from "../connections/providers/raindrop.js";
@@ -145,6 +148,9 @@ declare const fullApi: ApiFromModules<{
   "connections/oauth/httpRoutes": typeof connections_oauth_httpRoutes;
   "connections/oauth/stateSigner": typeof connections_oauth_stateSigner;
   "connections/oauth/tokenExchange": typeof connections_oauth_tokenExchange;
+  "connections/providers/github": typeof connections_providers_github;
+  "connections/providers/github_actions": typeof connections_providers_github_actions;
+  "connections/providers/github_internals": typeof connections_providers_github_internals;
   "connections/providers/google_drive": typeof connections_providers_google_drive;
   "connections/providers/notion": typeof connections_providers_notion;
   "connections/providers/raindrop": typeof connections_providers_raindrop;

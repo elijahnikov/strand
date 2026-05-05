@@ -12,6 +12,17 @@ function newWebhookSecret(): string {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+interface GitHubScopeSelection {
+  repos?: Array<{ name: string; hookId?: number }>;
+  starsEnabled?: boolean;
+  starsSnapshot?: string[];
+}
+
+function githubRepoNames(scope: unknown): string[] {
+  const s = scope as GitHubScopeSelection | undefined;
+  return s?.repos?.map((r) => r.name) ?? [];
+}
+
 export const disconnect = protectedMutation({
   args: { connectionId: v.id("connection") },
   handler: async (ctx, args) => {
@@ -22,6 +33,23 @@ export const disconnect = protectedMutation({
     if (connection.status === "revoked") {
       return;
     }
+
+    if (connection.provider === "github") {
+      // Keep the token alive for the cleanup action; mark sync off + status=
+      // disconnecting so it can't be used for new sync work. The action zeroes
+      // out the token after the GitHub DELETE calls finish.
+      await ctx.db.patch(args.connectionId, {
+        syncEnabled: false,
+        disconnectedAt: Date.now(),
+      });
+      await ctx.scheduler.runAfter(
+        0,
+        internal.connections.providers.github_actions.disconnectAndCleanup,
+        { connectionId: args.connectionId }
+      );
+      return;
+    }
+
     await ctx.db.patch(args.connectionId, {
       status: "revoked",
       accessToken: undefined,
@@ -99,6 +127,20 @@ export const enableSync = protectedMutation({
         updatedAt: Date.now(),
       });
     }
+
+    // GitHub: register webhooks on each picked repo. Action runs async so the
+    // mutation returns immediately; user sees the "Sync on" state right away
+    // and webhooks come online a few seconds later.
+    if (connection.provider === "github") {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.connections.providers.github_actions.reconcileWebhooks,
+        {
+          connectionId: args.connectionId,
+          targetRepos: githubRepoNames(args.scopeSelection),
+        }
+      );
+    }
   },
 });
 
@@ -118,6 +160,17 @@ export const setScopeSelection = protectedMutation({
     });
     // Note: changing scope does not retroactively pull existing content; only
     // changes after this point that match the new scope will be synced.
+
+    if (connection.provider === "github") {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.connections.providers.github_actions.reconcileWebhooks,
+        {
+          connectionId: args.connectionId,
+          targetRepos: githubRepoNames(args.scopeSelection),
+        }
+      );
+    }
   },
 });
 
@@ -154,11 +207,9 @@ export const triggerSyncNow = protectedMutation({
     if (!connection || connection.userId !== ctx.user._id) {
       throw new ConvexError("Connection not found");
     }
-    await ctx.scheduler.runAfter(
-      0,
-      internal.connections.sync.worker.runDelta,
-      { connectionId: args.connectionId }
-    );
+    await ctx.scheduler.runAfter(0, internal.connections.sync.worker.runDelta, {
+      connectionId: args.connectionId,
+    });
   },
 });
 

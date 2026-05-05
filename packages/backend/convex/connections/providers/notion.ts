@@ -64,9 +64,9 @@ interface NotionBlockChildrenResponse {
 }
 
 interface NotionItem {
+  html: string;
   page: NotionPage;
   plaintext: string;
-  html: string;
 }
 
 const HTML_ESCAPE: Record<string, string> = {
@@ -286,8 +286,8 @@ interface NotionWebhookPayload {
   entity?: { id?: string; type?: string };
   id?: string; // Notion event id
   type?: string; // e.g. "page.content_updated", "page.deleted"
-  workspace_id?: string; // identifies the source workspace; used for connection lookup
   verification_token?: string; // present in the one-time verification request
+  workspace_id?: string; // identifies the source workspace; used for connection lookup
 }
 
 async function verifyHmac(

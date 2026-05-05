@@ -19,17 +19,17 @@ export interface ProviderAccountInfo {
  * resource / noteResource / websiteResource / fileResource tables.
  */
 export interface ResourceUpsert {
+  description?: string;
   externalId: string;
   externalUrl?: string;
-  type: "website" | "note" | "file";
-  title: string;
-  description?: string;
   // Polymorphic payload — the worker dispatches by `type`.
   note?: {
     htmlContent?: string;
     jsonContent?: string;
     plainTextContent?: string;
   };
+  title: string;
+  type: "website" | "note" | "file";
   website?: {
     url: string;
     domain?: string;
@@ -44,14 +44,14 @@ export interface ResourceUpsert {
 }
 
 export interface WebhookEvent {
-  kind: "upsert" | "delete";
-  externalId: string;
-  // Provider-supplied unique ID for this delivery (used for dedupe via syncEvent table).
-  eventId: string;
   // For integration-level webhook URLs (Notion, GitHub) this identifies which
   // connection the event belongs to — looked up by `connection.providerAccountId`.
   // Required when the URL is shared across all connections of a provider.
   connectionLookupKey?: string;
+  // Provider-supplied unique ID for this delivery (used for dedupe via syncEvent table).
+  eventId: string;
+  externalId: string;
+  kind: "upsert" | "delete";
   // Optional inline payload — when absent, the worker calls fetchOne(externalId).
   rawItem?: unknown;
 }
@@ -64,16 +64,16 @@ export type WebhookParseResult =
   | { kind: "events"; events: WebhookEvent[] };
 
 export interface SyncBatch {
-  items: unknown[];
   cursor?: string;
   done: boolean;
+  items: unknown[];
 }
 
 export interface SyncContext {
   accessToken: string;
+  connectionId: string;
   scopeSelection: unknown;
   workspaceId: string;
-  connectionId: string;
 }
 
 /**
@@ -81,10 +81,24 @@ export interface SyncContext {
  * supports continuous (Pro-only) sync.
  */
 export interface ProviderSync {
+  // Fetch a single item by external ID (used when webhooks ship IDs only).
+  fetchOne?(ctx: SyncContext, externalId: string): Promise<unknown | null>;
   // "webhook": real-time push, no scheduled polling.
   // "poll":    no webhook support; rely on cron poll fallback.
   // "hybrid":  webhook primary + low-frequency poll for catch-up.
   kind: "webhook" | "poll" | "hybrid";
+
+  // Parse a webhook delivery. Provider implementations:
+  //   - read their own HMAC secret from env (Notion: NOTION_WEBHOOK_TOKEN) or
+  //     from the per-connection `secret` arg (GitHub: connection.webhookSecret)
+  //   - detect the provider's verification flow and surface that token via
+  //     `kind: "verification"` so the operator can finish setup
+  //   - return `kind: "events"` with normalized events for real deliveries
+  // Returns null when the signature fails (handler should 401).
+  parseWebhook?(
+    req: Request,
+    secret?: string
+  ): Promise<WebhookParseResult | null>;
 
   // Yields items changed since `cursor`. Used by both the cron fallback and
   // catch-up after webhook downtime. Sync starts from the moment enableSync
@@ -92,20 +106,6 @@ export interface ProviderSync {
   pollDelta(
     ctx: SyncContext & { cursor: string | undefined }
   ): AsyncIterable<SyncBatch>;
-
-  // Parse a webhook delivery. Provider implementations:
-  //   - read their own HMAC secret from env (e.g. NOTION_WEBHOOK_TOKEN)
-  //   - detect the provider's verification flow and surface that token via
-  //     `kind: "verification"` so the operator can finish setup
-  //   - return `kind: "events"` with normalized events for real deliveries
-  // Returns null when the signature fails (handler should 401).
-  parseWebhook?(req: Request): Promise<WebhookParseResult | null>;
-
-  // Fetch a single item by external ID (used when webhooks ship IDs only).
-  fetchOne?(
-    ctx: SyncContext,
-    externalId: string
-  ): Promise<unknown | null>;
 
   // Map a raw provider item to a canonical ResourceUpsert.
   toResource(rawItem: unknown, ctx: SyncContext): ResourceUpsert;
@@ -127,18 +127,18 @@ export interface OAuth2ProviderDescriptor {
   id: ProviderId;
   label: string;
   scopes: string[];
-  tokenAuthStyle?: "header" | "body";
-  tokenUrl: string;
   // Present when this provider supports continuous (Pro-only) sync.
   sync?: ProviderSync;
+  tokenAuthStyle?: "header" | "body";
+  tokenUrl: string;
 }
 
 export interface ApiTokenProviderDescriptor {
   authType: "api_token";
   id: ProviderId;
   label: string;
-  validateToken: (token: string) => Promise<ProviderAccountInfo>;
   sync?: ProviderSync;
+  validateToken: (token: string) => Promise<ProviderAccountInfo>;
 }
 
 export type ProviderDescriptor =

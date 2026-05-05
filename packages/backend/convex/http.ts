@@ -1,7 +1,10 @@
 import { httpRouter } from "convex/server";
 import { authComponent, createAuth } from "./auth";
 import { oauthCallbackHandler } from "./connections/oauth/httpRoutes";
-import { webhookHandler as integrationsWebhookHandler } from "./connections/sync/httpRoutes";
+import {
+  webhookHandler as integrationsWebhookHandler,
+  webhookHandlerByConnection as integrationsWebhookHandlerByConnection,
+} from "./connections/sync/httpRoutes";
 import {
   captureFileHandler,
   captureNoteHandler,
@@ -15,7 +18,12 @@ const http = httpRouter();
 
 authComponent.registerRoutes(http, createAuth);
 
-for (const provider of ["notion", "raindrop", "google_drive"] as const) {
+for (const provider of [
+  "notion",
+  "raindrop",
+  "google_drive",
+  "github",
+] as const) {
   http.route({
     path: `/api/oauth/${provider}/callback`,
     method: "GET",
@@ -23,20 +31,24 @@ for (const provider of ["notion", "raindrop", "google_drive"] as const) {
   });
 }
 
-// Provider webhooks for continuous sync. One URL per provider — the payload
-// itself carries a key (e.g. Notion's workspace_id) that the handler uses to
-// route the event to the correct connection.
-// Path shape: /api/integrations/:provider/webhook
-for (const provider of [
-  "notion",
-  "github",
-  "linear",
-  "google_drive",
-] as const) {
+// Provider webhooks for continuous sync.
+//   - Notion / Drive use ONE URL per provider; payload carries a key
+//     (e.g. workspace_id) that routes the event to the right connection.
+//   - GitHub / Linear use ONE URL per CONNECTION; the connectionId is encoded
+//     directly in the path. They register a unique URL per webhook anyway, so
+//     this is the simpler shape.
+for (const provider of ["notion", "google_drive"] as const) {
   http.route({
     path: `/api/integrations/${provider}/webhook`,
     method: "POST",
     handler: integrationsWebhookHandler,
+  });
+}
+for (const provider of ["github", "linear"] as const) {
+  http.route({
+    pathPrefix: `/api/integrations/${provider}/webhook/`,
+    method: "POST",
+    handler: integrationsWebhookHandlerByConnection,
   });
 }
 

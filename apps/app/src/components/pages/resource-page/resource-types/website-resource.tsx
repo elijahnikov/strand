@@ -669,6 +669,7 @@ export function WebsiteResource({ resource }: { resource: GetResourceData }) {
       )}
       <Suspense fallback={<div className="mt-6 min-h-[100px]" />}>
         <NoteEditor
+          fallbackHtml={content?.htmlContent ?? undefined}
           initialContent={content?.jsonContent ?? undefined}
           key={resource._id}
           resourceId={resource._id}

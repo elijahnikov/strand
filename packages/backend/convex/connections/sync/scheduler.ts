@@ -29,7 +29,9 @@ export const enqueueDeltaPolls = internalMutation({
       // Idle pause: skip if no member has touched the workspace in IDLE_PAUSE_MS.
       const lastAccess = await ctx.db
         .query("workspaceMember")
-        .withIndex("by_workspace", (q) => q.eq("workspaceId", conn.workspaceId!))
+        .withIndex("by_workspace", (q) =>
+          q.eq("workspaceId", conn.workspaceId!)
+        )
         .collect();
       const mostRecentAccess = lastAccess.reduce(
         (max, m) => Math.max(max, m.lastAccessedAt),

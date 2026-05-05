@@ -197,12 +197,9 @@ export const upsertSyncedResource = internalMutation({
     providerId: v.string(),
     upsert: upsertPayload,
   },
-  handler: async (
-    ctx,
-    args
-  ): Promise<"created" | "updated" | "skipped"> => {
+  handler: async (ctx, args): Promise<"created" | "updated" | "skipped"> => {
     const connection = await ctx.db.get(args.connectionId);
-    if (!connection || !connection.workspaceId) {
+    if (!(connection && connection.workspaceId)) {
       throw new ConvexError("Connection or workspace not found");
     }
 
@@ -274,7 +271,25 @@ export const upsertSyncedResource = internalMutation({
             ogImage: args.upsert.website.ogImage,
             siteName: args.upsert.website.siteName,
             articleContent: args.upsert.website.articleContent,
+            metadataStatus: "completed",
           });
+        }
+        if (args.upsert.website.articleContent) {
+          const editorContent = await ctx.db
+            .query("resourceContent")
+            .withIndex("by_resource", (q) => q.eq("resourceId", existing._id))
+            .unique();
+          if (editorContent) {
+            await ctx.db.replace(editorContent._id, {
+              resourceId: existing._id,
+              htmlContent: args.upsert.website.articleContent,
+            });
+          } else {
+            await ctx.db.insert("resourceContent", {
+              resourceId: existing._id,
+              htmlContent: args.upsert.website.articleContent,
+            });
+          }
         }
       }
       return "updated";
@@ -304,7 +319,7 @@ export const upsertSyncedResource = internalMutation({
     });
 
     // Editor renders from resourceContent (separate from the type-specific
-    // noteResource child). Seed it so edits to synced notes show up.
+    // noteResource/websiteResource child). Seed it so the body shows up.
     if (args.upsert.type === "note" && args.upsert.note) {
       await ctx.db.insert("resourceContent", {
         resourceId,
@@ -312,6 +327,33 @@ export const upsertSyncedResource = internalMutation({
         jsonContent: args.upsert.note.jsonContent,
         plainTextContent: args.upsert.note.plainTextContent,
       });
+    } else if (args.upsert.type === "website" && args.upsert.website) {
+      // Sync provides authoritative metadata directly from the source API
+      // (e.g. GitHub issue body, Notion page) — skip the URL scrape that
+      // leaves metadataStatus stuck on "pending" for private repos.
+      const website = args.upsert.website;
+      const child = await ctx.db
+        .query("websiteResource")
+        .withIndex("by_resource", (q) => q.eq("resourceId", resourceId))
+        .unique();
+      if (child) {
+        await ctx.db.patch(child._id, {
+          domain: website.domain ?? child.domain,
+          favicon: website.favicon,
+          ogTitle: website.ogTitle,
+          ogDescription: website.ogDescription,
+          ogImage: website.ogImage,
+          siteName: website.siteName,
+          articleContent: website.articleContent,
+          metadataStatus: "completed",
+        });
+      }
+      if (website.articleContent) {
+        await ctx.db.insert("resourceContent", {
+          resourceId,
+          htmlContent: website.articleContent,
+        });
+      }
     }
     return "created";
   },
