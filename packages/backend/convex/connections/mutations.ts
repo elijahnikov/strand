@@ -73,6 +73,7 @@ export const enableSync = protectedMutation({
   args: {
     connectionId: v.id("connection"),
     workspaceId: v.id("workspace"),
+    destinationCollectionId: v.optional(v.id("collection")),
     scopeSelection: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
@@ -96,8 +97,20 @@ export const enableSync = protectedMutation({
       throw new ConvexError("Not a member of this workspace");
     }
 
+    if (args.destinationCollectionId) {
+      const collection = await ctx.db.get(args.destinationCollectionId);
+      if (
+        !collection ||
+        collection.workspaceId !== args.workspaceId ||
+        collection.deletedAt
+      ) {
+        throw new ConvexError("Destination collection not found");
+      }
+    }
+
     await ctx.db.patch(args.connectionId, {
       workspaceId: args.workspaceId,
+      destinationCollectionId: args.destinationCollectionId,
       scopeSelection: args.scopeSelection,
       syncEnabled: true,
       webhookSecret: connection.webhookSecret ?? newWebhookSecret(),
@@ -171,6 +184,36 @@ export const setScopeSelection = protectedMutation({
         }
       );
     }
+  },
+});
+
+export const setDestinationCollection = protectedMutation({
+  args: {
+    connectionId: v.id("connection"),
+    destinationCollectionId: v.optional(v.id("collection")),
+  },
+  handler: async (ctx, args) => {
+    await requirePlan(ctx, ctx.user._id, [...SYNC_PLANS], "Continuous sync");
+    const connection = await ctx.db.get(args.connectionId);
+    if (!connection || connection.userId !== ctx.user._id) {
+      throw new ConvexError("Connection not found");
+    }
+    if (!connection.workspaceId) {
+      throw new ConvexError("Enable sync before choosing a destination");
+    }
+    if (args.destinationCollectionId) {
+      const collection = await ctx.db.get(args.destinationCollectionId);
+      if (
+        !collection ||
+        collection.workspaceId !== connection.workspaceId ||
+        collection.deletedAt
+      ) {
+        throw new ConvexError("Destination collection not found");
+      }
+    }
+    await ctx.db.patch(args.connectionId, {
+      destinationCollectionId: args.destinationCollectionId,
+    });
   },
 });
 

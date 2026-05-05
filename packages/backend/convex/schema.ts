@@ -485,6 +485,9 @@ export default defineSchema({
     providerAccountLabel: v.optional(v.string()),
     // Workspace this connection's resources are ingested into
     workspaceId: v.optional(v.id("workspace")),
+    // Optional collection inside the workspace; when unset, synced resources
+    // land at the workspace root.
+    destinationCollectionId: v.optional(v.id("collection")),
     // Per-provider scope selection (repos, page IDs, folder IDs, team IDs, etc.)
     scopeSelection: v.optional(v.any()),
     // HMAC secret used to verify provider webhook deliveries

@@ -4,6 +4,7 @@ import { Text } from "@omi/ui/text";
 import {
   RiArrowLeftLine,
   RiBankCardLine,
+  RiBarChart2Line,
   RiBuilding2Line,
   RiComputerLine,
   RiLinksFill,
@@ -13,10 +14,11 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { PageContent } from "~/components/common/page-content";
 import { AccountTab } from "./account-tab";
+import { BillingTab } from "./billing-tab";
 import { ConnectionsTab } from "./connections-tab";
 import { DevicesTab } from "./devices-tab";
 import { GeneralTab } from "./general-tab";
-import { UsageAndBillingTab } from "./usage-and-billing-tab";
+import { UsageTab } from "./usage-tab";
 import { WorkspacesTab } from "./workspaces-tab";
 
 export type UserSettingsTab =
@@ -24,6 +26,7 @@ export type UserSettingsTab =
   | "workspaces"
   | "connections"
   | "devices"
+  | "usage"
   | "billing"
   | "account";
 
@@ -72,7 +75,7 @@ export function UserSettingsPageComponent({
             <TabsTrigger className="grow-0 pl-3" value="connections">
               <RiLinksFill className="size-4" />
               <Text className="ml-1 font-medium" size="small">
-                Connections
+                Integrations
               </Text>
             </TabsTrigger>
             <TabsTrigger className="grow-0 pl-3" value="devices">
@@ -81,10 +84,16 @@ export function UserSettingsPageComponent({
                 Devices
               </Text>
             </TabsTrigger>
+            <TabsTrigger className="grow-0 pl-3" value="usage">
+              <RiBarChart2Line className="size-4" />
+              <Text className="ml-1 font-medium" size="small">
+                Usage
+              </Text>
+            </TabsTrigger>
             <TabsTrigger className="grow-0 pl-3" value="billing">
               <RiBankCardLine className="size-4" />
               <Text className="ml-1 font-medium" size="small">
-                Usage & Billing
+                Billing
               </Text>
             </TabsTrigger>
             <TabsTrigger className="grow-0 pl-3" value="account">
@@ -108,8 +117,11 @@ export function UserSettingsPageComponent({
           <TabsContent className="pl-8" value="devices">
             <DevicesTab />
           </TabsContent>
+          <TabsContent className="pl-8" value="usage">
+            <UsageTab />
+          </TabsContent>
           <TabsContent className="pl-8" value="billing">
-            <UsageAndBillingTab />
+            <BillingTab />
           </TabsContent>
           <TabsContent className="pl-8" value="account">
             <AccountTab />

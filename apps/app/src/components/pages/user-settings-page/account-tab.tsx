@@ -83,7 +83,7 @@ export function AccountTab() {
         </Text>
       </div>
 
-      <div className="mb-4 flex items-center justify-between gap-4 rounded-lg border-[0.5px] bg-ui-bg-field p-4">
+      <div className="mb-4 flex items-center justify-between gap-4 py-4">
         <div className="min-w-0">
           <Text className="font-medium">Sign out</Text>
           <Text className="text-ui-fg-subtle" size="small">
@@ -95,7 +95,7 @@ export function AccountTab() {
         </Button>
       </div>
 
-      <div className="mb-4 flex items-center justify-between gap-4 rounded-lg border-[0.5px] bg-ui-bg-field p-4">
+      <div className="mb-4 flex items-center justify-between gap-4 py-4">
         <div className="min-w-0">
           <Text className="font-medium">Export data</Text>
           <Text className="text-ui-fg-subtle" size="small">
@@ -113,7 +113,7 @@ export function AccountTab() {
         </LoadingButton>
       </div>
 
-      <div className="flex items-center justify-between gap-4 rounded-lg border-[0.5px] border-ui-border-error bg-ui-bg-field p-4">
+      <div className="flex items-center justify-between gap-4 py-4">
         <div className="min-w-0">
           <Text className="font-medium text-ui-fg-error">Delete account</Text>
           <Text className="text-ui-fg-subtle" size="small">

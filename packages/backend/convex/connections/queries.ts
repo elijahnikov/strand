@@ -37,6 +37,8 @@ export const listMyConnections = protectedQuery({
         syncEnabled: c.syncEnabled,
         lastSyncedAt: c.lastSyncedAt,
         workspaceId: c.workspaceId,
+        destinationCollectionId: c.destinationCollectionId,
+        scopeSelection: c.scopeSelection,
         supportsSync: providerSupportsSync(c.provider),
         createdAt: c.createdAt,
       }));

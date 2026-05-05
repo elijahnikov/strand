@@ -199,7 +199,7 @@ export const upsertSyncedResource = internalMutation({
   },
   handler: async (ctx, args): Promise<"created" | "updated" | "skipped"> => {
     const connection = await ctx.db.get(args.connectionId);
-    if (!(connection && connection.workspaceId)) {
+    if (!connection?.workspaceId) {
       throw new ConvexError("Connection or workspace not found");
     }
 
@@ -307,6 +307,7 @@ export const upsertSyncedResource = internalMutation({
         args.upsert.note?.htmlContent ?? args.upsert.website?.articleContent,
       jsonContent: args.upsert.note?.jsonContent,
       plainTextContent: args.upsert.note?.plainTextContent,
+      collectionId: connection.destinationCollectionId,
       importedFrom,
     });
 
