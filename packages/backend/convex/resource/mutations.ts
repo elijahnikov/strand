@@ -306,11 +306,24 @@ export const updateContent = workspaceMutation({
       .withIndex("by_resource", (q) => q.eq("resourceId", args.resourceId))
       .unique();
 
-    const patch = {
-      htmlContent: args.htmlContent,
-      jsonContent: args.jsonContent,
-      plainTextContent: args.plainTextContent,
-    };
+    // Only patch fields the caller actually provided; passing `undefined`
+    // through to db.patch would clear the existing value, which conflicts with
+    // sync (which writes htmlContent/plainTextContent and leaves jsonContent
+    // for the editor to manage).
+    const patch: {
+      htmlContent?: string;
+      jsonContent?: string;
+      plainTextContent?: string;
+    } = {};
+    if (args.htmlContent !== undefined) {
+      patch.htmlContent = args.htmlContent;
+    }
+    if (args.jsonContent !== undefined) {
+      patch.jsonContent = args.jsonContent;
+    }
+    if (args.plainTextContent !== undefined) {
+      patch.plainTextContent = args.plainTextContent;
+    }
 
     if (existing) {
       await ctx.db.patch(existing._id, patch);

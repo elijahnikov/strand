@@ -3,6 +3,8 @@ import type { OAuth2ProviderDescriptor } from "../providers/types";
 export interface TokenResponse {
   accessToken: string;
   expiresAt?: number;
+  // Provider-specific extras (e.g. Notion's workspace_id, bot_id).
+  raw: Record<string, unknown>;
   refreshToken?: string;
   scope?: string;
 }
@@ -14,6 +16,7 @@ interface RawTokenResponse {
   expires_in?: number;
   refresh_token?: string;
   scope?: string;
+  [key: string]: unknown;
 }
 
 function parseTokenBody(raw: RawTokenResponse): TokenResponse {
@@ -32,6 +35,7 @@ function parseTokenBody(raw: RawTokenResponse): TokenResponse {
     refreshToken: raw.refresh_token,
     expiresAt: raw.expires_in ? Date.now() + raw.expires_in * 1000 : undefined,
     scope: raw.scope,
+    raw,
   };
 }
 

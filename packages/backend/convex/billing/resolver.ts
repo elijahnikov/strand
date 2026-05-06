@@ -39,6 +39,39 @@ export async function resolveActingBillingAccount(
   };
 }
 
+/**
+ * Throws if the user's billing account plan is not in the allowed set.
+ * Use to gate Pro-only features (e.g. integration connectors).
+ */
+export async function requirePlan(
+  ctx: QueryCtx | MutationCtx,
+  userId: Id<"user">,
+  allowed: Plan[],
+  featureLabel?: string
+): Promise<ResolvedBillingAccount> {
+  const resolved = await resolveActingBillingAccount(ctx, userId);
+  if (!allowed.includes(resolved.plan)) {
+    throw new ConvexError(
+      featureLabel
+        ? `${featureLabel} requires a ${allowed.join(" or ")} plan`
+        : `This feature requires a ${allowed.join(" or ")} plan`
+    );
+  }
+  return resolved;
+}
+
+export const requirePlanCheck = internalQuery({
+  args: {
+    userId: v.id("user"),
+    allowed: v.array(
+      v.union(v.literal("free"), v.literal("basic"), v.literal("pro"))
+    ),
+    featureLabel: v.optional(v.string()),
+  },
+  handler: (ctx, args) =>
+    requirePlan(ctx, args.userId, args.allowed, args.featureLabel),
+});
+
 export const resolveActing = internalQuery({
   args: {
     userId: v.id("user"),

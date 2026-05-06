@@ -4,6 +4,7 @@ import { api } from "@omi/backend/_generated/api.js";
 import { Badge } from "@omi/ui/badge";
 import { Button } from "@omi/ui/button";
 import { Heading } from "@omi/ui/heading";
+import { LoadingButton } from "@omi/ui/loading-button";
 import { Tabs, TabsList, TabsTrigger } from "@omi/ui/tabs";
 import { Text } from "@omi/ui/text";
 import { toastManager } from "@omi/ui/toast";
@@ -18,12 +19,6 @@ const PLAN_LABEL: Record<Plan, string> = {
   free: "Free",
   basic: "Basic",
   pro: "Pro",
-};
-
-const PLAN_ALLOTMENT: Record<Plan, number> = {
-  free: 500,
-  basic: 3000,
-  pro: 10_000,
 };
 
 const PLAN_ORDER: Plan[] = ["free", "basic", "pro"];
@@ -94,20 +89,6 @@ const STATUS_MESSAGE: Record<SubscriptionStatus, string> = {
     "Your subscription has ended. Start a new one to restore paid features.",
 };
 
-const REASON_LABEL = {
-  chat: "Chat",
-  search: "Search",
-  enrich: "Enrich",
-  "memory-extract": "Memory",
-  other: "Other",
-} as const;
-
-type ReasonKey = keyof typeof REASON_LABEL;
-
-const KB = 1024;
-const MB = KB * 1024;
-const GB = MB * 1024;
-
 function isWarningStatus(value: unknown): value is SubscriptionStatus {
   return value === "past_due" || value === "unpaid" || value === "canceled";
 }
@@ -123,30 +104,7 @@ function formatDate(ts: number | undefined): string {
   });
 }
 
-function formatShortDate(ts: number | undefined): string {
-  if (!ts) {
-    return "—";
-  }
-  return new Date(ts).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-  });
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes >= GB) {
-    return `${(bytes / GB).toFixed(1)} GB`;
-  }
-  if (bytes >= MB) {
-    return `${(bytes / MB).toFixed(1)} MB`;
-  }
-  if (bytes >= KB) {
-    return `${(bytes / KB).toFixed(1)} KB`;
-  }
-  return `${bytes} B`;
-}
-
-export function UsageAndBillingTab() {
+export function BillingTab() {
   const { data: state, isLoading } = useQuery(
     convexQuery(api.billing.queries.getMyBillingState, {})
   );
@@ -155,18 +113,16 @@ export function UsageAndBillingTab() {
 
   if (isLoading) {
     return (
-      <div className="w-full">
-        <Text className="text-ui-fg-subtle" size="small">
-          Loading…
-        </Text>
-      </div>
+      <Text className="text-ui-fg-subtle" size="small">
+        Loading…
+      </Text>
     );
   }
 
   if (!state) {
     return (
       <div className="w-full">
-        <Heading>Usage & Billing</Heading>
+        <Heading>Billing</Heading>
         <Text className="mt-2 text-ui-fg-subtle" size="small">
           Your billing account hasn't been set up yet. Refresh the page in a
           moment.
@@ -180,10 +136,9 @@ export function UsageAndBillingTab() {
   return (
     <div className="flex w-full flex-col gap-6">
       <div>
-        <Heading>Usage & Billing</Heading>
+        <Heading>Billing</Heading>
         <Text className="text-ui-fg-subtle" size="small">
-          Your plan and AI actions. AI actions power chat, search, and
-          enrichment.
+          Manage your plan, payment method, and invoices.
         </Text>
       </div>
 
@@ -195,24 +150,116 @@ export function UsageAndBillingTab() {
         billingCadence={state.billingCadence}
         hasActiveSubscription={state.hasActiveSubscription}
         plan={plan}
-        stripeCurrentPeriodEnd={state.stripeCurrentPeriodEnd}
+        stripeCurrentPeriodEnd={state.stripeCurrentPeriodEnd ?? undefined}
       />
-
-      <CreditsCard
-        creditBalance={state.creditBalance}
-        creditResetAt={state.creditResetAt}
-        plan={plan}
-      />
-
-      <StorageCard
-        storageBytesAllotment={state.storageBytesAllotment}
-        storageBytesUsed={state.storageBytesUsed}
-      />
-
-      <UsageList />
 
       <PlansSection currentPlan={plan} />
+
+      {plan === "free" ? null : <CancellationSection />}
     </div>
+  );
+}
+
+function CancellationSection() {
+  return (
+    <section className="flex flex-col gap-3 rounded-lg border-[0.5px] border-destructive/40 bg-destructive/5 p-4">
+      <div>
+        <Heading level="h2">Cancellation</Heading>
+        <Text className="text-ui-fg-subtle" size="xsmall">
+          Cancel your plan from the Stripe billing portal. You'll keep access
+          until the end of your current billing period.
+        </Text>
+      </div>
+      <div>
+        <PortalButton variant="secondary">Cancel plan</PortalButton>
+      </div>
+    </section>
+  );
+}
+
+function PlanSection({
+  plan,
+  hasActiveSubscription,
+  billingCadence,
+  stripeCurrentPeriodEnd,
+}: {
+  plan: Plan;
+  hasActiveSubscription: boolean;
+  billingCadence: string | null | undefined;
+  stripeCurrentPeriodEnd: number | undefined;
+}) {
+  const isPaid = plan !== "free";
+
+  return (
+    <section className="flex flex-col gap-3 rounded-lg py-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Heading level="h2">Current plan</Heading>
+          <Badge className="px-2" variant="secondary">
+            {PLAN_LABEL[plan]}
+          </Badge>
+        </div>
+      </div>
+      {hasActiveSubscription && stripeCurrentPeriodEnd ? (
+        <Text className="text-ui-fg-subtle" size="xsmall">
+          Billed{" "}
+          <span className="text-ui-fg-base">{billingCadence ?? "monthly"}</span>{" "}
+          · Next renewal{" "}
+          <Badge size="sm" variant="secondary">
+            {formatDate(stripeCurrentPeriodEnd)}
+          </Badge>
+        </Text>
+      ) : null}
+      {isPaid ? (
+        <div className="flex flex-wrap gap-2">
+          <PortalButton variant="omi">Manage subscription</PortalButton>
+          <PortalButton variant="secondary">View invoices</PortalButton>
+        </div>
+      ) : (
+        <Text className="text-ui-fg-muted" size="xsmall">
+          You're on the Free plan. Upgrade below to unlock more AI actions and
+          storage.
+        </Text>
+      )}
+      <ResyncButton />
+    </section>
+  );
+}
+
+function PortalButton({
+  children,
+  variant,
+}: {
+  children: React.ReactNode;
+  variant: "omi" | "secondary";
+}) {
+  const [loading, setLoading] = useState(false);
+  const handleClick = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await authClient.subscription.billingPortal();
+      if (error || !data) {
+        toastManager.add({
+          type: "error",
+          title: "Could not open billing portal",
+          description: error?.message ?? "Please try again.",
+        });
+        return;
+      }
+      window.location.href = data.url;
+    } finally {
+      setLoading(false);
+    }
+  };
+  return (
+    <LoadingButton
+      loading={loading}
+      onClick={handleClick}
+      size="small"
+      variant={variant}
+    >
+      {children}
+    </LoadingButton>
   );
 }
 
@@ -220,7 +267,7 @@ function PlansSection({ currentPlan }: { currentPlan: Plan }) {
   const [cadence, setCadence] = useState<"monthly" | "yearly">("monthly");
 
   return (
-    <section className="flex flex-col gap-4 rounded-lg border-[0.5px] bg-ui-bg-field p-4">
+    <section className="flex flex-col gap-4 rounded-lg py-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <Heading level="h2">Plans</Heading>
@@ -279,7 +326,7 @@ function PlanCard({
   return (
     <div
       className={`flex flex-col gap-3 rounded-lg border-[0.5px] p-4 ${
-        isCurrent ? "bg-ui-bg-base shadow-borders-focus" : "bg-ui-bg-base"
+        isCurrent ? "bg-ui-bg-subtle shadow-borders-focus" : "bg-ui-bg-subtle"
       }`}
     >
       <div className="flex items-center justify-between gap-2">
@@ -326,12 +373,9 @@ function PlanCardCta({
 }) {
   if (isCurrent) {
     return (
-      <div className="mt-auto flex items-center justify-between gap-2">
-        <Text className="font-medium" size="small">
-          Current plan
-        </Text>
-        {plan === "free" ? null : <ManagePlanButton />}
-      </div>
+      <Text className="mt-auto font-medium" size="small">
+        Current plan
+      </Text>
     );
   }
   if (isUpgrade && plan !== "free") {
@@ -362,97 +406,8 @@ function SubscriptionStatusBanner({ status }: { status: SubscriptionStatus }) {
           {STATUS_MESSAGE[status]}
         </Text>
       </div>
-      <ManagePlanButton />
+      <PortalButton variant="omi">Open billing portal</PortalButton>
     </section>
-  );
-}
-
-function PlanSection({
-  plan,
-  hasActiveSubscription,
-  billingCadence,
-  stripeCurrentPeriodEnd,
-}: {
-  plan: Plan;
-  hasActiveSubscription: boolean;
-  billingCadence: string | null | undefined;
-  stripeCurrentPeriodEnd: number | null | undefined;
-}) {
-  return (
-    <section className="flex flex-col gap-3 rounded-lg border-[0.5px] bg-ui-bg-field p-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Heading level="h2">Current plan</Heading>
-          <Badge className="px-2" variant="secondary">
-            {PLAN_LABEL[plan]}
-          </Badge>
-        </div>
-        {hasActiveSubscription && <ManagePlanButton />}
-      </div>
-      {hasActiveSubscription && stripeCurrentPeriodEnd ? (
-        <Text className="text-ui-fg-subtle" size="xsmall">
-          Billed{" "}
-          <span className="text-ui-fg-base">{billingCadence ?? "monthly"}</span>{" "}
-          · Next renewal{" "}
-          <Badge size="sm" variant="secondary">
-            {formatDate(stripeCurrentPeriodEnd)}
-          </Badge>
-        </Text>
-      ) : null}
-      <ResyncButton />
-    </section>
-  );
-}
-
-function ManagePlanButton() {
-  return (
-    <Button
-      onClick={async () => {
-        const { data, error } = await authClient.subscription.billingPortal();
-        if (error || !data) {
-          return;
-        }
-        window.location.href = data.url;
-      }}
-      variant="secondary"
-    >
-      Manage
-    </Button>
-  );
-}
-
-function _UpgradeButtons({ currentPlan }: { currentPlan: Plan }) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {currentPlan === "free" ? (
-        <>
-          <Button
-            onClick={() => upgradeTo("basic", "monthly")}
-            size="small"
-            variant="secondary"
-          >
-            Basic · Monthly
-          </Button>
-          <Button
-            onClick={() => upgradeTo("basic", "yearly")}
-            size="small"
-            variant="secondary"
-          >
-            Basic · Yearly
-          </Button>
-        </>
-      ) : null}
-      {currentPlan === "pro" ? null : (
-        <>
-          <Button onClick={() => upgradeTo("pro", "monthly")} size="small">
-            Pro · Monthly
-          </Button>
-          <Button onClick={() => upgradeTo("pro", "yearly")} size="small">
-            Pro · Yearly
-          </Button>
-        </>
-      )}
-    </div>
   );
 }
 
@@ -464,7 +419,6 @@ async function upgradeTo(plan: "basic" | "pro", cadence: "monthly" | "yearly") {
     cancelUrl: `${window.location.origin}/account?tab=billing&checkout=cancel`,
   });
   if (error) {
-    console.error("subscription.upgrade failed", error);
     return;
   }
   if (!data?.url) {
@@ -541,128 +495,6 @@ function ResyncButton() {
         {isPending ? "Syncing…" : "Resync from Stripe"}
       </button>
     </Text>
-  );
-}
-
-function CreditsCard({
-  creditBalance,
-  creditResetAt,
-  plan,
-}: {
-  creditBalance: number;
-  creditResetAt: number | undefined;
-  plan: Plan;
-}) {
-  const allotment = PLAN_ALLOTMENT[plan];
-  const used = Math.max(0, allotment - creditBalance);
-  const pct = allotment > 0 ? Math.min(100, (used / allotment) * 100) : 0;
-
-  return (
-    <section className="flex flex-col gap-3 rounded-lg border-[0.5px] bg-ui-bg-field p-4">
-      <div className="flex items-baseline justify-between">
-        <Heading className="font-medium" level="h2">
-          AI actions
-        </Heading>
-        <Text className="flex gap-x-1" size="small">
-          <Badge variant="mono">{creditBalance.toLocaleString()}</Badge>/
-          <Badge variant="mono">{allotment.toLocaleString()}</Badge>
-        </Text>
-      </div>
-      <div className="h-2.5 w-full overflow-hidden rounded-full bg-ui-bg-subtle">
-        <div
-          className="h-full rounded-full bg-ui-fg-base transition-all"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      <Text className="text-ui-fg-muted" size="xsmall">
-        Resets {formatShortDate(creditResetAt)}
-      </Text>
-    </section>
-  );
-}
-
-function StorageCard({
-  storageBytesUsed,
-  storageBytesAllotment,
-}: {
-  storageBytesUsed: number;
-  storageBytesAllotment: number;
-}) {
-  const pct =
-    storageBytesAllotment > 0
-      ? Math.min(100, (storageBytesUsed / storageBytesAllotment) * 100)
-      : 0;
-  const nearFull = pct >= 90;
-
-  return (
-    <section className="flex flex-col gap-3 rounded-lg border-[0.5px] bg-ui-bg-field p-4">
-      <div className="flex items-baseline justify-between">
-        <Heading className="font-medium" level="h2">
-          File storage
-        </Heading>
-        <Text className="flex gap-x-1" size="small">
-          <Badge variant="mono">{formatBytes(storageBytesUsed)}</Badge>/
-          <Badge variant="mono">{formatBytes(storageBytesAllotment)}</Badge>
-        </Text>
-      </div>
-      <div className="h-2.5 w-full overflow-hidden rounded-full bg-ui-bg-subtle">
-        <div
-          className={`h-full rounded-full transition-all ${
-            nearFull ? "bg-warning" : "bg-ui-fg-base"
-          }`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      <Text className="text-ui-fg-muted" size="xsmall">
-        Used across all files you've uploaded. Upgrade your plan to raise the
-        cap.
-      </Text>
-    </section>
-  );
-}
-
-function UsageList() {
-  const { data, isLoading } = useQuery(
-    convexQuery(api.billing.queries.getMyUsageByWorkspace, {})
-  );
-
-  if (isLoading) {
-    return null;
-  }
-
-  const rows = data ?? [];
-
-  return (
-    <section className="flex flex-col gap-3 rounded-lg border-[0.5px] bg-ui-bg-field p-4">
-      <Heading level="h2">Usage this period</Heading>
-      {rows.length === 0 ? (
-        <Text className="text-ui-fg-muted" size="xsmall">
-          No AI actions used yet this period.
-        </Text>
-      ) : (
-        <ul className="flex flex-col divide-y">
-          {rows.map((row) => (
-            <li className="flex flex-col gap-1 py-2" key={row.workspaceId}>
-              <div className="flex items-center justify-between">
-                <Text size="base">{row.name}</Text>
-                <Text className="text-ui-fg-subtle" size="small">
-                  {row.credits.toLocaleString()} actions
-                </Text>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {(Object.keys(REASON_LABEL) as ReasonKey[])
-                  .filter((k) => row.byReason[k] > 0)
-                  .map((k) => (
-                    <Badge className="text-[12px]" key={k} variant="mono">
-                      {REASON_LABEL[k]} · {row.byReason[k].toLocaleString()}
-                    </Badge>
-                  ))}
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
   );
 }
 

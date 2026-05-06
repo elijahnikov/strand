@@ -1,11 +1,5 @@
-import {
-  convexQuery,
-  useConvexAction,
-  useConvexMutation,
-} from "@convex-dev/react-query";
+import { convexQuery, useConvexAction } from "@convex-dev/react-query";
 import { api } from "@omi/backend/_generated/api.js";
-import type { Id } from "@omi/backend/_generated/dataModel.js";
-import { Badge } from "@omi/ui/badge";
 import { Button } from "@omi/ui/button";
 import {
   Dialog,
@@ -25,8 +19,12 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { ConvexError } from "convex/values";
 import { useEffect, useMemo, useState } from "react";
 import { INTEGRATION_LOGO } from "~/components/pages/settings-page/import-tab/integration-logos";
-
-type ProviderId = "notion" | "raindrop" | "readwise";
+import { ConnectorsSection } from "./integrations/connectors-section";
+import {
+  type ConfigConnection,
+  ProviderConfigDialog,
+  type ProviderId,
+} from "./integrations/provider-config-dialog";
 
 type AuthType = "oauth2" | "api_token";
 
@@ -51,7 +49,7 @@ const UI_PROVIDERS: UiProviderDescriptor[] = [
     id: "notion",
     label: "Notion",
     description:
-      "Import pages and databases from a Notion workspace. Reconnect any time.",
+      "Sync pages and databases from a Notion workspace into a chosen folder.",
     authType: "oauth2",
   },
   {
@@ -61,37 +59,19 @@ const UI_PROVIDERS: UiProviderDescriptor[] = [
       "Import bookmarks, collections, and highlights from your Raindrop account.",
     authType: "oauth2",
   },
+  {
+    id: "github",
+    label: "GitHub",
+    description: "Sync issues and pull requests from selected repositories.",
+    authType: "oauth2",
+  },
 ];
 
-const PROVIDER_LOGO_ID: Record<ProviderId, string> = {
+const PROVIDER_LOGO_ID: Partial<Record<ProviderId, string>> = {
   notion: "notion_oauth",
   raindrop: "raindrop_oauth",
   readwise: "readwise",
-};
-
-type ConnectionStatus = "active" | "expired" | "error";
-
-interface ConnectionRow {
-  _id: Id<"connection">;
-  lastError?: string;
-  provider: ProviderId;
-  providerAccountLabel?: string;
-  status: ConnectionStatus | "revoked";
-}
-
-const STATUS_VARIANT: Record<
-  ConnectionStatus,
-  "mono" | "destructive" | "warning"
-> = {
-  active: "mono",
-  expired: "warning",
-  error: "destructive",
-};
-
-const STATUS_LABEL: Record<ConnectionStatus, string> = {
-  active: "Connected",
-  expired: "Reconnect",
-  error: "Error",
+  github: "github",
 };
 
 export function ConnectionsTab() {
@@ -99,8 +79,9 @@ export function ConnectionsTab() {
     convexQuery(api.connections.queries.listMyConnections, {})
   );
 
-  const [dialogProvider, setDialogProvider] =
+  const [connectProvider, setConnectProvider] =
     useState<UiProviderDescriptor | null>(null);
+  const [configProvider, setConfigProvider] = useState<ProviderId | null>(null);
   const [search, setSearch] = useState("");
 
   const filteredProviders = useMemo(() => {
@@ -140,55 +121,84 @@ export function ConnectionsTab() {
     window.history.replaceState({}, "", url.toString());
   }, []);
 
-  const connectionsByProvider = new Map<string, ConnectionRow>(
+  const connectionsByProvider = new Map<ProviderId, ConfigConnection>(
     (data ?? [])
       .filter((c) => c.status !== "revoked")
-      .map((c) => [c.provider, c as ConnectionRow])
+      .map((c) => [c.provider as ProviderId, c as ConfigConnection])
   );
 
+  const configConnection = configProvider
+    ? (connectionsByProvider.get(configProvider) ?? null)
+    : null;
+
+  const handleReconnect = (provider: ProviderId) => {
+    const descriptor = UI_PROVIDERS.find((p) => p.id === provider);
+    if (descriptor) {
+      setConnectProvider(descriptor);
+    }
+  };
+
   return (
-    <div className="w-full">
-      <div className="mb-6">
-        <Heading>Connections</Heading>
+    <div className="flex w-full flex-col gap-8">
+      <div>
+        <Heading>Integrations</Heading>
         <Text className="text-ui-fg-subtle" size="small">
-          Third-party accounts for importing and (soon) syncing. Connections
-          apply to your user, not this workspace.
+          Third-party accounts that pull content into your workspaces, plus
+          connectors that expose tools to chat. Integrations apply to your user.
         </Text>
       </div>
-      <div className="mb-4">
+
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <Heading level="h3">Integrations</Heading>
+        </div>
         <Input
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search connections"
+          placeholder="Search integrations"
           type="search"
           value={search}
         />
+        <div className="flex flex-col gap-2">
+          {filteredProviders.length === 0 ? (
+            <Text className="text-ui-fg-subtle" size="small">
+              No integrations match your search.
+            </Text>
+          ) : (
+            filteredProviders.map((provider) => (
+              <ProviderCard
+                connection={connectionsByProvider.get(provider.id)}
+                description={provider.description}
+                key={provider.id}
+                label={provider.label}
+                onConfigure={() => setConfigProvider(provider.id)}
+                onConnect={() => setConnectProvider(provider)}
+                providerId={provider.id}
+              />
+            ))
+          )}
+        </div>
       </div>
-      <div className="flex flex-col gap-3">
-        {filteredProviders.length === 0 ? (
-          <Text className="text-ui-fg-subtle" size="small">
-            No connections match your search.
-          </Text>
-        ) : (
-          filteredProviders.map((provider) => (
-            <ProviderCard
-              connection={connectionsByProvider.get(provider.id)}
-              description={provider.description}
-              key={provider.id}
-              label={provider.label}
-              onConnect={() => setDialogProvider(provider)}
-              providerId={provider.id}
-            />
-          ))
-        )}
-      </div>
+
+      <ConnectorsSection />
+
       <ConnectDialog
         onOpenChange={(next) => {
           if (!next) {
-            setDialogProvider(null);
+            setConnectProvider(null);
           }
         }}
-        open={dialogProvider !== null}
-        provider={dialogProvider}
+        open={connectProvider !== null}
+        provider={connectProvider}
+      />
+      <ProviderConfigDialog
+        connection={configConnection}
+        onOpenChange={(next) => {
+          if (!next) {
+            setConfigProvider(null);
+          }
+        }}
+        onReconnect={handleReconnect}
+        open={configProvider !== null && configConnection !== null}
       />
     </div>
   );
@@ -200,74 +210,39 @@ function ProviderCard({
   description,
   connection,
   onConnect,
+  onConfigure,
 }: {
   providerId: ProviderId;
   label: string;
   description: string;
-  connection: ConnectionRow | undefined;
+  connection: ConfigConnection | undefined;
   onConnect: () => void;
+  onConfigure: () => void;
 }) {
-  const { mutate: disconnect, isPending: disconnecting } = useMutation({
-    mutationFn: useConvexMutation(api.connections.mutations.disconnect),
-  });
-
-  const activeConnection =
-    connection && connection.status !== "revoked" ? connection : undefined;
-  const status = activeConnection?.status as ConnectionStatus | undefined;
-  const Logo = INTEGRATION_LOGO[PROVIDER_LOGO_ID[providerId]];
+  const logoId = PROVIDER_LOGO_ID[providerId];
+  const Logo = logoId ? INTEGRATION_LOGO[logoId] : undefined;
+  const isConnected = Boolean(connection);
 
   return (
-    <div className="flex items-center justify-between gap-4 rounded-lg p-4 hover:bg-ui-bg-component">
+    <div className="flex w-full items-center justify-between gap-4 rounded-lg p-4 hover:bg-ui-bg-component">
       <div className="flex min-w-0 items-start gap-3">
         {Logo && (
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center">
-            <Logo aria-hidden="true" className="h-8 w-8" />
+          <div className="flex h-5 w-5 shrink-0 items-center justify-center">
+            <Logo aria-hidden="true" className="h-5 w-5" />
           </div>
         )}
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <Text className="font-medium">{label}</Text>
-            {status && (
-              <Badge variant={STATUS_VARIANT[status]}>
-                {STATUS_LABEL[status]}
-              </Badge>
-            )}
-          </div>
-          <Text className="mt-1 text-ui-fg-subtle" size="small">
+          <Text className="font-medium">{label}</Text>
+          <Text className="text-ui-fg-subtle" size="xsmall">
             {description}
           </Text>
-          {activeConnection?.providerAccountLabel && (
-            <Text className="mt-2 text-ui-fg-muted" size="small">
-              {activeConnection.providerAccountLabel}
-            </Text>
-          )}
-          {status === "error" && activeConnection?.lastError && (
-            <Text className="mt-2 text-ui-fg-error" size="small">
-              {activeConnection.lastError}
-            </Text>
-          )}
         </div>
       </div>
-      <div className="flex shrink-0 items-center gap-2">
-        {activeConnection ? (
-          <>
-            <Button
-              data-provider={providerId}
-              onClick={onConnect}
-              size="small"
-              variant="secondary"
-            >
-              Reconnect
-            </Button>
-            <LoadingButton
-              loading={disconnecting}
-              onClick={() => disconnect({ connectionId: activeConnection._id })}
-              size="small"
-              variant="secondary"
-            >
-              Disconnect
-            </LoadingButton>
-          </>
+      <div className="shrink-0">
+        {isConnected ? (
+          <Button onClick={onConfigure} size="small" variant="secondary">
+            Configure
+          </Button>
         ) : (
           <Button onClick={onConnect} size="small" variant="omi">
             Connect

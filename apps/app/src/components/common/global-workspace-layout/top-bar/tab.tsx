@@ -91,9 +91,9 @@ function TabComponent({ tab, isActive, workspaceId }: TabProps) {
       >
         <Link
           className={cn(
-            "relative flex min-w-[120px] max-w-[220px] items-center gap-1.5 px-2 outline-none transition-colors",
+            "relative flex min-w-[120px] max-w-[220px] items-center gap-1.5 px-2 font-medium! outline-none transition-colors",
             isActive
-              ? "z-[100] h-8.5 rounded-t-lg rounded-b-0 bg-ui-bg-base pb-[5.5px] font-medium! text-ui-fg-base ring-[0.5px] ring-ui-border-base"
+              ? "z-[100] h-8.5 rounded-t-lg rounded-b-0 bg-ui-bg-base pb-[5.5px] text-ui-fg-base ring-[0.5px] ring-ui-border-base"
               : "mb-0.5 h-6 rounded-md text-ui-fg-muted hover:bg-[rgba(0,0,0,0.070)] hover:text-ui-fg-base dark:hover:bg-[rgba(255,255,255,0.070)]"
           )}
           onMouseDown={handleMouseDown}

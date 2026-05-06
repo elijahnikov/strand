@@ -127,9 +127,18 @@ export default defineSchema({
     collectionId: v.optional(v.id("collection")),
     importedFrom: v.optional(v.string()),
     dailyNoteDate: v.optional(v.string()),
+    // Back-pointers to a synced third-party item; set on resources created by a connection
+    sourceConnectionId: v.optional(v.id("connection")),
+    sourceProviderId: v.optional(v.string()),
+    sourceExternalId: v.optional(v.string()),
+    sourceExternalUrl: v.optional(v.string()),
+    // Bumped only by sync writes (not by local edits). Used by the editor to
+    // remount when remote content changes, without remounting on local typing.
+    syncedAt: v.optional(v.number()),
   })
     .index("by_workspace", ["workspaceId", "deletedAt"])
     .index("by_workspace_imported_from", ["workspaceId", "importedFrom"])
+    .index("by_source_external", ["sourceConnectionId", "sourceExternalId"])
     .index("by_workspace_dailyNoteDate", ["workspaceId", "dailyNoteDate"])
     .index("by_workspace_collection", [
       "workspaceId",
@@ -451,24 +460,42 @@ export default defineSchema({
       v.literal("notion"),
       v.literal("raindrop"),
       v.literal("google_drive"),
-      v.literal("readwise")
+      v.literal("readwise"),
+      v.literal("github"),
+      v.literal("linear")
     ),
     authType: v.union(v.literal("oauth2"), v.literal("api_token")),
     status: v.union(
       v.literal("active"),
       v.literal("expired"),
       v.literal("revoked"),
-      v.literal("error")
+      v.literal("error"),
+      v.literal("paused")
     ),
-    accessToken: v.string(),
+    // Legacy plaintext token (will be cleared by encryptTokens migration)
+    accessToken: v.optional(v.string()),
     refreshToken: v.optional(v.string()),
+    // Encrypted at rest via connections/tokens.ts (AES-256-GCM, base64-encoded)
+    encryptedAccessToken: v.optional(v.string()),
+    encryptedRefreshToken: v.optional(v.string()),
+    tokenKeyVersion: v.optional(v.number()),
     expiresAt: v.optional(v.number()),
     scope: v.optional(v.string()),
     providerAccountId: v.optional(v.string()),
     providerAccountLabel: v.optional(v.string()),
+    // Workspace this connection's resources are ingested into
+    workspaceId: v.optional(v.id("workspace")),
+    // Optional collection inside the workspace; when unset, synced resources
+    // land at the workspace root.
+    destinationCollectionId: v.optional(v.id("collection")),
+    // Per-provider scope selection (repos, page IDs, folder IDs, team IDs, etc.)
+    scopeSelection: v.optional(v.any()),
+    // HMAC secret used to verify provider webhook deliveries
+    webhookSecret: v.optional(v.string()),
     syncEnabled: v.optional(v.boolean()),
     syncCursor: v.optional(v.string()),
     lastSyncedAt: v.optional(v.number()),
+    lastWebhookAt: v.optional(v.number()),
     webhookSubscriptionId: v.optional(v.string()),
     lastError: v.optional(v.string()),
     lastErrorAt: v.optional(v.number()),
@@ -476,7 +503,54 @@ export default defineSchema({
     disconnectedAt: v.optional(v.number()),
   })
     .index("by_user_provider", ["userId", "provider", "status"])
-    .index("by_status_syncEnabled", ["status", "syncEnabled"]),
+    .index("by_status_syncEnabled", ["status", "syncEnabled"])
+    .index("by_workspace", ["workspaceId"]),
+
+  // SYNC CURSOR (per-connection incremental cursor, scoped by provider sub-source)
+  syncCursor: defineTable({
+    connectionId: v.id("connection"),
+    // Logical scope key — e.g. "repo:owner/name", "database:<id>", "drive:changes", "all"
+    scopeKey: v.string(),
+    cursor: v.string(),
+    updatedAt: v.number(),
+  }).index("by_connection_scope", ["connectionId", "scopeKey"]),
+
+  // SYNC JOB (run record of a backfill / delta / webhook batch)
+  syncJob: defineTable({
+    connectionId: v.id("connection"),
+    workspaceId: v.id("workspace"),
+    kind: v.union(
+      v.literal("backfill"),
+      v.literal("delta"),
+      v.literal("webhook")
+    ),
+    status: v.union(
+      v.literal("queued"),
+      v.literal("running"),
+      v.literal("completed"),
+      v.literal("failed"),
+      v.literal("cancelled")
+    ),
+    startedAt: v.number(),
+    finishedAt: v.optional(v.number()),
+    counts: v.object({
+      created: v.number(),
+      updated: v.number(),
+      skipped: v.number(),
+      failed: v.number(),
+    }),
+    cursor: v.optional(v.string()),
+    lastError: v.optional(v.string()),
+  })
+    .index("by_connection_status", ["connectionId", "status"])
+    .index("by_connection_started", ["connectionId", "startedAt"]),
+
+  // SYNC EVENT (idempotency record for webhook deliveries; TTL-cleaned)
+  syncEvent: defineTable({
+    connectionId: v.id("connection"),
+    providerEventId: v.string(),
+    receivedAt: v.number(),
+  }).index("by_connection_event", ["connectionId", "providerEventId"]),
 
   // IMPORT JOB (per-workspace data migration job from a third-party source)
   importJob: defineTable({

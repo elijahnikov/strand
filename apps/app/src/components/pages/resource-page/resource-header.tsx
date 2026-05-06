@@ -13,13 +13,17 @@ import { useHotkey } from "@tanstack/react-hotkeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback } from "react";
+import { type FC, type SVGProps, useCallback } from "react";
 import { DotGridLoader } from "~/components/common/dot-grid-loader";
 import { EditableText } from "~/components/common/editable-text";
 import { FileKindIcon } from "~/components/common/file-kind-icon";
 import { MiddleTruncate } from "~/components/common/middle-truncate";
 import { ShortcutTooltipBody } from "~/components/common/shortcut-tooltip";
 import { UserAvatar } from "~/components/common/user-avatar";
+import {
+  GitHub,
+  Notion,
+} from "~/components/pages/settings-page/import-tab/integration-logos";
 import type { GetResourceData } from "~/lib/convex-types";
 import { useFloatingPanelsStore } from "./floating-panels-store";
 import { ResourceActionsMenu } from "./resource-actions-menu";
@@ -167,6 +171,13 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
         {resource.type !== "note" && (
           <Separator className="h-4 shrink-0" orientation="vertical" />
         )}
+        <SyncedFromBadge
+          providerId={
+            "sourceProviderId" in resource
+              ? resource.sourceProviderId
+              : undefined
+          }
+        />
         <Badge className="shrink-0 text-xs" variant="mono">
           {format(new Date(resource._creationTime), "d MMM yyyy HH:mm")}
         </Badge>
@@ -194,6 +205,45 @@ export function ResourceHeader({ resource }: { resource: GetResourceData }) {
         workspaceId={workspaceId}
       />
     </div>
+  );
+}
+
+// Surfaces "Synced from <provider>" on resources created by the sync worker
+// (sourceProviderId is only set by upsertSyncedResource). Manually-clipped
+// resources from the same sites won't carry this field and won't render.
+type LogoSvg = FC<SVGProps<SVGSVGElement>>;
+const SYNC_PROVIDER_LABEL: Record<string, { label: string; Logo: LogoSvg }> = {
+  notion: { label: "Notion", Logo: Notion },
+  github: { label: "GitHub", Logo: GitHub },
+};
+
+function SyncedFromBadge({ providerId }: { providerId: string | undefined }) {
+  if (!providerId) {
+    return null;
+  }
+  const entry = SYNC_PROVIDER_LABEL[providerId];
+  if (!entry) {
+    return null;
+  }
+  const { Logo, label } = entry;
+  return (
+    <>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Badge className="shrink-0 text-xs" variant="mono">
+              <Logo className="size-3.5 shrink-0" />
+              <span>Synced from {label}</span>
+            </Badge>
+          }
+        />
+        <TooltipContent side="bottom">
+          This resource is kept in sync with {label}. Edits here may be
+          overwritten on the next change there.
+        </TooltipContent>
+      </Tooltip>
+      <Separator className="h-4 shrink-0" orientation="vertical" />
+    </>
   );
 }
 

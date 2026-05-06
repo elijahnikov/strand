@@ -56,7 +56,10 @@ export function NoteResource({ resource }: { resource: GetResourceData }) {
           fallbackHtml={fallbackHtml}
           fallbackMarkdown={fallbackMarkdown}
           initialContent={jsonContent}
-          key={resource._id}
+          // Include syncedAt so a remote sync update remounts the editor with
+          // fresh content, while local edits (which don't touch syncedAt)
+          // don't disturb the user mid-typing.
+          key={`${resource._id}:${"syncedAt" in resource ? (resource.syncedAt ?? 0) : 0}`}
           resourceId={resource._id}
           workspaceId={resource.workspaceId}
         />

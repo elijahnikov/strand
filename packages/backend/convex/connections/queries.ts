@@ -1,5 +1,17 @@
 import { ConvexError, v } from "convex/values";
 import { protectedQuery } from "../utils";
+import { getProvider, isProviderId } from "./providers/registry";
+
+function providerSupportsSync(providerId: string): boolean {
+  if (!isProviderId(providerId)) {
+    return false;
+  }
+  try {
+    return Boolean(getProvider(providerId).sync);
+  } catch {
+    return false;
+  }
+}
 
 export const listMyConnections = protectedQuery({
   args: {},
@@ -24,6 +36,10 @@ export const listMyConnections = protectedQuery({
         lastErrorAt: c.lastErrorAt,
         syncEnabled: c.syncEnabled,
         lastSyncedAt: c.lastSyncedAt,
+        workspaceId: c.workspaceId,
+        destinationCollectionId: c.destinationCollectionId,
+        scopeSelection: c.scopeSelection,
+        supportsSync: providerSupportsSync(c.provider),
         createdAt: c.createdAt,
       }));
   },

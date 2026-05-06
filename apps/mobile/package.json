@@ -1,5 +1,5 @@
 {
-  "name": "@omi/expo",
+  "name": "@omi/mobile",
   "private": true,
   "main": "index.ts",
   "scripts": {

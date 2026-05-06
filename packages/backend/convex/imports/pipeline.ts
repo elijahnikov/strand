@@ -4,6 +4,7 @@ import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { internalAction } from "../_generated/server";
+import { decryptToken } from "../connections/tokens";
 import { parseBookmarkHtml } from "./parsers/bookmarkHtml";
 import { parseUrlCsv } from "./parsers/csv";
 import { parseEvernoteEnex } from "./parsers/evernoteEnex";
@@ -85,14 +86,18 @@ export const runImport = internalAction({
           throw new Error("Token-based import requires a connectionId");
         }
         const tokenInfo = await ctx.runQuery(
-          internal.connections.internals.getActiveToken,
+          internal.connections.internals.getEncryptedToken,
           {
             connectionId: job.connectionId,
             userId: job.userId,
             requiredProvider: providerForSource(job.source),
           }
         );
-        iterator = parser.parse({ token: tokenInfo.accessToken });
+        const accessToken = decryptToken(
+          tokenInfo.encryptedAccessToken,
+          tokenInfo.tokenKeyVersion
+        );
+        iterator = parser.parse({ token: accessToken });
       }
 
       let rootCollectionId: Id<"collection"> | undefined;

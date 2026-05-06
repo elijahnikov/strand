@@ -1,3 +1,4 @@
+import { github } from "./github";
 import { googleDrive } from "./google_drive";
 import { notion } from "./notion";
 import { raindrop } from "./raindrop";
@@ -9,19 +10,24 @@ import type {
   ProviderId,
 } from "./types";
 
-const providers: Record<ProviderId, ProviderDescriptor> = {
+const providers: Partial<Record<ProviderId, ProviderDescriptor>> = {
   notion,
   raindrop,
   google_drive: googleDrive,
   readwise,
+  github,
 };
 
 export function getProvider(id: ProviderId): ProviderDescriptor {
-  return providers[id];
+  const descriptor = providers[id];
+  if (!descriptor) {
+    throw new Error(`Provider ${id} is not registered`);
+  }
+  return descriptor;
 }
 
 export function getOAuth2Provider(id: ProviderId): OAuth2ProviderDescriptor {
-  const descriptor = providers[id];
+  const descriptor = getProvider(id);
   if (descriptor.authType !== "oauth2") {
     throw new Error(`Provider ${id} is not an OAuth 2.0 provider`);
   }
@@ -31,7 +37,7 @@ export function getOAuth2Provider(id: ProviderId): OAuth2ProviderDescriptor {
 export function getApiTokenProvider(
   id: ProviderId
 ): ApiTokenProviderDescriptor {
-  const descriptor = providers[id];
+  const descriptor = getProvider(id);
   if (descriptor.authType !== "api_token") {
     throw new Error(`Provider ${id} is not an API-token provider`);
   }
@@ -43,5 +49,7 @@ export function isProviderId(value: string): value is ProviderId {
 }
 
 export function listProviders(): ProviderDescriptor[] {
-  return Object.values(providers);
+  return Object.values(providers).filter(
+    (p): p is ProviderDescriptor => p !== undefined
+  );
 }

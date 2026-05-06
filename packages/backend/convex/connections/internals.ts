@@ -6,7 +6,9 @@ const providerValidator = v.union(
   v.literal("notion"),
   v.literal("raindrop"),
   v.literal("google_drive"),
-  v.literal("readwise")
+  v.literal("readwise"),
+  v.literal("github"),
+  v.literal("linear")
 );
 
 const authTypeValidator = v.union(v.literal("oauth2"), v.literal("api_token"));
@@ -16,12 +18,14 @@ export const insertConnection = internalMutation({
     userId: v.id("user"),
     provider: providerValidator,
     authType: authTypeValidator,
-    accessToken: v.string(),
-    refreshToken: v.optional(v.string()),
+    encryptedAccessToken: v.string(),
+    encryptedRefreshToken: v.optional(v.string()),
+    tokenKeyVersion: v.number(),
     expiresAt: v.optional(v.number()),
     scope: v.optional(v.string()),
     providerAccountId: v.optional(v.string()),
     providerAccountLabel: v.optional(v.string()),
+    workspaceId: v.optional(v.id("workspace")),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
@@ -41,12 +45,16 @@ export const insertConnection = internalMutation({
       await ctx.db.patch(sameAccount._id, {
         authType: args.authType,
         status: "active",
-        accessToken: args.accessToken,
-        refreshToken: args.refreshToken,
+        accessToken: undefined,
+        refreshToken: undefined,
+        encryptedAccessToken: args.encryptedAccessToken,
+        encryptedRefreshToken: args.encryptedRefreshToken,
+        tokenKeyVersion: args.tokenKeyVersion,
         expiresAt: args.expiresAt,
         scope: args.scope,
         providerAccountId: args.providerAccountId,
         providerAccountLabel: args.providerAccountLabel,
+        workspaceId: args.workspaceId ?? sameAccount.workspaceId,
         lastError: undefined,
         lastErrorAt: undefined,
         disconnectedAt: undefined,
@@ -59,12 +67,14 @@ export const insertConnection = internalMutation({
       provider: args.provider,
       authType: args.authType,
       status: "active",
-      accessToken: args.accessToken,
-      refreshToken: args.refreshToken,
+      encryptedAccessToken: args.encryptedAccessToken,
+      encryptedRefreshToken: args.encryptedRefreshToken,
+      tokenKeyVersion: args.tokenKeyVersion,
       expiresAt: args.expiresAt,
       scope: args.scope,
       providerAccountId: args.providerAccountId,
       providerAccountLabel: args.providerAccountLabel,
+      workspaceId: args.workspaceId,
       createdAt: now,
     });
   },
@@ -73,8 +83,9 @@ export const insertConnection = internalMutation({
 export const updateTokenAfterRefresh = internalMutation({
   args: {
     connectionId: v.id("connection"),
-    accessToken: v.string(),
-    refreshToken: v.optional(v.string()),
+    encryptedAccessToken: v.string(),
+    encryptedRefreshToken: v.optional(v.string()),
+    tokenKeyVersion: v.number(),
     expiresAt: v.optional(v.number()),
     scope: v.optional(v.string()),
   },
@@ -84,8 +95,12 @@ export const updateTokenAfterRefresh = internalMutation({
       throw new ConvexError("Connection not found");
     }
     await ctx.db.patch(args.connectionId, {
-      accessToken: args.accessToken,
-      refreshToken: args.refreshToken ?? connection.refreshToken,
+      accessToken: undefined,
+      refreshToken: undefined,
+      encryptedAccessToken: args.encryptedAccessToken,
+      encryptedRefreshToken:
+        args.encryptedRefreshToken ?? connection.encryptedRefreshToken,
+      tokenKeyVersion: args.tokenKeyVersion,
       expiresAt: args.expiresAt,
       scope: args.scope ?? connection.scope,
       status: "active",
@@ -102,7 +117,8 @@ export const markError = internalMutation({
     status: v.union(
       v.literal("expired"),
       v.literal("error"),
-      v.literal("revoked")
+      v.literal("revoked"),
+      v.literal("paused")
     ),
   },
   handler: async (ctx, args) => {
@@ -114,7 +130,7 @@ export const markError = internalMutation({
   },
 });
 
-export const getActiveToken = internalQuery({
+export const getEncryptedToken = internalQuery({
   args: {
     connectionId: v.id("connection"),
     userId: v.id("user"),
@@ -133,9 +149,13 @@ export const getActiveToken = internalQuery({
     if (connection.status !== "active") {
       throw new ConvexError(`Connection is ${connection.status}`);
     }
+    if (!(connection.encryptedAccessToken && connection.tokenKeyVersion)) {
+      throw new ConvexError("Connection has no encrypted token");
+    }
     return {
-      accessToken: connection.accessToken,
-      refreshToken: connection.refreshToken,
+      encryptedAccessToken: connection.encryptedAccessToken,
+      encryptedRefreshToken: connection.encryptedRefreshToken,
+      tokenKeyVersion: connection.tokenKeyVersion,
       expiresAt: connection.expiresAt,
       providerAccountId: connection.providerAccountId,
     };
@@ -149,8 +169,15 @@ export const getConnectionForRefresh = internalQuery({
     args
   ): Promise<{
     _id: Id<"connection">;
-    provider: "notion" | "raindrop" | "google_drive" | "readwise";
-    refreshToken: string | undefined;
+    provider:
+      | "notion"
+      | "raindrop"
+      | "google_drive"
+      | "readwise"
+      | "github"
+      | "linear";
+    encryptedRefreshToken: string | undefined;
+    tokenKeyVersion: number | undefined;
   } | null> => {
     const connection = await ctx.db.get(args.connectionId);
     if (!connection) {
@@ -159,7 +186,8 @@ export const getConnectionForRefresh = internalQuery({
     return {
       _id: connection._id,
       provider: connection.provider,
-      refreshToken: connection.refreshToken,
+      encryptedRefreshToken: connection.encryptedRefreshToken,
+      tokenKeyVersion: connection.tokenKeyVersion,
     };
   },
 });

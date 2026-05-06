@@ -9,6 +9,7 @@ const USER_SETTINGS_TABS: readonly UserSettingsTab[] = [
   "workspaces",
   "connections",
   "devices",
+  "usage",
   "billing",
   "account",
 ];
