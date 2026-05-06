@@ -81,6 +81,10 @@ import type * as imports_parsers_util_markdownToHtml from "../imports/parsers/ut
 import type * as imports_pipeline from "../imports/pipeline.js";
 import type * as imports_queries from "../imports/queries.js";
 import type * as imports_rehydrate from "../imports/rehydrate.js";
+import type * as mcp_internals from "../mcp/internals.js";
+import type * as mcp_searchAction from "../mcp/searchAction.js";
+import type * as mcp_server from "../mcp/server.js";
+import type * as mcp_tokens from "../mcp/tokens.js";
 import type * as rateLimiter from "../rateLimiter.js";
 import type * as resource_actions from "../resource/actions.js";
 import type * as resource_aiActions from "../resource/aiActions.js";
@@ -193,6 +197,10 @@ declare const fullApi: ApiFromModules<{
   "imports/pipeline": typeof imports_pipeline;
   "imports/queries": typeof imports_queries;
   "imports/rehydrate": typeof imports_rehydrate;
+  "mcp/internals": typeof mcp_internals;
+  "mcp/searchAction": typeof mcp_searchAction;
+  "mcp/server": typeof mcp_server;
+  "mcp/tokens": typeof mcp_tokens;
   rateLimiter: typeof rateLimiter;
   "resource/actions": typeof resource_actions;
   "resource/aiActions": typeof resource_aiActions;

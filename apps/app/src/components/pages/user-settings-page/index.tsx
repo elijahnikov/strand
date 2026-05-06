@@ -8,6 +8,7 @@ import {
   RiBuilding2Line,
   RiComputerLine,
   RiLinksFill,
+  RiPlugLine,
   RiShieldUserLine,
   RiUserLine,
 } from "@remixicon/react";
@@ -18,6 +19,7 @@ import { BillingTab } from "./billing-tab";
 import { ConnectionsTab } from "./connections-tab";
 import { DevicesTab } from "./devices-tab";
 import { GeneralTab } from "./general-tab";
+import { McpTab } from "./mcp-tab";
 import { UsageTab } from "./usage-tab";
 import { WorkspacesTab } from "./workspaces-tab";
 
@@ -26,6 +28,7 @@ export type UserSettingsTab =
   | "workspaces"
   | "connections"
   | "devices"
+  | "mcp"
   | "usage"
   | "billing"
   | "account";
@@ -84,6 +87,12 @@ export function UserSettingsPageComponent({
                 Devices
               </Text>
             </TabsTrigger>
+            <TabsTrigger className="grow-0 pl-3" value="mcp">
+              <RiPlugLine className="size-4" />
+              <Text className="ml-1 font-medium" size="small">
+                MCP
+              </Text>
+            </TabsTrigger>
             <TabsTrigger className="grow-0 pl-3" value="usage">
               <RiBarChart2Line className="size-4" />
               <Text className="ml-1 font-medium" size="small">
@@ -116,6 +125,9 @@ export function UserSettingsPageComponent({
           </TabsContent>
           <TabsContent className="pl-8" value="devices">
             <DevicesTab />
+          </TabsContent>
+          <TabsContent className="pl-8" value="mcp">
+            <McpTab />
           </TabsContent>
           <TabsContent className="pl-8" value="usage">
             <UsageTab />

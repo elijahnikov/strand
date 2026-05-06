@@ -608,7 +608,11 @@ export default defineSchema({
     .index("by_workspace", ["workspaceId", "startedAt"])
     .index("by_user", ["userId", "startedAt"]),
 
-  // EXTENSION TOKEN (long-lived bearer tokens for the browser extension)
+  // EXTENSION TOKEN (long-lived bearer tokens for the browser extension and
+  // MCP clients). `kind` discriminates: 'extension' for the browser extension,
+  // 'mcp' for external MCP clients (Claude Desktop, Cursor, etc.). Absent
+  // means 'extension' for backwards compatibility with rows minted before the
+  // discriminator existed.
   extensionToken: defineTable({
     userId: v.id("user"),
     defaultWorkspaceId: v.optional(v.id("workspace")),
@@ -618,6 +622,7 @@ export default defineSchema({
     expiresAt: v.number(),
     lastUsedAt: v.optional(v.number()),
     revokedAt: v.optional(v.number()),
+    kind: v.optional(v.union(v.literal("extension"), v.literal("mcp"))),
   })
     .index("by_user", ["userId", "revokedAt"])
     .index("by_hash", ["tokenHash"]),

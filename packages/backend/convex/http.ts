@@ -13,6 +13,7 @@ import {
   meHandler,
   uploadUrlHandler,
 } from "./extensionAuth/http";
+import { mcpHandler } from "./mcp/server";
 
 const http = httpRouter();
 
@@ -82,5 +83,16 @@ http.route({
   method: "POST",
   handler: captureFileHandler,
 });
+
+// MCP server (Streamable HTTP transport). External MCP clients (Claude
+// Desktop, Cursor, custom agents) hit /api/mcp with a Bearer PAT scoped to a
+// single workspace.
+for (const method of ["POST", "GET", "DELETE"] as const) {
+  http.route({
+    path: "/api/mcp",
+    method,
+    handler: mcpHandler,
+  });
+}
 
 export default http;

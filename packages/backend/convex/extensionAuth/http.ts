@@ -55,15 +55,19 @@ function readBearerToken(request: Request): string {
   return header.slice(BEARER_PREFIX.length).trim();
 }
 
+type TokenKind = "extension" | "mcp";
+
 interface ResolvedAuth {
   defaultWorkspaceId?: Id<"workspace">;
+  kind: TokenKind;
   tokenId: Id<"extensionToken">;
   userId: Id<"user">;
 }
 
 async function resolveAuth(
   ctx: Parameters<Parameters<typeof httpAction>[0]>[0],
-  request: Request
+  request: Request,
+  expectedKind: TokenKind = "extension"
 ): Promise<ResolvedAuth> {
   const token = readBearerToken(request);
   const resolved = await ctx.runQuery(
@@ -71,6 +75,9 @@ async function resolveAuth(
     { token }
   );
   if (!resolved) {
+    throw new HttpError(401, "Invalid or expired token");
+  }
+  if (resolved.kind !== expectedKind) {
     throw new HttpError(401, "Invalid or expired token");
   }
   await ctx.runMutation(internal.extensionAuth.internals.touchLastUsed, {
