@@ -1,14 +1,10 @@
 import { internal } from "../../_generated/api";
+import type { Id } from "../../_generated/dataModel";
 import { internalAction, internalMutation } from "../../_generated/server";
 
 const POLL_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6h since last webhook → eligible for poll
 const IDLE_PAUSE_MS = 14 * 24 * 60 * 60 * 1000; // 14d workspace inactivity → pause
 
-/**
- * Cron-driven: scan active syncEnabled connections that haven't had a webhook
- * in a while (or whose provider is poll-only) and enqueue a delta job.
- * Skips connections in workspaces that have been idle for > 14d.
- */
 export const enqueueDeltaPolls = internalMutation({
   args: {},
   handler: async (ctx) => {
@@ -26,11 +22,10 @@ export const enqueueDeltaPolls = internalMutation({
         continue;
       }
 
-      // Idle pause: skip if no member has touched the workspace in IDLE_PAUSE_MS.
       const lastAccess = await ctx.db
         .query("workspaceMember")
         .withIndex("by_workspace", (q) =>
-          q.eq("workspaceId", conn.workspaceId!)
+          q.eq("workspaceId", conn.workspaceId as Id<"workspace">)
         )
         .collect();
       const mostRecentAccess = lastAccess.reduce(
@@ -58,11 +53,6 @@ export const enqueueDeltaPolls = internalMutation({
   },
 });
 
-/**
- * Cron-driven: pause connections whose owning user has been downgraded off Pro.
- * Does not delete data — flips status to "paused" so resources remain visible
- * but no new sync work runs. Resume happens manually when user upgrades.
- */
 export const pauseDowngradedConnections = internalAction({
   args: {},
   handler: async (ctx): Promise<{ paused: number }> => {

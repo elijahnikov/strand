@@ -36,12 +36,13 @@ interface GitHubRepoListItem {
   private: boolean;
 }
 
+const TRAILING_SLASHES_RE = /\/+$/;
 function siteUrl(): string {
   const url = process.env.CONVEX_SITE_URL;
   if (!url) {
     throw new Error("CONVEX_SITE_URL not set");
   }
-  return url.replace(/\/+$/, "");
+  return url.replace(TRAILING_SLASHES_RE, "");
 }
 
 async function ghFetch<T>(
@@ -287,7 +288,7 @@ export const disconnectAndCleanup = internalAction({
 export const pollAllStars = internalAction({
   args: {},
   handler: async (ctx): Promise<void> => {
-    const ids: Array<Id<"connection">> = await ctx.runQuery(
+    const ids: Id<"connection">[] = await ctx.runQuery(
       internal.connections.providers.github_internals
         .listActiveGithubConnections,
       {}
@@ -312,7 +313,7 @@ export const pollStarsForConnection = internalAction({
       internal.connections.providers.github_internals.getConnectionForGithub,
       { connectionId: args.connectionId }
     );
-    if (!(conn && conn.scopeSelection.starsEnabled)) {
+    if (!conn?.scopeSelection.starsEnabled) {
       return;
     }
     const accessToken = decryptToken(

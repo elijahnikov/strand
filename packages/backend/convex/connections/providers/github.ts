@@ -106,6 +106,7 @@ async function verifyHmacSha256(
   }
   let mismatch = 0;
   for (let i = 0; i < hex.length; i += 1) {
+    // biome-ignore lint/suspicious/noBitwiseOperators: <>
     mismatch |= hex.charCodeAt(i) ^ expected.charCodeAt(i);
   }
   return mismatch === 0;
@@ -119,10 +120,11 @@ function externalIdFor(
   return `${kind}:${repoFullName}/${number}`;
 }
 
+const EXTERNAL_ID_RE = /^(issue|pr):([^/]+)\/([^/]+)\/(\d+)$/;
 function parseExternalId(
   externalId: string
 ): { kind: IssueOrPrKind; owner: string; repo: string; number: number } | null {
-  const match = externalId.match(/^(issue|pr):([^/]+)\/([^/]+)\/(\d+)$/);
+  const match = externalId.match(EXTERNAL_ID_RE);
   if (!match) {
     return null;
   }
@@ -151,11 +153,10 @@ function prState(pr: GitHubIssueOrPr): string {
 }
 
 const githubSync: ProviderSync = {
-  // Issues + PRs are webhook-only; stars run via a separate cron in
-  // github_actions.ts. pollDelta is a no-op so the generic delta cron skips us.
   kind: "webhook",
 
   // biome-ignore lint/correctness/useYield: intentional empty generator
+  // biome-ignore lint/suspicious/useAwait: <>
   async *pollDelta() {
     return;
   },
@@ -186,8 +187,6 @@ const githubSync: ProviderSync = {
     const deliveryId =
       req.headers.get("X-GitHub-Delivery") ?? `${Date.now()}:${Math.random()}`;
 
-    // Ping events fire on initial webhook registration — ack them so GitHub
-    // marks the hook as healthy.
     if (eventType === "ping" || payload.zen) {
       return { kind: "events", events: [] };
     }
@@ -212,8 +211,6 @@ const githubSync: ProviderSync = {
         } satisfies GitHubRawItem,
       });
     } else if (eventType === "pull_request" && payload.pull_request) {
-      // GitHub never sends `deleted` for PRs, but include the branch for
-      // symmetry with issues.
       const isDelete = payload.action === "deleted";
       events.push({
         kind: isDelete ? "delete" : "upsert",
@@ -290,8 +287,6 @@ export const github: OAuth2ProviderDescriptor = {
   authType: "oauth2",
   authorizeUrl: "https://github.com/login/oauth/authorize",
   tokenUrl: "https://github.com/login/oauth/access_token",
-  // `repo` covers private repos + webhook management for repos the user can
-  // admin. For public-only deployments switch to `public_repo` via env.
   scopes: process.env.GITHUB_SCOPES?.split(/\s+/).filter(Boolean) ?? ["repo"],
   clientId: process.env.GITHUB_CLIENT_ID,
   clientSecret: process.env.GITHUB_CLIENT_SECRET,

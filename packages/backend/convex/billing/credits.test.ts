@@ -37,8 +37,8 @@ describe("tokensToCredits", () => {
     expect(tokensToCredits(10, "gpt-4o-mini")).toBe(1);
   });
 
-  it("scales Gemini Flash down by 0.25x", () => {
-    expect(tokensToCredits(4500, "gemini-2.5-flash")).toBe(2);
+  it("charges Gemini Flash at 1x (cost savings retained as margin)", () => {
+    expect(tokensToCredits(4500, "gemini-2.5-flash")).toBe(5);
   });
 });
 

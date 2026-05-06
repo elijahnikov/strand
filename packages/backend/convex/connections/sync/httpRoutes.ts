@@ -11,7 +11,6 @@ function parseProvider(pathname: string): string | null {
     return null;
   }
   const rest = pathname.slice(PREFIX.length);
-  // Accept "<provider>/webhook" with no trailing path.
   if (!rest.endsWith(SUFFIX)) {
     return null;
   }
@@ -22,11 +21,6 @@ function parseProvider(pathname: string): string | null {
   return provider;
 }
 
-/**
- * Provider-level webhook endpoint. One URL per provider; the payload contains
- * a key (e.g. workspace_id for Notion) that identifies which connection the
- * delivery belongs to.
- */
 export const webhookHandler = httpAction(async (ctx, request) => {
   const url = new URL(request.url);
   const providerId = parseProvider(url.pathname);
@@ -39,7 +33,7 @@ export const webhookHandler = httpAction(async (ctx, request) => {
     return new Response("Provider does not accept webhooks", { status: 400 });
   }
 
-  let parsed;
+  let parsed: Awaited<ReturnType<typeof descriptor.sync.parseWebhook>>;
   try {
     parsed = await descriptor.sync.parseWebhook(request);
   } catch (err) {
@@ -51,9 +45,6 @@ export const webhookHandler = httpAction(async (ctx, request) => {
   }
 
   if (parsed.kind === "verification") {
-    // Surface the token via logs so the operator can paste it into the
-    // provider's settings UI to complete subscription setup. We don't auto-
-    // store it — the operator explicitly wires it into the env var.
     console.warn(
       `[webhook] ${providerId} verification token (set as ${providerId.toUpperCase()}_WEBHOOK_TOKEN env var): ${parsed.verificationToken}`
     );
@@ -80,7 +71,6 @@ export const webhookHandler = httpAction(async (ctx, request) => {
       }
     );
     if (!conn) {
-      // No active sync-enabled connection for this workspace — drop silently.
       continue;
     }
     const connectionId = conn._id as Id<"connection">;
@@ -117,13 +107,6 @@ export const webhookHandler = httpAction(async (ctx, request) => {
 const PER_CONN_PREFIX_RE =
   /^\/api\/integrations\/([^/]+)\/webhook\/([^/]+)\/?$/;
 
-/**
- * Per-connection webhook endpoint. Used by providers (GitHub, Linear) that
- * register a unique URL per webhook subscription, where the connectionId is
- * encoded directly in the path. The provider's parseWebhook receives the
- * connection's `webhookSecret` so it can verify HMAC against per-connection
- * secrets rather than a single env-var-level secret.
- */
 export const webhookHandlerByConnection = httpAction(async (ctx, request) => {
   const url = new URL(request.url);
   const match = url.pathname.match(PER_CONN_PREFIX_RE);
@@ -153,7 +136,7 @@ export const webhookHandlerByConnection = httpAction(async (ctx, request) => {
     return new Response("Connection has no webhook secret", { status: 400 });
   }
 
-  let parsed;
+  let parsed: Awaited<ReturnType<typeof descriptor.sync.parseWebhook>>;
   try {
     parsed = await descriptor.sync.parseWebhook(request, conn.webhookSecret);
   } catch (err) {
@@ -165,7 +148,6 @@ export const webhookHandlerByConnection = httpAction(async (ctx, request) => {
   }
 
   if (parsed.kind === "verification") {
-    // Per-connection providers don't currently use this flow; surface anyway.
     console.warn(
       `[webhook] ${providerId} verification token: ${parsed.verificationToken}`
     );

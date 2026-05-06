@@ -21,8 +21,6 @@ export const getConnectionForGithub = internalQuery({
   ): Promise<{
     encryptedAccessToken: string;
     tokenKeyVersion: number;
-    // Only set after enableSync runs. Required for hook registration but not
-    // for read-only operations like listMyRepos.
     webhookSecret: string | undefined;
     scopeSelection: GitHubScopeSelection;
   } | null> => {
@@ -72,7 +70,7 @@ export const finalizeDisconnect = internalMutation({
 
 export const listActiveGithubConnections = internalQuery({
   args: {},
-  handler: async (ctx): Promise<Array<Id<"connection">>> => {
+  handler: async (ctx): Promise<Id<"connection">[]> => {
     const all = await ctx.db
       .query("connection")
       .withIndex("by_status_syncEnabled", (q) =>

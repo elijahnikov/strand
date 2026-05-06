@@ -200,7 +200,7 @@ async function fetchPageContent(
   }
 }
 
-async function searchPages(
+function searchPages(
   accessToken: string,
   startCursor: string | undefined,
   sortDescending: boolean
@@ -228,8 +228,6 @@ async function* iterateBatches(
   options: { sortDescending: boolean; stopAfterTimestamp?: string }
 ): AsyncIterable<SyncBatch> {
   let cursor: string | undefined;
-  // Track the highest last_edited_time seen across the whole iteration so we
-  // can emit it as the new sync cursor when we're done.
   let maxSeen = options.stopAfterTimestamp;
   while (true) {
     const res = await searchPages(
@@ -239,12 +237,12 @@ async function* iterateBatches(
     );
     const liveResults = res.results.filter((p) => !(p.archived || p.in_trash));
 
-    // Delta mode: stop once we cross the previous high-water mark.
     let stop = false;
     let trimmed = liveResults;
-    if (options.stopAfterTimestamp) {
+    const stopAfterTimestamp = options.stopAfterTimestamp;
+    if (stopAfterTimestamp) {
       const idx = liveResults.findIndex(
-        (p) => p.last_edited_time <= options.stopAfterTimestamp!
+        (p) => p.last_edited_time <= stopAfterTimestamp
       );
       if (idx !== -1) {
         trimmed = liveResults.slice(0, idx);
@@ -323,6 +321,7 @@ async function verifyHmac(
   }
   let mismatch = 0;
   for (let i = 0; i < hex.length; i += 1) {
+    // biome-ignore lint/suspicious/noBitwiseOperators: <>
     mismatch |= hex.charCodeAt(i) ^ expected.charCodeAt(i);
   }
   return mismatch === 0;
