@@ -3,7 +3,13 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI, openai } from "@ai-sdk/openai";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
-import { generateText, type LanguageModel, tool } from "ai";
+import {
+  generateText,
+  jsonSchema,
+  type LanguageModel,
+  type ToolSet,
+  tool,
+} from "ai";
 import { z } from "zod";
 import {
   fetchAuthAction,
@@ -126,9 +132,17 @@ export async function buildRAGContext(
   return { chunks, scopedResource };
 }
 
+export interface ExternalToolSummary {
+  description: string | null;
+  name: string;
+  serverInstructions: string | null;
+  serverName: string;
+}
+
 export function buildSystemPrompt(
   ragContext: RAGContext,
-  memory: string | null
+  memory: string | null,
+  externalTools: ExternalToolSummary[] = []
 ): string {
   const basePrompt = `You are a knowledgeable assistant for the user's personal knowledge library in omi. You help users explore, understand, and connect their saved resources (articles, notes, files).
 
@@ -164,11 +178,12 @@ Every single time you reference a saved resource, replace its title in your pros
 
 ## Other Rules
 
-- Ground your answers in the user's library content whenever possible.
+- For questions about the user's library, ground your answers in their saved resources.
+- For questions about a connected external service (Linear, Calendar, etc., listed below if any), CALL the relevant external tool — do NOT tell the user to check that service themselves.
 - When the user references resources in their message using [[resource:ID|Title|type]], treat them as explicit references they want you to focus on. Use the getResourceDetails tool with the provided ID to fetch full details before answering.
 - Use the searchLibrary tool when the user asks about topics not covered in the provided context.
 - Be concise but thorough.
-- When you don't have enough context from the library, say so honestly.
+- When you don't have enough context from the library or any external tool, say so honestly.
 - Format the rest of your response with markdown for readability (headings, lists, code blocks, etc.).
 
 ## Creating Collections
@@ -193,6 +208,56 @@ Never call \`proposeCollection\` without first calling \`searchLibrary\` in the 
     sections.push(
       `\n## Current Resource\nTitle: ${r.title}\nType: ${r.type}${r.summary ? `\nSummary: ${r.summary}` : ""}${r.content ? `\nContent:\n${r.content}` : ""}`
     );
+  }
+
+  if (externalTools.length > 0) {
+    const grouped = new Map<
+      string,
+      { instructions: string | null; tools: ExternalToolSummary[] }
+    >();
+    for (const tool of externalTools) {
+      const entry = grouped.get(tool.serverName) ?? {
+        instructions: tool.serverInstructions,
+        tools: [],
+      };
+      entry.tools.push(tool);
+      grouped.set(tool.serverName, entry);
+    }
+    const lines: string[] = [
+      "\n## Connected External Tools",
+      "The user has connected external services (via MCP) whose tools are available to you. Prefer these tools when the user's question is about that service — don't tell them to check the dashboard themselves. Tool names are namespaced `mcp__<service>__<action>`.",
+      "",
+      "**Argument minimalism — STRICT, READ THIS:**",
+      "Tool schemas list every argument the tool CAN accept, including many optional filters. Most calls should pass FEW arguments — only the ones the user actually mentioned, plus required ones.",
+      "",
+      "Specifically:",
+      "- DO NOT fill in optional filter fields (`priority`, `state`, `team`, `project`, `assignee`, `owner`, `cycle`, `label`, `delegate`, `cursor`, `parentId`, `createdAt`, `updatedAt`, `query`, etc.) unless the user asked to filter on them. OMIT them entirely.",
+      "- DO NOT invent IDs, slugs, names, or enum values from the user's message. If you don't have a verified value (returned by another tool call this turn), omit the field — the API will use its default.",
+      '- 0, `"all"`, `"any"`, `"none"`, `"null"`, `""` are FILTER VALUES, not "no filter". They RESTRICT results. To get unfiltered results, OMIT THE FIELD.',
+      "",
+      "Example — user asks 'list my Linear issues':",
+      '- WRONG: `list_issues({ assignee: "me", team: "my-workspace", state: "all", priority: 0, ... })` — every filter is a guess.',
+      "- RIGHT: `list_issues({ limit: 50 })` — pass only required args; let the server default to everything.",
+      "",
+      "**For 'my X' queries**: prefer tools whose name contains `me`, `my`, `whoami`, `viewer`, or `current_user`. Otherwise, OMIT user-filter args — most APIs default to the authenticated user. Never pass the literal string `\"me\"` as a user ID.",
+      "",
+      "**For ID/slug filters** (team, project, workspace, etc.): if you don't already have a real ID returned by another tool, either (a) call a `list_*` enumerator tool first, or (b) omit the filter and let the server return everything.",
+      "",
+      "**Empty results aren't an answer**: if a list call returns zero items unexpectedly, RETRY ONCE with FEWER filters (or none) before reporting empty.",
+    ];
+    // We list tool NAMES only here — full descriptions are already delivered
+    // to the model via each tool definition. Listing the names alongside
+    // their server is what nudges the model to call them. Descriptions can
+    // be 1-2KB each (Notion); duplicating them would inflate the prompt
+    // by tens of KB.
+    for (const [serverName, entry] of grouped) {
+      lines.push(`\n**${serverName}** (${entry.tools.length} tools):`);
+      if (entry.instructions) {
+        lines.push(`*Server guidance:* ${entry.instructions}`);
+      }
+      lines.push(entry.tools.map((t) => `\`${t.name}\``).join(", "));
+    }
+    sections.push(lines.join("\n"));
   }
 
   if (ragContext.chunks.length > 0) {
@@ -362,6 +427,101 @@ export function createChatTools(workspaceId: string) {
       },
     }),
   };
+}
+
+/**
+ * Pull the user's connected MCP servers' enabled tools and wrap each as an
+ * ai-sdk tool whose `execute()` proxies the call to the Convex MCP client
+ * action. Tool names are namespaced `mcp__<serverName>__<toolName>` to avoid
+ * collisions with native tools and across multiple connected servers.
+ *
+ * Returns a tools record (possibly empty) plus the set of namespaced tool
+ * names so the caller can extend `PERSISTED_TOOL_NAMES` for replay rendering.
+ */
+export async function createMcpToolsForChat(): Promise<{
+  tools: ToolSet;
+  toolNames: Set<string>;
+  toolSummaries: ExternalToolSummary[];
+}> {
+  let enabled: Array<{
+    serverId: Id<"mcpServer">;
+    serverName: string;
+    serverInstructions: string | null;
+    toolName: string;
+    description: string | null;
+    inputSchema: string;
+  }>;
+  try {
+    enabled = (await fetchAuthQuery(
+      api.mcpClient.queries.listEnabledToolsForChat,
+      {}
+    )) as typeof enabled;
+  } catch (err) {
+    console.error(
+      "[createMcpToolsForChat] listEnabledToolsForChat failed:",
+      err
+    );
+    enabled = [];
+  }
+
+  const tools: ToolSet = {};
+  const toolNames = new Set<string>();
+  const toolSummaries: ExternalToolSummary[] = [];
+
+  for (const entry of enabled) {
+    const namespacedName = mcpToolName(entry.serverName, entry.toolName);
+    toolNames.add(namespacedName);
+    toolSummaries.push({
+      name: namespacedName,
+      serverName: entry.serverName,
+      description: entry.description,
+      serverInstructions: entry.serverInstructions,
+    });
+
+    tools[namespacedName] = tool({
+      description: entry.description
+        ? `[${entry.serverName}] ${entry.description}`
+        : `Tool '${entry.toolName}' from ${entry.serverName}`,
+      inputSchema: jsonSchema(
+        parseInputSchemaJson(entry.inputSchema) as Parameters<
+          typeof jsonSchema
+        >[0]
+      ),
+      execute: async (args) => {
+        console.log("[tool:mcp]", {
+          server: entry.serverName,
+          tool: entry.toolName,
+        });
+        return (await fetchAuthAction(api.mcpClient.callAction.callTool, {
+          serverId: entry.serverId,
+          toolName: entry.toolName,
+          args,
+        })) as {
+          content: Array<{ type: string; text?: string; [k: string]: unknown }>;
+          isError?: boolean;
+        };
+      },
+    });
+  }
+
+  return { tools, toolNames, toolSummaries };
+}
+
+function parseInputSchemaJson(serialized: string): unknown {
+  try {
+    return JSON.parse(serialized);
+  } catch {
+    return { type: "object", properties: {} };
+  }
+}
+
+const MCP_TOOL_PREFIX = "mcp__";
+const NON_ALNUM_RE = /[^a-zA-Z0-9_]/g;
+
+function mcpToolName(serverName: string, toolName: string): string {
+  const safeServer = serverName.replace(NON_ALNUM_RE, "_").slice(0, 32);
+  const safeTool = toolName.replace(NON_ALNUM_RE, "_").slice(0, 64);
+  return `${MCP_TOOL_PREFIX}${safeServer}__${safeTool}`;
 }
 
 export interface Citation {

@@ -14,6 +14,7 @@ import {
   uploadUrlHandler,
 } from "./extensionAuth/http";
 import { mcpHandler } from "./mcp/server";
+import { oauthCallbackHandler as mcpClientOauthCallbackHandler } from "./mcpClient/oauthHttp";
 
 const http = httpRouter();
 
@@ -94,5 +95,13 @@ for (const method of ["POST", "GET", "DELETE"] as const) {
     handler: mcpHandler,
   });
 }
+
+// OAuth callback for outbound MCP client connections (Omi-as-client connecting
+// to external MCP servers like Google Calendar, Notion's MCP, etc.).
+http.route({
+  path: "/api/mcp-client/oauth/callback",
+  method: "GET",
+  handler: mcpClientOauthCallbackHandler,
+});
 
 export default http;

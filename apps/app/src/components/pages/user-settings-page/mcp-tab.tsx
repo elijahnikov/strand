@@ -24,9 +24,10 @@ import {
 } from "@omi/ui/select";
 import { Text } from "@omi/ui/text";
 import { toastManager } from "@omi/ui/toast";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { ConvexError } from "convex/values";
 import { useState } from "react";
+import { WorkspaceIcon } from "~/components/common/workspace-icon";
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof ConvexError) {
@@ -89,10 +90,10 @@ interface MintedToken {
 }
 
 export function McpTab() {
-  const { data: tokens } = useSuspenseQuery(
+  const { data: tokens = [] } = useQuery(
     convexQuery(api.mcp.tokens.listMyMcpTokens, {})
   );
-  const { data: workspaces } = useSuspenseQuery(
+  const { data: workspaces = [] } = useQuery(
     convexQuery(api.workspace.queries.listByUser, {})
   );
 
@@ -138,7 +139,13 @@ export function McpTab() {
         onClose={() => setCreateDialogOpen(false)}
         onMinted={setMinted}
         open={createDialogOpen}
-        workspaces={workspaces.map((w) => ({ id: w._id, name: w.name }))}
+        workspaces={workspaces.map((w) => ({
+          id: w._id,
+          name: w.name,
+          icon: w.icon,
+          emoji: w.emoji,
+          iconColor: w.iconColor,
+        }))}
       />
 
       <RevealTokenDialog minted={minted} onClose={() => setMinted(null)} />
@@ -197,7 +204,13 @@ interface CreateTokenDialogProps {
   onClose: () => void;
   onMinted: (minted: MintedToken) => void;
   open: boolean;
-  workspaces: Array<{ id: Id<"workspace">; name: string }>;
+  workspaces: Array<{
+    id: Id<"workspace">;
+    name: string;
+    icon?: string;
+    emoji?: string;
+    iconColor?: string;
+  }>;
 }
 
 function CreateTokenDialog({
@@ -288,14 +301,37 @@ function CreateTokenDialog({
             >
               <SelectTrigger>
                 <SelectValue>
-                  {workspaces.find((w) => w.id === workspaceId)?.name ??
-                    "Select workspace"}
+                  {(() => {
+                    const ws = workspaces.find((w) => w.id === workspaceId);
+                    if (!ws) {
+                      return "Select workspace";
+                    }
+                    return (
+                      <span className="flex items-center gap-2">
+                        <WorkspaceIcon
+                          emoji={ws.emoji}
+                          icon={ws.icon}
+                          iconColor={ws.iconColor}
+                          size="xs"
+                        />
+                        <span>{ws.name}</span>
+                      </span>
+                    );
+                  })()}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent alignItemWithTrigger={false}>
                 {workspaces.map((w) => (
                   <SelectItem key={w.id} value={w.id}>
-                    {w.name}
+                    <span className="flex items-center gap-2">
+                      <WorkspaceIcon
+                        emoji={w.emoji}
+                        icon={w.icon}
+                        iconColor={w.iconColor}
+                        size="xs"
+                      />
+                      <span>{w.name}</span>
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>

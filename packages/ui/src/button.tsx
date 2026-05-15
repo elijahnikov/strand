@@ -21,9 +21,9 @@ const buttonVariants = cva(
           "focus-visible:shadow-buttons-inverted-focus!"
         ),
         omi: cn(
-          "border-[0.5px] border-blue-400 bg-linear-to-t from-blue-500 to-blue-400 text-white after:hidden",
-          "hover:from-blue-600 hover:to-blue-500",
-          "active:from-blue-700 active:to-blue-600",
+          "border-[0.5px] border-sky-400 bg-linear-to-t from-sky-500 to-sky-400 text-white after:hidden",
+          "hover:from-sky-600 hover:to-sky-500",
+          "active:from-sky-700 active:to-sky-600",
           "focus-visible:shadow-buttons-recall-focus disabled:shadow-none"
         ),
         success: cn(

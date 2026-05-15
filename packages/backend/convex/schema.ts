@@ -608,6 +608,81 @@ export default defineSchema({
     .index("by_workspace", ["workspaceId", "startedAt"])
     .index("by_user", ["userId", "startedAt"]),
 
+  // MCP SERVER (outbound: an external MCP server Omi's chat connects to as a
+  // client to invoke the server's tools — Linear, Google Calendar, Gmail,
+  // custom internal MCPs, etc.). User-scoped: a connected server's tools are
+  // available in every workspace the user chats in. Per-workspace scoping
+  // can land later as an additive `availableInWorkspaceIds` array.
+  mcpServer: defineTable({
+    userId: v.id("user"),
+    // Legacy: rows created before MCP servers became user-scoped carried a
+    // `workspaceId` here. New rows omit it; the field is read nowhere.
+    workspaceId: v.optional(v.id("workspace")),
+    name: v.string(),
+    catalogId: v.optional(v.string()),
+    url: v.string(),
+    transport: v.literal("streamable_http"),
+    authType: v.union(v.literal("bearer"), v.literal("oauth2")),
+    encryptedAccessToken: v.optional(v.string()),
+    encryptedRefreshToken: v.optional(v.string()),
+    tokenKeyVersion: v.optional(v.number()),
+    accessTokenExpiresAt: v.optional(v.number()),
+    oauthClientId: v.optional(v.string()),
+    encryptedOauthClientSecret: v.optional(v.string()),
+    oauthAuthorizationServer: v.optional(v.string()),
+    oauthTokenEndpoint: v.optional(v.string()),
+    oauthScope: v.optional(v.string()),
+    status: v.union(
+      v.literal("active"),
+      v.literal("error"),
+      v.literal("disabled"),
+      v.literal("pending_oauth")
+    ),
+    lastErrorAt: v.optional(v.number()),
+    lastErrorMessage: v.optional(v.string()),
+    cachedTools: v.array(
+      v.object({
+        name: v.string(),
+        description: v.optional(v.string()),
+        // JSON-encoded JSON Schema. Stored stringified because Convex rejects
+        // documents containing top-level `$`-prefixed keys ($schema, $ref,
+        // $defs are common in JSON Schema).
+        inputSchema: v.string(),
+      })
+    ),
+    enabledTools: v.array(v.string()),
+    // Optional server-authored guidance from the MCP `initialize` response.
+    // Injected into the chat system prompt only when this server is connected,
+    // so per-server quirks don't bloat the prompt for everyone.
+    instructions: v.optional(v.string()),
+    toolsLastFetchedAt: v.number(),
+    lastConnectedAt: v.number(),
+  }).index("by_user_status", ["userId", "status"]),
+
+  // MCP OAUTH STATE (ephemeral state during the OAuth dance: PKCE verifier,
+  // dynamically-registered client credentials, return URL). Rows are written
+  // when the user clicks "Connect" and consumed in the OAuth callback;
+  // expired rows are reaped lazily by the callback handler.
+  mcpOauthState: defineTable({
+    state: v.string(),
+    userId: v.id("user"),
+    // Legacy: pre-refactor rows carried `workspaceId`. New rows omit it.
+    workspaceId: v.optional(v.id("workspace")),
+    catalogId: v.optional(v.string()),
+    name: v.string(),
+    url: v.string(),
+    pkceVerifier: v.string(),
+    oauthClientId: v.optional(v.string()),
+    encryptedOauthClientSecret: v.optional(v.string()),
+    tokenKeyVersion: v.optional(v.number()),
+    authorizationEndpoint: v.string(),
+    tokenEndpoint: v.string(),
+    authorizationServer: v.optional(v.string()),
+    scope: v.optional(v.string()),
+    returnTo: v.string(),
+    expiresAt: v.number(),
+  }).index("by_state", ["state"]),
+
   // EXTENSION TOKEN (long-lived bearer tokens for the browser extension and
   // MCP clients). `kind` discriminates: 'extension' for the browser extension,
   // 'mcp' for external MCP clients (Claude Desktop, Cursor, etc.). Absent

@@ -59,6 +59,12 @@ const limits = {
     period: MINUTE,
     capacity: 30,
   },
+  mcpClientCall: {
+    kind: "token bucket",
+    rate: 60,
+    period: MINUTE,
+    capacity: 60,
+  },
 } as const;
 
 export type RateLimitName = keyof typeof limits;
