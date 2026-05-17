@@ -78,6 +78,7 @@ export const resolveByToken = internalQuery({
       tokenId: row._id,
       userId: row.userId,
       defaultWorkspaceId: row.defaultWorkspaceId,
+      kind: row.kind ?? ("extension" as const),
     };
   },
 });

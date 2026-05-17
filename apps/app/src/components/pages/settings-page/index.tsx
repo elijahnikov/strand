@@ -35,7 +35,6 @@ import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { PageContent } from "~/components/common/page-content";
 import {
   WorkspaceIcon,
   WorkspaceIconSelector,
@@ -67,14 +66,14 @@ export function SettingsPageComponent({
   );
 
   return (
-    <PageContent className="mt-8 py-8" width="xl:w-2/3">
-      <Tabs
-        className="flex h-full gap-0"
-        onValueChange={(next) => onTabChange(next as SettingsTab)}
-        orientation="vertical"
-        value={tab}
-      >
-        <TabsList className="sticky top-8 h-fit w-44 shrink-0 items-start justify-start self-start pr-4">
+    <Tabs
+      className="h-full"
+      onValueChange={(next) => onTabChange(next as SettingsTab)}
+      orientation="vertical"
+      value={tab}
+    >
+      <div className="sticky top-0 flex h-screen w-52 shrink-0 flex-col gap-3 self-start border-r-[0.5px] py-8 pr-4 pl-6">
+        <TabsList className="w-full items-start justify-start">
           <TabsTrigger className="grow-0 pl-3" value="general">
             <RiSettings3Fill className="size-4" />
             <Text className="ml-1 font-medium" size="small">
@@ -112,8 +111,10 @@ export function SettingsPageComponent({
             </Text>
           </TabsTrigger>
         </TabsList>
-        <div className="h-fit min-h-[calc(100vh-140px)] flex-1 border-l-[0.5px] pb-8">
-          <TabsContent className="pl-8" value="general">
+      </div>
+      <div className="flex min-w-0 flex-1 justify-center">
+        <div className="mt-8 min-h-[calc(100vh-140px)] w-full max-w-[640px] px-4 py-8 md:px-0">
+          <TabsContent value="general">
             <GeneralTab
               isAdminOrOwner={
                 data.member?.role === "owner" || data.member?.role === "admin"
@@ -122,22 +123,22 @@ export function SettingsPageComponent({
               workspaceId={workspaceId}
             />
           </TabsContent>
-          <TabsContent className="pl-8" value="members">
+          <TabsContent value="members">
             <MembersTab
               currentUserRole={data.member?.role}
               workspaceId={workspaceId}
             />
           </TabsContent>
-          <TabsContent className="pl-8" value="memory">
+          <TabsContent value="memory">
             <MemoryTab workspaceId={workspaceId} />
           </TabsContent>
-          <TabsContent className="pl-8" value="ai-provider">
+          <TabsContent value="ai-provider">
             <AIProviderTab workspaceId={workspaceId} />
           </TabsContent>
-          <TabsContent className="pl-8" value="import">
+          <TabsContent value="import">
             <ImportTab workspaceId={workspaceId} />
           </TabsContent>
-          <TabsContent className="pl-8" value="advanced">
+          <TabsContent value="advanced">
             <AdvancedTab
               isOwner={data.member?.role === "owner"}
               workspaceId={workspaceId}
@@ -145,8 +146,9 @@ export function SettingsPageComponent({
             />
           </TabsContent>
         </div>
-      </Tabs>
-    </PageContent>
+      </div>
+      <div aria-hidden className="w-52 shrink-0" />
+    </Tabs>
   );
 }
 

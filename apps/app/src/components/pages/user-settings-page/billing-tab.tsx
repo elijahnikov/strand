@@ -12,6 +12,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ConvexError } from "convex/values";
 import { CheckIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { TabSkeleton } from "./tab-skeleton";
 
 type Plan = "free" | "basic" | "pro";
 
@@ -112,11 +113,7 @@ export function BillingTab() {
   usePostCheckoutSync();
 
   if (isLoading) {
-    return (
-      <Text className="text-ui-fg-subtle" size="small">
-        Loading…
-      </Text>
-    );
+    return <TabSkeleton />;
   }
 
   if (!state) {

@@ -2,8 +2,10 @@ import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@omi/backend/_generated/api.js";
 import { Badge } from "@omi/ui/badge";
 import { Heading } from "@omi/ui/heading";
+import { Skeleton } from "@omi/ui/skeleton";
 import { Text } from "@omi/ui/text";
 import { useQuery } from "@tanstack/react-query";
+import { TabSkeleton } from "./tab-skeleton";
 
 type Plan = "free" | "basic" | "pro";
 
@@ -56,11 +58,7 @@ export function UsageTab() {
   );
 
   if (isLoading) {
-    return (
-      <Text className="text-ui-fg-subtle" size="small">
-        Loading…
-      </Text>
-    );
+    return <TabSkeleton />;
   }
 
   if (!state) {
@@ -128,7 +126,7 @@ function CreditsCard({
       </div>
       <div className="h-2.5 w-full overflow-hidden rounded-full bg-ui-bg-subtle">
         <div
-          className="h-full rounded-full bg-blue-500 transition-all"
+          className="h-full rounded-full bg-sky-500 transition-all"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -185,7 +183,13 @@ function UsageList() {
   );
 
   if (isLoading) {
-    return null;
+    return (
+      <section className="flex flex-col gap-3 rounded-lg py-4">
+        <Skeleton className="h-5 w-40" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </section>
+    );
   }
 
   const rows = data ?? [];

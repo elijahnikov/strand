@@ -1,10 +1,9 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { api } from "@omi/backend/_generated/api.js";
 import type { Id } from "@omi/backend/_generated/dataModel.js";
-import { Button } from "@omi/ui/button";
 import { toastManager } from "@omi/ui/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { CollapsibleSection } from "~/components/common/collapsible-section";
 import { ResourceRow } from "~/components/pages/library-page/resource-row";
@@ -79,25 +78,7 @@ export function RecentResources({
   }
 
   return (
-    <CollapsibleSection
-      className="mb-14"
-      secondary={
-        <Link
-          onClick={(e) => e.stopPropagation()}
-          params={{ workspaceId }}
-          to="/workspace/$workspaceId/library"
-        >
-          <Button
-            className="text-ui-fg-subtle text-xs hover:text-ui-fg-base"
-            size="xsmall"
-            variant="ghost"
-          >
-            View library
-          </Button>
-        </Link>
-      }
-      title="Recent"
-    >
+    <CollapsibleSection className="mb-14" title="Recent">
       <div className="mt-3 flex flex-col gap-y-1">
         {resources.map((r) => (
           <ResourceRow

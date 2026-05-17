@@ -86,7 +86,7 @@
 @layer base {
   :root {
     --font-berkeley-mono: "IoskeleyMono";
-    --font-open-runde-sans: "Inter", sans-serif;
+    --font-open-runde-sans: "OpenRunde", sans-serif;
   }
   * {
     scrollbar-color: var(--input) transparent;

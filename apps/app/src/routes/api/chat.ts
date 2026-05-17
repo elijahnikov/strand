@@ -8,6 +8,7 @@ import {
   buildRAGContext,
   buildSystemPrompt,
   createChatTools,
+  createMcpToolsForChat,
   extractCitations,
   extractToolPartsFromSteps,
   generateThreadTitle,
@@ -93,12 +94,22 @@ export const Route = createFileRoute("/api/chat")({
           }).catch(() => null),
         ]);
 
+        const nativeTools = createChatTools(workspaceId);
+        const {
+          tools: mcpTools,
+          toolNames: mcpToolNames,
+          toolSummaries: mcpToolSummaries,
+        } = await createMcpToolsForChat();
+        const tools = { ...nativeTools, ...mcpTools };
+        const persistedToolNames = new Set([
+          ...PERSISTED_TOOL_NAMES,
+          ...mcpToolNames,
+        ]);
         const systemPrompt = buildSystemPrompt(
           ragContext,
-          memoryRow?.content ?? null
+          memoryRow?.content ?? null,
+          mcpToolSummaries
         );
-
-        const tools = createChatTools(workspaceId);
 
         const { model: chatModel, modelId: CHAT_MODEL_ID } =
           await getChatModel(workspaceId);
@@ -123,7 +134,7 @@ export const Route = createFileRoute("/api/chat")({
             const citations = extractCitations(ragContext);
             const toolParts = extractToolPartsFromSteps(
               steps,
-              PERSISTED_TOOL_NAMES
+              persistedToolNames
             );
             await saveAssistantMessage(
               workspaceId,
