@@ -46,7 +46,7 @@ function TabsList({
           "absolute bottom-0 left-0 h-(--active-tab-height) w-(--active-tab-width) translate-x-(--active-tab-left) -translate-y-(--active-tab-bottom) transition-[width,translate] duration-200 ease-in-out",
           variant === "underline"
             ? "z-10 border-blue-400 border-b-3 data-[orientation=horizontal]:h-0.5 data-[orientation=vertical]:w-0.5 data-[orientation=vertical]:-translate-x-px data-[orientation=horizontal]:translate-y-px"
-            : "-z-1 rounded-full bg-ui-bg-component-hover"
+            : "-z-1 rounded-full"
         )}
         data-slot="tab-indicator"
       />

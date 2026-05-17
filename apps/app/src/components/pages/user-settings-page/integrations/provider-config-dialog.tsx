@@ -198,9 +198,11 @@ function SyncPanel({
 
   if (!isPro) {
     return (
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3 rounded-md border px-4 py-2">
         <div className="flex items-center gap-2">
-          <Badge variant="warning">Pro</Badge>
+          <Badge className="px-2" variant="warning">
+            Pro
+          </Badge>
           <Text size="small">
             Continuous sync keeps {connection.providerAccountLabel ?? "this"}{" "}
             content up to date automatically.

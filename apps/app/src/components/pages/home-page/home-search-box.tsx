@@ -32,7 +32,7 @@ export function HomeSearchBox({
           <SearchIcon className="size-4" />
         </div>
         <Input
-          className="rounded-full bg-ui-bg-field-component-hover pr-8 pl-8 shadow-xs hover:bg-ui-bg-component-hover dark:bg-ui-bg-field-component dark:shadow-sm dark:hover:bg-ui-bg-field-component-hover"
+          className="rounded-md bg-ui-bg-field-component-hover pr-8 pl-8 shadow-xs hover:bg-ui-bg-component-hover dark:bg-ui-bg-field-component dark:shadow-sm dark:hover:bg-ui-bg-field-component-hover"
           onChange={(e) => setValue(e.target.value)}
           placeholder="Search your library…"
           type="search"

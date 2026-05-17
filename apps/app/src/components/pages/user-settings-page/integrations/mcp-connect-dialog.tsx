@@ -137,8 +137,7 @@ export function McpConnectDialog({
         token: token.trim(),
       });
     } else {
-      const base =
-        window.location.href.split("?")[0] ?? window.location.href;
+      const base = window.location.href.split("?")[0] ?? window.location.href;
       startOauth({
         catalogId: target.catalogId,
         name: customName,

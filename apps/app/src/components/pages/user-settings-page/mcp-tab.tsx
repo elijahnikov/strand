@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@omi/ui/select";
+import { Skeleton } from "@omi/ui/skeleton";
 import { Text } from "@omi/ui/text";
 import { toastManager } from "@omi/ui/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -90,7 +91,7 @@ interface MintedToken {
 }
 
 export function McpTab() {
-  const { data: tokens = [] } = useQuery(
+  const { data: tokens = [], isLoading: tokensLoading } = useQuery(
     convexQuery(api.mcp.tokens.listMyMcpTokens, {})
   );
   const { data: workspaces = [] } = useQuery(
@@ -121,7 +122,12 @@ export function McpTab() {
         </Button>
       </div>
 
-      {tokens.length === 0 ? (
+      {tokensLoading ? (
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+        </div>
+      ) : tokens.length === 0 ? (
         <div className="rounded-lg border border-dashed p-6 text-center">
           <Text className="text-ui-fg-subtle" size="small">
             No MCP tokens yet. Generate one to connect an external assistant.

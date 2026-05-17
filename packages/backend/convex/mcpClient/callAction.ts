@@ -31,7 +31,7 @@ async function callToolWithSessionRetry(
   try {
     return await mcpToolsCall(baseOptions, toolName, toolArgs);
   } catch (err) {
-    if (!(err instanceof McpRpcError) || !isSessionRequiredError(err)) {
+    if (!(err instanceof McpRpcError && isSessionRequiredError(err))) {
       throw err;
     }
     const init = await mcpInitialize(baseOptions);

@@ -132,8 +132,8 @@ export function JournalPageComponent({
               <Button
                 disabled={creatingDate !== null}
                 onClick={() => createForDate(targetDate)}
-                size="xsmall"
-                variant="outline"
+                size="small"
+                variant="omi"
               >
                 <RiAddLine className="size-4" />
                 {createLabel}
