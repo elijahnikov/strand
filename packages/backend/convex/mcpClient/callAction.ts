@@ -46,11 +46,13 @@ async function callToolWithSessionRetry(
   }
 }
 
+const SESSION_ERROR_RE = /session/i;
+
 function isSessionRequiredError(err: McpRpcError): boolean {
-  if (err.status === 400 && /session/i.test(err.message)) {
+  if (err.status === 400 && SESSION_ERROR_RE.test(err.message)) {
     return true;
   }
-  if (err.code === -32_000 && /session/i.test(err.message)) {
+  if (err.code === -32_000 && SESSION_ERROR_RE.test(err.message)) {
     return true;
   }
   return false;
